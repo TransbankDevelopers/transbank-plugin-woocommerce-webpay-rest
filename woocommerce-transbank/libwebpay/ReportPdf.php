@@ -28,9 +28,7 @@ class ReportPdf {
                     $this->buffer.= '<tr><td colspan="2" >'.$element['php_info']['string']['content'].'</td></tr>';
                 } else if ($child[$count_child] == 'log' ) {
                     $this->buffer.='<tr><td colspan="2" class="log">'.$element['log'].'</td></tr>';
-                } else if ($child[$count_child] == 'public_cert' || $child[$count_child] == 'private_key' || $child[$count_child] == 'webpay_cert'){
-
-                } else {
+                }  else {
                     if ($child_lvl != 3) {
                         $this->buffer.= '<tr><td colspan="2" class="pdf'.$child_lvl.'">'.$child[$count_child].'</td></tr>';
                     } else {

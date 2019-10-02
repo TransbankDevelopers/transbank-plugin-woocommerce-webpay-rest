@@ -13,3 +13,6 @@ RUN docker-php-ext-install zip
 RUN docker-php-ext-install soap
 
 ADD ./files/php.ini /usr/local/etc/php/conf.d/php.ini
+
+#agrega scripts de utilidad
+ADD ./files/*.sh /var/www/html/

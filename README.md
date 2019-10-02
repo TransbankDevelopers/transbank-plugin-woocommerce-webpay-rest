@@ -1,6 +1,6 @@
 # Transbank Woocommerce Webpay
 
-Plugin oficial de Woocommerce para Webpay
+Plugin oficial de Woocommerce para Webpay Rest
 
 ## Descripción
 
