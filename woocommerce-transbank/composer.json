@@ -1,6 +1,12 @@
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/TransbankDevelopers/transbank-sdk-php"
+        }
+    ],
   "require": {
-    "transbank/transbank-sdk": "1.5.1",
+    "transbank/transbank-sdk": "dev-feat/add-rest-support",
     "apache/log4php":"2.3.0"
   }
 }

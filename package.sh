@@ -16,7 +16,7 @@ composer install --no-dev
 composer update --no-dev
 cd ..
 
-sed -i.bkp "s/Version: 2.0.4/Version: ${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$FILE1"
+sed -i.bkp "s/Version: 1.0.0/Version: ${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$FILE1"
 
 PLUGIN_FILE="woocommerce-transbank.zip"
 

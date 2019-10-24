@@ -2,8 +2,7 @@
 
 require_once('../../../../wp-load.php');
 
-use \Transbank\Webpay\Webpay;
-use \Transbank\Webpay\Configuration;
+use Transbank\Webpay\Options;
 
 class ConfigProvider extends WC_Payment_Gateway {
 
@@ -16,18 +15,15 @@ class ConfigProvider extends WC_Payment_Gateway {
         if (!empty($value)) {
             return $value;
         }
-        $config = Configuration::forTestingWebpayPlusNormal();
+        $config = Options::defaultConfig();
         switch ($option) {
             case 'webpay_test_mode':
-                return Webpay::INTEGRACION;
+                return $config::DEFAULT_INTEGRATION_TYPE;
             case 'webpay_commerce_code':
                 return $config->getCommerceCode();
-            case 'webpay_public_cert':
-                return $config->getPublicCert();
-            case 'webpay_private_key':
-                return $config->getPrivateKey();
-            case 'webpay_webpay_cert':
-                return $config->getWebpayCert();
+            case 'webpay_api_key':
+                return $config->getApiKey();
+
         }
         return null;
     }

@@ -9,14 +9,13 @@ Este plugin oficial ha sido creado para que puedas integrar Webpay fácilmente e
 Debes tener instalado previamente Woocommerce.
 
 Habilitar los siguientes módulos / extensiones para PHP:
-- Soap
 - OpenSSL 1.0.1 o superior
 - SimpleXML
 - DOM 2.7.8 o superior
 
 ## Instalación de Plugin
 
-1. Dirígete a [https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay/releases/latest](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay/releases/latest), y descargue la última versión disponible del plugin.
+1. Dirígete a [https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest), y descargue la última versión disponible del plugin.
 
   Una vez descargado el plugin, ingresa a la página de administración de Woocommerce (usualmente en http://misitio.com/wp-admin, http://localhost/wp-admin) y dirígete a (Plugins / Add New), indicado a continuación:
 
@@ -52,9 +51,8 @@ Para acceder a la configuración, debes seguir los siguientes pasos:
 
   * **Ambiente**: Ambiente hacia donde se realiza la transacción. 
   * **Código de comercio**: Es lo que te identifica como comercio.
-  * **Llave Privada**: Llave secreta que te autoriza y valida a hacer transacciones.
-  * **Certificado**: Llave publica que te autoriza y valida a hacer transacciones.
-  * **Certificado Transbank**: Llave secreta de webpay que te autoriza y valida a hacer transacciones.
+  * **API Key**: API Key es la clave para acceder a los servicios rest de webpay.
+  
 
   Las opciones disponibles para _Ambiente_ son: "Integración" para realizar pruebas y certificar la instalación con Transbank, y "Producción" para hacer transacciones reales una vez que Transbank ha aprobado el comercio.
   
@@ -63,9 +61,8 @@ Para acceder a la configuración, debes seguir los siguientes pasos:
 Para el ambiente de Integración, puedes utilizar las siguientes credenciales para realizar pruebas:
 
 * Código de comercio: `597020000540`
-* Llave Privada: Se puede encontrar [aquí - private_key](https://github.com/TransbankDevelopers/transbank-webpay-credenciales/blob/master/integracion/Webpay%20Plus%20-%20CLP/597020000540.key)
-* Certificado Publico: Se puede encontrar [aquí - public_cert](https://github.com/TransbankDevelopers/transbank-webpay-credenciales/blob/master/integracion/Webpay%20Plus%20-%20CLP/597020000540.crt)
-* Certificado Webpay: Se puede encontrar [aquí - webpay_cert](https://github.com/TransbankDevelopers/transbank-sdk-php/blob/master/lib/webpay/webpay.php#L39)
+* API Key : `579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C`
+
 
 1. Guardar los cambios presionando el botón [Save changes]
 

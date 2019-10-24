@@ -16,3 +16,4 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 
 ADD ./files/init.sh /
 WORKDIR /var/www/html/wp-content/plugins/woocommerce-transbank
+

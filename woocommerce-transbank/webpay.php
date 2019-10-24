@@ -12,10 +12,10 @@ if (!defined('ABSPATH')) {
  * that starts the plugin.
  *
  * @wordpress-plugin
- * Plugin Name: Transbank Webpay Plus
+ * Plugin Name: Transbank Webpay Plus Rest
  * Plugin URI: https://www.transbankdevelopers.cl/plugin/woocommerce/webpay
  * Description: Recibe pagos en l&iacute;nea con Tarjetas de Cr&eacute;dito y Redcompra en tu WooCommerce a trav&eacute;s de Webpay Plus.
- * Version: 2.0.4
+ * Version: 1.0.0
  * Author: Transbank
  * Author URI: https://www.transbank.cl
  * WC requires at least: 3.4.0
@@ -28,7 +28,7 @@ require_once ABSPATH . "wp-includes/pluggable.php";
 require_once plugin_dir_path( __FILE__ ) . "vendor/autoload.php";
 require_once plugin_dir_path( __FILE__ ) . "libwebpay/HealthCheck.php";
 require_once plugin_dir_path( __FILE__ ) . "libwebpay/LogHandler.php";
-require_once plugin_dir_path( __FILE__ ) . "libwebpay/TransbankSdkWebpay.php";
+require_once plugin_dir_path( __FILE__ ) . "libwebpay/TransbankSdkWebpayRest.php";
 
 function woocommerce_transbank_init() {
 
@@ -51,27 +51,23 @@ function woocommerce_transbank_init() {
 
             $this->id = 'transbank';
             $this->icon = "https://www.transbank.cl/public/img/Logo_Webpay3-01-50x50.png";
-            $this->method_title = __('Transbank Webpay Plus');
+            $this->method_title = __('Transbank Webpay Plus Rest');
             $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_' . $this->id, home_url('/'));
-            $this->title = 'Transbank Webpay';
-            $this->description = 'Permite el pago de productos y/o servicios, con Tarjetas de Cr&eacute;dito y Redcompra a trav&eacute;s de Webpay Plus';
+            $this->title = 'Transbank Webpay Rest';
+            $this->description = 'Permite el pago de productos y/o servicios, con Tarjetas de Cr&eacute;dito y Redcompra a trav&eacute;s de Webpay Plus Rest';
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
 
-            $certificates = include 'libwebpay/certificates.php';
-            $webpay_commerce_code = $certificates['commerce_code'];
-            $webpay_private_key = $certificates['private_key'];
-            $webpay_public_cert = $certificates['public_cert'];
-            $webpay_webpay_cert = (new TransbankSdkWebpay(null))->getWebPayCertDefault();
+            $keys = include 'libwebpay/IntegrationKeys.php';
+            $webpay_commerce_code = $keys['commerce_code'];
+            $webpay_api_key = $keys['private_key'];
+
 
             $this->config = array(
-                "MODO" => trim($this->get_option('webpay_test_mode', 'INTEGRACION')),
-                "COMMERCE_CODE" => trim($this->get_option('webpay_commerce_code', $webpay_commerce_code)),
-                "PRIVATE_KEY" => trim(str_replace("<br/>", "\n", $this->get_option('webpay_private_key', $webpay_private_key))),
-                "PUBLIC_CERT" => trim(str_replace("<br/>", "\n", $this->get_option('webpay_public_cert', $webpay_public_cert))),
-                "WEBPAY_CERT" => trim(str_replace("<br/>", "\n", $this->get_option('webpay_webpay_cert', $webpay_webpay_cert))),
+                "MODO" => trim($this->get_option('webpay_test_mode', 'TEST')),
+                "COMMERCE_CODE" => $this->get_option('webpay_commerce_code', $webpay_commerce_code),
+                "API_KEY" => $this->get_option('webpay_api_key', $webpay_api_key),
                 "URL_RETURN" => home_url('/') . '?wc-api=WC_Gateway_' . $this->id,
-                "URL_FINAL" => "_URL_",
                 "ECOMMERCE" => 'woocommerce',
                 "VENTA_DESC" => array(
                     "VD" => "Venta Deb&iacute;to",
@@ -124,27 +120,20 @@ function woocommerce_transbank_init() {
                     'title' => __('Ambiente', 'woocommerce'),
                     'type' => 'select',
                     'options' => array(
-                        'INTEGRACION' => 'Integraci&oacute;n',
-                        'PRODUCCION' => 'Producci&oacute;n'
+                        'TEST' => 'Integraci&oacute;n',
+                        'LIVE' => 'Producci&oacute;n'
                     ),
-                    'default' => __('INTEGRACION', 'woocommerce')
+                    'default' => __('TEST', 'woocommerce')
                 ),
                 'webpay_commerce_code' => array(
                     'title' => __('C&oacute;digo de Comercio', 'woocommerce'),
                     'type' => 'text',
                     'default' => __($this->config['COMMERCE_CODE'], 'woocommerce')
                 ),
-                'webpay_private_key' => array(
-                    'title' => __('Llave Privada', 'woocommerce'),
-                    'type' => 'textarea',
-                    'default' => __(str_replace("<br/>", "\n", $this->config['PRIVATE_KEY']), 'woocommerce'),
-                    'css' => 'font-family: monospace'
-                ),
-                'webpay_public_cert' => array(
-                    'title' => __('Certificado', 'woocommerce'),
-                    'type' => 'textarea',
-                    'default' => __(str_replace("<br/>", "\n", $this->config['PUBLIC_CERT']), 'woocommerce'),
-                    'css' => 'font-family: monospace'
+                'webpay_api_key' => array(
+                    'title' => __('API Key', 'woocommerce'),
+                    'type' => 'text',
+                    'default' => __($this->config['API_KEY'], 'woocommerce')
                 )
             );
         }
@@ -159,14 +148,12 @@ function woocommerce_transbank_init() {
             $sessionId = uniqid();
             $buyOrder = $order_id;
             $returnUrl = self::$URL_RETURN;
-            $finalUrl = str_replace("_URL_",
-                        add_query_arg( 'key', $order->get_order_key(), $order->get_checkout_order_received_url()), self::$URL_FINAL);
 
             $returnUrl = $returnUrl . '&orid=' . $order_id;
-            $finalUrl = $finalUrl . '&orid=' . $order_id;
 
-            $transbankSdkWebpay = new TransbankSdkWebpay($this->config);
-            $result = $transbankSdkWebpay->initTransaction($amount, $sessionId, $buyOrder, $returnUrl, $finalUrl);
+
+            $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
+            $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
 
             if (isset($result["token_ws"])) {
 
@@ -203,7 +190,7 @@ function woocommerce_transbank_init() {
 
             $token_ws = isset($data["token_ws"]) ? $data["token_ws"] : null;
 
-            $transbankSdkWebpay = new TransbankSdkWebpay($this->config);
+            $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
             $result = $transbankSdkWebpay->commitTransaction($token_ws);
 
             $order_id = $_GET['orid'];
@@ -213,22 +200,26 @@ function woocommerce_transbank_init() {
 
                 WC()->session->set($order_info->get_order_key(), $result);
 
-                if ($result->detailOutput->responseCode == 0) {
+                if ($result->responseCode == 0) {
 
                     WC()->session->set($order_info->get_order_key() . "_transaction_paid", 1);
 
-                    $order_info->add_order_note(__('Pago exitoso con Webpay Plus', 'woocommerce'));
+                    $order_info->add_order_note(__('Pago exitoso con Webpay Plus Rest', 'woocommerce'));
                     $order_info->add_order_note(__(json_encode($result), 'woocommerce'));
                     $order_info->update_status('processing');
                     wc_reduce_stock_levels($order_id);
-                    self::redirect($result->urlRedirection, array("token_ws" => $token_ws));
+                    $finalUrl = str_replace("_URL_",
+                        add_query_arg( 'key', $order_info->get_order_key(), $order_info->get_checkout_order_received_url()), self::$URL_FINAL);
+
+                    $finalUrl = $finalUrl . '&orid=' . $order_id;
+                    self::redirect($finalUrl, array("token_ws" => $token_ws));
                     die();
                 }
             }
 
             $order_info = new WC_Order($order_id);
             if ($order_info->has_status( 'pending')) {
-                $order_info->add_order_note(__('Pago rechazado con Webpay Plus', 'woocommerce'));
+                $order_info->add_order_note(__('Pago rechazado con Webpay Plus Rest', 'woocommerce'));
                 $order_info->add_order_note(__(json_encode($result), 'woocommerce'));
                 $order_info->update_status('failed');
             }
@@ -355,98 +346,6 @@ function woocommerce_transbank_init() {
 										</tr>
 									</table>
 									<br>
-									<h3 class="tbk_title_h3">Validación certificados</h3>
-									<h4 class="tbk_table_title">Consistencias</h4>
-									<table class="tbk_table_info">
-										<tr>
-											<td>
-                                                <div title="Informa si las llaves ingresadas por el usuario corresponden al certificado entregado por Transbank" class="label label-info">?</div>
-                                                <strong>Consistencias con llaves: </strong>
-                                            </td>
-                                            <td class="tbk_table_td">
-                                                <span class="label
-                                                <?php if ($datos_hc->validate_certificates->consistency->cert_vs_private_key == 'OK') {
-                                                    echo 'label-success';
-                                                } else {
-                                                    echo 'label-danger';
-                                                } ?>">
-												<?php echo $datos_hc->validate_certificates->consistency->cert_vs_private_key; ?>
-                                                </span>
-                                            </td>
-										</tr>
-										<tr>
-											<td>
-                                                <div title="Informa si el código de comercio ingresado por el usuario corresponde al certificado entregado por Transbank" class="label label-info">?</div>
-                                                <strong>Validación Código de comercio: </strong>
-                                            </td>
-                                            <td class="tbk_table_td">
-                                                <span class="label
-                                                <?php if ($datos_hc->validate_certificates->consistency->commerce_code_validate == 'OK') {
-                                                    echo 'label-success';
-                                                } else {
-                                                    echo 'label-danger';
-                                                } ?>">
-												<?php echo $datos_hc->validate_certificates->consistency->commerce_code_validate; ?>
-                                                </span>
-                                            </td>
-										</tr>
-									</table>
-									<hr>
-									<h4 class="tbk_table_title">Información del certificado</h4>
-									<table class="tbk_table_info">
-										<tr>
-                                            <td>
-                                                <div title="CN (common name) dentro del certificado, en este caso corresponde al código de comercio emitido por Transbank" class="label label-info">?</div>
-                                                <strong>Código de Comercio Válido: </strong>
-                                            </td>
-                                            <td class="tbk_table_td">
-                                                <?php echo $datos_hc->validate_certificates->cert_info->subject_commerce_code; ?>
-                                            </td>
-										</tr>
-										<tr>
-											<td>
-                                                <div title="Versión del certificado emitido por Transbank" class="label label-info">?</div>
-                                                <strong>Versión certificado: </strong>
-                                            </td>
-                                            <td class="tbk_table_td">
-                                                <?php echo $datos_hc->validate_certificates->cert_info->version; ?>
-                                            </td>
-										</tr>
-										<tr>
-											<td>
-                                                <div title="Informa si el certificado está vigente actualmente" class="label label-info">?</div>
-                                                <strong>Vigencia: </strong>
-                                            </td>
-                                            <td class="tbk_table_td"><span class="label
-                                                <?php if ($datos_hc->validate_certificates->cert_info->is_valid == 'OK') {
-                                                    echo 'label-success';
-                                                } else {
-                                                    echo 'label-danger';
-                                                } ?>">
-												<?php echo $datos_hc->validate_certificates->cert_info->is_valid; ?>
-                                                </span>
-                                            </td>
-										</tr>
-										<tr>
-											<td>
-                                                <div title="Fecha desde la cual el certificado es válido" class="label label-info">?</div>
-                                                <strong>Válido desde: </strong>
-                                            </td>
-                                            <td class="tbk_table_td">
-                                                <?php echo $datos_hc->validate_certificates->cert_info->valid_from; ?>
-                                            </td>
-										</tr>
-										<tr>
-											<td>
-                                                <div title="Fecha hasta la cual el certificado es válido" class="label label-info">?</div>
-                                                <strong>Válido hasta: </strong>
-                                            </td>
-                                            <td class="tbk_table_td">
-                                                <?php echo $datos_hc->validate_certificates->cert_info->valid_to; ?>
-                                            </td>
-										</tr>
-									</table>
-									<br>
 									<h3 class="tbk_title_h3">Estado de la Extensiones de PHP</h3>
 									<h4 class="tbk_table_title">Información Principal</h4>
 									<table class="tbk_table_info">
@@ -527,22 +426,7 @@ function woocommerce_transbank_init() {
                                                 <?php echo $datos_hc->php_extensions_status->SimpleXML->version; ?>
                                             </td>
 										</tr>
-										<tr>
-											<td style="font-weight:bold">soap</td>
-                                            <td>
-                                                <span class="label
-                                                <?php if ($datos_hc->php_extensions_status->soap->status == 'OK') {
-                                                    echo 'label-success';
-                                                } else {
-                                                    echo 'label-danger';
-                                                } ?>">
-												<?php echo $datos_hc->php_extensions_status->soap->status; ?>
-                                                </span>
-                                            </td>
-											<td class="tbk_table_td">
-                                                <?php echo $datos_hc->php_extensions_status->soap->version; ?>
-                                            </td>
-										</tr>
+
 										<tr>
 											<td style="font-weight:bold">dom</td>
 											<td>
@@ -579,7 +463,7 @@ function woocommerce_transbank_init() {
                                         <tbody>
                                             <tr id="row_response_status" style="display:none">
                                                 <td>
-                                                    <div title="Informa el estado de la comunicación con Transbank mediante método init_transaction" class="label label-info">?</div> <strong>Estado: </strong>
+                                                    <div title="Informa el estado de la comunicación con Transbank mediante método create_transaction" class="label label-info">?</div> <strong>Estado: </strong>
                                                 </td>
                                                 <td>
                                                     <span id="row_response_status_text" class="label tbk_table_trans" style="display:none"></span>
@@ -813,7 +697,7 @@ function woocommerce_transbank_init() {
             if (WC()->session->get($order_info->get_order_key() . "_transaction_paid") == "" &&
                 WC()->session->get($order_info->get_order_key()) == "" && $order_info->has_status( 'pending')) {
 
-                $order_info->add_order_note(__('Pago cancelado con Webpay Plus', 'woocommerce'));
+                $order_info->add_order_note(__('Pago cancelado con Webpay Plus Rest', 'woocommerce'));
                 $order_info->update_status('failed');
 
                 wc_add_notice(__('Compra <strong>Anulada</strong>', 'woocommerce') .
@@ -831,10 +715,10 @@ function woocommerce_transbank_init() {
         $finalResponse = WC()->session->get($order_info->get_order_key());
         WC()->session->set($order_info->get_order_key(), "");
 
-        $paymentTypeCode = $finalResponse->detailOutput->paymentTypeCode;
-        $paymenCodeResult = $transbank_data->config['VENTA_DESC'][$paymentTypeCode];
+        $paymentTypeCode = $finalResponse->paymentTypeCode;
+        $paymentCodeResult = $transbank_data->config['VENTA_DESC'][$paymentTypeCode];
 
-        if ($finalResponse->detailOutput->responseCode == 0) {
+        if ($finalResponse->responseCode == 0) {
             $transactionResponse = "Transacci&oacute;n Aprobada";
         } else {
             $transactionResponse = "Transacci&oacute;n Rechazada";
@@ -846,7 +730,7 @@ function woocommerce_transbank_init() {
 
             if($paymentTypeCode == "SI" || $paymentTypeCode == "S2" ||
                 $paymentTypeCode == "NC" || $paymentTypeCode == "VC" ) {
-                $installmentType = $paymenCodeResult;
+                $installmentType = $paymentCodeResult;
             } else {
                 $installmentType = "Sin cuotas";
             }
@@ -859,11 +743,11 @@ function woocommerce_transbank_init() {
 
             update_post_meta($order_id, 'transactionResponse', $transactionResponse);
             update_post_meta($order_id, 'buyOrder', $finalResponse->buyOrder);
-            update_post_meta($order_id, 'authorizationCode', $finalResponse->detailOutput->authorizationCode);
-            update_post_meta($order_id, 'cardNumber', $finalResponse->cardDetail->cardNumber);
-            update_post_meta($order_id, 'paymenCodeResult', $paymenCodeResult);
-            update_post_meta($order_id, 'amount', $finalResponse->detailOutput->amount);
-            update_post_meta($order_id, 'coutas', $finalResponse->detailOutput->sharesNumber);
+            update_post_meta($order_id, 'authorizationCode', $finalResponse->authorizationCode);
+            update_post_meta($order_id, 'cardNumber', $finalResponse->cardDetail);
+            update_post_meta($order_id, 'paymenCodeResult', $paymentCodeResult);
+            update_post_meta($order_id, 'amount', $finalResponse->amount);
+            update_post_meta($order_id, 'coutas', $finalResponse->installmentsNumber);
             update_post_meta($order_id, 'transactionDate', $date_accepted->format('d-m-Y / H:i:s') );
 
             echo '</br><h2>Detalles del pago</h2>' .
@@ -878,7 +762,7 @@ function woocommerce_transbank_init() {
                     '<tr>' .
                     '<th scope="row">C&oacute;digo de la Transacci&oacute;n:</th>' .
                     '<td><span class="CT">' .
-                    $finalResponse->detailOutput->responseCode .
+                    $finalResponse->responseCode .
                     '</span></td>' .
                     '</tr>' .
                     '<tr>' .
@@ -890,7 +774,7 @@ function woocommerce_transbank_init() {
                     '<tr>' .
                     '<th scope="row">Codigo de Autorizaci&oacute;n:</th>' .
                     '<td><span class="CA">' .
-                    $finalResponse->detailOutput->authorizationCode .
+                    $finalResponse->authorizationCode .
                     '</span></td>' .
                     '</tr>' .
                     '<tr>' .
@@ -908,7 +792,7 @@ function woocommerce_transbank_init() {
                     '<tr>' .
                     '<th scope="row">Tarjeta de Cr&eacute;dito:</th>' .
                     '<td><span class="TC">************' .
-                    $finalResponse->cardDetail->cardNumber .
+                     $finalResponse->cardDetail['card_number'] .
                     '</span></td>' .
                     '</tr>' .
                     '<tr>' .
@@ -926,13 +810,13 @@ function woocommerce_transbank_init() {
                     '<tr>' .
                     '<th scope="row">Monto Compra:</th>' .
                     '<td><span class="amount">' .
-                    $finalResponse->detailOutput->amount .
+                    $finalResponse->amount .
                     '</span></td>' .
                     '</tr>' .
                     '<tr>' .
                     '<th scope="row">N&uacute;mero de Cuotas:</th>' .
                     '<td><span class="NC">' .
-                    $finalResponse->detailOutput->sharesNumber .
+                    $finalResponse->installmentsNumber .
                     '</span></td>' .
                     '</tr>' .
                     '</tfoot>' .
