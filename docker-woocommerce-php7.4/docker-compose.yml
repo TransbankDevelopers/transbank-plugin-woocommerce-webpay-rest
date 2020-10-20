@@ -10,7 +10,7 @@ services:
     - data:/var/www/html
     #- ../woocommerce-transbank:/var/www/html/wp-content/plugins/woocommerce-transbank
     environment:
-      WOOCOMMERCE_VERSION: 3.6.3
+      WOOCOMMERCE_VERSION: 3.9.1
       WORDPRESS_DB_PASSWORD: example
       WORDPRESS_DEBUG: 1
     depends_on:

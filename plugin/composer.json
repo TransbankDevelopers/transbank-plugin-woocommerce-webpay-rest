@@ -1,0 +1,13 @@
+{
+  "require": {
+    "transbank/transbank-sdk": "^1.8",
+    "apache/log4php":"2.3.0",
+    "tecnickcom/tcpdf": "^6.3",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Transbank\\WooCommerce\\WebpayRest\\": "src/"
+    }
+  }
+}

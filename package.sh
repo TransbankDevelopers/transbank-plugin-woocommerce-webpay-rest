@@ -8,20 +8,20 @@ then
    TRAVIS_TAG='1.0.0'
 fi
 
-SRC_DIR="woocommerce-transbank"
+SRC_DIR="plugin"
 FILE1="webpay.php"
 
 cd $SRC_DIR
 composer install --no-dev
-composer update --no-dev
 cd ..
 
-sed -i.bkp "s/Version: 1.0.0/Version: ${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$FILE1"
+sed -i.bkp "s/Version: VERSION_REPLACE_HERE/Version: ${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$FILE1"
 
-PLUGIN_FILE="woocommerce-transbank.zip"
+PLUGIN_FILE="transbank-webpay-plus-rest.zip"
 
 cd $SRC_DIR
-zip -FSr ../$PLUGIN_FILE . -x composer.json composer.lock "$FILE1.bkp"
+zip -FSr ../$PLUGIN_FILE . -x composer.json composer.lock "$FILE1.bkp" vendor/tecnickcom/tcpdf/fonts/*
+zip -ur ../$PLUGIN_FILE ./vendor/tecnickcom/tcpdf/fonts/helvetica.php
 cd ..
 
 cp "$SRC_DIR/$FILE1.bkp" "$SRC_DIR/$FILE1"
