@@ -111,25 +111,29 @@ class ResponseController
     {
         $wooCommerceOrder->add_order_note(__('Pago exitoso con Webpay Plus', 'transbank_webpay'));
         $wooCommerceOrder->add_order_note(json_encode($result, JSON_PRETTY_PRINT));
-        $wooCommerceOrder->payment_complete();
-        $final_status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
-        if ($final_status) {
-            $wooCommerceOrder->update_status($final_status);
-        }
+        
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted) = $this->getTransactionDetails($result);
 
         update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
         update_post_meta($wooCommerceOrder->get_id(), 'buyOrder', $result->buyOrder);
         update_post_meta($wooCommerceOrder->get_id(), 'authorizationCode', $authorizationCode);
-        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $result->cardDetail->cardNumber);
+        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $result->cardDetail->card_number);
         update_post_meta($wooCommerceOrder->get_id(), 'paymentCodeResult', $paymentCodeResult);
         update_post_meta($wooCommerceOrder->get_id(), 'amount', $amount);
         update_post_meta($wooCommerceOrder->get_id(), 'cuotas', $sharesNumber);
         update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date_accepted->format('d-m-Y / H:i:s'));
+        update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
+        update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
 
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay'));
         TransbankWebpayOrders::update($webpayTransaction->id,
             ['status' => TransbankWebpayOrders::STATUS_APPROVED, 'transbank_response' => json_encode($result)]);
+        
+        $wooCommerceOrder->payment_complete();
+        $final_status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
+        if ($final_status) {
+            $wooCommerceOrder->update_status($final_status);
+        }
     }
     /**
      * @param WC_Order $wooCommerceOrder
