@@ -9,7 +9,7 @@ then
 fi
 
 SRC_DIR="plugin"
-FILE1="webpay.php"
+FILE1="webpay-rest.php"
 
 cd $SRC_DIR
 composer install --no-dev
