@@ -1,9 +1,7 @@
 <?php
-
+use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
-use Transbank\WooCommerce\WebpayRest\Controllers\FinalProcessController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
-use Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\RedirectorHelper;
@@ -35,7 +33,6 @@ if (!defined('ABSPATH')) {
  * WC requires at least: 3.4.0
  * WC tested up to: 4.0.1
  */
-
 add_action('plugins_loaded', 'woocommerce_transbank_init', 0);
 
 //todo: Eliminar todos estos require y usar PSR-4 de composer
@@ -105,8 +102,8 @@ function woocommerce_transbank_init()
 
             $this->config = [
                 "MODO" => trim($this->get_option('webpay_rest_environemnt', 'TEST')),
-                "COMMERCE_CODE" => trim($this->get_option('webpay_rest_commerce_code', \Transbank\Webpay\Options::DEFAULT_COMMERCE_CODE)),
-                "API_KEY" => $this->get_option('webpay_rest_api_key', \Transbank\Webpay\Options::DEFAULT_API_KEY),
+                "COMMERCE_CODE" => trim($this->get_option('webpay_rest_commerce_code', Options::DEFAULT_COMMERCE_CODE)),
+                "API_KEY" => $this->get_option('webpay_rest_api_key', Options::DEFAULT_API_KEY),
                 "URL_RETURN" => home_url('/') . '?wc-api=WC_Gateway_' . $this->id,
                 "ECOMMERCE" => 'woocommerce',
                 "VENTA_DESC" => [
@@ -129,7 +126,6 @@ function woocommerce_transbank_init()
             $this->init_settings();
 
             add_action('woocommerce_thankyou', [new ThankYouPageController($this->config), 'show'], 1);
-            add_action('woocommerce_api_transbankwebpayrestthankyoupage', [new FinalProcessController($this->config), 'show']);
             add_action('woocommerce_receipt_' . $this->id, [$this, 'receipt_page']);
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'registerPluginVersion']);
@@ -172,8 +168,7 @@ function woocommerce_transbank_init()
             }
 
             $commerceCode = $this->get_option('webpay_rest_commerce_code');
-            $certificates = include 'libwebpay/certificates.php';
-            if ($commerceCode == $certificates['commerce_code']) {
+            if ($commerceCode == Options::DEFAULT_COMMERCE_CODE) {
                 // If we are using the default commerce code, then abort as the user have not updated that value yet.
                 return;
             };

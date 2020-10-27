@@ -111,16 +111,16 @@ class ResponseController
     {
         $wooCommerceOrder->add_order_note(__('Pago exitoso con Webpay Plus', 'transbank_webpay'));
         $wooCommerceOrder->add_order_note(json_encode($result, JSON_PRETTY_PRINT));
-        
-        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted) = $this->getTransactionDetails($result);
 
+        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
         update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
         update_post_meta($wooCommerceOrder->get_id(), 'buyOrder', $result->buyOrder);
         update_post_meta($wooCommerceOrder->get_id(), 'authorizationCode', $authorizationCode);
-        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $result->cardDetail->card_number);
+        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $result->cardDetail['card_number']);
         update_post_meta($wooCommerceOrder->get_id(), 'paymentCodeResult', $paymentCodeResult);
         update_post_meta($wooCommerceOrder->get_id(), 'amount', $amount);
-        update_post_meta($wooCommerceOrder->get_id(), 'cuotas', $sharesNumber);
+        update_post_meta($wooCommerceOrder->get_id(), 'installmentsNumber', $sharesNumber ? $sharesNumber : '0');
+        update_post_meta($wooCommerceOrder->get_id(), 'installmentsAmount', $sharesAmount ? $sharesAmount : '0');
         update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date_accepted->format('d-m-Y / H:i:s'));
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
@@ -128,7 +128,7 @@ class ResponseController
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay'));
         TransbankWebpayOrders::update($webpayTransaction->id,
             ['status' => TransbankWebpayOrders::STATUS_APPROVED, 'transbank_response' => json_encode($result)]);
-        
+
         $wooCommerceOrder->payment_complete();
         $final_status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
         if ($final_status) {
@@ -183,14 +183,14 @@ class ResponseController
      * @return array
      * @throws \Exception
      */
-    protected function getTransactionDetails($result)
+    public function getTransactionDetails($result)
     {
-        $detailOutput = $result->detailOutput;
-        $paymentTypeCode = isset($detailOutput->paymentTypeCode) ? $detailOutput->paymentTypeCode : null;
-        $authorizationCode = isset($detailOutput->authorizationCode) ? $detailOutput->authorizationCode : null;
-        $amount = isset($detailOutput->amount) ? $detailOutput->amount : null;
-        $sharesNumber = isset($detailOutput->sharesNumber) ? $detailOutput->sharesNumber : null;
-        $responseCode = isset($detailOutput->responseCode) ? $detailOutput->responseCode : null;
+        $paymentTypeCode = isset($result->paymentTypeCode) ? $result->paymentTypeCode : null;
+        $authorizationCode = isset($result->authorizationCode) ? $result->authorizationCode : null;
+        $amount = isset($result->amount) ? $result->amount : null;
+        $sharesNumber = isset($result->installmentsNumber) ? $result->installmentsNumber : null;
+        $sharesAmount = isset($result->installmentsAmount) ? $result->installmentsAmount : null;
+        $responseCode = isset($result->responseCode) ? $result->responseCode : null;
         if ($responseCode == 0) {
             $transactionResponse = "Transacción Aprobada";
         } else {
@@ -205,10 +205,15 @@ class ResponseController
             }
         }
 
+        $paymentType = __("Crédito", 'transbank_webpay');
+        if ($paymentTypeCode == "VD") {
+            $paymentType = __("Débito", 'transbank_webpay');
+        }
+
         $transactionDate = isset($result->transactionDate) ? $result->transactionDate : null;
         $date_accepted = new DateTime($transactionDate);
 
-        return [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted];
+        return [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType];
     }
 
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)

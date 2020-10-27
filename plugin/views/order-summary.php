@@ -46,11 +46,11 @@
     </tr>
     <tr>
         <th scope="row">Número de cuotas:</th>
-        <td><span class="NC"><?php echo $finalResponse->installmentsNumber; ?></span></td>
+        <td><span class="NC"><?php echo $finalResponse->installmentsNumber ? $finalResponse->installmentsNumber : '-'; ?></span></td>
     </tr>
     <tr>
         <th scope="row">Monto de cada cuota:</th>
-        <td><span class="NC"><?php echo $finalResponse->installmentsAmount; ?></span></td>
+        <td><span class="NC"><?php echo $finalResponse->installmentsAmount ? $finalResponse->installmentsAmount : '-'; ?></span></td>
     </tr>
     </tfoot>
 </table><br/>
