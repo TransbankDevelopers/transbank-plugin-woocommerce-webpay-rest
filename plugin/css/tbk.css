@@ -1,0 +1,18 @@
+.tbk_table_info {
+	width: 600px;
+	max-width: 80%;
+}
+
+.tbk_table_info td {
+	width: 300px;
+	max-width: 70%;
+}
+
+.tbk_table_td {
+	width: 200px;
+	max-width: 30%;
+}
+
+.tbk_table_trans pre {
+	font-size: 12px;
+}
