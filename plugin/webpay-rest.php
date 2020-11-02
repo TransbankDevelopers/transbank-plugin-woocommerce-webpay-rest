@@ -33,15 +33,15 @@ if (!defined('ABSPATH')) {
  * WC requires at least: 3.4.0
  * WC tested up to: 4.0.1
  */
-add_action('plugins_loaded', 'woocommerce_transbank_init', 0);
+add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
 //todo: Eliminar todos estos require y usar PSR-4 de composer
 require_once plugin_dir_path(__FILE__) . "vendor/autoload.php";
 require_once plugin_dir_path(__FILE__) . "libwebpay/ConnectionCheck.php";
 require_once plugin_dir_path(__FILE__) . "libwebpay/ReportGenerator.php";
 
-register_activation_hook(__FILE__, 'on_webpay_plugin_activation');
-add_action( 'admin_init', 'on_transbank_webpay_plugins_loaded' );
+register_activation_hook(__FILE__, 'on_webpay_rest_plugin_activation');
+add_action( 'admin_init', 'on_transbank_rest_webpay_plugins_loaded' );
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
 add_action('wp_ajax_download_report', 'Transbank\Woocommerce\ReportGenerator::download');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
@@ -49,7 +49,7 @@ add_action('woocommerce_before_cart', function() {
     SessionMessageHelper::printMessage();
 });
 
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_action_links');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_rest_action_links');
 
 //Start sessions if not already done
 add_action('init',function() {
@@ -60,7 +60,7 @@ add_action('init',function() {
     }
 });
 
-function woocommerce_transbank_init()
+function woocommerce_transbank_rest_init()
 {
     if (!class_exists("WC_Payment_Gateway")) {
         return;
@@ -333,7 +333,7 @@ function woocommerce_transbank_init()
 
 }
 
-function add_action_links($links)
+function add_rest_action_links($links)
 {
     $newLinks = [
         '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest') . '">Configuración</a>',
@@ -342,9 +342,9 @@ function add_action_links($links)
     return array_merge($links, $newLinks);
 }
 
-function on_webpay_plugin_activation()
+function on_webpay_rest_plugin_activation()
 {
-    woocommerce_transbank_init();
+    woocommerce_transbank_rest_init();
     if (!class_exists(WC_Gateway_Transbank_Webpay_Plus_REST::class)) {
         die('Se necesita tener WooCommerce instalado y activo para poder activar este plugin');
         return;
@@ -353,12 +353,12 @@ function on_webpay_plugin_activation()
     $pluginObject->registerPluginVersion();
 }
 
-function on_transbank_webpay_plugins_loaded() {
+function on_transbank_rest_webpay_plugins_loaded() {
     TransbankWebpayOrders::createTableIfNeeded();
 }
 
-function transbank_remove_database() {
+function transbank_rest_remove_database() {
     TransbankWebpayOrders::deleteTable();
 }
 
-register_uninstall_hook( __FILE__, 'transbank_remove_database' );
+register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
