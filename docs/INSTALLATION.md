@@ -60,7 +60,7 @@ Para acceder a la configuración, debes seguir los siguientes pasos:
 
 Para el ambiente de Integración, puedes utilizar las siguientes credenciales para realizar pruebas:
 
-* Código de comercio: `597020000540`
+* Código de comercio: `597055555540`
 * API Key : `579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C`
 
 
@@ -122,3 +122,6 @@ Puedes aceptar o rechazar la transacción
  ![order1](img/order1.png)
 
  ![order2](img/order2.png)
+
+## Pasar a producción
+Para operar en el ambiente de producción (con dinero real) debes pasar un proceso de validación. Puedes ver las instrucciones [acá](https://transbankdevelopers.cl/plugin/woocommerce/#puesta-en-produccion) 
