@@ -181,14 +181,9 @@ function woocommerce_transbank_rest_init()
         /**
          * Comprueba configuración de moneda (Peso Chileno)
          **/
-        function is_valid_for_use()
+        public static function is_valid_for_use()
         {
-            if (!in_array(get_woocommerce_currency(),
-                apply_filters('woocommerce_' . $this->id . '_supported_currencies', ['CLP']))) {
-                return false;
-            }
-
-            return true;
+            return in_array(get_woocommerce_currency(), ['CLP']);
         }
 
         /**
@@ -360,4 +355,17 @@ function transbank_rest_remove_database() {
     TransbankWebpayOrders::deleteTable();
 }
 
+add_action('admin_notices', function() {
+
+    if (!class_exists(WC_Gateway_Transbank_Webpay_Plus_REST::class)) {
+        return;
+    }
+    if (!WC_Gateway_Transbank_Webpay_Plus_REST::is_valid_for_use()) {
+        ?>
+        <div class="notice notice-error">
+            <p><?php _e( 'Woocommerce debe estar configurado en pesos chilenos (CLP) para habilitar Webpay', 'transbank' ); ?></p>
+        </div>
+        <?php
+    }
+});
 register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
