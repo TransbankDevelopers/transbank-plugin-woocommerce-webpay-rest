@@ -22,7 +22,11 @@ class TransbankWebpayOrders
     public static function getWebpayTransactionsTableName()
     {
         global $wpdb;
-        return $wpdb->prefix . static::TRANSACTIONS_TABLE_NAME;
+        if(is_multisite()) {
+        	return $wpdb->base_prefix . static::TRANSACTIONS_TABLE_NAME;
+        } else {
+	    	return $wpdb->prefix . static::TRANSACTIONS_TABLE_NAME;    
+        }
     }
 
     public static function createTransaction(array $data)
