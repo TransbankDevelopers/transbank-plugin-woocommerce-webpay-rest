@@ -92,9 +92,9 @@ function woocommerce_transbank_rest_init()
 
             $this->id = 'transbank_webpay_plus_rest';
             $this->icon = plugin_dir_url(__FILE__ ) . 'libwebpay/images/webpay.png';
-            $this->method_title = __('Transbank Webpay Plus REST');
+            $this->method_title = __('Transbank Webpay Plus');
             $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_' . $this->id, home_url('/'));
-            $this->title = 'Transbank Webpay Plus REST';
+            $this->title = 'Transbank Webpay Plus';
             $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito y Redcompra a través de Webpay Plus';
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
