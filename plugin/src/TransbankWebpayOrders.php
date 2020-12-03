@@ -15,7 +15,7 @@ class TransbankWebpayOrders
     const STATUS_APPROVED = 'approved';
 
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
-    const LATEST_TABLE_VERSION = 1;
+    const LATEST_TABLE_VERSION = 2;
     /**
      * @return string
      */
