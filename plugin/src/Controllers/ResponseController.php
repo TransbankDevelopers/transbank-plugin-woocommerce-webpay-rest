@@ -196,14 +196,15 @@ class ResponseController
         } else {
             $transactionResponse = "Transacción Rechazada";
         }
-        $paymentCodeResult = "Sin cuotas";
-        if ($this->pluginConfig) {
-            if (array_key_exists('VENTA_DESC', $this->pluginConfig)) {
-                if (array_key_exists($paymentTypeCode, $this->pluginConfig['VENTA_DESC'])) {
-                    $paymentCodeResult = $this->pluginConfig['VENTA_DESC'][$paymentTypeCode];
-                }
-            }
-        }
+        $installmentTypes = [
+            "VD" => "Venta Débito",
+            "VN" => "Venta Normal",
+            "VC" => "Venta en cuotas",
+            "SI" => "3 cuotas sin interés",
+            "S2" => "2 cuotas sin interés",
+            "NC" => "N cuotas sin interés"
+        ];
+        $paymentCodeResult = isset($installmentTypes[$paymentTypeCode]) ? $installmentTypes[$paymentTypeCode] : "Sin cuotas";
 
         $paymentType = __("Crédito", 'transbank_webpay');
         if ($paymentTypeCode == "VD") {

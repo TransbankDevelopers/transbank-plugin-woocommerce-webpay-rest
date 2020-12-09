@@ -106,14 +106,6 @@ function woocommerce_transbank_rest_init()
                 "API_KEY" => $this->get_option('webpay_rest_api_key', Options::DEFAULT_API_KEY),
                 "URL_RETURN" => home_url('/') . '?wc-api=WC_Gateway_' . $this->id,
                 "ECOMMERCE" => 'woocommerce',
-                "VENTA_DESC" => [
-                    "VD" => "Venta Débito",
-                    "VN" => "Venta Normal",
-                    "VC" => "Venta en cuotas",
-                    "SI" => "3 cuotas sin interés",
-                    "S2" => "2 cuotas sin interés",
-                    "NC" => "N cuotas sin interés"
-                ],
                 "STATUS_AFTER_PAYMENT" => $this->get_option('webpay_rest_after_payment_order_status', null)
             ];
 

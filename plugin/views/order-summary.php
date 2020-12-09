@@ -9,10 +9,6 @@
 
     </tr>
     <tr>
-        <th scope="row">C&oacute;digo de respuesta dela transacción:</th>
-        <td><span class="CT"><?php echo $finalResponse->responseCode; ?></span></td>
-    </tr>
-    <tr>
         <th scope="row">Orden de Compra:</th>
         <td><span class="RT"><?php echo $finalResponse->buyOrder; ?></span></td>
     </tr>
@@ -29,7 +25,7 @@
         <td><span class="FT"><?php echo $date_accepted->format('H:i:s'); ?></span></td>
     </tr>
     <tr>
-        <th scope="row">Tarjeta de crédito:</th>
+        <th scope="row">Número de tarjeta:</th>
         <td><span class="TC">**** **** **** <?php echo $finalResponse->cardDetail->card_number; ?></span></td>
     </tr>
     <tr>
@@ -48,9 +44,15 @@
         <th scope="row">Número de cuotas:</th>
         <td><span class="NC"><?php echo $finalResponse->installmentsNumber ? $finalResponse->installmentsNumber : '-'; ?></span></td>
     </tr>
+    <?php if ($finalResponse->installmentsAmount) { ?>
     <tr>
         <th scope="row">Monto de cada cuota:</th>
         <td><span class="NC"><?php echo $finalResponse->installmentsAmount ? $finalResponse->installmentsAmount : '-'; ?></span></td>
+    </tr>
+    <?php } ?>
+    <tr>
+        <th scope="row">C&oacute;digo de respuesta dela transacción:</th>
+        <td><span class="CT"><?php echo $finalResponse->responseCode; ?></span></td>
     </tr>
     </tfoot>
 </table><br/>
