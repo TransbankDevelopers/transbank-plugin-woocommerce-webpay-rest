@@ -4,8 +4,18 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2020-12-10
+### Added
+- Ahora se puede consultar el estado de una transacción hecha con webpay plus dentro del detalle de una orden [PR #21](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/21)
+- Se incluye funcionalidad para realizar anulaciones de un pago dentro del detalle de una orden [PR #20](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/20)
+- Mejora página de configuración con mejores textos de ayuda [PR #22](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/22)
 
-## [1.1.0] - 2020-11-09
+
+### Fixed
+- Soluciona PDF que no se exportaba [PR #22](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/22)
+
+
+## [1.1.0] - 2020-10-09
 ### Added 
 - Mejora compatibilidad con Wordpress MU [PR #9](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/9)
 - Añade mensaje cuando Woocommerce no está configurado en Pesos chilenos [PR #15](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/15)
