@@ -62,8 +62,8 @@ jQuery(function($) {
           let $table = $('.transaction-status-response');
 
           Object.keys(response).forEach(key => {
-              console.log(key, response[key]);
-              $table.find('.status-' + key).html(response[key]);
+              let value = response[key] ? response[key] : '-';
+              $table.find('.status-' + key).html(value);
           });
           let niceJson = JSON.stringify(response, null, 2)
           $table.find('.status-raw').html(`<pre>${niceJson}</pre>`);
