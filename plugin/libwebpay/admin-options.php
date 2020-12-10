@@ -18,7 +18,7 @@
 
 <div class="alert alert-info">
     <p>Al instalar este plugin, verás que viene configurado en modo Intgración,
-        que significa que opera en un ambiente de pruebas, con dinero y tarjeta de prueba.</p>
+        que significa que opera en un ambiente de pruebas, con dinero y tarjetas de prueba.</p>
     <p>Para operar en producción, verifica que el plugin funciona correctamente en tu sitio,
         y si es así, debes seguir este proceso de validación para obtener tu propia llave secreta
         (API Key) y código de comercio.</p>
