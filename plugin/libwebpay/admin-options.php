@@ -8,13 +8,26 @@
 <h3><?php _e('Transbank Webpay', 'woocommerce'); ?></h3>
 <p><?php _e('Transbank es la empresa líder en negocios de medio de pago seguros en Chile.'); ?></p>
 
-<a class ="button " data-toggle="modal" href="#tb_modal">Información del sistema</a>
+<a class ="button " data-toggle="modal" href="#tb_modal">Realizar diagnóstico</a>
 
 <hr>
 
 <table class="form-table">
     <?php $this->generate_settings_html(); ?>
 </table>
+
+<div class="alert alert-info">
+    <p>Al instalar este plugin, verás que viene configurado en modo Intgración,
+        que significa que opera en un ambiente de pruebas, con dinero y tarjetas de prueba.</p>
+    <p>Para operar en producción, verifica que el plugin funciona correctamente en tu sitio,
+        y si es así, debes seguir este proceso de validación para obtener tu propia llave secreta
+        (API Key) y código de comercio.</p>
+
+    <p>Revisa
+        <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion">Cómo pasar a producción</a>
+    </p>
+
+</div>
 
 <div class="modal" id="tb_modal">
     <div class="modal-dialog">
@@ -31,11 +44,12 @@
                 <div class="tab-content">
                     <div id="info" class="tab-pane in active">
                         <fieldset class="tbk_info">
-                            <h3 class="tbk_title_h3">Informe pdf</h3>
+                            <h3 class="tbk_title_h3">Informe</h3>
+
                             <a class="button-primary" id="tbk_pdf_button"
-                               href="<?=$this->plugin_url?>libwebpay/CreatePdf.php?document=report"
+                               href="<?php echo admin_url('admin-ajax.php'); ?>?action=download_report&document=report"
                                target="_blank">
-                                Crear PDF
+                                Descargar en PDF
                             </a>
                         </fieldset>
 
@@ -234,8 +248,8 @@
                     <div id="php_info" class="tab-pane">
                         <fieldset class="tbk_info">
                             <h3 class="tbk_title_h3">Informe PHP info</h3>
-                            <a class="button-primary" href="<?=$this->plugin_url?>libwebpay/CreatePdf.php?document=php_info" target="_blank">
-                                Crear PHP info
+                            <a class="button-primary" href="<?php echo admin_url('admin-ajax.php'); ?>?action=download_report&document=php_info" target="_blank">
+                                Crear PDF de PHP info
                             </a>
                             <br>
                         </fieldset>
