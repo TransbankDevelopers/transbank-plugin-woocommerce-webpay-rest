@@ -400,16 +400,5 @@ add_action('admin_notices', function() {
     }
 });
 register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
-//
-//
-//
-//add_filter( 'manage_edit-shop_order_columns', function($columns) {
-//    $columns['refund_column'] = 'Anular / reversar';
-//    return $columns;
-//} );
-//
-//add_action( 'manage_shop_order_posts_custom_column', function($column) {
-// if ($column !== 'refund_column') return;
-//
-// echo '<a href="" class="button action">Anular pago</a>';
-//});
+
+
