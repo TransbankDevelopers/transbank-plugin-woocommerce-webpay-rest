@@ -12,7 +12,7 @@ jQuery(function($) {
     $("#row_error_detail").hide();
     $(".tbk_table_trans").empty();
 
-    $.post(ajax_object.ajax_url, {action: 'check_connection'}, function(response){
+    $.post(ajax_object.ajax_url, {action: 'check_connection', nonce: ajax_object.nonce}, function(response){
         console.log('RESPONSE', response)
       $(".check_conn").text("Verificar Conexión");
       $("#response_title").show();
@@ -41,6 +41,42 @@ jQuery(function($) {
     })
 
     e.preventDefault();
+  });
+
+  $('.get-transaction-status').click(function(e) {
+      if ($(this).data('sending') === true) {
+          return;
+      }
+      $(this).data('sending', true);
+      $(this).html('Consultando al API REST...');
+     e.preventDefault();
+
+      $.post(ajax_object.ajax_url, {
+          action: 'get_transaction_status',
+          order_id: $(this).data('order-id'),
+          token: $(this).data('token'),
+          nonce: window.ajax_object.nonce
+      }, function(response){
+          console.log(response);
+
+          let $table = $('.transaction-status-response');
+
+          Object.keys(response).forEach(key => {
+              let value = response[key] ? response[key] : '-';
+              $table.find('.status-' + key).html(value);
+          });
+          let niceJson = JSON.stringify(response, null, 2)
+          $table.find('.status-raw').html(`<pre>${niceJson}</pre>`);
+          $table.show();
+          $(this).data('sending', false);
+          $(this).html('Consultar estado de la transacción');
+
+      }.bind(this))
+      .fail(function(e, a) {
+          alert('Falló la consulta de cuotas: ' + e.responseJSON.message)
+          $(this).data('sending', false);
+          $(this).html('Consultar estado de la transacción');
+      })
   });
 
 })

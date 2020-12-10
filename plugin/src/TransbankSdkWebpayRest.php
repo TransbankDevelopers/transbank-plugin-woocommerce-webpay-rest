@@ -1,5 +1,6 @@
 <?php
 namespace Transbank\WooCommerce\WebpayRest;
+use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Exception;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus;
@@ -26,14 +27,22 @@ class TransbankSdkWebpayRest {
      * TransbankSdkWebpayRest constructor.
      * @param $config
      */
-    function __construct($config) {
+    function __construct($config = null) {
         $this->log = new LogHandler();
-        if (isset($config)) {
-            $environment = isset($config["MODO"]) ? $config["MODO"] : 'TEST';
-            $this->options = ($environment != 'TEST') ? new Options($config["API_KEY"], $config["COMMERCE_CODE"]) : Options::defaultConfig();
-            $this->options->setIntegrationType($environment);
+        if (!isset($config)) {
+
+            $configProvider = new ConfigProvider();
+            $config = [
+                'MODO' => $configProvider->getConfig('webpay_rest_environment'),
+                'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
+                'API_KEY' => $configProvider->getConfig('webpay_rest_api_key'),
+            ];
+
         }
-    }
+        $environment = isset($config["MODO"]) ? $config["MODO"] : 'TEST';
+        $this->options = ($environment != 'TEST') ? new Options($config["API_KEY"], $config["COMMERCE_CODE"]) : Options::defaultConfig();
+        $this->options->setIntegrationType($environment);
+}
 
     /**
      * @param $amount
@@ -95,5 +104,15 @@ class TransbankSdkWebpayRest {
             $this->log->logError(json_encode($result));
         }
         return $result;
+    }
+
+    public function refund($token, $amount)
+    {
+        return WebpayPlus\Transaction::refund($token, $amount, $this->options);
+    }
+
+    public function status($token)
+    {
+        return WebpayPlus\Transaction::getStatus($token, $this->options);
     }
 }

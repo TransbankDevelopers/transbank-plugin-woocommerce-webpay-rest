@@ -2,6 +2,8 @@
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
+use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
+use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\RedirectorHelper;
@@ -43,10 +45,20 @@ require_once plugin_dir_path(__FILE__) . "libwebpay/ReportGenerator.php";
 register_activation_hook(__FILE__, 'on_webpay_rest_plugin_activation');
 add_action( 'admin_init', 'on_transbank_rest_webpay_plugins_loaded' );
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
-add_action('wp_ajax_download_report', 'Transbank\Woocommerce\ReportGenerator::download');
+add_action('wp_ajax_get_transaction_status', TransactionStatusController::class . '::status');
+add_action('wp_ajax_download_report', 'Transbank\Controller\ReportGenerator::download');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
 add_action('woocommerce_before_cart', function() {
     SessionMessageHelper::printMessage();
+});
+
+add_action('admin_enqueue_scripts', function() {
+    wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__));
+    wp_enqueue_script('tbk-ajax-script', plugins_url('/js/admin.js', __FILE__), ['jquery']);
+    wp_localize_script('tbk-ajax-script', 'ajax_object', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'  => wp_create_nonce( 'my-ajax-nonce' ),
+    ]);
 });
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_rest_action_links');
@@ -125,7 +137,6 @@ function woocommerce_transbank_rest_init()
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'registerPluginVersion']);
             add_action('woocommerce_api_wc_gateway_' . $this->id, [$this, 'check_ipn_response']);
-            add_action('admin_enqueue_scripts', [$this, 'enqueueScripts']);
 
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
@@ -142,7 +153,8 @@ function woocommerce_transbank_rest_init()
             }
             $response = [];
             try {
-                $response = \Transbank\Webpay\WebpayPlus\Transaction::refund($transaction->token, round($amount));
+                $sdk = new TransbankSdkWebpayRest();
+                $response = $sdk->refund($transaction->token, round($amount));
                 $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             } catch (Exception $e) {
                 $order->add_order_note('Error al anular: ' . $e->getMessage());
@@ -165,11 +177,6 @@ function woocommerce_transbank_rest_init()
 
             return false;
 
-        }
-        public function enqueueScripts()
-        {
-            wp_enqueue_script('ajax-script', plugins_url('/js/admin.js', __FILE__), ['jquery']);
-            wp_localize_script('ajax-script', 'ajax_object', ['ajax_url' => admin_url('admin-ajax.php')]);
         }
 
         public function checkConnection()
@@ -401,4 +408,10 @@ add_action('admin_notices', function() {
 });
 register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
 
-
+add_action( 'add_meta_boxes', function() {
+    add_meta_box( 'transbank_check_payment_status', __('Verificar estado del pago','transbank'), function($post) {
+        $order = new WC_Order($post->ID);
+        $transaction = TransbankWebpayOrders::getApprovedByOrderId($order->get_id());
+        include(__DIR__ . '/views/get-status.php');
+    }, 'shop_order', 'side', 'core' );
+});
