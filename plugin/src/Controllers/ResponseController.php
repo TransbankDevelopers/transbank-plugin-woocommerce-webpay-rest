@@ -44,9 +44,8 @@ class ResponseController
         if ($wooCommerceOrder->is_paid()) {
             // TODO: Revisar porqué no se muestra el mensaje de abajo. H4x
             //SessionMessageHelper::set('Orden <strong>ya ha sido pagada</strong>.', 'notice');
-            $wooCommerceOrder->add_order_note('El usuario intentó pagar esta orden cuando ya ' .
-                'estaba pagada, no se ejecutó captura del pago y este se debería reversar en ' .
-                'los próximos días.');
+            $wooCommerceOrder->add_order_note('El usuario intentó pagar esta orden nuevamente, cuando esta ya ' .
+                'estaba pagada.');
             return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
 
@@ -55,7 +54,7 @@ class ResponseController
             //SessionMessageHelper::set('El estado de la orden no permite que sea pagada. Comuníquese con la tienda.', 'error');
             $wooCommerceOrder->add_order_note('El usuario intentó pagar la orden cuando estaba en estado: ' .
                 $wooCommerceOrder->get_status() . ".\n" .
-                'No se ejecutó captura del pago y este se debería reversar en los próximos días.'
+                'No se ejecutó captura del pago de esta solicitud.'
             );
             return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }

@@ -99,6 +99,10 @@ function woocommerce_transbank_rest_init()
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
 
+            $this->supports = [
+                'refunds',
+            ];
+
 
             $this->config = [
                 "MODO" => trim($this->get_option('webpay_rest_environment', 'TEST')),
@@ -126,6 +130,41 @@ function woocommerce_transbank_rest_init()
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
             }
+        }
+
+        public function process_refund( $order_id, $amount = null, $reason = '' ) {
+            $order = new WC_Order($order_id);
+            $transaction = TransbankWebpayOrders::getApprovedByOrderId($order_id);
+
+            if (!$transaction) {
+                $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
+                return false;
+            }
+            $response = [];
+            try {
+                $response = \Transbank\Webpay\WebpayPlus\Transaction::refund($transaction->token, round($amount));
+                $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
+            } catch (Exception $e) {
+                $order->add_order_note('Error al anular: ' . $e->getMessage());
+                return false;
+            }
+
+            if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
+                $type = $response->getType() === 'REVERSED' ? 'Reversa' : 'Anulación';
+                $order->add_order_note('Refund a través de Webpay ejecutado CORRECTAMENTE.' .
+                    "\nTipo: " . $type .
+                    "\nMonto devuelto: $" . number_format($amount, 0, ',', '.')  .
+                    "\nBalance: $" . number_format($response->getBalance(), 0, ',', '.')  .
+                    "\n\nRespuesta de anulación: \n" . $jsonResponse);
+                return true;
+            } else  {
+                $order->add_order_note('Anulación a través de Webpay FALLIDA. ' .
+                    "\n\n" . $jsonResponse);
+                return false;
+            }
+
+            return false;
+
         }
         public function enqueueScripts()
         {
@@ -361,3 +400,5 @@ add_action('admin_notices', function() {
     }
 });
 register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
+
+
