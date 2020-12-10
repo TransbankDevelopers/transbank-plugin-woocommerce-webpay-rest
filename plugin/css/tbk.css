@@ -16,3 +16,24 @@
 .tbk_table_trans pre {
 	font-size: 12px;
 }
+
+.transaction-status-response {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+}
+.transaction-status-response pre {
+    max-width: 100%;
+    width: 250px;
+    overflow: scroll;
+}
+
+.transaction-status-response th {
+    width: 100%;
+    padding: 5px;
+    background: #ddd;
+    text-align: left;
+}
+.transaction-status-response td {
+    padding: 5px 5px 10px 5px;
+}

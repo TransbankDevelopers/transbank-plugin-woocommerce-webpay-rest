@@ -1,5 +1,6 @@
 <?php
 
+use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
 
 class ConnectionCheck {
