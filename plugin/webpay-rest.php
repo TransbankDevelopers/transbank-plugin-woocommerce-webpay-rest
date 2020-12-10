@@ -33,7 +33,7 @@ if (!defined('ABSPATH')) {
  * Author: Transbank
  * Author URI: https://www.transbank.cl
  * WC requires at least: 3.4.0
- * WC tested up to: 4.0.1
+ * WC tested up to: 4.8.0
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
@@ -46,7 +46,7 @@ register_activation_hook(__FILE__, 'on_webpay_rest_plugin_activation');
 add_action( 'admin_init', 'on_transbank_rest_webpay_plugins_loaded' );
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class . '::status');
-add_action('wp_ajax_download_report', 'Transbank\Controller\ReportGenerator::download');
+add_action('wp_ajax_download_report', \Transbank\Woocommerce\ReportGenerator::class . '::download');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
 add_action('woocommerce_before_cart', function() {
     SessionMessageHelper::printMessage();
@@ -179,28 +179,9 @@ function woocommerce_transbank_rest_init()
 
         }
 
-        public function checkConnection()
-        {
-            require_once('ConfigProvider.php');
-            require_once('HealthCheck.php');
-
-            $configProvider = new ConfigProvider();
-            $config = [
-                'MODO' => $configProvider->getConfig('webpay_rest_test_mode'),
-                'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
-                'API_KEY' => $configProvider->getConfig('webpay_rest_api_key'),
-                'ECOMMERCE' => 'woocommerce'
-            ];
-            $healthcheck = new HealthCheck($config);
-            $resp = $healthcheck->setInitTransaction();
-            // ob_clean();
-            echo json_encode($resp);
-            exit;
-        }
-
         public function registerPluginVersion()
         {
-            if (!$this->get_option('webpay_rest_test_mode', 'INTEGRACION') === 'PRODUCCION') {
+            if (!$this->get_option('webpay_rest_environment', 'TEST') === 'LIVE') {
                 return;
             }
 
@@ -237,6 +218,9 @@ function woocommerce_transbank_rest_init()
                 'webpay_rest_environment' => array(
                     'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
                     'type' => 'select',
+                    'description' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
+                    ambiente real (producción). Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
+                    comercio y llave secreta que tengas configurado abajo.',
                     'options' => array(
                         'TEST' => __('Integración', 'transbank_webpay_plus_rest'),
                         'LIVE' => __('Producción', 'transbank_webpay_plus_rest')
@@ -244,14 +228,18 @@ function woocommerce_transbank_rest_init()
                     'default' => 'TEST'
                 ),
                 'webpay_rest_commerce_code' => array(
-                    'title' => __('Código de Comercio', 'transbank_webpay_plus_rest'),
+                    'title' => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
+                    'placeholder' => 'Ej: 597012345678',
+                    'description' => 'Indica tu código de comercio para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
                     'type' => 'text',
-                    'default' => $this->config['COMMERCE_CODE']
+                    'default' => ''
                 ),
                 'webpay_rest_api_key' => array(
-                    'title' => __('API Key', 'transbank_webpay_plus_rest'),
+                    'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
                     'type' => 'text',
-                    'default' => $this->config['API_KEY']
+                    'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+                    'description' => 'Esta llave privada te la entregará Transbank luego de que completes el proceso de validación (link más abajo). No la compartas con nadie una vez que la tengas. ',
+                    'default' => ''
                 )
             );
         }

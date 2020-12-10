@@ -7,11 +7,9 @@ class ConnectionCheck {
     public static function check()
     {
 
-        require_once(__DIR__  . '/ConfigProvider.php');
-
         $configProvider = new ConfigProvider();
         $config = array(
-            'MODO' => $configProvider->getConfig('webpay_rest_test_mode'),
+            'MODO' => $configProvider->getConfig('webpay_rest_environment'),
             'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
             'API_KEY' => $configProvider->getConfig('webpay_api_key'),
             'ECOMMERCE' => 'woocommerce'

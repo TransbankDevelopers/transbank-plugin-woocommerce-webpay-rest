@@ -1,14 +1,18 @@
 <?php
 
+namespace Transbank\WooCommerce\WebpayRest\Helpers;
+
+use TCPDF;
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
 class ReportPdf
 {
-    
+
     var $buffer;
-    
+
     public function __construct()
     {
         $this->buffer = '<html>
@@ -17,18 +21,18 @@ class ReportPdf
         </head>
         <body>';
     }
-    
+
     private function chain($element, $level)
     {
         if ($level == 0) {
             $this->buffer .= '<table>';
         }
-        
+
         if (is_array($element)) {
             $child_lvl = $level + 1;
             $child = array_keys($element);
             for ($count_child = 0; $count_child < count($child); $count_child++) {
-                
+
                 if ($child[$count_child] == 'php_info') {
                     $this->buffer .= '<tr><td colspan="2" class="pdf1">' . $child[$count_child] . '</td></tr>';
                     $this->buffer .= '<tr><td colspan="2" >' . $element['php_info']['string']['content'] . '</td></tr>';
@@ -37,14 +41,14 @@ class ReportPdf
                         $this->buffer .= '<tr><td colspan="2" class="log">' . $element['log'] . '</td></tr>';
                     } else {
                         if ($child[$count_child] == 'public_cert' || $child[$count_child] == 'private_key' || $child[$count_child] == 'webpay_cert') {
-                        
+
                         } else {
                             if ($child_lvl != 3) {
                                 $this->buffer .= '<tr><td colspan="2" class="pdf' . $child_lvl . '">' . $child[$count_child] . '</td></tr>';
                             } else {
                                 $this->buffer .= '<tr><td class="pdf' . $child_lvl . '">' . $child[$count_child] . '</td>';
                             }
-                            
+
                             $this->chain($element[$child[$count_child]], $child_lvl);
                         }
                     }
@@ -57,7 +61,7 @@ class ReportPdf
             $this->buffer .= '</table></body></html>';
         }
     }
-    
+
     public function getReport($myJSON)
     {
         $obj = json_decode($myJSON, true);

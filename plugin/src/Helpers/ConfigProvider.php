@@ -16,13 +16,12 @@ class ConfigProvider extends WC_Payment_Gateway
     public function getConfig($option)
     {
         $value = $this->get_option($option);
-        print_r('value', $value);
         if (!empty($value)) {
             return $value;
         }
         $config = Options::defaultConfig();
         switch ($option) {
-            case 'webpay_rest_test_mode':
+            case 'webpay_rest_environment':
                 return $config::DEFAULT_INTEGRATION_TYPE;
             case 'webpay_rest_commerce_code':
                 return $config->getCommerceCode();

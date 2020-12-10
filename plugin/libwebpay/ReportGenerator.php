@@ -4,24 +4,22 @@ namespace Transbank\Woocommerce;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
-use ReportPdfLog;
+use Transbank\WooCommerce\WebpayRest\Helpers\ReportPdfLog;
 
 class ReportGenerator
 {
     public static function download()
     {
-        require_once(__DIR__ . '/ConfigProvider.php');
-        require_once(__DIR__ . '/ReportPdfLog.php');
-        require_once(__DIR__ . '/HealthCheck.php');
-
 
         $configProvider = new ConfigProvider();
+
         $config = [
-            'MODO' => $configProvider->getConfig('webpay_rest_test_mode'),
+            'MODO' => $configProvider->getConfig('webpay_rest_environment'),
             'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
             'API_KEY' => $configProvider->getConfig('webpay_rest_api_key'),
             'ECOMMERCE' => 'woocommerce'
         ];
+
 
         $document = $_GET["document"];
         $healthcheck = new HealthCheck($config);
