@@ -1,33 +1,7 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<link href="<?php echo plugin_dir_path( __FILE__ ) ?>css/bootstrap-switch.css" rel="stylesheet">
-<link href="<?php echo plugin_dir_path( __FILE__ ) ?>css/tbk.css" rel="stylesheet">
-
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
 <h3><?php _e('Transbank Webpay', 'woocommerce'); ?></h3>
 <p><?php _e('Transbank es la empresa líder en negocios de medio de pago seguros en Chile.'); ?></p>
 
-<a class ="button " data-toggle="modal" href="#tb_modal">Realizar diagnóstico</a>
-
-<hr>
-
-<table class="form-table">
-    <?php $this->generate_settings_html(); ?>
-</table>
-
-<div class="alert alert-info">
-    <p>Al instalar este plugin, verás que viene configurado en modo Intgración,
-        que significa que opera en un ambiente de pruebas, con dinero y tarjetas de prueba.</p>
-    <p>Para operar en producción, verifica que el plugin funciona correctamente en tu sitio,
-        y si es así, debes seguir este proceso de validación para obtener tu propia llave secreta
-        (API Key) y código de comercio.</p>
-
-    <p>Revisa
-        <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion">Cómo pasar a producción</a>
-    </p>
-
-</div>
+<a class ="button " href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest') ?>">&lt; Volver a la configuración</a>
 
 <div class="modal" id="tb_modal">
     <div class="modal-dialog">

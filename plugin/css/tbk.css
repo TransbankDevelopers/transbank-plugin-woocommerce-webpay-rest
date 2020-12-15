@@ -37,3 +37,13 @@
 .transaction-status-response td {
     padding: 5px 5px 10px 5px;
 }
+
+
+.swal-modal {
+    width: 700px;
+    max-width: 80vw;
+}
+.swal-content {
+    text-align: left;
+    -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
