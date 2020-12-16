@@ -1,9 +1,8 @@
-
-
-<h3><?php _e('Transbank Webpay', 'woocommerce'); ?></h3>
-<p><?php _e('Transbank es la empresa líder en negocios de medio de pago seguros en Chile.'); ?></p>
-
-<a class ="button " data-toggle="modal" href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=healthcheck') ?>">Realizar diagnóstico</a>
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
 
 <hr>
 
@@ -36,12 +35,26 @@
     (API Key) y código de comercio. Revisa
         <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion">las instrucciones de cómo pasar a producción</a>
 
-    <iframe width="100%" height="315" src="https://www.youtube.com/embed/AB9eh7BTJUE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <h3>Documentación</h3>
+    <p>Encuentra más detalles y funcionalidades en la <a target="_blank" href="http://transbankdevelopers.cl/plugin/woocommerce/">documentación oficial del plugin</a></p>
+<!--    <iframe width="100%" height="315" src="https://www.youtube.com/embed/AB9eh7BTJUE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
 
 </div>
 
 
-<a href="#" id="show-welcome-message" class="">Ver mensaje de bienvenida nuevamente</a>
+<div class="transbank-rest-credentials">
+    En el ambiente de integración debes probar usando tarjetas de crédito y débito de prueba. <br>
+    <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#ambiente-de-integracion">Encuentra las tarjeta de prueba acá </a>
+
+    <p>
+        Después de seleccionar el método de pago (en una compra de prueba), llegarás a una página de un Banco de prueba. Debes ingresar estas credenciales:
+        <br>
+        <strong>Rut:</strong> 11.111.111-1 <br>
+        <strong>Clave:</strong> 123 <br>
+    </p>
+</div>
+
+<a href="#" id="show-welcome-message" style="padding-top: 10px" class="">Ver mensaje de bienvenida nuevamente</a>
 
 
 <script>

@@ -13,8 +13,8 @@ jQuery(function($) {
     $(".tbk_table_trans").empty();
 
     $.post(ajax_object.ajax_url, {action: 'check_connection', nonce: ajax_object.nonce}, function(response){
-        console.log('RESPONSE', response)
       $(".check_conn").text("Verificar Conexión");
+      $('.tbk-response-title').show();
       $("#response_title").show();
       $("#row_response_status").show();
       $("#row_response_status_text").removeClass("label-success").removeClass("label-danger");

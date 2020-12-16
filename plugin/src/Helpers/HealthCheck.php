@@ -90,7 +90,7 @@ class HealthCheck
         $response = wp_remote_get($baseurl);
         $body = wp_remote_retrieve_body($response);
         $json = json_decode($body, true);
-        $version = array_key_exists('tag_name', $json) ? $json['tag_name'] : '';
+        $version = is_array($json) && array_key_exists('tag_name', $json) ? $json['tag_name'] : '-';
 
         return $version;
     }
@@ -149,7 +149,7 @@ class HealthCheck
 
         $json = json_decode($body, true);
         if (isset($json['message'])) {
-            return 'UNDEFINED';
+            return 'No se pudo obtener';
         }
 
         $tag_name = $json['tag_name'];

@@ -105,10 +105,11 @@ function woocommerce_transbank_rest_init()
 
             $this->id = 'transbank_webpay_plus_rest';
             $this->icon = plugin_dir_url(__FILE__ ) . 'libwebpay/images/webpay.png';
-            $this->method_title = __('Transbank Webpay Plus');
+            $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
             $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_' . $this->id, home_url('/'));
             $this->title = 'Transbank Webpay Plus';
-            $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito y Redcompra a través de Webpay Plus';
+            $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
+            $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
 
@@ -319,19 +320,14 @@ function woocommerce_transbank_rest_init()
             $showedWelcome = get_site_option('transbank_webpay_rest_showed_welcome_message');
 
             add_thickbox();
+            $tabs = ['options', 'healthcheck', 'logs'];
             $tab = isset($_GET['tbk_tab']) ? $_GET['tbk_tab'] : null;
-            $tab = in_array($tab, ['options', 'healthcheck']) ? $tab : 'options';
+            $tab = in_array($tab, $tabs) ? $tab : 'options';
 
-            if ($tab === 'options') {
-                if (!$showedWelcome) {
-                    update_site_option('transbank_webpay_rest_showed_welcome_message', true);
-                }
-                include __DIR__ . '/views/admin/admin-options.php';
-            } else {
+            if (in_array($tab, ['healthcheck', 'logs'])) {
                 $this->healthcheck = new HealthCheck($this->config);
-                $datos_hc = json_decode($this->healthcheck->printFullResume());
-                include __DIR__ . '/views/admin/healthcheck.php';
             }
+            include __DIR__ . '/views/admin/options-tabs.php';
 
         }
 
@@ -411,9 +407,32 @@ add_action('admin_notices', function() {
 register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
 
 add_action( 'add_meta_boxes', function() {
-    add_meta_box( 'transbank_check_payment_status', __('Verificar estado del pago','transbank'), function($post) {
+    add_meta_box( 'transbank_check_payment_status', __('Verificar estado del pago','transbank_webpay_plus_rest'), function($post) {
         $order = new WC_Order($post->ID);
         $transaction = TransbankWebpayOrders::getApprovedByOrderId($order->get_id());
         include(__DIR__ . '/views/get-status.php');
     }, 'shop_order', 'side', 'core' );
+});
+
+add_action('admin_menu', function() {
+    //create new top-level menu
+    add_menu_page('Configuración de Webpay Plus', 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function() {
+
+        $tab = isset($_GET['tbk_tab']) ? $_GET['tbk_tab'] : null;
+        $tab = in_array($tab, ['healthcheck', 'logs', 'phpinfo']) ? $tab : 'healthcheck';
+
+        $configProvider = new ConfigProvider();
+        $config = [
+            'MODO' => $configProvider->getConfig('webpay_rest_environment'),
+            'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
+            'API_KEY' => $configProvider->getConfig('webpay_rest_api_key'),
+            'ECOMMERCE' => 'woocommerce'
+        ];
+        $healthcheck = new HealthCheck($config);
+        $datos_hc = json_decode($healthcheck->printFullResume());
+        $log = new LogHandler();
+
+        include __DIR__ . '/views/admin/options-tabs.php';
+    } , plugins_url('/images/icon.png', __FILE__) );
+
 });

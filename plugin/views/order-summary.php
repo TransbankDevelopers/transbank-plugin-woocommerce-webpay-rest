@@ -1,3 +1,8 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
 <br />
 <h2>Detalles del pago</h2>
 <table class="shop_table order_details">

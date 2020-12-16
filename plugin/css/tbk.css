@@ -1,11 +1,13 @@
+
 .tbk_table_info {
 	width: 600px;
-	max-width: 80%;
+	max-width: 50%;
 }
 
 .tbk_table_info td {
 	width: 300px;
-	max-width: 70%;
+    border-bottom: dashed 1px #ccc;
+	max-width: 50%;
 }
 
 .tbk_table_td {
@@ -46,4 +48,73 @@
 .swal-content {
     text-align: left;
     -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+#show-welcome-message {float: right}
+
+.healthcheck-tabs {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.healthcheck-tabs li {
+    padding: 10px;
+}
+
+.label.label-info {
+    padding: 5px;
+    float: left;
+    margin-right: 5px;
+    background: #666;
+    border-radius: 7px;
+    width: 7px;
+    height: 7px;
+    color: #fff;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.label-success {
+    background: #5cb85c;
+    border-radius: 5px;
+    padding: 5px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+#row_response_token_text pre {
+    padding: 5px;
+    background: #eee;
+    border-radius: 5px;
+    border:solid 1px #999;
+}
+
+
+.tbk_table_info th {
+    text-align: left;
+}
+.tbk_table_info td {
+    padding: 4px;
+}
+
+.transbank_rest_tool {
+    max-width: 80%;
+    width: 600px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.transbank-rest-credentials {
+    background: #fff;
+    border-left: solid 3px blue;
+    padding: 10px;
 }
