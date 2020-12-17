@@ -20,6 +20,6 @@ class RedirectorHelper
     public static function redirect($url, array $data)
     {
         echo static::getRedirectForm($url, $data);
-        die;
+        return;
     }
 }
