@@ -18,8 +18,9 @@ class TransactionStatusController
             die ( 'Busted!');
         }
 
-        $orderId  = $_POST['order_id'];
-        $token  = $_POST['token'];
+        $orderId  = filter_input(INPUT_POST, 'order_id', FILTER_SANITIZE_NUMBER_INT);
+        $token  = filter_input(INPUT_POST, 'token', FILTER_SANITIZE_STRING);
+
         $transaction = TransbankWebpayOrders::getApprovedByOrderId($orderId);
         if (!$transaction) {
             wp_send_json([

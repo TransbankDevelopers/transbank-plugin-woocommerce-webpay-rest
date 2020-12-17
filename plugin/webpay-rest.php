@@ -5,6 +5,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
+use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\RedirectorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
@@ -42,7 +43,7 @@ require_once plugin_dir_path(__FILE__) . "vendor/autoload.php";
 require_once plugin_dir_path(__FILE__) . "libwebpay/ConnectionCheck.php";
 require_once plugin_dir_path(__FILE__) . "libwebpay/ReportGenerator.php";
 
-register_activation_hook(__FILE__, 'on_webpay_rest_plugin_activation');
+register_activation_hook(__FILE__, 'transbank_webpay_rest_on_webpay_rest_plugin_activation');
 add_action( 'admin_init', 'on_transbank_rest_webpay_plugins_loaded' );
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class . '::status');
@@ -55,13 +56,14 @@ add_action('woocommerce_before_cart', function() {
 add_action('admin_enqueue_scripts', function() {
     wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__));
     wp_enqueue_script('tbk-ajax-script', plugins_url('/js/admin.js', __FILE__), ['jquery']);
+    wp_enqueue_script('tbk-thickbox', plugins_url('/js/swal.min.js', __FILE__));
     wp_localize_script('tbk-ajax-script', 'ajax_object', [
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'  => wp_create_nonce( 'my-ajax-nonce' ),
     ]);
 });
 
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'add_rest_action_links');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'transbank_webpay_rest_add_rest_action_links');
 
 //Start sessions if not already done
 add_action('init',function() {
@@ -104,10 +106,11 @@ function woocommerce_transbank_rest_init()
 
             $this->id = 'transbank_webpay_plus_rest';
             $this->icon = plugin_dir_url(__FILE__ ) . 'libwebpay/images/webpay.png';
-            $this->method_title = __('Transbank Webpay Plus');
+            $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
             $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_' . $this->id, home_url('/'));
             $this->title = 'Transbank Webpay Plus';
-            $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito y Redcompra a través de Webpay Plus';
+            $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
+            $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
 
@@ -220,7 +223,7 @@ function woocommerce_transbank_rest_init()
                     'type' => 'select',
                     'description' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
                     ambiente real (producción). Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
-                    comercio y llave secreta que tengas configurado abajo.',
+                    comercio y llave secreta que tengas configurado abajo, ya que se usará el código de comercio especial del ambiente de pruebas.',
                     'options' => array(
                         'TEST' => __('Integración', 'transbank_webpay_plus_rest'),
                         'LIVE' => __('Producción', 'transbank_webpay_plus_rest')
@@ -293,7 +296,7 @@ function woocommerce_transbank_rest_init()
                 header('HTTP/1.1 200 OK');
                 return (new ResponseController($this->config))->response($_POST);
             } else {
-                echo "Ocurrio un error al procesar su compra";
+                echo "Ocurrió un error al procesar su compra";
             }
         }
 
@@ -315,10 +318,12 @@ function woocommerce_transbank_rest_init()
          **/
         public function admin_options()
         {
+            $showedWelcome = get_site_option('transbank_webpay_rest_showed_welcome_message');
+            update_site_option('transbank_webpay_rest_showed_welcome_message', true);
+            $tab = 'options';
+            $environment = $this->config['MODO'];
+            include __DIR__ . '/views/admin/options-tabs.php';
 
-            $this->healthcheck = new HealthCheck($this->config);
-            $datos_hc = json_decode($this->healthcheck->printFullResume());
-            include 'libwebpay/admin-options.php';
         }
 
         /**
@@ -353,7 +358,7 @@ function woocommerce_transbank_rest_init()
 
 }
 
-function add_rest_action_links($links)
+function transbank_webpay_rest_add_rest_action_links($links)
 {
     $newLinks = [
         '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest') . '">Configuración</a>',
@@ -362,7 +367,7 @@ function add_rest_action_links($links)
     return array_merge($links, $newLinks);
 }
 
-function on_webpay_rest_plugin_activation()
+function transbank_webpay_rest_on_webpay_rest_plugin_activation()
 {
     woocommerce_transbank_rest_init();
     if (!class_exists(WC_Gateway_Transbank_Webpay_Plus_REST::class)) {
@@ -397,9 +402,27 @@ add_action('admin_notices', function() {
 register_uninstall_hook( __FILE__, 'transbank_rest_remove_database' );
 
 add_action( 'add_meta_boxes', function() {
-    add_meta_box( 'transbank_check_payment_status', __('Verificar estado del pago','transbank'), function($post) {
+    add_meta_box( 'transbank_check_payment_status', __('Verificar estado del pago','transbank_webpay_plus_rest'), function($post) {
         $order = new WC_Order($post->ID);
         $transaction = TransbankWebpayOrders::getApprovedByOrderId($order->get_id());
         include(__DIR__ . '/views/get-status.php');
     }, 'shop_order', 'side', 'core' );
+});
+
+add_action('admin_menu', function() {
+    //create new top-level menu
+    add_menu_page('Configuración de Webpay Plus', 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function() {
+
+        $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
+        if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo'])) {
+            wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
+        }
+
+        $healthcheck = HealthCheckFactory::create();
+        $datos_hc = json_decode($healthcheck->printFullResume());
+        $log = new LogHandler();
+
+        include __DIR__ . '/views/admin/options-tabs.php';
+    } , null );
+
 });

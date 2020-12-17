@@ -87,16 +87,10 @@ class HealthCheck
     private function getLastGitHubReleaseVersion($string)
     {
         $baseurl = 'https://api.github.com/repos/' . $string . '/releases/latest';
-        $agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)';
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $baseurl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $agent);
-        //curl_setopt($ch,CURLOPT_HEADER, false);
-        $content = curl_exec($ch);
-        curl_close($ch);
-        $con = json_decode($content, true);
-        $version = array_key_exists('tag_name', $con) ? $con['tag_name'] : '';
+        $response = wp_remote_get($baseurl);
+        $body = wp_remote_retrieve_body($response);
+        $json = json_decode($body, true);
+        $version = is_array($json) && array_key_exists('tag_name', $json) ? $json['tag_name'] : '-';
 
         return $version;
     }
@@ -150,20 +144,12 @@ class HealthCheck
     // arma array con informacion del ultimo plugin compatible con el ecommerce
     private function getPluginLastVersion()
     {
-        $githubApiUrl = 'https://api.github.com/repos/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest';
-
-        $agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)';
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $githubApiUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $agent);
-
-        $body = curl_exec($ch);
-        curl_close($ch);
+        $response = wp_remote_get('https://api.github.com/repos/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest');
+        $body = wp_remote_retrieve_body($response);
 
         $json = json_decode($body, true);
         if (isset($json['message'])) {
-            return 'UNDEFINED';
+            return 'No se pudo obtener';
         }
 
         $tag_name = $json['tag_name'];

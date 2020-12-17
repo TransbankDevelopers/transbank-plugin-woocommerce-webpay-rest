@@ -2,21 +2,15 @@
 
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
+use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 
 class ConnectionCheck {
     public static function check()
     {
 
-        $configProvider = new ConfigProvider();
-        $config = array(
-            'MODO' => $configProvider->getConfig('webpay_rest_environment'),
-            'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
-            'API_KEY' => $configProvider->getConfig('webpay_api_key'),
-            'ECOMMERCE' => 'woocommerce'
-        );
-        $healthcheck = new HealthCheck($config);
+        $healthCheck = HealthCheckFactory::create();
 
-        $resp = $healthcheck->setCreateTransaction();
+        $resp = $healthCheck->setCreateTransaction();
 
         header('Content-Type: application/json');
         ob_clean();
