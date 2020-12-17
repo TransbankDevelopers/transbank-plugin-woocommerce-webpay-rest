@@ -5,6 +5,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
+use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\RedirectorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
@@ -26,7 +27,7 @@ if (!defined('ABSPATH')) {
  * that starts the plugin.
  *
  * @wordpress-plugin
- * Plugin Name: Transbank Webpay Plus REST
+ * Plugin Name: Transbank Webpay Plus REST REMOVETHIS
  * Plugin URI: https://www.transbankdevelopers.cl/plugin/woocommerce/webpay
  * Description: Recibe pagos en línea con Tarjetas de Crédito y Redcompra en tu WooCommerce a través de Webpay Plus.
  * Version: VERSION_REPLACE_HERE
@@ -295,7 +296,7 @@ function woocommerce_transbank_rest_init()
                 header('HTTP/1.1 200 OK');
                 return (new ResponseController($this->config))->response($_POST);
             } else {
-                echo "Ocurrio un error al procesar su compra";
+                echo "Ocurrió un error al procesar su compra";
             }
         }
 
@@ -318,15 +319,9 @@ function woocommerce_transbank_rest_init()
         public function admin_options()
         {
             $showedWelcome = get_site_option('transbank_webpay_rest_showed_welcome_message');
-
-            add_thickbox();
-            $tabs = ['options', 'healthcheck', 'logs'];
-            $tab = isset($_GET['tbk_tab']) ? $_GET['tbk_tab'] : null;
-            $tab = in_array($tab, $tabs) ? $tab : 'options';
-
-            if (in_array($tab, ['healthcheck', 'logs'])) {
-                $this->healthcheck = new HealthCheck($this->config);
-            }
+            update_site_option('transbank_webpay_rest_showed_welcome_message', true);
+            $tab = 'options';
+            $environment = $this->config['MODO'];
             include __DIR__ . '/views/admin/options-tabs.php';
 
         }
@@ -418,21 +413,16 @@ add_action('admin_menu', function() {
     //create new top-level menu
     add_menu_page('Configuración de Webpay Plus', 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function() {
 
-        $tab = isset($_GET['tbk_tab']) ? $_GET['tbk_tab'] : null;
-        $tab = in_array($tab, ['healthcheck', 'logs', 'phpinfo']) ? $tab : 'healthcheck';
+        $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
+        if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo'])) {
+            return false;
+        }
 
-        $configProvider = new ConfigProvider();
-        $config = [
-            'MODO' => $configProvider->getConfig('webpay_rest_environment'),
-            'COMMERCE_CODE' => $configProvider->getConfig('webpay_rest_commerce_code'),
-            'API_KEY' => $configProvider->getConfig('webpay_rest_api_key'),
-            'ECOMMERCE' => 'woocommerce'
-        ];
-        $healthcheck = new HealthCheck($config);
+        $healthcheck = HealthCheckFactory::create();
         $datos_hc = json_decode($healthcheck->printFullResume());
         $log = new LogHandler();
 
         include __DIR__ . '/views/admin/options-tabs.php';
-    } , plugins_url('/images/icon.png', __FILE__) );
+    } , null );
 
 });

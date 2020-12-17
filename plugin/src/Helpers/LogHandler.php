@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('Webpay_ROOT', dirname(dirname(dirname(__DIR__))));
+define('Transbank_webpay_Rest_Webpay_ROOT', dirname(dirname(dirname(__DIR__))));
 
 class LogHandler
 {
@@ -27,7 +27,7 @@ class LogHandler
     function __construct($ecommerce = 'woocommerce', $days = 7, $weight = '2MB')
     {
         $this->ecommerce = $ecommerce;
-        $this->lockfile = Webpay_ROOT . "/set_logs_activate.lock";
+        $this->lockfile = Transbank_webpay_Rest_Webpay_ROOT . "/set_logs_activate.lock";
         $dia = date('Y-m-d');
         $this->confdays = $days;
         $this->confweight = $weight;

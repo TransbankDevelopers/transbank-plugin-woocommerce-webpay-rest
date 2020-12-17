@@ -41,8 +41,9 @@ if (!defined('ABSPATH')) {
 
 </div>
 
-
+<?php if($environment === 'TEST') { ?>
 <div class="transbank-rest-credentials">
+    <h3>Credenciales de prueba</h3>
     En el ambiente de integración debes probar usando tarjetas de crédito y débito de prueba. <br>
     <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#ambiente-de-integracion">Encuentra las tarjeta de prueba acá </a>
 
@@ -53,6 +54,7 @@ if (!defined('ABSPATH')) {
         <strong>Clave:</strong> 123 <br>
     </p>
 </div>
+<?php } ?>
 
 <a href="#" id="show-welcome-message" style="padding-top: 10px" class="">Ver mensaje de bienvenida nuevamente</a>
 
