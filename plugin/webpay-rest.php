@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
  * that starts the plugin.
  *
  * @wordpress-plugin
- * Plugin Name: Transbank Webpay Plus REST REMOVETHIS
+ * Plugin Name: Transbank Webpay Plus REST
  * Plugin URI: https://www.transbankdevelopers.cl/plugin/woocommerce/webpay
  * Description: Recibe pagos en línea con Tarjetas de Crédito y Redcompra en tu WooCommerce a través de Webpay Plus.
  * Version: VERSION_REPLACE_HERE
@@ -415,7 +415,7 @@ add_action('admin_menu', function() {
 
         $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
         if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo'])) {
-            return false;
+            wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
         }
 
         $healthcheck = HealthCheckFactory::create();
