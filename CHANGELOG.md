@@ -4,6 +4,19 @@ Todos los cambios notables a este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 y este proyecto adhiere a [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2020-12-17
+### Added
+* Se reemplaza el modal de diagnóstico por pantallas especiales
+* Se añade menú 'Webpay plus' en el menú lateral de la administración de Wordpress
+* Se añade mensaje de bienvenida al instalar el plugin
+* Se mejora compatibilidad con otros plugins
+* Se actualiza SDK de PHP a la versión 1.10.0
+* Se elimina Boostrap para los estilos de la administración
+
+### Fixed
+* Se arreglan "issues" internas destacadas por el equipo de Wordpress para subir el plugin al repositorio de wordpress.org
+
+
 ## [1.2.0] - 2020-12-10
 ### Added
 - Ahora se puede consultar el estado de una transacción hecha con webpay plus dentro del detalle de una orden [PR #21](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/21)
