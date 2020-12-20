@@ -1,10 +1,10 @@
 === Transbank Webpay Plus REST ===
-Contributors: TransbankDevelopers, gonzunigad
+Contributors: TransbankDevelopers
 Tags: transbank, webpay, rest, chile
 Requires at least: 4.0
 Tested up to: 5.5.3
 Requires PHP: 5.6
-Stable tag: 1.0.2
+Stable tag: 1.3.0
 License: 3-Clause BSD License
 License URI: https://opensource.org/licenses/BSD-3-Clause
 
@@ -14,6 +14,18 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
 
 == Changelog ==
+= 1.3.0 =
+### Added
+* Se reemplaza el modal de diagnóstico por pantallas especiales
+* Se añade menú 'Webpay plus' en el menú lateral de la administración de Wordpress
+* Se añade mensaje de bienvenida al instalar el plugin
+* Se mejora compatibilidad con otros plugins
+* Se actualiza SDK de PHP a la versión 1.10.0
+* Se elimina Boostrap para los estilos de la administración
+
+### Fixed
+* Se arreglan "issues" internas destacadas por el equipo de Wordpress para subir el plugin al repositorio de wordpress.org
+
 = 1.2.0 =
 ### Added
 * Ahora se puede consultar el estado de una transacción hecha con webpay plus dentro del detalle de una orden [PR #21](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/21)
@@ -38,6 +50,19 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 * Initial release.
 
 == Upgrade Notice ==
+= 1.3.0 =
+### Added
+* Se reemplaza el modal de diagnóstico por pantallas especiales
+* Se añade menú 'Webpay plus' en el menú lateral de la administración de Wordpress
+* Se añade mensaje de bienvenida al instalar el plugin
+* Se mejora compatibilidad con otros plugins
+* Se actualiza SDK de PHP a la versión 1.10.0
+* Se elimina Boostrap para los estilos de la administración
+
+### Fixed
+* Se arreglan "issues" internas destacadas por el equipo de Wordpress para subir el plugin al repositorio de wordpress.org
+
+
 = 1.2.0 =
 ### Added
 * Ahora se puede consultar el estado de una transacción hecha con webpay plus dentro del detalle de una orden [PR #21](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/21)
