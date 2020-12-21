@@ -73,6 +73,7 @@ Para generar una nueva versión, se debe crear un PR (con un título "Prepare re
 En ese PR deben incluirse los siguientes cambios:
 
 1. Modificar el archivo `plugin/readme.txt` para incluir una nueva entrada (al comienzo) para `X.Y.Z` que explique en español los cambios. (bajo el título == Changelog ==)
+2. Modificar el archivo `plugin/readme.txt` para incluir una nueva entrada en la sección == Upgrade Notice == con una explicación breve de porque se debe actualizar.
 
 Luego de obtener aprobación del pull request, debes mezclar a master e inmediatamente generar un release en GitHub con el tag `vX.Y.Z`. En la descripción del release debes poner lo mismo que agregaste al changelog.
 Con eso Travis CI generará automáticamente una nueva versión del plugin y actualizará el Release de Github con el zip del plugin, además de crear el release en el SVN de Wordpress.org.
