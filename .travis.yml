@@ -7,7 +7,7 @@ before_deploy:
   - sh package.sh
 deploy:
   - provider: releases
-    name: Versión $TRAVIS_TAG
+    name: "Versión $TRAVIS_TAG"
     file: transbank-webpay-plus-rest.zip
     api_key:
       secure: XHl3tahHkS58bYnIX5SlUdsU9LnecJz8XfQYU99/sPzDmHfW8xmIMsfUQCQjXAtINJhlcghkBRdmchObVgRWVY85S56lqe4TqNfKVkZf5XTqXX0A+2BLPsUN/jUXyN3RzUs9RZVphkTP1ykS6mctWSssRWIPl9SWJxZcyfhi8wQQKc7GadyI9woMnTypNKNGigFdeQOnVlJlNsVC/4cq+r0SAPp28GhoWLmH+2Ek4AbguokM9JcYonwYVCgtlj/F8a9IXKUQv1kb3JIkCklTuKLaWyL6iFI9iTav8WxR26TSDSxE4Eqnv3jzu2aFmM2GercQv+S1MGvJvt+/eyZNU2WWDF5PRZKlikNyaRGqEPICa5Pd8NV6GXxulqJWQlqS2OHwFi1fQXXvlgussuyoTiTO0PcnZFP7xbXsSGblJav6eE2Kd1nban5dc/7osUt+8jv5yQ+M2oYXfzkLowdyBXo/GdHJrCJCrFAdB42UAiHdfHZxzKFqCHagssq5yD6mHFTcIeP+wWBBr5WjUcAKeTbJ2OV3kAX2o7b8pOBP0aXUZLKadW7cvbF9symgNXSugDxRUzkChUOz6B86xyYN9lwQKN4Jr9C+8yTYhcrgLysYsv67GXWdlZ1WORueHvL9h53Yca2lZ+dypc6ecpTr7eLiybxSHVggpg83p7VFHAg=
@@ -15,9 +15,11 @@ deploy:
     on:
       repo: TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest
       tags: true
+      php: 7.4
   - provider: script
     skip_cleanup: true
     script: ./scripts/deploy.sh
     on:
       repo: TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest
       tags: true
+      php: 7.4
