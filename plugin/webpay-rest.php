@@ -411,7 +411,7 @@ add_action( 'add_meta_boxes', function() {
 
 add_action('admin_menu', function() {
     //create new top-level menu
-    add_menu_page('Configuración de Webpay Plus', 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function() {
+    add_submenu_page('woocommerce', 'Configuración de Webpay Plus', 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function() {
 
         $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
         if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo'])) {
