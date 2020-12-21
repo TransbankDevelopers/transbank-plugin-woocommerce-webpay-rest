@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
 
 == Changelog ==
+= 1.3.1 =
+* Se cambia la posición del menú "Webpay Plus" que antes estaba en el menú principal y ahora bajo el menú WooCommerce
+
 = 1.3.0 =
 Agregado:
 * Se reemplaza el modal de diagnóstico por pantallas especiales
@@ -49,6 +52,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.3.1 =
+* Se cambia la posición del menú "Webpay Plus" que antes estaba en el menú principal y ahora bajo el menú WooCommerce
+
 = 1.3.0 =
 Agregado:
 * Se reemplaza el modal de diagnóstico por pantallas especiales
