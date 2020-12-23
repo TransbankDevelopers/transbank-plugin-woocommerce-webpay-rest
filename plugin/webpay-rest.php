@@ -221,7 +221,7 @@ function woocommerce_transbank_rest_init()
                 'webpay_rest_environment' => array(
                     'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
                     'type' => 'select',
-                    'description' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
+                    'description' => 'Define!!!! si el plugin operará en el ambiente de pruebas (integración) o en el
                     ambiente real (producción). Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
                     comercio y llave secreta que tengas configurado abajo, ya que se usará el código de comercio especial del ambiente de pruebas.',
                     'options' => array(
