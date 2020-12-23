@@ -5,15 +5,85 @@ if (!defined('ABSPATH')) {
 ?>
 
     <div id="transbank_rest_info" class="tab-pane in active">
-        <fieldset class="tbk_info">
-            <h3 class="tbk_title_h3">&nbsp;</h3>
 
+        <div class="transbank_rest_tool">
+            <h3 style="margin-bottom: 0">Verificar configuración </h3>
+            <p>Esta herramienta permite probar tu configuración (ambiente, código de comercio y llave secreta (Api Key Secret). Al verificar conexión se envía una solicitud para crear una transacción de prueba.
+                Si ocurre algún problema, puedes obtener más información en el tab de "registros (logs)"</p>
+            <table class="table table-striped">
+                <tbody>
+                <tr>
+                    <td>
+                        <button class="check_conn button">Verificar Conexión</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <hr>
+            <h4 class="tbk-response-title" style="display: none">Respuesta de Transbank</h4>
+            <table class="table table-borderless">
+                <tbody>
+                <tr id="row_response_status" style="display:none">
+                    <td>
+                        <div
+                            title="Informa el estado de la comunicación con Transbank mediante método create_transaction"
+                            class="label label-info">?
+                        </div>
+                        <strong>Estado: </strong>
+                    </td>
+                    <td>
+                                    <span id="row_response_status_text" class="label tbk_table_trans"
+                                          style="display:none"></span>
+                    </td>
+                </tr>
+                <tr id="row_response_url" style="display:none">
+                    <td>
+                        <div title="URL entregada por Transbank para realizar la transacción"
+                             class="label label-info">?
+                        </div>
+                        <strong>URL: </strong>
+                    </td>
+                    <td id="row_response_url_text" class="tbk_table_trans"></td>
+                </tr>
+                <tr id="row_response_token" style="display:none">
+                    <td>
+                        <div title="Token entregada por Transbank para realizar la transacción"
+                             class="label label-info">?
+                        </div>
+                        <strong>Token: </strong>
+                    </td>
+                    <td id="row_response_token_text" class="tbk_table_trans"></td>
+                </tr>
+                <tr id="row_error_message" style="display:none">
+                    <td>
+                        <div title="Mensaje de error devuelto por Transbank al fallar init_transaction"
+                             class="label label-info">?
+                        </div>
+                        <strong>Error: </strong>
+                    </td>
+                    <td id="row_error_message_text" class="tbk_table_trans"></td>
+                </tr>
+                <tr id="row_error_detail" style="display:none">
+                    <td>
+                        <div title="Detalle del error devuelto por Transbank al fallar init_transaction"
+                             class="label label-info">?
+                        </div>
+                        <strong>Detalle: </strong>
+                    </td>
+                    <td id="row_error_detail_text" class="tbk_table_trans"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <fieldset class="tbk_info">
             <a class="button-primary" id="tbk_pdf_button"
                href="<?php echo admin_url('admin-ajax.php'); ?>?action=download_report&document=report"
                target="_blank">
-                Descargar en PDF
+                Descargar diagnóstico en PDF
             </a>
         </fieldset>
+
 
         <h3 class="tbk_title_h3">Información de Plugin / Ambiente</h3>
         <table class="tbk_table_info">
@@ -167,75 +237,7 @@ if (!defined('ABSPATH')) {
             </tr>
         </table>
         <br>
-        <div class="transbank_rest_tool">
-            <h3 style="margin-bottom: 0px">Validaci&oacute;n Transacci&oacute;n</h3>
-            <p>Esta herramienta permite probar tu configuración (ambiente, código de comercio y llave secreta (Api Key Secret). Al verificar conexión se envía una solicitud para crear una transacción de prueba.
-            Si ocurre algún problema, puedes obtener más información en el tab de "registros (logs)"</p>
-            <table class="table table-striped">
-                <tbody>
-                <tr>
-                    <td>
-                        <button class="check_conn button">Verificar Conexión</button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <hr>
-            <h4 class="tbk-response-title" style="display: none">Respuesta de Transbank</h4>
-            <table class="table table-borderless">
-                <tbody>
-                <tr id="row_response_status" style="display:none">
-                    <td>
-                        <div
-                            title="Informa el estado de la comunicación con Transbank mediante método create_transaction"
-                            class="label label-info">?
-                        </div>
-                        <strong>Estado: </strong>
-                    </td>
-                    <td>
-                                    <span id="row_response_status_text" class="label tbk_table_trans"
-                                          style="display:none"></span>
-                    </td>
-                </tr>
-                <tr id="row_response_url" style="display:none">
-                    <td>
-                        <div title="URL entregada por Transbank para realizar la transacción"
-                             class="label label-info">?
-                        </div>
-                        <strong>URL: </strong>
-                    </td>
-                    <td id="row_response_url_text" class="tbk_table_trans"></td>
-                </tr>
-                <tr id="row_response_token" style="display:none">
-                    <td>
-                        <div title="Token entregada por Transbank para realizar la transacción"
-                             class="label label-info">?
-                        </div>
-                        <strong>Token: </strong>
-                    </td>
-                    <td id="row_response_token_text" class="tbk_table_trans"></td>
-                </tr>
-                <tr id="row_error_message" style="display:none">
-                    <td>
-                        <div title="Mensaje de error devuelto por Transbank al fallar init_transaction"
-                             class="label label-info">?
-                        </div>
-                        <strong>Error: </strong>
-                    </td>
-                    <td id="row_error_message_text" class="tbk_table_trans"></td>
-                </tr>
-                <tr id="row_error_detail" style="display:none">
-                    <td>
-                        <div title="Detalle del error devuelto por Transbank al fallar init_transaction"
-                             class="label label-info">?
-                        </div>
-                        <strong>Detalle: </strong>
-                    </td>
-                    <td id="row_error_detail_text" class="tbk_table_trans"></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+
 
     </div>
 

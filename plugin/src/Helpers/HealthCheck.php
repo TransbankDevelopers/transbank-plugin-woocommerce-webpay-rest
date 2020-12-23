@@ -209,7 +209,7 @@ class HealthCheck
     public function setCreateTransaction()
     {
 
-        $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
+        $transbankSdkWebpay = new TransbankSdkWebpayRest();
 
         $amount = 990;
         $buyOrder = "_Healthcheck_";
@@ -217,6 +217,7 @@ class HealthCheck
         $returnUrl = "http://test.com/test";
 
         $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+        $status = 'Error';
         if ($result) {
             if (!empty($result["error"]) && isset($result["error"])) {
                 $status = 'Error';
@@ -228,12 +229,11 @@ class HealthCheck
                 $status = "Error";
             }
         }
-        $response = array(
-            'status' => array('string' => $status),
-            'response' => preg_replace('/<!--(.*)-->/Uis', '', $result)
-        );
 
-        return $response;
+        return array(
+            'status' => array('string' => $status),
+            'response' =>  $result
+        );
     }
 
     //compila en solo un metodo toda la informacion obtenida, lista para imprimir
