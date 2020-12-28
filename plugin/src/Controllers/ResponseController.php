@@ -108,11 +108,9 @@ class ResponseController
      */
     protected function completeWooCommerceOrder(WC_Order $wooCommerceOrder, $result, $webpayTransaction)
     {
-        $wooCommerceOrder->add_order_note(__('Pago exitoso con Webpay Plus', 'transbank_webpay_plus_rest'));
-        $wooCommerceOrder->add_order_note(json_encode($result, JSON_PRETTY_PRINT));
-
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
-        update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
+		
+		update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
         update_post_meta($wooCommerceOrder->get_id(), 'buyOrder', $result->buyOrder);
         update_post_meta($wooCommerceOrder->get_id(), 'authorizationCode', $authorizationCode);
         update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $result->cardDetail['card_number']);
@@ -123,6 +121,15 @@ class ResponseController
         update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date_accepted->format('d-m-Y / H:i:s'));
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
+
+        $wooCommerceOrder->add_order_note(__('Pago exitoso con Webpay Plus', 'transbank_webpay_plus_rest'));
+        // NOTA ANTIGUA
+		// $wooCommerceOrder->add_order_note(json_encode($result, JSON_PRETTY_PRINT));
+		
+		// NOTA del plugin no oficial
+        $formatear_nota = '<ul><li><strong>Respuesta de la Transacción</strong>: ACEPTADO</li><li><strong>Orden Nro:</strong> %s</li><li><strong>Cod. Autorización:</strong> %s</li><li><strong>Fecha y Hora de la Transacción:</strong> %s</li><li><strong>Tarjeta de Crédito:</strong> ···· ···· ···· %s</li><li><strong>Tipo de Pago:</strong> %s</li><li><strong>Monto Compra: </strong>$%s</li><li><strong>Nro. Cuotas:</strong> %s</li></ul>';
+
+        $wooCommerceOrder->add_order_note(sprintf($formatear_nota, $result->buyOrder, $authorizationCode, $date_accepted->format('d-m-Y / H:i:s'), $result->cardDetail['card_number'], $paymentCodeResult, $amount, $sharesNumber));
 
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay_plus_rest'));
         TransbankWebpayOrders::update($webpayTransaction->id,
