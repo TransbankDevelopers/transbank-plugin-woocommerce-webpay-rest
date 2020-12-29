@@ -56,7 +56,7 @@ if (!defined('ABSPATH')) {
     </tr>
     <?php } ?>
     <tr>
-        <th scope="row">C&oacute;digo de respuesta dela transacción:</th>
+        <th scope="row">C&oacute;digo de respuesta de la transacción:</th>
         <td><span class="CT"><?php echo $finalResponse->responseCode; ?></span></td>
     </tr>
     </tfoot>
