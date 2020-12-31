@@ -121,3 +121,7 @@
     padding: 10px;
 }
 
+.transbank_response_note h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+}

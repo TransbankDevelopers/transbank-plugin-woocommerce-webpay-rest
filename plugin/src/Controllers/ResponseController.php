@@ -123,30 +123,10 @@ class ResponseController
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
 
-        $amountFormatted = number_format($amount, 0, ',', '.');
-        $responseCode = isset($result->responseCode) ? $result->responseCode : '-';
-        $sharesAmount = $sharesAmount ? $sharesAmount : '-';
-        $transactionDetails = "
-            <div class='transbank_response_note'>
-                <p><h3>Pago exitoso con Webpay Plus</h3></p>
-
-                <strong>Estado: </strong>{$transactionResponse} <br />
-                <strong>Orden de compra: </strong>{$result->buyOrder} <br />
-                <strong>Código de autorización: </strong>{$authorizationCode} <br />
-                <strong>Últimos dígitos tarjeta: </strong>{$cardNumber} <br />
-                <strong>Monto: </strong>$ {$amountFormatted} <br />
-                <strong>Número de cuotas: </strong>{$sharesNumber} <br />
-                <strong>Monto de cada cuotas: </strong>{$sharesAmount} <br />
-                <strong>Tipo de pago: </strong>{$paymentType} <br />
-                <strong>Tipo de cuota: </strong>{$paymentCodeResult} <br />
-                <strong>Código de respuesta: </strong>{$responseCode} <br />
-                <strong>ID interno: </strong>{$webpayTransaction->id} <br />
-                <strong>Token:</strong> {$webpayTransaction->token} <br />
-                <strong>Fecha:</strong> {$date} <br />
-            </div>
-        ";
-        $wooCommerceOrder->add_order_note($transactionDetails);
-
+        $message = 'Pago exitoso con Webpay Plus';
+        $this->addOrderDetailsOnNotes($amount, $result, $sharesAmount, $message, $transactionResponse,
+            $authorizationCode, $cardNumber, $sharesNumber, $paymentType, $paymentCodeResult, $webpayTransaction, $date,
+            $wooCommerceOrder);
 
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay_plus_rest'));
         TransbankWebpayOrders::update($webpayTransaction->id,
@@ -166,10 +146,16 @@ class ResponseController
     protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result = null)
     {
         $_SESSION['woocommerce_order_failed'] = true;
-        $wooCommerceOrder->add_order_note(__('Pago rechazado', 'transbank_webpay_plus_rest'));
         $wooCommerceOrder->update_status('failed');
         if ($result !== null) {
-            $wooCommerceOrder->add_order_note(json_encode($result, JSON_PRETTY_PRINT));
+            $message = 'Pago rechazado';
+            list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
+            $cardNumber = isset($result->cardDetail['card_number']) ? $result->cardDetail['card_number'] : '-';
+
+            $date = $date_accepted->format('d-m-Y / H:i:s');
+            $this->addOrderDetailsOnNotes($amount, $result, $sharesAmount, $message, $transactionResponse,
+                $authorizationCode, $cardNumber, $sharesNumber, $paymentType, $paymentCodeResult, $webpayTransaction, $date,
+                $wooCommerceOrder);
         }
 
         TransbankWebpayOrders::update($webpayTransaction->id,
@@ -243,7 +229,7 @@ class ResponseController
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)
     {
         // Transaction aborted by user
-        $order_info->add_order_note(__('Pago abortado por el usuario en el fomulario de pago', 'transbank_webpay_plus_rest'));
+        $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el fomulario de pago', 'transbank_webpay_plus_rest'));
         $order_info->update_status('cancelled');
         TransbankWebpayOrders::update($webpayTransaction->id,
             ['status' => TransbankWebpayOrders::STATUS_ABORTED_BY_USER]);
@@ -254,5 +240,59 @@ class ResponseController
     private function transactionWasCanceledByUser()
     {
         return isset($_POST['TBK_ORDEN_COMPRA']) && isset($_POST['TBK_ID_SESION']) && $_POST['TBK_TOKEN'];
+    }
+    /**
+     * @param $amount
+     * @param array $result
+     * @param $sharesAmount
+     * @param string $message
+     * @param $transactionResponse
+     * @param $authorizationCode
+     * @param $cardNumber
+     * @param $sharesNumber
+     * @param $paymentType
+     * @param $paymentCodeResult
+     * @param $webpayTransaction
+     * @param $date
+     * @param WC_Order $wooCommerceOrder
+     */
+    protected function addOrderDetailsOnNotes(
+        $amount,
+        $result,
+        $sharesAmount,
+        string $message,
+        $transactionResponse,
+        $authorizationCode,
+        $cardNumber,
+        $sharesNumber,
+        $paymentType,
+        $paymentCodeResult,
+        $webpayTransaction,
+        $date,
+        WC_Order $wooCommerceOrder
+    ): void {
+        $amountFormatted = number_format($amount, 0, ',', '.');
+        $responseCode = isset($result->responseCode) ? $result->responseCode : '-';
+        $sharesAmount = $sharesAmount ? $sharesAmount : '-';
+        $transactionDetails = "
+            <div class='transbank_response_note'>
+                <p><h3>{$message}</h3></p>
+
+                <strong>Estado: </strong>{$transactionResponse} <br />
+                <strong>Orden de compra: </strong>{$result->buyOrder} <br />
+                <strong>Código de autorización: </strong>{$authorizationCode} <br />
+                <strong>Últimos dígitos tarjeta: </strong>{$cardNumber} <br />
+                <strong>Monto: </strong>$ {$amountFormatted} <br />
+                <strong>Código de respuesta: </strong>{$responseCode} <br />
+                <strong>Tipo de pago: </strong>{$paymentType} <br />
+                <strong>Tipo de cuota: </strong>{$paymentCodeResult} <br />
+                <strong>Número de cuotas: </strong>{$sharesNumber} <br />
+                <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
+                <strong>Token:</strong> {$webpayTransaction->token} <br />
+                <strong>Fecha:</strong> {$date} <br />
+                <strong>ID interno: </strong>{$webpayTransaction->id} <br />
+            </div>
+        ";
+        $wooCommerceOrder->add_order_note($transactionDetails);
     }
 }
