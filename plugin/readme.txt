@@ -2,7 +2,7 @@
 Contributors: TransbankDevelopers
 Tags: transbank, webpay, rest, chile
 Requires at least: 4.0
-Tested up to: 5.5.3
+Tested up to: 5.6
 Requires PHP: 5.6
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
