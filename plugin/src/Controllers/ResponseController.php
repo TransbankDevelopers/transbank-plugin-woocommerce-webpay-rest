@@ -108,21 +108,45 @@ class ResponseController
      */
     protected function completeWooCommerceOrder(WC_Order $wooCommerceOrder, $result, $webpayTransaction)
     {
-        $wooCommerceOrder->add_order_note(__('Pago exitoso con Webpay Plus', 'transbank_webpay_plus_rest'));
-        $wooCommerceOrder->add_order_note(json_encode($result, JSON_PRETTY_PRINT));
-
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
+        $cardNumber = $result->cardDetail['card_number'];
+        $date = $date_accepted->format('d-m-Y / H:i:s');
         update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
         update_post_meta($wooCommerceOrder->get_id(), 'buyOrder', $result->buyOrder);
         update_post_meta($wooCommerceOrder->get_id(), 'authorizationCode', $authorizationCode);
-        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $result->cardDetail['card_number']);
+        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $cardNumber);
         update_post_meta($wooCommerceOrder->get_id(), 'paymentCodeResult', $paymentCodeResult);
         update_post_meta($wooCommerceOrder->get_id(), 'amount', $amount);
         update_post_meta($wooCommerceOrder->get_id(), 'installmentsNumber', $sharesNumber ? $sharesNumber : '0');
         update_post_meta($wooCommerceOrder->get_id(), 'installmentsAmount', $sharesAmount ? $sharesAmount : '0');
-        update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date_accepted->format('d-m-Y / H:i:s'));
+        update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date);
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
+
+        $amountFormatted = number_format($amount, 0, ',', '.');
+        $responseCode = isset($result->responseCode) ? $result->responseCode : '-';
+        $sharesAmount = $sharesAmount ? $sharesAmount : '-';
+        $transactionDetails = "
+            <div class='transbank_response_note'>
+                <p><h3>Pago exitoso con Webpay Plus</h3></p>
+
+                <strong>Estado: </strong>{$transactionResponse} <br />
+                <strong>Orden de compra: </strong>{$result->buyOrder} <br />
+                <strong>Código de autorización: </strong>{$authorizationCode} <br />
+                <strong>Últimos dígitos tarjeta: </strong>{$cardNumber} <br />
+                <strong>Monto: </strong>$ {$amountFormatted} <br />
+                <strong>Número de cuotas: </strong>{$sharesNumber} <br />
+                <strong>Monto de cada cuotas: </strong>{$sharesAmount} <br />
+                <strong>Tipo de pago: </strong>{$paymentType} <br />
+                <strong>Tipo de cuota: </strong>{$paymentCodeResult} <br />
+                <strong>Código de respuesta: </strong>{$responseCode} <br />
+                <strong>ID interno: </strong>{$webpayTransaction->id} <br />
+                <strong>Token:</strong> {$webpayTransaction->token} <br />
+                <strong>Fecha:</strong> {$date} <br />
+            </div>
+        ";
+        $wooCommerceOrder->add_order_note($transactionDetails);
+
 
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay_plus_rest'));
         TransbankWebpayOrders::update($webpayTransaction->id,
