@@ -14,6 +14,10 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
 
 == Changelog ==
+= 1.3.4 =
+* Se mejora compatibilidad con PHP 7.0
+* El plugin ya no debería fallar si no existe la extensión ext-soap de PHP
+
 = 1.3.3 =
 * Se actualiza el logo de webpay en el formulario de pago
 * Se arregla error de tipeo en la página de éxito
@@ -62,8 +66,6 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
-= 1.3.3 =
-* Se actualiza el logo de webpay en el formulario de pago
-* Se arregla error de tipeo en la página de éxito
-* Se añade soporte a Wordpress 5.6
-* Se mejora el detalle de las notas del pedido en transacciones aprobadas y rechazadas.
+= 1.3.4 =
+* Se mejora compatibilidad con PHP 7.0
+* El plugin ya no debería fallar si no existe la extensión ext-soap de PHP
