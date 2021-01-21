@@ -21,6 +21,10 @@ class PluginVersion
      */
     public function __construct()
     {
+        if (!class_exists('SoapClient')) {
+            return;
+        }
+
         try {
             $this->client = new \SoapClient($this->soapUri);
         } catch (\Exception $exception) {
