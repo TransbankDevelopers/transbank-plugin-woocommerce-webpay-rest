@@ -270,7 +270,7 @@ class ResponseController
         $webpayTransaction,
         $date,
         WC_Order $wooCommerceOrder
-    ): void {
+    ) {
         $amountFormatted = number_format($amount, 0, ',', '.');
         $responseCode = isset($result->responseCode) ? $result->responseCode : '-';
         $sharesAmount = $sharesAmount ? $sharesAmount : '-';
