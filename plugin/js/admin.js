@@ -1,7 +1,7 @@
 function updateConfig(){
 }
 jQuery(function($) {
-  $(".check_conn").click(function(e) {
+  $(".check_conn").on("click",function(e) {
 
     $(".check_conn").text("Verificando ...");
     $("#response_title").hide();
@@ -43,7 +43,7 @@ jQuery(function($) {
     e.preventDefault();
   });
 
-  $('.get-transaction-status').click(function(e) {
+  $('.get-transaction-status').on("click",function(e) {
       if ($(this).data('sending') === true) {
           return;
       }
