@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
 
 if (!$transaction) {
     echo 'No hay transacciones webpay aprobadas para esta orden';
+
     return;
 }
 ?>

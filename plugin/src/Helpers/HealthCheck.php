@@ -10,18 +10,17 @@ if (!defined('ABSPATH')) {
 
 class HealthCheck
 {
+    public $apiKey;
+    public $commerceCode;
+    public $environment;
+    public $extensions;
+    public $versioninfo;
+    public $resume;
+    public $fullResume;
+    public $ecommerce;
+    public $config;
 
-    var $apiKey;
-    var $commerceCode;
-    var $environment;
-    var $extensions;
-    var $versioninfo;
-    var $resume;
-    var $fullResume;
-    var $ecommerce;
-    var $config;
-
-    function __construct($config)
+    public function __construct($config)
     {
         $this->config = $config;
         $this->environment = $config['MODO'];
@@ -29,26 +28,26 @@ class HealthCheck
         $this->apiKey = $config['API_KEY'];
         $this->ecommerce = $config['ECOMMERCE'];
         // extensiones necesarias
-        $this->extensions = array(
+        $this->extensions = [
             'openssl',
             'SimpleXML',
-            'dom'
-        );
+            'dom',
+        ];
     }
 
     // valida version de php
     private function getValidatephp()
     {
         if (version_compare(phpversion(), '8.0', '<') and version_compare(phpversion(), '5.5.0', '>=')) {
-            $this->versioninfo = array(
-                'status' => 'OK',
-                'version' => phpversion()
-            );
+            $this->versioninfo = [
+                'status'  => 'OK',
+                'version' => phpversion(),
+            ];
         } else {
-            $this->versioninfo = array(
-                'status' => 'Error!: Version no soportada',
-                'version' => phpversion()
-            );
+            $this->versioninfo = [
+                'status'  => 'Error!: Version no soportada',
+                'version' => phpversion(),
+            ];
         }
 
         return $this->versioninfo;
@@ -62,20 +61,20 @@ class HealthCheck
                 $version = OPENSSL_VERSION_TEXT;
             } else {
                 $version = phpversion($extension);
-                if (empty($version) or $version == null or $version === false or $version == " " or $version == "") {
-                    $version = "PHP Extension Compiled. ver:" . phpversion();
+                if (empty($version) or $version == null or $version === false or $version == ' ' or $version == '') {
+                    $version = 'PHP Extension Compiled. ver:'.phpversion();
                 }
             }
             $status = 'OK';
-            $result = array(
-                'status' => $status,
-                'version' => $version
-            );
+            $result = [
+                'status'  => $status,
+                'version' => $version,
+            ];
         } else {
-            $result = array(
-                'status' => 'Error!',
-                'version' => 'No Disponible'
-            );
+            $result = [
+                'status'  => 'Error!',
+                'version' => 'No Disponible',
+            ];
         }
 
         return $result;
@@ -86,7 +85,7 @@ class HealthCheck
     // permite un maximo de 60 consultas por hora
     private function getLastGitHubReleaseVersion($string)
     {
-        $baseurl = 'https://api.github.com/repos/' . $string . '/releases/latest';
+        $baseurl = 'https://api.github.com/repos/'.$string.'/releases/latest';
         $response = wp_remote_get($baseurl);
         $body = wp_remote_retrieve_body($response);
         $json = json_decode($body, true);
@@ -107,21 +106,21 @@ class HealthCheck
             } else {
                 $actualversion = $woocommerce->version;
                 $lastversion = $this->getLastGitHubReleaseVersion('woocommerce/woocommerce');
-                $file = __DIR__ . '/../../webpay-rest.php';
-                $search = " * Version:";
+                $file = __DIR__.'/../../webpay-rest.php';
+                $search = ' * Version:';
                 $lines = file($file);
                 foreach ($lines as $line) {
                     if (strpos($line, $search) !== false) {
-                        $currentplugin = str_replace(" * Version:", "", $line);
+                        $currentplugin = str_replace(' * Version:', '', $line);
                     }
                 }
             }
         }
-        $result = array(
+        $result = [
             'current_ecommerce_version' => $actualversion,
-            'last_ecommerce_version' => $lastversion,
-            'current_plugin_version' => $currentplugin
-        );
+            'last_ecommerce_version'    => $lastversion,
+            'current_plugin_version'    => $currentplugin,
+        ];
 
         return $result;
     }
@@ -131,12 +130,12 @@ class HealthCheck
     private function getPluginInfo($ecommerce)
     {
         $data = $this->getEcommerceInfo($ecommerce);
-        $result = array(
-            'ecommerce' => $ecommerce,
-            'ecommerce_version' => $data['current_ecommerce_version'],
+        $result = [
+            'ecommerce'              => $ecommerce,
+            'ecommerce_version'      => $data['current_ecommerce_version'],
             'current_plugin_version' => $data['current_plugin_version'],
-            'last_plugin_version' => $this->getPluginLastVersion()
-        );
+            'last_plugin_version'    => $this->getPluginLastVersion(),
+        ];
 
         return $result;
     }
@@ -171,11 +170,11 @@ class HealthCheck
     private function getServerResume()
     {
         // arma array de despliegue
-        $this->resume = array(
-            'php_version' => $this->getValidatephp(),
-            'server_version' => array('server_software' => $_SERVER['SERVER_SOFTWARE']),
-            'plugin_info' => $this->getPluginInfo($this->ecommerce)
-        );
+        $this->resume = [
+            'php_version'    => $this->getValidatephp(),
+            'server_version' => ['server_software' => $_SERVER['SERVER_SOFTWARE']],
+            'plugin_info'    => $this->getPluginInfo($this->ecommerce),
+        ];
 
         return $this->resume;
     }
@@ -183,13 +182,13 @@ class HealthCheck
     // crea array con la informacion de comercio para posteriormente exportarla via json
     private function getCommerceInfo()
     {
-        $result = array(
-            'environment' => $this->environment,
+        $result = [
+            'environment'   => $this->environment,
             'commerce_code' => $this->commerceCode,
-            'api_key' => $this->apiKey
-        );
+            'api_key'       => $this->apiKey,
+        ];
 
-        return array('data' => $result);
+        return ['data' => $result];
     }
 
     // guarda en array informacion de funcion phpinfo
@@ -201,50 +200,49 @@ class HealthCheck
         ob_end_clean();
         $newinfo = strstr($info, '<table>');
         $newinfo = strstr($newinfo, '<h1>PHP Credits</h1>', true);
-        $return = array('string' => array('content' => str_replace('</div></body></html>', '', $newinfo)));
+        $return = ['string' => ['content' => str_replace('</div></body></html>', '', $newinfo)]];
 
         return $return;
     }
 
     public function setCreateTransaction()
     {
-
         $transbankSdkWebpay = new TransbankSdkWebpayRest();
 
         $amount = 990;
-        $buyOrder = "_Healthcheck_";
+        $buyOrder = '_Healthcheck_';
         $sessionId = uniqid();
-        $returnUrl = "http://test.com/test";
+        $returnUrl = 'http://test.com/test';
 
         $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
         $status = 'Error';
         if ($result) {
-            if (!empty($result["error"]) && isset($result["error"])) {
+            if (!empty($result['error']) && isset($result['error'])) {
                 $status = 'Error';
             } else {
                 $status = 'OK';
             }
         } else {
             if (array_key_exists('error', $result)) {
-                $status = "Error";
+                $status = 'Error';
             }
         }
 
-        return array(
-            'status' => array('string' => $status),
-            'response' =>  $result
-        );
+        return [
+            'status'   => ['string' => $status],
+            'response' => $result,
+        ];
     }
 
     //compila en solo un metodo toda la informacion obtenida, lista para imprimir
     private function getFullResume()
     {
-        $this->fullResume = array(
-            'server_resume' => $this->getServerResume(),
+        $this->fullResume = [
+            'server_resume'         => $this->getServerResume(),
             'php_extensions_status' => $this->getExtensionsValidate(),
-            'commerce_info' => $this->getCommerceInfo(),
-            'php_info' => $this->getPhpInfo()
-        );
+            'commerce_info'         => $this->getCommerceInfo(),
+            'php_info'              => $this->getPhpInfo(),
+        ];
 
         return $this->fullResume;
     }
@@ -283,5 +281,3 @@ class HealthCheck
         return json_encode($this->setCreateTransaction());
     }
 }
-
-?>

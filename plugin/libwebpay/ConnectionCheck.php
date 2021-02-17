@@ -1,13 +1,11 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
-use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 
-class ConnectionCheck {
+class ConnectionCheck
+{
     public static function check()
     {
-
         $healthCheck = HealthCheckFactory::create();
 
         $resp = $healthCheck->setCreateTransaction();
@@ -16,6 +14,5 @@ class ConnectionCheck {
         ob_clean();
         echo json_encode($resp);
         wp_die();
-
     }
 }

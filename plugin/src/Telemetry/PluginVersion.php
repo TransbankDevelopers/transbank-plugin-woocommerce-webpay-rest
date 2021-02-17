@@ -1,4 +1,5 @@
 <?php
+
 namespace Transbank\WooCommerce\WebpayRest\Telemetry;
 
 class PluginVersion
@@ -16,6 +17,7 @@ class PluginVersion
     const ECOMMERCE_VIRTUEMART = 4;
     const ECOMMERCE_OPENCART = 5;
     const ECOMMERCE_SDK = 6;
+
     /**
      * PluginVersion constructor.
      */
@@ -28,7 +30,6 @@ class PluginVersion
         try {
             $this->client = new \SoapClient($this->soapUri);
         } catch (\Exception $exception) {
-
         }
     }
 
@@ -43,6 +44,7 @@ class PluginVersion
         } catch (\Exception $e) {
             // Si la conexión falla, simplemente no hacer nada.
         }
+
         return null;
     }
 }
