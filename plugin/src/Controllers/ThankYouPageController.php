@@ -2,10 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use DateTime;
-use http\Env\Response;
-use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
+use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
 use WC_Gateway_Transbank_Webpay_Plus_REST;
 use WC_Order;
 
@@ -27,6 +25,7 @@ class ThankYouPageController
             //     return;
             // }
             wc_print_notice('Transacción <strong>fallida</strong>. Puedes volver a intentar el pago', 'error');
+
             return;
         }
 
@@ -39,6 +38,6 @@ class ThankYouPageController
         $finalResponse = json_decode($webpayTransaction->transbank_response);
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = (new ResponseController([]))->getTransactionDetails($finalResponse);
 
-        require(__DIR__ . '/../../views/order-summary.php');
+        require __DIR__.'/../../views/order-summary.php';
     }
 }

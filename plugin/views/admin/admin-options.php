@@ -41,7 +41,7 @@ if (!defined('ABSPATH')) {
 
 </div>
 
-<?php if($environment === 'TEST') { ?>
+<?php if ($environment === 'TEST') { ?>
 <div class="transbank-rest-credentials">
     <h3>Credenciales de prueba</h3>
     En el ambiente de integración debes probar usando tarjetas de crédito y débito de prueba. <br>

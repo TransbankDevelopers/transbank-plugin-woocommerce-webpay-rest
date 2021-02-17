@@ -2,8 +2,6 @@
 
 namespace Transbank\Woocommerce;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
-use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheck;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\ReportPdfLog;
 
@@ -11,15 +9,15 @@ class ReportGenerator
 {
     public static function download()
     {
-        $document = filter_input(INPUT_GET, "document", FILTER_SANITIZE_STRING);
+        $document = filter_input(INPUT_GET, 'document', FILTER_SANITIZE_STRING);
         $healthcheck = HealthCheckFactory::create();
 
         $json = $healthcheck->printFullResume();
         $temp = json_decode($json);
-        if ($document == "report"){
+        if ($document == 'report') {
             unset($temp->php_info);
         } else {
-            $temp = array('php_info' => $temp->php_info);
+            $temp = ['php_info' => $temp->php_info];
         }
         $rl = new ReportPdfLog($document);
         $rl->getReport(json_encode($temp));

@@ -7,7 +7,6 @@ use WC_Payment_Gateway;
 
 class ConfigProvider extends WC_Payment_Gateway
 {
-
     public function __construct()
     {
         $this->id = 'transbank_webpay_plus_rest';

@@ -51,11 +51,15 @@ if (!defined('ABSPATH')) {
                 <td class="tbk_table_td">
                     <ul style="font-size:0.8em;list-style: disc">
                         <?php
-                        $logs_list = isset(json_decode($log->getResume(),
-                                true)['logs_list']) ? json_decode($log->getResume(),
-                            true)['logs_list'] : array();
+                        $logs_list = isset(json_decode(
+    $log->getResume(),
+    true
+)['logs_list']) ? json_decode(
+                                    $log->getResume(),
+                                    true
+                                )['logs_list'] : [];
                         foreach ($logs_list as $index) {
-                            echo '<li>' . $index . '</li>';
+                            echo '<li>'.$index.'</li>';
                         }
                         ?>
                     </ul>
@@ -72,9 +76,13 @@ if (!defined('ABSPATH')) {
                     </div>
                     <strong>Último Documento: </strong></td>
                 <td class="tbk_table_td">
-                    <?php echo isset(json_decode($log->getLastLog(),
-                            true)['log_file']) ? json_decode($log->getLastLog(),
-                        true)['log_file'] : null; ?>
+                    <?php echo isset(json_decode(
+                            $log->getLastLog(),
+                            true
+                        )['log_file']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_file'] : null; ?>
                 </td>
             </tr>
             <tr>
@@ -84,9 +92,13 @@ if (!defined('ABSPATH')) {
                     </div>
                     <strong>Peso del Documento: </strong></td>
                 <td class="tbk_table_td">
-                    <?php echo isset(json_decode($log->getLastLog(),
-                            true)['log_weight']) ? json_decode($log->getLastLog(),
-                        true)['log_weight'] : null; ?>
+                    <?php echo isset(json_decode(
+                            $log->getLastLog(),
+                            true
+                        )['log_weight']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_weight'] : null; ?>
                 </td>
             </tr>
             <tr>
@@ -96,9 +108,13 @@ if (!defined('ABSPATH')) {
                     </div>
                     <strong>Cantidad de Líneas: </strong></td>
                 <td class="tbk_table_td">
-                    <?php echo isset(json_decode($log->getLastLog(),
-                            true)['log_regs_lines']) ? json_decode($log->getLastLog(),
-                        true)['log_regs_lines'] : null; ?>
+                    <?php echo isset(json_decode(
+                            $log->getLastLog(),
+                            true
+                        )['log_regs_lines']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_regs_lines'] : null; ?>
                 </td>
             </tr>
         </table>
@@ -106,9 +122,13 @@ if (!defined('ABSPATH')) {
         <pre>
                     <span
                         style="font-size: 10px; font-family:monospace; display: block; background: white;width: fit-content;">
-                    <?php echo isset(json_decode($log->getLastLog(),
-                            true)['log_content']) ? json_decode($log->getLastLog(),
-                        true)['log_content'] : null; ?>
+                    <?php echo isset(json_decode(
+                            $log->getLastLog(),
+                            true
+                        )['log_content']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_content'] : null; ?>
                     </span>
                 </pre>
     </fieldset>

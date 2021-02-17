@@ -4,8 +4,8 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 class SessionMessageHelper
 {
-    const TBK_MESSAGE_SESSION_KEY='tbk_message';
-    const TBK_MESSAGE_TYPE_SESSION_KEY='tbk_message_type';
+    const TBK_MESSAGE_SESSION_KEY = 'tbk_message';
+    const TBK_MESSAGE_TYPE_SESSION_KEY = 'tbk_message_type';
 
     public static function set($message, $type = 'info')
     {
