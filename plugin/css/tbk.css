@@ -117,8 +117,13 @@
 
 .transbank-rest-credentials {
     background: #fff;
+    max-width: 600px;
     border-left: solid 3px blue;
     padding: 10px;
+}
+.transbank-rest-credentials h4 {
+    margin: 0;
+    margin-top: 10px;
 }
 
 .transbank_response_note h3 {
