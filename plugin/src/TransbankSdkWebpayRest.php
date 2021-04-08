@@ -44,7 +44,7 @@ class TransbankSdkWebpayRest
         $environment = isset($config['MODO']) ? $config['MODO'] : 'TEST';
 
         $options = WebpayPlus\Transaction::getDefaultOptions();
-        if($environment !== 'TEST') {
+        if ($environment !== 'TEST') {
             $options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY']);
         }
 
@@ -96,10 +96,10 @@ class TransbankSdkWebpayRest
     /**
      * @param $tokenWs
      *
-     * @return array|WebpayPlus\TransactionCommitResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
-     *
      * @throws Exception
+     *
+     * @return array|WebpayPlus\TransactionCommitResponse
      */
     public function commitTransaction($tokenWs)
     {

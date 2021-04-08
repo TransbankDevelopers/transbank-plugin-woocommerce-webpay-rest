@@ -2,7 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus;
 use WC_Payment_Gateway;
 

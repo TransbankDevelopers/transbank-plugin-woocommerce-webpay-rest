@@ -57,7 +57,7 @@ class HealthCheck
     private function getCheckExtension($extension)
     {
         if (extension_loaded($extension)) {
-                if ($extension == 'openssl') {
+            if ($extension == 'openssl') {
                 $version = OPENSSL_VERSION_TEXT;
             } else {
                 $version = phpversion($extension);

@@ -162,10 +162,10 @@ if (!defined('ABSPATH')) {
             </td>
             <td class="tbk_table_td"><span class="label
                                             <?php if ($datos_hc->server_resume->php_version->status == 'OK') {
-                    echo 'label-success';
-                } else {
-                    echo 'label-danger';
-                } ?>">
+    echo 'label-success';
+} else {
+    echo 'label-danger';
+} ?>">
                                             <?php echo $datos_hc->server_resume->php_version->status; ?>
                                             </span>
             </td>
@@ -192,10 +192,10 @@ if (!defined('ABSPATH')) {
             <td>
                                             <span class="label
                                             <?php if ($datos_hc->php_extensions_status->json->status == 'OK') {
-                                                echo 'label-success';
-                                            } else {
-                                                echo 'label-danger';
-                                            } ?>">
+    echo 'label-success';
+} else {
+    echo 'label-danger';
+} ?>">
                                             <?php echo $datos_hc->php_extensions_status->json->status; ?>
                                             </span>
             </td>
@@ -208,10 +208,10 @@ if (!defined('ABSPATH')) {
             <td>
                                             <span class="label
                                             <?php if ($datos_hc->php_extensions_status->dom->status == 'OK') {
-                                                echo 'label-success';
-                                            } else {
-                                                echo 'label-danger';
-                                            } ?>">
+    echo 'label-success';
+} else {
+    echo 'label-danger';
+} ?>">
                                             <?php echo $datos_hc->php_extensions_status->dom->status; ?>
                                             </span>
             </td>
@@ -224,10 +224,10 @@ if (!defined('ABSPATH')) {
             <td>
                                             <span class="label
                                             <?php if ($datos_hc->php_extensions_status->curl->status == 'OK') {
-                                                echo 'label-success';
-                                            } else {
-                                                echo 'label-danger';
-                                            } ?>">
+    echo 'label-success';
+} else {
+    echo 'label-danger';
+} ?>">
                                             <?php echo $datos_hc->php_extensions_status->curl->status; ?>
                                             </span>
             </td>
