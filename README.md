@@ -5,6 +5,8 @@
 
 # Transbank Woocommerce Webpay Plugin
 Plugin oficial de Webpay para WooCommerce
+![transbank-woocommerce-plugin](https://user-images.githubusercontent.com/1103494/114062234-4b74d980-9865-11eb-9a59-232be4846365.png)
+
 
 ## Descripción
 Este plugin **oficial** de Transbank te permite integrar Webpay fácilmente en tu sitio WooCommerce. Está desarrollado en base al [SDK oficial de PHP](https://github.com/TransbankDevelopers/transbank-sdk-php)
