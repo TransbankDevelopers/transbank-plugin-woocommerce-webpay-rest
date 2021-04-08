@@ -1,5 +1,5 @@
 <?php
-use Transbank\Webpay\Options;
+use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
@@ -32,7 +32,7 @@ if (!defined('ABSPATH')) {
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
  * WC requires at least: 3.4.0
- * WC tested up to: 4.9.0
+ * WC tested up to: 5.1.0
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
@@ -116,8 +116,8 @@ function woocommerce_transbank_rest_init()
 
             $this->config = [
                 'MODO'                 => trim($this->get_option('webpay_rest_environment', 'TEST')),
-                'COMMERCE_CODE'        => trim($this->get_option('webpay_rest_commerce_code', Options::DEFAULT_COMMERCE_CODE)),
-                'API_KEY'              => $this->get_option('webpay_rest_api_key', Options::DEFAULT_API_KEY),
+                'COMMERCE_CODE'        => trim($this->get_option('webpay_rest_commerce_code', WebpayPlus::DEFAULT_COMMERCE_CODE)),
+                'API_KEY'              => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
                 'URL_RETURN'           => home_url('/').'?wc-api=WC_Gateway_'.$this->id,
                 'ECOMMERCE'            => 'woocommerce',
                 'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', null),
@@ -188,7 +188,7 @@ function woocommerce_transbank_rest_init()
             }
 
             $commerceCode = $this->get_option('webpay_rest_commerce_code');
-            if ($commerceCode == Options::DEFAULT_COMMERCE_CODE) {
+            if ($commerceCode == WebpayPlus::DEFAULT_COMMERCE_CODE) {
                 // If we are using the default commerce code, then abort as the user have not updated that value yet.
                 return;
             }

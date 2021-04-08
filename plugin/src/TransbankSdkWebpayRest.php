@@ -23,6 +23,8 @@ class TransbankSdkWebpayRest
      */
     protected $log;
 
+    protected $transaction = null;
+
     /**
      * TransbankSdkWebpayRest constructor.
      *
@@ -40,8 +42,13 @@ class TransbankSdkWebpayRest
             ];
         }
         $environment = isset($config['MODO']) ? $config['MODO'] : 'TEST';
-        $this->options = ($environment != 'TEST') ? new Options($config['API_KEY'], $config['COMMERCE_CODE']) : Options::defaultConfig();
-        $this->options->setIntegrationType($environment);
+
+        $options = WebpayPlus\Transaction::getDefaultOptions();
+        if($environment !== 'TEST') {
+            $options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY']);
+        }
+
+        $this->transaction = new WebpayPlus\Transaction($options);
     }
 
     /**
@@ -64,7 +71,7 @@ class TransbankSdkWebpayRest
             $this->log->logInfo('initTransaction - amount: '.$amount.', sessionId: '.$sessionId.
                 ', buyOrder: '.$buyOrder.', txDate: '.$txDate.', txTime: '.$txTime);
 
-            $initResult = WebpayPlus\Transaction::create($buyOrder, $sessionId, $amount, $returnUrl, $this->options);
+            $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
 
             $this->log->logInfo('createTransaction - initResult: '.json_encode($initResult));
             if (isset($initResult) && isset($initResult->url) && isset($initResult->token)) {
@@ -89,9 +96,10 @@ class TransbankSdkWebpayRest
     /**
      * @param $tokenWs
      *
-     * @throws Exception
-     *
      * @return array|WebpayPlus\TransactionCommitResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @throws Exception
      */
     public function commitTransaction($tokenWs)
     {
@@ -101,7 +109,7 @@ class TransbankSdkWebpayRest
                 throw new Exception('El token webpay es requerido');
             }
 
-            return WebpayPlus\Transaction::commit($tokenWs, $this->options);
+            return $this->transaction->commit($tokenWs);
         } catch (TransactionCommitException $e) {
             $result = [
                 'error'  => 'Error al confirmar la transacción',
@@ -115,11 +123,11 @@ class TransbankSdkWebpayRest
 
     public function refund($token, $amount)
     {
-        return WebpayPlus\Transaction::refund($token, $amount, $this->options);
+        return $this->transaction->refund($token, $amount);
     }
 
     public function status($token)
     {
-        return WebpayPlus\Transaction::getStatus($token, $this->options);
+        return $this->transaction->status($token);
     }
 }

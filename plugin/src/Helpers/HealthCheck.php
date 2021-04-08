@@ -14,7 +14,7 @@ class HealthCheck
     public $commerceCode;
     public $environment;
     public $extensions;
-    public $versioninfo;
+    public $versionInfo;
     public $resume;
     public $fullResume;
     public $ecommerce;
@@ -29,35 +29,35 @@ class HealthCheck
         $this->ecommerce = $config['ECOMMERCE'];
         // extensiones necesarias
         $this->extensions = [
-            'openssl',
-            'SimpleXML',
             'dom',
+            'curl',
+            'json',
         ];
     }
 
     // valida version de php
     private function getValidatephp()
     {
-        if (version_compare(phpversion(), '8.0', '<') and version_compare(phpversion(), '5.5.0', '>=')) {
-            $this->versioninfo = [
+        if (version_compare(phpversion(), '7.0.0', '>=')) {
+            $this->versionInfo = [
                 'status'  => 'OK',
                 'version' => phpversion(),
             ];
         } else {
-            $this->versioninfo = [
+            $this->versionInfo = [
                 'status'  => 'Error!: Version no soportada',
                 'version' => phpversion(),
             ];
         }
 
-        return $this->versioninfo;
+        return $this->versionInfo;
     }
 
     // verifica si existe la extension y cual es la version de esta
     private function getCheckExtension($extension)
     {
         if (extension_loaded($extension)) {
-            if ($extension == 'openssl') {
+                if ($extension == 'openssl') {
                 $version = OPENSSL_VERSION_TEXT;
             } else {
                 $version = phpversion($extension);
