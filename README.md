@@ -26,14 +26,14 @@ Para poder operar con dinero real (ambiente de **producción**), debes completar
 A continuación, encontrarás información necesaria para el desarrollo de este plugin. 
 
 ## Requisitos 
-* PHP 5.6 o superior
+* PHP 7.0 o superior
 * Woocommerce 3.4 o superior
 
 ## Dependencias
 
 El plugin depende de las siguientes librerías:
 
-* transbank/transbank-sdk
+* transbank/transbank-sdk:~2.0
 * tecnickcom/tcpdf
 * apache/log4php
 
@@ -47,7 +47,6 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
 
 Para testear los ejemplos estos estan disponibles en:
-- [WooCommerce 3.4.0 con php 5.6](./docker-woocommerce-php5.6)
 - [WooCommerce 3.4.0 con php 7.1](./docker-woocommerce-php7.1)
 - [WooCommerce 3.6.3 con php 7.2](./docker-woocommerce-php7.2)
 - [WooCommerce 3.9.1 con php 7.3](./docker-woocommerce-php7.3)

@@ -93,12 +93,12 @@ if (!defined('ABSPATH')) {
                     <strong>Peso del Documento: </strong></td>
                 <td class="tbk_table_td">
                     <?php echo isset(json_decode(
-                                $log->getLastLog(),
-                                true
-                            )['log_weight']) ? json_decode(
                             $log->getLastLog(),
                             true
-                        )['log_weight'] : null; ?>
+                        )['log_weight']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_weight'] : null; ?>
                 </td>
             </tr>
             <tr>
@@ -109,12 +109,12 @@ if (!defined('ABSPATH')) {
                     <strong>Cantidad de Líneas: </strong></td>
                 <td class="tbk_table_td">
                     <?php echo isset(json_decode(
-                                $log->getLastLog(),
-                                true
-                            )['log_regs_lines']) ? json_decode(
                             $log->getLastLog(),
                             true
-                        )['log_regs_lines'] : null; ?>
+                        )['log_regs_lines']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_regs_lines'] : null; ?>
                 </td>
             </tr>
         </table>
@@ -123,12 +123,12 @@ if (!defined('ABSPATH')) {
                     <span
                         style="font-size: 10px; font-family:monospace; display: block; background: white;width: fit-content;">
                     <?php echo isset(json_decode(
-                                $log->getLastLog(),
-                                true
-                            )['log_content']) ? json_decode(
                             $log->getLastLog(),
                             true
-                        )['log_content'] : null; ?>
+                        )['log_content']) ? json_decode(
+                                $log->getLastLog(),
+                                true
+                            )['log_content'] : null; ?>
                     </span>
                 </pre>
     </fieldset>

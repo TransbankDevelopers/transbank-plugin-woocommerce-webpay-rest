@@ -14,6 +14,15 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
 
 == Changelog ==
+= 1.4.0 =
+* Se utiliza el nuevo SDk de PHP versión 2.0
+* Ya no es compatible con PHP 5.6.
+* Ahora es compatible de PHP 7.0 a PHP 8.0
+* Ahora se puede completar el formulario de validación directamente desde el plugin
+* Se soluciona warning de jQuery [PR 57](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/57)
+* Se aplica coding style de StyleCI.
+
+
 = 1.3.4 =
 * Se mejora compatibilidad con PHP 7.0
 * El plugin ya no debería fallar si no existe la extensión ext-soap de PHP
@@ -66,6 +75,10 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
-= 1.3.4 =
-* Se mejora compatibilidad con PHP 7.0
-* El plugin ya no debería fallar si no existe la extensión ext-soap de PHP
+= 1.4.0 =
+* Se utiliza el nuevo SDk de PHP versión 2.0
+* Ya no es compatible con PHP 5.6.
+* Ahora es compatible de PHP 7.0 a PHP 8.0
+* Ahora se puede completar el formulario de validación directamente desde el plugin
+* Se soluciona warning de jQuery [PR 57](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/57)
+* Se aplica coding style de StyleCI.
