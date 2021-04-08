@@ -28,21 +28,32 @@ if (!defined('ABSPATH')) {
     <p>Verifica que todo funcione correctamente. Realiza algunas compras con tarjetas de crédito y de débito, además de probar con transacciones aprobadas y rechazadas.
         <br>Si todo funciona correctamente, solicita tu llave secreta (Api Key Secret). A continuación te explicamos como.  </p>
 
-
-    <h3>Operar en el ambiente de producción</h3>
-
-    <p>Para operar en producción - con tarjetas y dinero real - debes seguir este proceso de validación para obtener tu propia llave secreta
-    (API Key) y código de comercio. Revisa
-        <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion">las instrucciones de cómo pasar a producción</a>
-
     <h3>Documentación</h3>
     <p>Encuentra más detalles y funcionalidades en la <a target="_blank" href="http://transbankdevelopers.cl/plugin/woocommerce/">documentación oficial del plugin</a></p>
-<!--    <iframe width="100%" height="315" src="https://www.youtube.com/embed/AB9eh7BTJUE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
+    <!--<iframe width="100%" height="315" src="https://www.youtube.com/embed/AB9eh7BTJUE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
 
 </div>
 
 <?php if ($environment === 'TEST') { ?>
 <div class="transbank-rest-credentials">
+    <h3>¿Quieres operar en producción?</h3>
+    Para operar en el ambiente productivo, con dinero real, debes tener tu <strong>código de comercio</strong> y tu <strong>Api Key</strong>.
+
+    <h4>Código de comercio</h4>
+    Si no lo tienes, puedes solicitarlo en <a href="https://public.transbank.cl">el sitio web de Transbank</a>.
+
+    <h4>Tu Api Key</h4>
+    Si ya tienes tu código de comercio, lo único que te faltaría es tu Api Key. Para obtenerla, debes completar el siguiente formulario:
+    <br>
+    <a href="https://form.typeform.com/to/fZqOJyFZ?typeform-medium=embed-snippet" style="margin-top: 5px; display: inline-block;clear: both" data-mode="popup" class="typeform-share link button-primary" data-size="100" data-submit-close-delay="25">Comenzar proceso de validación</a>
+
+
+    <br><br><br>
+
+    Si quieres, puedes revisar <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion">las instrucciones detalladas de cómo pasar a producción</a>
+
+</div>
+<div class="transbank-rest-credentials" style="margin-top: 20px">
     <h3>Credenciales de prueba</h3>
     En el ambiente de integración debes probar usando tarjetas de crédito y débito de prueba. <br>
     <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#ambiente-de-integracion">Encuentra las tarjeta de prueba acá </a>
@@ -78,3 +89,4 @@ if (!defined('ABSPATH')) {
     })(jQuery);
 
 </script>
+<script> (function() { var qs,js,q,s,d=document, gi=d.getElementById, ce=d.createElement, gt=d.getElementsByTagName, id="typef_orm_share", b="https://embed.typeform.com/"; if(!gi.call(d,id)){ js=ce.call(d,"script"); js.id=id; js.src=b+"embed.js"; q=gt.call(d,"script")[0]; q.parentNode.insertBefore(js,q) } })() </script>
