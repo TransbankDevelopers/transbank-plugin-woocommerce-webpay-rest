@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5938a51b7dcc300783fb288cc924889",
+    "content-hash": "314d3e852f72115b65c63f7d8954d513",
     "packages": [
         {
             "name": "apache/log4php",
@@ -746,29 +746,28 @@
         },
         {
             "name": "transbank/transbank-sdk",
-            "version": "1.10.1",
+            "version": "2.0-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/TransbankDevelopers/transbank-sdk-php.git",
-                "reference": "0d5407629ebb7b74ebda7c1841eae2ea694820d6"
+                "reference": "913a0c3ada467f54c89e34e85cdf1c47a96b80e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TransbankDevelopers/transbank-sdk-php/zipball/0d5407629ebb7b74ebda7c1841eae2ea694820d6",
-                "reference": "0d5407629ebb7b74ebda7c1841eae2ea694820d6",
+                "url": "https://api.github.com/repos/TransbankDevelopers/transbank-sdk-php/zipball/913a0c3ada467f54c89e34e85cdf1c47a96b80e8",
+                "reference": "913a0c3ada467f54c89e34e85cdf1c47a96b80e8",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "ext-json": "*",
                 "ext-mbstring": "*",
-                "ext-openssl": "*",
-                "ext-soap": "*",
                 "guzzlehttp/guzzle": "^5|^6|^7",
                 "php": ">=5.6.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0",
+                "dms/phpunit-arraysubset-asserts": "^0.2.1",
+                "phpunit/phpunit": "^9",
                 "satooshi/php-coveralls": "~0.6.1",
                 "squizlabs/php_codesniffer": "~2.0"
             },
@@ -791,13 +790,19 @@
                 "sdk",
                 "transbank"
             ],
-            "time": "2020-12-21T21:57:26+00:00"
+            "support": {
+                "issues": "https://github.com/TransbankDevelopers/transbank-sdk-php/issues",
+                "source": "https://github.com/TransbankDevelopers/transbank-sdk-php/tree/2.0-beta"
+            },
+            "time": "2021-04-06T21:17:43+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "transbank/transbank-sdk": 10
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -805,5 +810,5 @@
         "php": ">=5.6"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
