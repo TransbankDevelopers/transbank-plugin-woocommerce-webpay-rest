@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
 
 == Changelog ==
+= 1.4.1 =
+* Ahora el API 1.2 de Transbank a veces redirige por GET al finalizar el flujo y el plugin no funcionaba bien cuando esto pasaba. Ya está arreglado.
+
 = 1.4.0 =
 * Se utiliza el nuevo SDk de PHP versión 2.0
 * Ya no es compatible con PHP 5.6.
@@ -75,7 +78,7 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
-= 1.4.0 =
+= 1.4.1 =
 * Se utiliza el nuevo SDk de PHP versión 2.0
 * Ya no es compatible con PHP 5.6.
 * Ahora es compatible de PHP 7.0 a PHP 8.0
