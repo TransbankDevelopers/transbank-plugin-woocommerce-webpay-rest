@@ -141,7 +141,7 @@ class LogHandler
                 'status'         => false,
                 'lock_file'      => basename($this->lockfile),
                 'max_logs_days'  => '7',
-                'max_log_weight' => '2',
+                'max_log_size' => '2',
             ];
         } else {
             $lines = file($this->lockfile);
@@ -152,7 +152,7 @@ class LogHandler
                 'status'         => true,
                 'lock_file'      => basename($this->lockfile),
                 'max_logs_days'  => $this->confdays,
-                'max_log_weight' => $this->confweight,
+                'max_log_size' => $this->confweight,
             ];
         }
 
@@ -198,7 +198,7 @@ class LogHandler
         }
         $return = [
             'log_file'       => basename($this->lastLog),
-            'log_weight'     => $this->formatBytes($this->lastLog),
+            'log_size'     => $this->formatBytes($this->lastLog),
             'log_regs_lines' => count(file($this->lastLog)),
             'log_content'    => $var,
         ];

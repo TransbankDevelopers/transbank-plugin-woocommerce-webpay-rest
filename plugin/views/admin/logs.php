@@ -66,7 +66,9 @@ if (!defined('ABSPATH')) {
                 </td>
             </tr>
         </table>
+        <?php
 
+        $lastLog =  json_decode($log->getLastLog(), true); ?>
         <h3 class="tbk_title_h3">Últimos Registros</h3>
         <table class="tbk_table_info">
             <tr>
@@ -76,13 +78,7 @@ if (!defined('ABSPATH')) {
                     </div>
                     <strong>Último Documento: </strong></td>
                 <td class="tbk_table_td">
-                    <?php echo isset(json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_file']) ? json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_file'] : null; ?>
+                    <?php echo $lastLog['log_file'] ?? '-'; ?>
                 </td>
             </tr>
             <tr>
@@ -92,13 +88,7 @@ if (!defined('ABSPATH')) {
                     </div>
                     <strong>Peso del Documento: </strong></td>
                 <td class="tbk_table_td">
-                    <?php echo isset(json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_weight']) ? json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_weight'] : null; ?>
+                    <?php echo $lastLog['log_size'] ?? '-'; ?>
                 </td>
             </tr>
             <tr>
@@ -108,27 +98,15 @@ if (!defined('ABSPATH')) {
                     </div>
                     <strong>Cantidad de Líneas: </strong></td>
                 <td class="tbk_table_td">
-                    <?php echo isset(json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_regs_lines']) ? json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_regs_lines'] : null; ?>
+                    <?php echo $lastLog['log_regs_lines'] ?? '-'; ?>
                 </td>
             </tr>
         </table>
         <br>
         <pre>
                     <span
-                        style="font-size: 10px; font-family:monospace; display: block; background: white;width: fit-content;">
-                    <?php echo isset(json_decode(
-                                $log->getLastLog(),
-                                true
-                            )['log_content']) ? json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_content'] : null; ?>
+                        style="font-size: 10px; padding: 10px; font-family:monospace; display: block; background: white;width: fit-content;">
+<?php echo $lastLog['log_content'] ?? '-'; ?>
                     </span>
                 </pre>
     </fieldset>
