@@ -303,6 +303,7 @@ function woocommerce_transbank_rest_init()
             if (isset($_POST)) {
                 header('HTTP/1.1 200 OK');
                 $data = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $_GET : $_POST;
+
                 return (new ResponseController($this->config))->response($data);
             } else {
                 echo 'Ocurrió un error al procesar su compra';

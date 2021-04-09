@@ -291,6 +291,7 @@ class ResponseController
         $buyOrder = $_POST['TBK_ORDEN_COMPRA'] ?? $_GET['TBK_ORDEN_COMPRA'] ?? null;
         $sessionId = $_POST['TBK_ID_SESION'] ?? $_GET['TBK_ID_SESION'] ?? null;
         $token = $_POST['TBK_TOKEN'] ?? $_GET['TBK_TOKEN'] ?? null;
+
         return $buyOrder && $sessionId && $token;
     }
 
