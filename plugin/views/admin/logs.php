@@ -68,7 +68,7 @@ if (!defined('ABSPATH')) {
         </table>
         <?php
 
-        $lastLog =  json_decode($log->getLastLog(), true); ?>
+        $lastLog = json_decode($log->getLastLog(), true); ?>
         <h3 class="tbk_title_h3">Últimos Registros</h3>
         <table class="tbk_table_info">
             <tr>
