@@ -112,9 +112,9 @@ if (!defined('ABSPATH')) {
                             $log->getLastLog(),
                             true
                         )['log_regs_lines']) ? json_decode(
-                                $log->getLastLog(),
-                                true
-                            )['log_regs_lines'] : null; ?>
+                            $log->getLastLog(),
+                            true
+                        )['log_regs_lines'] : null; ?>
                 </td>
             </tr>
         </table>
@@ -123,12 +123,12 @@ if (!defined('ABSPATH')) {
                     <span
                         style="font-size: 10px; font-family:monospace; display: block; background: white;width: fit-content;">
                     <?php echo isset(json_decode(
-                            $log->getLastLog(),
-                            true
-                        )['log_content']) ? json_decode(
                                 $log->getLastLog(),
                                 true
-                            )['log_content'] : null; ?>
+                            )['log_content']) ? json_decode(
+                            $log->getLastLog(),
+                            true
+                        )['log_content'] : null; ?>
                     </span>
                 </pre>
     </fieldset>
