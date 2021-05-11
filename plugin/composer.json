@@ -1,6 +1,6 @@
 {
   "require": {
-    "transbank/transbank-sdk": "^2.0-beta",
+    "transbank/transbank-sdk": "~2.0",
     "apache/log4php":"2.3.0",
     "tecnickcom/tcpdf": "^6.3",
     "ext-json": "*",
