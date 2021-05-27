@@ -8,6 +8,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 class TransbankWebpayOrders
 {
     const TRANSACTIONS_TABLE_NAME = 'webpay_rest_transactions';
+    const ONECLICK_INSCRIPTIONS_TABLE_NAME = 'webpay_oneclick_inscriptions';
 
     const STATUS_INITIALIZED = 'initialized';
     const STATUS_FAILED = 'failed';
@@ -27,6 +28,16 @@ class TransbankWebpayOrders
             return $wpdb->base_prefix.static::TRANSACTIONS_TABLE_NAME;
         } else {
             return $wpdb->prefix.static::TRANSACTIONS_TABLE_NAME;
+        }
+    }
+
+    public static function getOneclickInscriptionsTableName()
+    {
+        global $wpdb;
+        if (is_multisite()) {
+            return $wpdb->base_prefix.static::ONECLICK_INSCRIPTIONS_TABLE_NAME;
+        } else {
+            return $wpdb->prefix.static::ONECLICK_INSCRIPTIONS_TABLE_NAME;
         }
     }
 
@@ -118,12 +129,33 @@ class TransbankWebpayOrders
             `session_id` varchar(100),
             `status` varchar(50) NOT NULL,
             `transbank_response` LONGTEXT,
+            `product` varchar(12),
             `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
         ) $charset_collate";
 
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+
+        $inscriptionsTableName = static::getOneclickInscriptionsTableName();
+        $sql = "CREATE TABLE `{$inscriptionsTableName}` (
+            `id` bigint(20) NOT NULL AUTO_INCREMENT,
+            `token` varchar(100) NOT NULL,
+            `username` varchar(100),
+            `email` varchar(50) NOT NULL,
+            `user_id` LONGTEXT,
+            `finished` TINYINT(1) NOT NULL DEFAULT 0,
+            `response_code` varchar(50),
+            `authorization_code` varchar(50),
+            `card_type` varchar(50),
+            `card_number` varchar(50),
+            `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
+            PRIMARY KEY (id)
+        ) $charset_collate";
+
+        require_once ABSPATH.'wp-admin/includes/upgrade.php';
+        dbDelta($sql);
+
         $success = empty($wpdb->last_error);
         if ($success) {
             update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
@@ -147,4 +179,6 @@ class TransbankWebpayOrders
         $wpdb->query($sql);
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
+
+
 }

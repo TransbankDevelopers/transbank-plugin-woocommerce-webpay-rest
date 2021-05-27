@@ -16,5 +16,6 @@
             "Transbank\\WooCommerce\\WebpayRest\\": "src/"
         }
     },
-    "description": "Transbank WooCoommerce Plugin"
+    "description": "Transbank WooCommerce Plugin",
+    "name": "transbank/woocommerce-plugin"
 }

@@ -34,7 +34,7 @@ class ThankYouPageController
         }
 
         // Transacción aprobada
-        wc_print_notice('Transacción aprobada', 'success');
+        wc_print_notice(__('Transacción aprobada', 'transbank'), 'success');
         $finalResponse = json_decode($webpayTransaction->transbank_response);
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = (new ResponseController([]))->getTransactionDetails($finalResponse);
 

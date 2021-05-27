@@ -9,7 +9,6 @@ if (!defined('ABSPATH')) {
     <tfoot>
     <tr>
         <th scope="row">Respuesta de la Transacción:</th>
-
         <td><span class="RT"><?php echo $transactionResponse; ?></span></td>
 
     </tr>

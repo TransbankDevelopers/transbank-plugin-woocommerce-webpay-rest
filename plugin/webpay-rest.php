@@ -78,6 +78,9 @@ function woocommerce_transbank_rest_init()
         return;
     }
 
+    require(__DIR__ . '/src/Tokenization/WC_Payment_Token_Oneclick.php');
+
+
     /**
      * @property string icon
      * @property string  method_title
@@ -87,23 +90,20 @@ function woocommerce_transbank_rest_init()
      */
     class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
-        private static $URL_RETURN;
+        const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
         private static $URL_FINAL;
 
-        protected $notify_url;
         protected $plugin_url;
         protected $log;
         protected $config;
 
         public function __construct()
         {
-            self::$URL_RETURN = home_url('/').'?wc-api=WC_Gateway_transbank_webpay_plus_rest';
             self::$URL_FINAL = home_url('/').'?wc-api=TransbankWebpayRestThankYouPage';
 
             $this->id = 'transbank_webpay_plus_rest';
             $this->icon = plugin_dir_url(__FILE__).'libwebpay/images/webpay.png';
             $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
-            $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_'.$this->id, home_url('/'));
             $this->title = 'Transbank Webpay Plus';
             $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
             $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
@@ -111,6 +111,7 @@ function woocommerce_transbank_rest_init()
             $this->log = new LogHandler();
 
             $this->supports = [
+                'products',
                 'refunds',
             ];
 
@@ -118,7 +119,6 @@ function woocommerce_transbank_rest_init()
                 'MODO'                 => trim($this->get_option('webpay_rest_environment', 'TEST')),
                 'COMMERCE_CODE'        => trim($this->get_option('webpay_rest_commerce_code', WebpayPlus::DEFAULT_COMMERCE_CODE)),
                 'API_KEY'              => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
-                'URL_RETURN'           => home_url('/').'?wc-api=WC_Gateway_'.$this->id,
                 'ECOMMERCE'            => 'woocommerce',
                 'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', null),
             ];
@@ -134,6 +134,7 @@ function woocommerce_transbank_rest_init()
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'registerPluginVersion']);
             add_action('woocommerce_api_wc_gateway_'.$this->id, [$this, 'check_ipn_response']);
+
 
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
@@ -260,12 +261,7 @@ function woocommerce_transbank_rest_init()
             $amount = (int) number_format($order->get_total(), 0, ',', '');
             $sessionId = uniqid();
             $buyOrder = $order_id;
-            $returnUrl = self::$URL_RETURN;
-            $finalUrl = str_replace(
-                '_URL_',
-                add_query_arg('key', $order->get_order_key(), $order->get_checkout_order_received_url()),
-                self::$URL_FINAL
-            );
+            $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
 
             $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
             $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
@@ -349,7 +345,8 @@ function woocommerce_transbank_rest_init()
      **/
     function woocommerce_add_transbank_gateway($methods)
     {
-        $methods[] = 'WC_Gateway_transbank_webpay_plus_rest';
+        $methods[] = 'WC_Gateway_Transbank_Webpay_Plus_REST';
+        $methods[] = \Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST::class;
 
         return $methods;
     }
