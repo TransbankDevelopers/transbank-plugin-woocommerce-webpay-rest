@@ -127,7 +127,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public static function scheduled_subscription_payment($amount_to_charge, $order)
     {
-        file_put_contents(__DIR__ . '/test.txt',  print_r([$amount_to_charge, $order], true));
+        //TODO: Add this process
+        //file_put_contents(__DIR__ . '/test.txt',  print_r([$amount_to_charge, $order], true));
     }
 
     public function methods_list_item_oneclick($item, $payment_token)
