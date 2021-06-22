@@ -1,5 +1,7 @@
 <?php
 
+use Transbank\Webpay\Options;
+
 class WC_Payment_Token_Oneclick extends \WC_Payment_Token
 {
 
@@ -9,7 +11,8 @@ class WC_Payment_Token_Oneclick extends \WC_Payment_Token
         'last4'        => '',
         'username'     => '',
         'email'        => '',
-        'card_type'    => ''
+        'card_type'    => '',
+        'environment'  => ''
     ];
 
     /**
@@ -20,7 +23,8 @@ class WC_Payment_Token_Oneclick extends \WC_Payment_Token
      * @return string
      */
     public function get_display_name( $deprecated = '' ) {
-        return $this->get_card_type() . ' terminada en ' . $this->get_last4();
+        $testPrefix = ($this->get_environment() === Options::ENVIRONMENT_PRODUCTION ? '' : '[TEST] ');
+        return  $testPrefix . $this->get_card_type() . ' terminada en ' . $this->get_last4();
     }
 
     public function validate()
@@ -37,6 +41,11 @@ class WC_Payment_Token_Oneclick extends \WC_Payment_Token
         }
 
         if ( ! $this->get_username( 'edit' ) ) {
+            return false;
+        }
+
+        if ( ! $this->get_environment( 'edit' ) ) {
+            $this->set_environment(Options::ENVIRONMENT_INTEGRATION);
             return false;
         }
 
@@ -117,6 +126,25 @@ class WC_Payment_Token_Oneclick extends \WC_Payment_Token
      */
     public function set_username( $username ) {
         $this->set_prop( 'username', $username );
+    }
+
+    /**
+     * Returns the token oneclick environement
+     *
+     * @param  string $context What the value is for. Valid values are view and edit.
+     * @return string [TEST|LIVE]
+     */
+    public function get_environment( $context = 'view' ) {
+        return $this->get_prop( 'environment', $context );
+    }
+
+    /**
+     * Set the token environment
+     *
+     * @param string $environment Credit card last four digits.
+     */
+    public function set_environment( $environment ) {
+        $this->set_prop( 'environment', $environment );
     }
 
     /**

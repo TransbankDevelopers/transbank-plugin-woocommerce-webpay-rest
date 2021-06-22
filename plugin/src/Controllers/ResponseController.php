@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
+use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
 use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
@@ -24,7 +25,29 @@ class ResponseController
     {
         $this->pluginConfig = $pluginConfig;
     }
+    /**
+     * @param $paymentTypeCode
+     * @return string
+     */
+    public static function getHumanReadableInstallemntsType($paymentTypeCode): string
+    {
+        $installmentTypes = [
+            'VD' => 'Venta Débito',
+            'VN' => 'Venta Normal',
+            'VC' => 'Venta en cuotas',
+            'SI' => '3 cuotas sin interés',
+            'S2' => '2 cuotas sin interés',
+            'NC' => 'N cuotas sin interés',
+        ];
+        $paymentCodeResult = isset($installmentTypes[$paymentTypeCode]) ? $installmentTypes[$paymentTypeCode] : 'Sin cuotas';
 
+        return $paymentCodeResult;
+    }
+
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException
+     */
     public function response($postData)
     {
         $token_ws = $this->getTokenWs($postData);
@@ -117,9 +140,9 @@ class ResponseController
      * @param array    $result
      * @param $webpayTransaction
      */
-    protected function completeWooCommerceOrder(WC_Order $wooCommerceOrder, $result, $webpayTransaction)
+    protected function completeWooCommerceOrder(WC_Order $wooCommerceOrder, TransactionCommitResponse $result, $webpayTransaction)
     {
-        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
+        [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType] = $this->getTransactionDetails($result);
         $cardNumber = $result->cardDetail['card_number'];
         $date = $date_accepted->format('d-m-Y / H:i:s');
         update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
@@ -154,7 +177,10 @@ class ResponseController
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay_plus_rest'));
         TransbankWebpayOrders::update(
             $webpayTransaction->id,
-            ['status' => TransbankWebpayOrders::STATUS_APPROVED, 'transbank_response' => json_encode($result)]
+            [
+                'status' => TransbankWebpayOrders::STATUS_APPROVED,
+                'transbank_status' => $result->getStatus(),
+                'transbank_response' => json_encode($result)]
         );
 
         $wooCommerceOrder->payment_complete();
@@ -175,7 +201,7 @@ class ResponseController
         $wooCommerceOrder->update_status('failed');
         if ($result !== null) {
             $message = 'Pago rechazado';
-            list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
+            [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType] = $this->getTransactionDetails($result);
             $cardNumber = isset($result->cardDetail['card_number']) ? $result->cardDetail['card_number'] : '-';
 
             $date = $date_accepted->format('d-m-Y / H:i:s');
@@ -198,7 +224,10 @@ class ResponseController
 
         TransbankWebpayOrders::update(
             $webpayTransaction->id,
-            ['status' => TransbankWebpayOrders::STATUS_FAILED, 'transbank_response' => json_encode($result)]
+            [
+                'status' => TransbankWebpayOrders::STATUS_FAILED,
+                'transbank_response' => json_encode($result)
+            ]
         );
     }
 
@@ -251,20 +280,9 @@ class ResponseController
         } else {
             $transactionResponse = 'Transacción Rechazada';
         }
-        $installmentTypes = [
-            'VD' => 'Venta Débito',
-            'VN' => 'Venta Normal',
-            'VC' => 'Venta en cuotas',
-            'SI' => '3 cuotas sin interés',
-            'S2' => '2 cuotas sin interés',
-            'NC' => 'N cuotas sin interés',
-        ];
-        $paymentCodeResult = isset($installmentTypes[$paymentTypeCode]) ? $installmentTypes[$paymentTypeCode] : 'Sin cuotas';
+        $paymentCodeResult = self::getHumanReadableInstallemntsType($paymentTypeCode);
 
-        $paymentType = __('Crédito', 'transbank_webpay_plus_rest');
-        if ($paymentTypeCode == 'VD') {
-            $paymentType = __('Débito', 'transbank_webpay_plus_rest');
-        }
+        $paymentType = $this->getHumanReadablePaymentType($paymentTypeCode);
 
         $transactionDate = isset($result->transactionDate) ? $result->transactionDate : null;
         $date_accepted = new DateTime($transactionDate);
@@ -275,7 +293,7 @@ class ResponseController
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)
     {
         // Transaction aborted by user
-        $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el fomulario de pago', 'transbank_webpay_plus_rest'));
+        $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el formulario de pago', 'transbank_webpay_plus_rest'));
         $order_info->update_status('cancelled');
         TransbankWebpayOrders::update(
             $webpayTransaction->id,
@@ -348,5 +366,18 @@ class ResponseController
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
+    }
+    /**
+     * @param $paymentTypeCode
+     * @return string|void
+     */
+    public static function getHumanReadablePaymentType($paymentTypeCode)
+    {
+        $paymentType = __('Crédito', 'transbank_webpay_plus_rest');
+        if ($paymentTypeCode == 'VD') {
+            $paymentType = __('Débito', 'transbank_webpay_plus_rest');
+        }
+
+        return $paymentType;
     }
 }

@@ -2,7 +2,9 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
+use DateTime;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
+use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
 use WC_Gateway_Transbank_Webpay_Plus_REST;
 use WC_Order;
@@ -12,8 +14,9 @@ class ThankYouPageController
     public function show($orderId)
     {
         $woocommerceOrder = new WC_Order($orderId);
-        $transbank_data = new WC_Gateway_Transbank_Webpay_Plus_REST();
-        if ($woocommerceOrder->get_payment_method_title() != $transbank_data->title) {
+        $webpayPlusPaymentGateway = new WC_Gateway_Transbank_Webpay_Plus_REST();
+        $transbankOneclickPaymentGateway = new WC_Gateway_Transbank_Oneclick_Mall_REST();
+        if (!in_array($woocommerceOrder->get_payment_method(), [$webpayPlusPaymentGateway->id, $transbankOneclickPaymentGateway->id])) {
             return;
         }
 
@@ -36,8 +39,21 @@ class ThankYouPageController
         // Transacción aprobada
         wc_print_notice(__('Transacción aprobada', 'transbank'), 'success');
         $finalResponse = json_decode($webpayTransaction->transbank_response);
-        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = (new ResponseController([]))->getTransactionDetails($finalResponse);
 
+        if ($webpayTransaction->product == TransbankWebpayOrders::PRODUCT_WEBPAY_ONECLICK) {
+            $firstTransaction = $finalResponse->details[0] ?? null;
+            $responseCode = $firstTransaction->responseCode ?? null;
+            $status = $firstTransaction->status ?? null;
+            $responseTitle = ($responseCode === 0 && $status === 'AUTHORIZED') ? 'Transacción Aprobada' : 'Transacción Rechazada';
+            $dateAccepted = new DateTime($finalResponse->transactionDate ?? null);
+            $paymentType = ResponseController::getHumanReadablePaymentType($firstTransaction->paymentTypeCode);
+            $installmentType = ResponseController::getHumanReadableInstallemntsType($firstTransaction->paymentTypeCode);
+            require __DIR__.'/../../views/order-summary-oneclick.php';
+            return;
+        }
+
+        [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType] = (new ResponseController([]))->getTransactionDetails($finalResponse);
         require __DIR__.'/../../views/order-summary.php';
+
     }
 }
