@@ -82,7 +82,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'response'
         ]);
 
-        // add_action('woocommerce_api_' . strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT_CHECKOUT), [$this, 'process_inscription_return_checkout']);
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
         add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
     }
@@ -136,7 +135,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public static function scheduled_subscription_payment($amount_to_charge, $order)
     {
         //TODO: Add this process
-        //file_put_contents(__DIR__ . '/test.txt',  print_r([$amount_to_charge, $order], true));
     }
 
     public function methods_list_item_oneclick($item, $payment_token)
@@ -152,7 +150,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     /**
      * Procesar pago y retornar resultado.
-     **/
+     **
+     *
+     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     */
     public function process_payment($order_id)
     {
         $order = new WC_Order($order_id);
@@ -189,24 +190,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             return $this->authorizeTransaction($order);
         }
         wc_add_notice(__('Error interno: no se pudo procesar el pago', 'transbank'), 'error');
-
-        return;
     }
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws Oneclick\Exceptions\InscriptionStartException
+     */
     public function add_payment_method()
     {
-        $userInfo = wp_get_current_user();
-        // $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
         $response = $this->startInscription(null, 'my_account');
-        //$response = $this->oneclickInscription->start($this->generateOneclickUsername($userInfo), $userInfo->user_email, $returnUrl);
         $redirectUrl = $response->getRedirectUrl();
 
         return wp_redirect($redirectUrl);
-    }
-
-    public function process_inscription_return_checkout()
-    {
-        $this->process_inscription_return('checkout');
     }
 
     /**
@@ -216,12 +211,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function save_payment_method_checkbox() {
         echo '<p class="form-row woocommerce-SavedPaymentMethods-saveNew"><strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong></p>';
-        return;
-    }
-
-    public function process_inscription_return($from = 'my_account')
-    {
-
     }
 
     /**
@@ -289,6 +278,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         return 'WP:' . $userInfo->ID . ':' . uniqid();
     }
+
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
         /** @var Oneclick\Responses\TransactionDetail $firstDetail */
@@ -326,7 +316,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function startInscription(int $order_id = null, string $from = 'checkout'): Oneclick\Responses\InscriptionStartResponse
     {
-// The user selected Oneclick, Pay with new card and choosed to save it in their account.
+        // The user selected Oneclick, Pay with new card and choosed to save it in their account.
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
         $username = $this->generateOneclickUsername($userInfo);
@@ -349,8 +339,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         return $response;
     }
     /**
-     * @param int $order_id
-     * @param $woocommerce
+     * @param WC_Order $order
      * @return array
      * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
      */
