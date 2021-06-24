@@ -14,12 +14,9 @@ use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
 use WC_Subscriptions_Manager;
-use WC_Subscriptions_Renewal_Order;
 
 /**
- * Class WC_Gateway_Transbank_Oneclick_Mall_REST
- *
- * @package Transbank\WooCommerce\WebpayRest\PaymentGateways
+ * Class WC_Gateway_Transbank_Oneclick_Mall_REST.
  */
 class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
@@ -86,7 +83,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             );
         }
 
-        add_action('woocommerce_scheduled_subscription_payment_' . $this->id, [$this, 'scheduled_subscription_payment'], 10, 3);
+        add_action('woocommerce_scheduled_subscription_payment_'.$this->id, [$this, 'scheduled_subscription_payment'], 10, 3);
         add_action('woocommerce_api_'.strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
             new OneclickInscriptionResponseController($this->oneclickInscription, $this->id, $this->logger),
             'response',
@@ -147,17 +144,17 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-
-        (new LogHandler())->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
+        (new LogHandler())->logInfo('New scheduled_subscription_payment for Order #'.$renewalOrder->get_id());
         $customerId = $renewalOrder->get_customer_id();
         if (!$customerId) {
             (new LogHandler())->logError('There is no costumer id on the renewal order');
+
             throw new Exception('There is no costumer id on the renewal order');
         }
         $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
         $this->authorizeTransaction($renewalOrder, $paymentToken);
         $renewalOrder->payment_complete();
-        WC_Subscriptions_Manager::process_subscription_payments_on_order( $renewalOrder );
+        WC_Subscriptions_Manager::process_subscription_payments_on_order($renewalOrder);
     }
 
     public static function subscription_payment_method_updated()
@@ -395,8 +392,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $token = \WC_Payment_Tokens::get($token_id);
         }
 
-        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'. $token->get_id());
-
+        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token->get_id());
 
         $amount = (int) number_format($order->get_total(), 0, ',', '');
 
@@ -428,7 +424,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if ($response->isApproved()) {
             $order->add_payment_token($token);
             $order->payment_complete();
-            if (wc()->cart){
+            if (wc()->cart) {
                 wc()->cart->empty_cart();
             }
             $this->add_order_notes($order, $response, 'Oneclick: Transacción Aprobada');
