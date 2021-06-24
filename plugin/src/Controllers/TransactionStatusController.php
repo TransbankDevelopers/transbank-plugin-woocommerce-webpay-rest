@@ -3,8 +3,8 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionStatusException;
-use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
 
 class TransactionStatusController
 {

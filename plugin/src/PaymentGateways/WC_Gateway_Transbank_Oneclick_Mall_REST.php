@@ -1,7 +1,7 @@
 <?php
+
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use Transbank\Webpay\Exceptions\WebpayRequestException;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
@@ -9,9 +9,8 @@ use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use WC_Order;
-use WC_Payment_Token_Oneclick;
 use WC_Payment_Gateway_CC;
-use WC_Payment_Tokens;
+use WC_Payment_Token_Oneclick;
 
 class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
@@ -47,16 +46,15 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'subscription_payment_method_change',
             'subscription_payment_method_change_customer',
             'subscription_payment_method_change_admin',
-            'multiple_subscriptions'
+            'multiple_subscriptions',
         ];
 
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
         $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
         $this->method_description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.svg';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/oneclick.svg';
         $this->id = 'transbank_oneclick_mall_rest';
-
 
         $this->init_form_fields();
         $this->init_settings();
@@ -70,16 +68,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if ($environment === Options::ENVIRONMENT_PRODUCTION) {
             $this->oneclickInscription->configureForProduction(
                 $this->get_option('commerce_code'),
-                $this->get_option('api_key'));
+                $this->get_option('api_key')
+            );
 
             $this->oneclickTransaction->configureForProduction(
                 $this->get_option('commerce_code'),
-                $this->get_option('api_key'));
+                $this->get_option('api_key')
+            );
         }
 
-        add_action('woocommerce_api_' . strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
+        add_action('woocommerce_api_'.strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
             new OneclickInscriptionResponseController($this->oneclickInscription, $this->id, $this->logger),
-            'response'
+            'response',
         ]);
 
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
@@ -89,13 +89,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function payment_fields()
     {
         $description = $this->get_description();
-        if ( $description ) {
-            echo wpautop( wptexturize( $description ) ); // @codingStandardsIgnoreLine.
+        if ($description) {
+            echo wpautop(wptexturize($description)); // @codingStandardsIgnoreLine.
         }
         parent::payment_fields();
     }
 
-    public function is_valid_for_use() {
+    public function is_valid_for_use()
+    {
         return in_array(
             get_woocommerce_currency(),
             apply_filters(
@@ -106,29 +107,31 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         );
     }
 
-    public function admin_options() {
-        if ( $this->is_valid_for_use() ) {
+    public function admin_options()
+    {
+        if ($this->is_valid_for_use()) {
             parent::admin_options();
         } else {
             ?>
             <div class="inline error">
                 <p>
-                    <strong><?php esc_html_e( 'Gateway disabled', 'woocommerce' ); ?></strong>: <?php esc_html_e( 'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP', 'woocommerce' ); ?>
+                    <strong><?php esc_html_e('Gateway disabled', 'woocommerce'); ?></strong>: <?php esc_html_e('Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP', 'woocommerce'); ?>
                 </p>
             </div>
             <?php
         }
     }
 
-    public function is_available() {
+    public function is_available()
+    {
         if (!$this->is_valid_for_use()) {
             return false;
         }
+
         return parent::is_available();
     }
 
     public function form()
-
     {
     }
 
@@ -161,6 +164,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if (!$order->needs_payment()) {
             $this->logger->logError('This order was already paid or does not need payment');
             wc_add_notice('Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ');
+
             return [];
         }
 
@@ -170,8 +174,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if ($addNewCard && !get_current_user_id()) {
             $order->add_order_note('El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout) cuenta de usuario');
             $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
-            wc_add_notice(__('Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago',
-                'transbank'), 'error');
+            wc_add_notice(__(
+                'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago',
+                'transbank'
+            ), 'error');
         }
 
         if ($addNewCard) {
@@ -180,9 +186,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
             $this->logger->logInfo(print_r($response, true));
             $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
+
             return [
-                'result' => 'success',
-                'redirect' => $response->getRedirectUrl()
+                'result'   => 'success',
+                'redirect' => $response->getRedirectUrl(),
             ];
         }
 
@@ -209,7 +216,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      *
      * @since 2.6.0
      */
-    public function save_payment_method_checkbox() {
+    public function save_payment_method_checkbox()
+    {
         echo '<p class="form-row woocommerce-SavedPaymentMethods-saveNew"><strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong></p>';
     }
 
@@ -220,63 +228,65 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         $this->form_fields = [
             'enabled' => [
-                'title' => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
-                'type' => 'checkbox',
+                'title'   => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
+                'type'    => 'checkbox',
                 'default' => 'yes',
             ],
             'environment' => [
-                'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
-                'type' => 'select',
+                'title'       => __('Ambiente', 'transbank_webpay_plus_rest'),
+                'type'        => 'select',
                 'description' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
                     ambiente real (producción). Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
                     comercio y llave secreta que tengas configurado abajo, ya que se usará el código de comercio especial del ambiente de pruebas.',
                 'options' => [
                     Options::ENVIRONMENT_INTEGRATION => __('Integración', 'transbank_webpay_plus_rest'),
-                    Options::ENVIRONMENT_PRODUCTION => __('Producción', 'transbank_webpay_plus_rest'),
+                    Options::ENVIRONMENT_PRODUCTION  => __('Producción', 'transbank_webpay_plus_rest'),
                 ],
                 'default' => Options::ENVIRONMENT_INTEGRATION,
             ],
             'commerce_code' => [
-                'title' => __('Código de Comercio Mall Producción', 'transbank_webpay_plus_rest'),
+                'title'       => __('Código de Comercio Mall Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
                 'description' => 'Indica tu código de comercio para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
-                'type' => 'text',
-                'default' => '',
+                'type'        => 'text',
+                'default'     => '',
             ],
             'child_commerce_code' => [
-                'title' => __('Código de Comercio Tienda Producción', 'transbank_webpay_plus_rest'),
+                'title'       => __('Código de Comercio Tienda Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
                 'description' => 'Indica tu código de comercio para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
-                'type' => 'text',
-                'default' => '',
+                'type'        => 'text',
+                'default'     => '',
             ],
             'api_key' => [
-                'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
-                'type' => 'text',
+                'title'       => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
+                'type'        => 'text',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'description' => 'Esta llave secreta te la entregará Transbank luego de que completes el proceso de validación (link más abajo). No la compartas con nadie una vez que la tengas. ',
-                'default' => '',
+                'default'     => '',
             ],
             'max_amount' => [
-                'title' => __('Monto máximo de transacción permitido', 'transbank_webpay_plus_rest'),
-                'type' => 'number',
-                'options' => ['step' => 100],
-                'default' => '100000',
+                'title'       => __('Monto máximo de transacción permitido', 'transbank_webpay_plus_rest'),
+                'type'        => 'number',
+                'options'     => ['step' => 100],
+                'default'     => '100000',
                 'description' => 'Define el monto máximo que un cliente puede pagar con Oneclick.
                 Si un cliente va a realizar una compra superior a este monto, Oneclick no aparecerá como opción de
                 pago en el Checkout. Dejar en 0 si no se desea tener un límite (no recomendado). Recuerda que Oneclick,
                 al no tener una autorización bancaria para cada pago, es un producto donde el riesgo puede pasar más
-                fácilmente hacia el comercio.'
+                fácilmente hacia el comercio.',
             ],
         ];
     }
+
     /**
      * @param \WP_User $userInfo
+     *
      * @return string
      */
     public function generateOneclickUsername(\WP_User $userInfo): string
     {
-        return 'WP:' . $userInfo->ID . ':' . uniqid();
+        return 'WP:'.$userInfo->ID.':'.uniqid();
     }
 
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
@@ -309,10 +319,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     /**
      * @param int|null $order_id
-     * @param string $from
-     * @return Oneclick\Responses\InscriptionStartResponse
+     * @param string   $from
+     *
      * @throws Oneclick\Exceptions\InscriptionStartException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @return Oneclick\Responses\InscriptionStartResponse
      */
     public function startInscription(int $order_id = null, string $from = 'checkout'): Oneclick\Responses\InscriptionStartResponse
     {
@@ -320,56 +332,62 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
         $username = $this->generateOneclickUsername($userInfo);
-        $email  = $userInfo->user_email; // Todo: check if we had to generate a random email as well
+        $email = $userInfo->user_email; // Todo: check if we had to generate a random email as well
         $response = $this->oneclickInscription->start($username, $email, $returnUrl);
 
         Inscription::create([
-            'token' => $response->getToken(),
-            'username' => $username,
-            'order_id' => $order_id,
-            'user_id' => $userInfo->ID,
+            'token'                 => $response->getToken(),
+            'username'              => $username,
+            'order_id'              => $order_id,
+            'user_id'               => $userInfo->ID,
             'pay_after_inscription' => false,
-            'email' => $email,
-            'from' => $from,
-            'status' => Inscription::STATUS_INITIALIZED,
-            'environment' => $this->oneclickInscription->getOptions()->getIntegrationType(),
-            'commerce_code' => $this->oneclickInscription->getOptions()->getCommerceCode(),
+            'email'                 => $email,
+            'from'                  => $from,
+            'status'                => Inscription::STATUS_INITIALIZED,
+            'environment'           => $this->oneclickInscription->getOptions()->getIntegrationType(),
+            'commerce_code'         => $this->oneclickInscription->getOptions()->getCommerceCode(),
         ]);
 
         return $response;
     }
+
     /**
      * @param WC_Order $order
-     * @return array
+     *
      * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     *
+     * @return array
      */
     public function authorizeTransaction(WC_Order $order): array
     {
         $token_id = wc_clean($_POST["wc-{$this->id}-payment-token"]);
-        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #' . $token_id);
+        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token_id);
 
         /** @var WC_Payment_Token_Oneclick $token */
         $token = \WC_Payment_Tokens::get($token_id);
 
-        $amount = (int)number_format($order->get_total(), 0, ',', '');
+        $amount = (int) number_format($order->get_total(), 0, ',', '');
 
         $childCommerceCode = $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ?
             $this->get_option('child_commerce_code') :
             Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
 
-        $childBuyOrder = 'C' . $order->get_id();
+        $childBuyOrder = 'C'.$order->get_id();
         $details = [
             [
-                "commerce_code" => $childCommerceCode,
-                "buy_order" => $childBuyOrder, // Tu propio buyOrder
-                "amount" => $amount,
-                "installments_number" => 1
-            ]
+                'commerce_code'       => $childCommerceCode,
+                'buy_order'           => $childBuyOrder, // Tu propio buyOrder
+                'amount'              => $amount,
+                'installments_number' => 1,
+            ],
         ];
 
-
-        $response = $this->oneclickTransaction->authorize($token->get_username(), $token->get_token(), $order->get_id(),
-            $details);
+        $response = $this->oneclickTransaction->authorize(
+            $token->get_username(),
+            $token->get_token(),
+            $order->get_id(),
+            $details
+        );
 
         $this->logger->logInfo('[Oneclick] Checkout: paying response');
         $this->logger->logInfo(print_r($response, true));
@@ -389,10 +407,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $orderNoteMessage = 'Transacción rechazada';
             if ($status === 'CONSTRAINTS_VIOLATED') {
                 $message = 'La transacción ha sido rechazada porque se superó el monto máximo por transacción, el monto máximo diario o el número de transacciones diarias configuradas por el comercio para cada usuario';
-                $orderNoteMessage = 'CONSTRAINTS_VIOLATED: ' . $message;
+                $orderNoteMessage = 'CONSTRAINTS_VIOLATED: '.$message;
                 wc_add_notice($message, 'error');
             } else {
-                wc_add_notice('La transacción ha sido rechazada (Código de error: ' . $errorCode . ')', 'error');
+                wc_add_notice('La transacción ha sido rechazada (Código de error: '.$errorCode.')', 'error');
             }
 
             if ($orderNoteMessage) {
@@ -401,27 +419,28 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         }
 
         Transaction::createTransaction([
-            'order_id' => $order->get_id(),
-            'buy_order' => $order->get_id(),
-            'child_buy_order' => $childBuyOrder,
-            'commerce_code' => $this->oneclickInscription->getOptions()->getCommerceCode(),
+            'order_id'            => $order->get_id(),
+            'buy_order'           => $order->get_id(),
+            'child_buy_order'     => $childBuyOrder,
+            'commerce_code'       => $this->oneclickInscription->getOptions()->getCommerceCode(),
             'child_commerce_code' => $childCommerceCode,
-            'amount' => $amount,
-            'environment' => $this->oneclickInscription->getOptions()->getIntegrationType(),
-            'product' => Transaction::PRODUCT_WEBPAY_ONECLICK,
-            'status' => $status,
-            'transbank_status' => $response->getDetails()[0]->getStatus() ?? null,
-            'transbank_response' => json_encode($response)
+            'amount'              => $amount,
+            'environment'         => $this->oneclickInscription->getOptions()->getIntegrationType(),
+            'product'             => Transaction::PRODUCT_WEBPAY_ONECLICK,
+            'status'              => $status,
+            'transbank_status'    => $response->getDetails()[0]->getStatus() ?? null,
+            'transbank_response'  => json_encode($response),
         ]);
 
         if ($response->isApproved()) {
             return [
-                'result' => 'success',
-                'redirect' => $this->get_return_url($order)
+                'result'   => 'success',
+                'redirect' => $this->get_return_url($order),
             ];
         }
+
         return [
-            'result' => 'error'
+            'result' => 'error',
         ];
     }
 }

@@ -20,7 +20,7 @@ class DatabaseTableInstaller
         return false;
     }
 
-    public static function install() : bool
+    public static function install(): bool
     {
         return static::createTables();
     }
@@ -113,7 +113,6 @@ class DatabaseTableInstaller
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
 
-
     public static function createTableIfNeeded()
     {
         if (!static::isUpgraded()) {
@@ -122,5 +121,4 @@ class DatabaseTableInstaller
 
         return null;
     }
-
 }

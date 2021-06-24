@@ -29,15 +29,17 @@ class OneclickInscriptionResponseController
      */
     public function response()
     {
-        $this->logger->logInfo('[ONECLICK] Process inscription return: GET ' . print_r($_GET, true) . ' | POST: ' . print_r($_POST, true));
+        $this->logger->logInfo('[ONECLICK] Process inscription return: GET '.print_r($_GET, true).' | POST: '.print_r($_POST, true));
         $tbkToken = $_GET['TBK_TOKEN'] ?? $_POST['TBK_TOKEN'] ?? null;
         if (!$tbkToken) {
             $this->logger->logError('No se puede acceder a esta página directamente');
         }
+
         try {
             $inscription = Inscription::getByToken($tbkToken);
         } catch (\Exception $e) {
             $this->logger->logError($e->getMessage());
+
             throw $e;
         }
 
@@ -52,29 +54,30 @@ class OneclickInscriptionResponseController
         }
 
         if ($inscription->status !== Inscription::STATUS_INITIALIZED) {
-            $this->logger->logError('La inscripción no se encuentra en estado inicializada: ' . $tbkToken);
+            $this->logger->logError('La inscripción no se encuentra en estado inicializada: '.$tbkToken);
             $this->redirectUser($from);
         }
 
         try {
             $response = $this->oneclickInscription->finish($tbkToken);
         } catch (\Exception $e) {
-            $this->logger->logError('Ocurrió un error al ejecutar la inscripción: ' . $e->getMessage());
-            wc_add_notice('Ocurrió un error en la inscripción de la tarjeta: '. $e->getMessage(), 'error');
+            $this->logger->logError('Ocurrió un error al ejecutar la inscripción: '.$e->getMessage());
+            wc_add_notice('Ocurrió un error en la inscripción de la tarjeta: '.$e->getMessage(), 'error');
             $this->redirectUser($from);
             Inscription::update($inscription->id, [
-                'status' => Inscription::STATUS_FAILED
+                'status' => Inscription::STATUS_FAILED,
             ]);
+
             return;
         }
 
         Inscription::update($inscription->id, [
-            'finished' => true,
+            'finished'           => true,
             'authorization_code' => $response->getAuthorizationCode(),
-            'card_type' => $response->getCardType(),
-            'card_number' => $response->getCardNumber(),
+            'card_type'          => $response->getCardType(),
+            'card_number'        => $response->getCardNumber(),
             'transbank_response' => json_encode($response),
-            'status' => $response->isApproved() ? Inscription::STATUS_COMPLETED : Inscription::STATUS_FAILED
+            'status'             => $response->isApproved() ? Inscription::STATUS_COMPLETED : Inscription::STATUS_FAILED,
         ]);
 
         // Todo: guardar la información del usuario al momento de crear la inscripción y luego obtenerla en base al token,
@@ -86,11 +89,11 @@ class OneclickInscriptionResponseController
 
         $order = null;
         if ($inscription->order_id) {
-            $order =  new \WC_Order($inscription->order_id);
+            $order = new \WC_Order($inscription->order_id);
         }
-        $this->logger->logInfo('[ONECLICK] Resultado obtenido correctamente: ' . print_r($response, true));
+        $this->logger->logInfo('[ONECLICK] Resultado obtenido correctamente: '.print_r($response, true));
         if ($response->isApproved()) {
-            wc_add_notice('La tarjeta ha sido inscrita satisfactoriamente. Ahora puedes realizar el pago.','success');
+            wc_add_notice('La tarjeta ha sido inscrita satisfactoriamente. Ahora puedes realizar el pago.', 'success');
             $this->logger->logInfo('[ONECLICK] Inscripción aprobada');
             $token = new WC_Payment_Token_Oneclick();
             $token->set_token($response->getTbkUser()); // Token comes from payment processor
@@ -109,18 +112,18 @@ class OneclickInscriptionResponseController
             }
 
             Inscription::update($inscription->id, [
-                'token_id' => $token->get_id()
+                'token_id' => $token->get_id(),
             ]);
 
             // Set this token as the users new default token
             WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
 
-            $this->logger->logError('Inscription finished successfully for user #' . $inscription->user_id);
+            $this->logger->logError('Inscription finished successfully for user #'.$inscription->user_id);
         } else {
             //Todo: In case that the inscription fails, we need to redirect the user somewhere.
-            wc_add_notice('La inscripción de la tarjeta ha sido rechazada ( ' . $response->getResponseCode() . ' ). Puede intentar nuevamente. ','error');
+            wc_add_notice('La inscripción de la tarjeta ha sido rechazada ( '.$response->getResponseCode().' ). Puede intentar nuevamente. ', 'error');
             if ($order) {
-                $order->add_order_note('La inscripción de la tarjeta ha sido rechazada (código de respuesta: ' . $response->getResponseCode() . ')');
+                $order->add_order_note('La inscripción de la tarjeta ha sido rechazada (código de respuesta: '.$response->getResponseCode().')');
             }
             $this->logger->logInfo('[ONECLICK] Inscripción fallida');
         }
@@ -139,13 +142,15 @@ class OneclickInscriptionResponseController
             $redirectUrl = $checkout_page_id ? get_permalink($checkout_page_id) : null;
         }
         if ($from === 'my_account') {
-            $redirectUrl = get_permalink(get_option('woocommerce_myaccount_page_id')) . '/' . get_option('woocommerce_myaccount_payment_methods_endpoint',
-                    'payment-methods');
+            $redirectUrl = get_permalink(get_option('woocommerce_myaccount_page_id')).'/'.get_option(
+                'woocommerce_myaccount_payment_methods_endpoint',
+                'payment-methods'
+            );
         }
         if ($redirectUrl) {
             wp_redirect($redirectUrl);
         }
 
-        die();
+        exit();
     }
 }

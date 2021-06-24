@@ -2,9 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
-use Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use function is_multisite;
+use Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException;
 
 class Transaction
 {
@@ -25,15 +24,16 @@ class Transaction
     {
         global $wpdb;
         if (is_multisite()) {
-            return $wpdb->base_prefix . static::TRANSACTIONS_TABLE_NAME;
+            return $wpdb->base_prefix.static::TRANSACTIONS_TABLE_NAME;
         } else {
-            return $wpdb->prefix . static::TRANSACTIONS_TABLE_NAME;
+            return $wpdb->prefix.static::TRANSACTIONS_TABLE_NAME;
         }
     }
 
     public static function createTransaction(array $data)
     {
         global $wpdb;
+
         return $wpdb->insert(static::getTableName(), $data);
     }
 
@@ -57,6 +57,7 @@ class Transaction
         if (!is_array($sqlResult) || count($sqlResult) <= 0) {
             throw new TokenNotFoundOnDatabaseException("Token '{$token}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
+
         return $sqlResult[0];
     }
 
@@ -65,8 +66,10 @@ class Transaction
         global $wpdb;
         $transaction = static::getTableName();
         $statusApproved = static::STATUS_APPROVED;
-        $sql = $wpdb->prepare("SELECT * FROM $transaction WHERE status = '$statusApproved' AND order_id = '%s'",
-            $orderId);
+        $sql = $wpdb->prepare(
+            "SELECT * FROM $transaction WHERE status = '$statusApproved' AND order_id = '%s'",
+            $orderId
+        );
         $sqlResult = $wpdb->get_results($sql);
 
         return $sqlResult[0] ?? null;
@@ -79,8 +82,11 @@ class Transaction
     {
         global $wpdb;
         $transactionTableName = Transaction::getTableName();
-        $sql = $wpdb->prepare("SELECT * FROM $transactionTableName WHERE session_id = '%s' && order_id='%s'",
-            $TBK_ID_SESION, $TBK_ORDEN_COMPRA);
+        $sql = $wpdb->prepare(
+            "SELECT * FROM $transactionTableName WHERE session_id = '%s' && order_id='%s'",
+            $TBK_ID_SESION,
+            $TBK_ORDEN_COMPRA
+        );
         $sqlResult = $wpdb->get_results($sql);
         if (!is_array($sqlResult) || count($sqlResult) <= 0) {
             throw new TokenNotFoundOnDatabaseException('No se encontró el session_id y order_id en la base de datos de transacciones, por lo que no se puede completar el proceso');
@@ -88,5 +94,4 @@ class Transaction
 
         return $sqlResult[0];
     }
-
 }

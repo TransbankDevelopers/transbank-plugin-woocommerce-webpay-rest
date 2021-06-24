@@ -5,8 +5,8 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use DateTime;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
-use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
 use WC_Order;
 
 class ResponseController
@@ -25,8 +25,10 @@ class ResponseController
     {
         $this->pluginConfig = $pluginConfig;
     }
+
     /**
      * @param $paymentTypeCode
+     *
      * @return string
      */
     public static function getHumanReadableInstallemntsType($paymentTypeCode): string
@@ -178,9 +180,9 @@ class ResponseController
         Transaction::update(
             $webpayTransaction->id,
             [
-                'status' => Transaction::STATUS_APPROVED,
-                'transbank_status' => $result->getStatus(),
-                'transbank_response' => json_encode($result)]
+                'status'             => Transaction::STATUS_APPROVED,
+                'transbank_status'   => $result->getStatus(),
+                'transbank_response' => json_encode($result), ]
         );
 
         $wooCommerceOrder->payment_complete();
@@ -225,8 +227,8 @@ class ResponseController
         Transaction::update(
             $webpayTransaction->id,
             [
-                'status' => Transaction::STATUS_FAILED,
-                'transbank_response' => json_encode($result)
+                'status'             => Transaction::STATUS_FAILED,
+                'transbank_response' => json_encode($result),
             ]
         );
     }
@@ -367,8 +369,10 @@ class ResponseController
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
     }
+
     /**
      * @param $paymentTypeCode
+     *
      * @return string|void
      */
     public static function getHumanReadablePaymentType($paymentTypeCode)

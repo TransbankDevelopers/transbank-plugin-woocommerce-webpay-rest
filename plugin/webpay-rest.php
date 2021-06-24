@@ -9,11 +9,10 @@ use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\RedirectorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-
 
 if (!defined('ABSPATH')) {
     exit();
@@ -56,7 +55,6 @@ add_action('woocommerce_before_cart', function () {
 
 add_action('woocommerce_scheduled_subscription_payment_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'scheduled_subscription_payment'], 10, 2);
 
-
 add_action('admin_enqueue_scripts', function () {
     wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__));
     wp_enqueue_script('tbk-ajax-script', plugins_url('/js/admin.js', __FILE__), ['jquery']);
@@ -84,8 +82,7 @@ function woocommerce_transbank_rest_init()
         return;
     }
 
-    require(__DIR__ . '/src/Tokenization/WC_Payment_Token_Oneclick.php');
-
+    require __DIR__.'/src/Tokenization/WC_Payment_Token_Oneclick.php';
 
     /**
      * @property string icon
@@ -140,7 +137,6 @@ function woocommerce_transbank_rest_init()
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'registerPluginVersion']);
             add_action('woocommerce_api_wc_gateway_'.$this->id, [$this, 'check_ipn_response']);
-
 
             if (!$this->is_valid_for_use()) {
                 $this->enabled = false;
@@ -285,14 +281,14 @@ function woocommerce_transbank_rest_init()
             $token_ws = $result['token_ws'];
 
             Transaction::createTransaction([
-                'order_id'   => $order_id,
-                'buy_order'  => $buyOrder,
-                'amount'     => $amount,
-                'token'      => $token_ws,
-                'session_id' => $sessionId,
+                'order_id'    => $order_id,
+                'buy_order'   => $buyOrder,
+                'amount'      => $amount,
+                'token'       => $token_ws,
+                'session_id'  => $sessionId,
                 'environment' => $transbankSdkWebpay->getTransaction()->getOptions()->getIntegrationType(),
                 'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
-                'status'     => Transaction::STATUS_INITIALIZED,
+                'status'      => Transaction::STATUS_INITIALIZED,
             ]);
 
             RedirectorHelper::redirect($url, ['token_ws' => $token_ws]);
@@ -438,5 +434,4 @@ add_action('admin_menu', function () {
     add_submenu_page('woocommerce', 'Configuración de Webpay Plus', 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
         wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options'));
     }, null);
-
 });

@@ -131,6 +131,7 @@ class TransbankSdkWebpayRest
     {
         return $this->transaction->status($token);
     }
+
     /**
      * @return Transaction|null
      */
