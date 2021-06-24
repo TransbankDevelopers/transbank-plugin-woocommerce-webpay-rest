@@ -12,7 +12,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 
 
 if (!defined('ABSPATH')) {
@@ -108,7 +108,7 @@ function woocommerce_transbank_rest_init()
             self::$URL_FINAL = home_url('/').'?wc-api=TransbankWebpayRestThankYouPage';
 
             $this->id = 'transbank_webpay_plus_rest';
-            $this->icon = plugin_dir_url(__FILE__).'libwebpay/images/webpay.png';
+            $this->icon = plugin_dir_url(__FILE__).'images/webpay.png';
             $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
             $this->title = 'Transbank Webpay Plus';
             $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
@@ -150,7 +150,7 @@ function woocommerce_transbank_rest_init()
         public function process_refund($order_id, $amount = null, $reason = '')
         {
             $order = new WC_Order($order_id);
-            $transaction = TransbankWebpayOrders::getApprovedByOrderId($order_id);
+            $transaction = Transaction::getApprovedByOrderId($order_id);
 
             if (!$transaction) {
                 $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
@@ -284,15 +284,15 @@ function woocommerce_transbank_rest_init()
             $url = $result['url'];
             $token_ws = $result['token_ws'];
 
-            TransbankWebpayOrders::createTransaction([
+            Transaction::createTransaction([
                 'order_id'   => $order_id,
                 'buy_order'  => $buyOrder,
                 'amount'     => $amount,
                 'token'      => $token_ws,
                 'session_id' => $sessionId,
                 'environment' => $transbankSdkWebpay->getTransaction()->getOptions()->getIntegrationType(),
-                'product'     => TransbankWebpayOrders::PRODUCT_WEBPAY_PLUS,
-                'status'     => TransbankWebpayOrders::STATUS_INITIALIZED,
+                'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
+                'status'     => Transaction::STATUS_INITIALIZED,
             ]);
 
             RedirectorHelper::redirect($url, ['token_ws' => $token_ws]);
@@ -415,7 +415,7 @@ register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 add_action('add_meta_boxes', function () {
     add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_webpay_plus_rest'), function ($post) {
         $order = new WC_Order($post->ID);
-        $transaction = TransbankWebpayOrders::getApprovedByOrderId($order->get_id());
+        $transaction = Transaction::getApprovedByOrderId($order->get_id());
         include __DIR__.'/views/get-status.php';
     }, 'shop_order', 'side', 'core');
 });

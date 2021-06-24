@@ -5,7 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use DateTime;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
-use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use WC_Gateway_Transbank_Webpay_Plus_REST;
 use WC_Order;
 
@@ -20,7 +20,7 @@ class ThankYouPageController
             return;
         }
 
-        $webpayTransaction = TransbankWebpayOrders::getApprovedByOrderId($orderId);
+        $webpayTransaction = Transaction::getApprovedByOrderId($orderId);
         if ($webpayTransaction === null) {
             // TODO: Revisar porqué no se muestra el mensaje de abajo.
             // if (SessionMessageHelper::exists()){
@@ -32,7 +32,7 @@ class ThankYouPageController
             return;
         }
 
-        if ($webpayTransaction->status !== TransbankWebpayOrders::STATUS_APPROVED) {
+        if ($webpayTransaction->status !== Transaction::STATUS_APPROVED) {
             return wp_redirect($woocommerceOrder->get_cancel_order_url());
         }
 
@@ -40,7 +40,7 @@ class ThankYouPageController
         wc_print_notice(__('Transacción aprobada', 'transbank'), 'success');
         $finalResponse = json_decode($webpayTransaction->transbank_response);
 
-        if ($webpayTransaction->product == TransbankWebpayOrders::PRODUCT_WEBPAY_ONECLICK) {
+        if ($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
             $firstTransaction = $finalResponse->details[0] ?? null;
             $responseCode = $firstTransaction->responseCode ?? null;
             $status = $firstTransaction->status ?? null;

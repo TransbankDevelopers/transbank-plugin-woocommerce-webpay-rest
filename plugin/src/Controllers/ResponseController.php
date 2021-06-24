@@ -6,7 +6,7 @@ use DateTime;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use WC_Order;
 
 class ResponseController
@@ -51,13 +51,13 @@ class ResponseController
     public function response($postData)
     {
         $token_ws = $this->getTokenWs($postData);
-        $webpayTransaction = TransbankWebpayOrders::getByToken($token_ws);
+        $webpayTransaction = Transaction::getByToken($token_ws);
 
         $wooCommerceOrder = $this->getWooCommerceOrderById($webpayTransaction->order_id);
 
         if ($this->transactionWasCanceledByUser()) {
             SessionMessageHelper::set('La transacción ha sido cancelada por el usuario', 'error');
-            if ($webpayTransaction->status !== TransbankWebpayOrders::STATUS_INITIALIZED || $wooCommerceOrder->is_paid()) {
+            if ($webpayTransaction->status !== Transaction::STATUS_INITIALIZED || $wooCommerceOrder->is_paid()) {
                 $wooCommerceOrder->add_order_note('El usuario canceló la transacción en el formulario de pago, pero esta orden ya estaba pagada o en un estado diferente a INICIALIZADO');
 
                 return wp_safe_redirect($wooCommerceOrder->get_cancel_order_url());
@@ -175,10 +175,10 @@ class ResponseController
         );
 
         wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay_plus_rest'));
-        TransbankWebpayOrders::update(
+        Transaction::update(
             $webpayTransaction->id,
             [
-                'status' => TransbankWebpayOrders::STATUS_APPROVED,
+                'status' => Transaction::STATUS_APPROVED,
                 'transbank_status' => $result->getStatus(),
                 'transbank_response' => json_encode($result)]
         );
@@ -222,10 +222,10 @@ class ResponseController
             );
         }
 
-        TransbankWebpayOrders::update(
+        Transaction::update(
             $webpayTransaction->id,
             [
-                'status' => TransbankWebpayOrders::STATUS_FAILED,
+                'status' => Transaction::STATUS_FAILED,
                 'transbank_response' => json_encode($result)
             ]
         );
@@ -295,9 +295,9 @@ class ResponseController
         // Transaction aborted by user
         $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el formulario de pago', 'transbank_webpay_plus_rest'));
         $order_info->update_status('cancelled');
-        TransbankWebpayOrders::update(
+        Transaction::update(
             $webpayTransaction->id,
-            ['status' => TransbankWebpayOrders::STATUS_ABORTED_BY_USER]
+            ['status' => Transaction::STATUS_ABORTED_BY_USER]
         );
     }
 

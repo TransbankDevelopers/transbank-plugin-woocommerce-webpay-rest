@@ -2,12 +2,13 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
+use Transbank\WooCommerce\WebpayRest\Models\Inscription;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 
 class DatabaseTableInstaller
 {
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
-    const LATEST_TABLE_VERSION = 3;
+    const LATEST_TABLE_VERSION = 32;
 
     public static function isUpgraded(): bool
     {
@@ -35,7 +36,7 @@ class DatabaseTableInstaller
         | Webpay Transactions Table
         |--------------------------------------------------------------------------
         */
-        $transactionTableName = TransbankWebpayOrders::getWebpayTransactionsTableName();
+        $transactionTableName = Transaction::getTableName();
 
         $sql = "CREATE TABLE `{$transactionTableName}` (
             `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -59,21 +60,29 @@ class DatabaseTableInstaller
         dbDelta($sql);
         /*
         |--------------------------------------------------------------------------
-        | Oneclick table
+        | Oneclick inscriptions table
         |--------------------------------------------------------------------------
         */
-        $inscriptionsTableName = TransbankWebpayOrders::getOneclickInscriptionsTableName();
+        $inscriptionsTableName = Inscription::getTableName();
         $sql = "CREATE TABLE `{$inscriptionsTableName}` (
             `id` bigint(20) NOT NULL AUTO_INCREMENT,
             `token` varchar(100) NOT NULL,
             `username` varchar(100),
             `email` varchar(50) NOT NULL,
-            `user_id` LONGTEXT,
+            `user_id` bigint(20),
+            `token_id` bigint(20),
+            `order_id` bigint(20),
+            `pay_after_inscription` TINYINT(1) DEFAULT 0,
             `finished` TINYINT(1) NOT NULL DEFAULT 0,
             `response_code` varchar(50),
             `authorization_code` varchar(50),
             `card_type` varchar(50),
             `card_number` varchar(50),
+            `from` varchar(50),
+            `status` varchar(50) NOT NULL,
+            `environment` varchar(20),
+            `commerce_code` varchar(60),
+            `transbank_response` LONGTEXT,
             `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
         ) $charset_collate";
@@ -85,7 +94,7 @@ class DatabaseTableInstaller
             update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
         } else {
             $log = new LogHandler();
-            $log->logError('Error creating webpay_orders table');
+            $log->logError('Error creating transbank tables');
             $log->logError($wpdb->last_error);
 
             add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
@@ -98,7 +107,7 @@ class DatabaseTableInstaller
     public static function deleteTable()
     {
         global $wpdb;
-        $table_name = TransbankWebpayOrders::getWebpayTransactionsTableName();
+        $table_name = Transaction::getTableName();
         $sql = "DROP TABLE IF EXISTS `$table_name`";
         $wpdb->query($sql);
         delete_option(static::TABLE_VERSION_OPTION_KEY);

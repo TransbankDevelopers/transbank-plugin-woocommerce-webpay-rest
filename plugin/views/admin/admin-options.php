@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 <div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh; w">
     <h2>¡Excelente!</h2>
-    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/libwebpay/images/webpay-new.png', dirname(__DIR__)); ?>" alt="">
+    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/images/webpay-new.png', dirname(__DIR__)); ?>" alt="">
     <div>
         <p>Ahora que ya tienes el plugin instalado, tu sitio ya está  habilitado para que tus clientes puedan pagar usando Webpay Plus.
             Asegúrate de que tu tienda esté

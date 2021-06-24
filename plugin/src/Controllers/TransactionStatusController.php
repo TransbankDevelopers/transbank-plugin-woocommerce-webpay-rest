@@ -4,7 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionStatusException;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-use Transbank\WooCommerce\WebpayRest\TransbankWebpayOrders;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 
 class TransactionStatusController
 {
@@ -20,7 +20,7 @@ class TransactionStatusController
         $orderId = filter_input(INPUT_POST, 'order_id', FILTER_SANITIZE_NUMBER_INT);
         $token = filter_input(INPUT_POST, 'token', FILTER_SANITIZE_STRING);
 
-        $transaction = TransbankWebpayOrders::getApprovedByOrderId($orderId);
+        $transaction = Transaction::getApprovedByOrderId($orderId);
         if (!$transaction) {
             wp_send_json([
                 'message' => 'No hay transacciones webpay aprobadas para esta orden',
