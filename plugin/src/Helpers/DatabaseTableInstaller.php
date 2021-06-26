@@ -5,10 +5,10 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 
-class DatabaseTableInstaller
+class DatabaseTableInstallerw
 {
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
-    const LATEST_TABLE_VERSION = 32;
+    const LATEST_TABLE_VERSION = 4;
 
     public static function isUpgraded(): bool
     {

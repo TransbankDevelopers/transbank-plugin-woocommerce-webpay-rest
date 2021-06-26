@@ -53,7 +53,7 @@ add_action('woocommerce_before_cart', function () {
     SessionMessageHelper::printMessage();
 });
 
-add_action('woocommerce_scheduled_subscription_payment_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'scheduled_subscription_payment'], 10, 2);
+add_action('woocommerce_subscription_failing_payment_method_updated_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'subscription_payment_method_updated'], 10, 3);
 
 add_action('admin_enqueue_scripts', function () {
     wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__));

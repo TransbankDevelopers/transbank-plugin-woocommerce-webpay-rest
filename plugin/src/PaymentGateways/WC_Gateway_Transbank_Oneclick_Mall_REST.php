@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
+use mysql_xdevapi\Exception;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
@@ -11,7 +12,15 @@ use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
+use WC_Payment_Tokens;
+use WC_Subscriptions_Manager;
+use WC_Subscriptions_Renewal_Order;
 
+/**
+ * Class WC_Gateway_Transbank_Oneclick_Mall_REST
+ *
+ * @package Transbank\WooCommerce\WebpayRest\PaymentGateways
+ */
 class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
@@ -43,9 +52,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'subscription_reactivation',
             'subscription_amount_changes',
             'subscription_date_changes',
-            'subscription_payment_method_change',
-            'subscription_payment_method_change_customer',
-            'subscription_payment_method_change_admin',
+            // 'subscription_payment_method_change',
+            // 'subscription_payment_method_change_customer',
+            // 'subscription_payment_method_change_admin',
             'multiple_subscriptions',
         ];
 
@@ -77,6 +86,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             );
         }
 
+        add_action('woocommerce_scheduled_subscription_payment_' . $this->id, [$this, 'scheduled_subscription_payment'], 10, 3);
         add_action('woocommerce_api_'.strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
             new OneclickInscriptionResponseController($this->oneclickInscription, $this->id, $this->logger),
             'response',
@@ -135,9 +145,24 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
     }
 
-    public static function scheduled_subscription_payment($amount_to_charge, $order)
+    public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        //TODO: Add this process
+
+        (new LogHandler())->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
+        $customerId = $renewalOrder->get_customer_id();
+        if (!$customerId) {
+            (new LogHandler())->logError('There is no costumer id on the renewal order');
+            throw new Exception('There is no costumer id on the renewal order');
+        }
+        $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
+        $this->authorizeTransaction($renewalOrder, $paymentToken);
+        $renewalOrder->payment_complete();
+        WC_Subscriptions_Manager::process_subscription_payments_on_order( $renewalOrder );
+    }
+
+    public static function subscription_payment_method_updated()
+    {
+        // Todo: check if we need something here.
     }
 
     public function methods_list_item_oneclick($item, $payment_token)
@@ -161,11 +186,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         $order = new WC_Order($order_id);
 
-        if (!$order->needs_payment()) {
+        if (!$order->needs_payment() && !wcs_is_subscription($order_id)) {
             $this->logger->logError('This order was already paid or does not need payment');
-            wc_add_notice('Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ');
+            wc_add_notice('Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ', 'error');
 
-            return [];
+            return [
+                'result' => 'error',
+            ];
         }
 
         $addNewCard = 'new' === $_POST["wc-{$this->id}-payment-token"];
@@ -358,13 +385,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      *
      * @return array
      */
-    public function authorizeTransaction(WC_Order $order): array
+    public function authorizeTransaction(WC_Order $order, WC_Payment_Token_Oneclick $paymentToken = null): array
     {
-        $token_id = wc_clean($_POST["wc-{$this->id}-payment-token"]);
-        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token_id);
+        if ($paymentToken) {
+            $token = $paymentToken;
+        } else {
+            $token_id = wc_clean($_POST["wc-{$this->id}-payment-token"]);
+            /** @var WC_Payment_Token_Oneclick $token */
+            $token = \WC_Payment_Tokens::get($token_id);
+        }
 
-        /** @var WC_Payment_Token_Oneclick $token */
-        $token = \WC_Payment_Tokens::get($token_id);
+        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'. $token->get_id());
+
 
         $amount = (int) number_format($order->get_total(), 0, ',', '');
 
@@ -394,8 +426,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $status = $response->isApproved() ? Transaction::STATUS_APPROVED : Transaction::STATUS_FAILED;
 
         if ($response->isApproved()) {
+            $order->add_payment_token($token);
             $order->payment_complete();
-            wc()->cart->empty_cart();
+            if (wc()->cart){
+                wc()->cart->empty_cart();
+            }
             $this->add_order_notes($order, $response, 'Oneclick: Transacción Aprobada');
         } else {
             $this->logger->logInfo('[Oneclick] Checkout: authorization rejected');
