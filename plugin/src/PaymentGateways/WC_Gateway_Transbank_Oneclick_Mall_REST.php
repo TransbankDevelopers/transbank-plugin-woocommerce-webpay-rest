@@ -13,7 +13,6 @@ use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
-use WC_Subscriptions_Manager;
 
 /**
  * Class WC_Gateway_Transbank_Oneclick_Mall_REST.
@@ -207,8 +206,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 __('Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago.', 'transbank_wc_plugin'),
                 'transbank'
             ), 'error');
+
             return [
-                'result' => 'error'
+                'result' => 'error',
             ];
         }
 

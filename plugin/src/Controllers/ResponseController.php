@@ -57,7 +57,6 @@ class ResponseController
 
         $wooCommerceOrder = $this->getWooCommerceOrderById($webpayTransaction->order_id);
 
-
         if ($this->transactionWasCanceledByUser()) {
             $params = ['transbank_webpayplus_cancelled_order' => 1];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
@@ -66,10 +65,12 @@ class ResponseController
                 $wooCommerceOrder->add_order_note('El usuario canceló la transacción en el formulario de pago, pero esta orden ya estaba pagada o en un estado diferente a INICIALIZADO');
 
                 wp_safe_redirect($redirectUrl);
+
                 return;
             }
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $webpayTransaction);
             wp_safe_redirect($redirectUrl);
+
             return;
         }
 

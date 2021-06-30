@@ -6,7 +6,6 @@ use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
-use Transbank\WooCommerce\WebpayRest\Helpers\RedirectorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
@@ -308,7 +307,7 @@ function woocommerce_transbank_rest_init()
 
             return [
                 'result'   => 'success',
-                'redirect' => $url . '?token_ws=' . $token_ws,
+                'redirect' => $url.'?token_ws='.$token_ws,
             ];
         }
 
@@ -425,17 +424,19 @@ add_action('admin_menu', function () {
     }, null);
 });
 
-function transbank_rest_before_cart() {
+function transbank_rest_before_cart()
+{
     SessionMessageHelper::printMessage();
 }
 
-function transbank_rest_check_cancelled_checkout() {
+function transbank_rest_check_cancelled_checkout()
+{
     $cancelledOrder = $_GET['transbank_cancelled_order'] ?? false;
     $cancelledWebpayPlusOrder = $_GET['transbank_webpayplus_cancelled_order'] ?? false;
     if ($cancelledWebpayPlusOrder) {
-        wc_print_notice(__('Cancelaste la transacción durante el formulario de Webpay Plus.', 'transbank_wc_plugin'),'error');
+        wc_print_notice(__('Cancelaste la transacción durante el formulario de Webpay Plus.', 'transbank_wc_plugin'), 'error');
     }
     if ($cancelledOrder) {
-        wc_print_notice(__('Cancelaste la inscripción durante el formulario de Webpay.', 'transbank_wc_plugin'),'error');
+        wc_print_notice(__('Cancelaste la inscripción durante el formulario de Webpay.', 'transbank_wc_plugin'), 'error');
     }
 }
