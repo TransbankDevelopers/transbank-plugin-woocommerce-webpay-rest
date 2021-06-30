@@ -43,6 +43,11 @@ class OneclickInscriptionResponseController
             throw $e;
         }
 
+        $order = null;
+        if ($inscription->order_id) {
+            $order = new \WC_Order($inscription->order_id);
+        }
+
         $from = $inscription->from;
         $tbkOrdenCompra = $_GET['TBK_ORDEN_COMPRA'] ?? $_POST['TBK_ORDEN_COMPRA'] ?? null;
 
@@ -50,6 +55,13 @@ class OneclickInscriptionResponseController
             // TODO: Mejorar este caso marcando la inscripción como abortada
             wc_add_notice('Has anulado la inscripción', 'warning');
             $this->logger->logError('La inscripción fue anulada por el usuario o hubo un error en el formulario de pago');
+            if ($order) {
+                $order->add_order_note('El usuario canceló la inscripción en el formulario de pago');
+                $params = ['transbank_cancelled_order' => 1];
+                $redirectUrl = add_query_arg($params, wc_get_checkout_url());
+                wp_safe_redirect($redirectUrl);
+                exit;
+            }
             $this->redirectUser($from);
         }
 
@@ -87,10 +99,6 @@ class OneclickInscriptionResponseController
             $this->logger->logError('You were logged out');
         }
 
-        $order = null;
-        if ($inscription->order_id) {
-            $order = new \WC_Order($inscription->order_id);
-        }
         $this->logger->logInfo('[ONECLICK] Resultado obtenido correctamente: '.print_r($response, true));
         if ($response->isApproved()) {
             wc_add_notice('La tarjeta ha sido inscrita satisfactoriamente. Ahora puedes realizar el pago.', 'success');

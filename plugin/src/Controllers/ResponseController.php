@@ -57,16 +57,20 @@ class ResponseController
 
         $wooCommerceOrder = $this->getWooCommerceOrderById($webpayTransaction->order_id);
 
+
         if ($this->transactionWasCanceledByUser()) {
-            SessionMessageHelper::set('La transacción ha sido cancelada por el usuario', 'error');
+            $params = ['transbank_webpayplus_cancelled_order' => 1];
+            $redirectUrl = add_query_arg($params, wc_get_checkout_url());
+
             if ($webpayTransaction->status !== Transaction::STATUS_INITIALIZED || $wooCommerceOrder->is_paid()) {
                 $wooCommerceOrder->add_order_note('El usuario canceló la transacción en el formulario de pago, pero esta orden ya estaba pagada o en un estado diferente a INICIALIZADO');
 
-                return wp_safe_redirect($wooCommerceOrder->get_cancel_order_url());
+                wp_safe_redirect($redirectUrl);
+                return;
             }
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $webpayTransaction);
-
-            return wp_safe_redirect($wooCommerceOrder->get_cancel_order_url());
+            wp_safe_redirect($redirectUrl);
+            return;
         }
 
         if ($wooCommerceOrder->is_paid()) {
@@ -176,7 +180,6 @@ class ResponseController
             $wooCommerceOrder
         );
 
-        wc_add_notice(__('Pago recibido satisfactoriamente', 'transbank_webpay_plus_rest'));
         Transaction::update(
             $webpayTransaction->id,
             [
@@ -295,7 +298,7 @@ class ResponseController
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)
     {
         // Transaction aborted by user
-        $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el formulario de pago', 'transbank_webpay_plus_rest'));
+        $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el formulario de pago', 'transbank_wc_plugin'));
         $order_info->update_status('cancelled');
         Transaction::update(
             $webpayTransaction->id,

@@ -49,12 +49,11 @@ add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::status');
 add_action('wp_ajax_download_report', \Transbank\Woocommerce\ReportGenerator::class.'::download');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
-add_action('woocommerce_before_cart', function () {
-    SessionMessageHelper::printMessage();
-});
+add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
 add_action('woocommerce_subscription_failing_payment_method_updated_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'subscription_payment_method_updated'], 10, 3);
 
+add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
 add_action('admin_enqueue_scripts', function () {
     wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__));
     wp_enqueue_script('tbk-ajax-script', plugins_url('/js/admin.js', __FILE__), ['jquery']);
@@ -255,9 +254,25 @@ function woocommerce_transbank_rest_init()
         }
 
         /**
-         * Pagina Receptora.
+         * Obtiene respuesta IPN (Instant Payment Notification).
          **/
-        public function receipt_page($order_id)
+        public function check_ipn_response()
+        {
+            @ob_clean();
+            if (isset($_POST)) {
+                header('HTTP/1.1 200 OK');
+                $data = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $_GET : $_POST;
+
+                return (new ResponseController($this->config))->response($data);
+            } else {
+                echo 'Ocurrió un error al procesar su compra';
+            }
+        }
+
+        /**
+         * Procesar pago y retornar resultado.
+         **/
+        public function process_payment($order_id)
         {
             $order = new WC_Order($order_id);
             $amount = (int) number_format($order->get_total(), 0, ',', '');
@@ -291,35 +306,9 @@ function woocommerce_transbank_rest_init()
                 'status'      => Transaction::STATUS_INITIALIZED,
             ]);
 
-            RedirectorHelper::redirect($url, ['token_ws' => $token_ws]);
-        }
-
-        /**
-         * Obtiene respuesta IPN (Instant Payment Notification).
-         **/
-        public function check_ipn_response()
-        {
-            @ob_clean();
-            if (isset($_POST)) {
-                header('HTTP/1.1 200 OK');
-                $data = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $_GET : $_POST;
-
-                return (new ResponseController($this->config))->response($data);
-            } else {
-                echo 'Ocurrió un error al procesar su compra';
-            }
-        }
-
-        /**
-         * Procesar pago y retornar resultado.
-         **/
-        public function process_payment($order_id)
-        {
-            $order = new WC_Order($order_id);
-
             return [
                 'result'   => 'success',
-                'redirect' => $order->get_checkout_payment_url(true),
+                'redirect' => $url . '?token_ws=' . $token_ws,
             ];
         }
 
@@ -401,7 +390,7 @@ add_action('admin_notices', function () {
     if (!WC_Gateway_Transbank_Webpay_Plus_REST::is_valid_for_use()) {
         ?>
         <div class="notice notice-error">
-            <p><?php _e('Woocommerce debe estar configurado en pesos chilenos (CLP) para habilitar Webpay', 'transbank'); ?></p>
+            <p><?php _e('Woocommerce debe estar configurado en pesos chilenos (CLP) para habilitar Webpay', 'transbank_wc_plugin'); ?></p>
         </div>
         <?php
     }
@@ -409,7 +398,7 @@ add_action('admin_notices', function () {
 register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 
 add_action('add_meta_boxes', function () {
-    add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_webpay_plus_rest'), function ($post) {
+    add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post) {
         $order = new WC_Order($post->ID);
         $transaction = Transaction::getApprovedByOrderId($order->get_id());
         include __DIR__.'/views/get-status.php';
@@ -418,7 +407,7 @@ add_action('add_meta_boxes', function () {
 
 add_action('admin_menu', function () {
     //create new top-level menu
-    add_submenu_page('woocommerce', 'Configuración de Webpay Plus', 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
+    add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
         $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
         if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo'])) {
             wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
@@ -431,7 +420,22 @@ add_action('admin_menu', function () {
         include __DIR__.'/views/admin/options-tabs.php';
     }, null);
 
-    add_submenu_page('woocommerce', 'Configuración de Webpay Plus', 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
+    add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
         wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options'));
     }, null);
 });
+
+function transbank_rest_before_cart() {
+    SessionMessageHelper::printMessage();
+}
+
+function transbank_rest_check_cancelled_checkout() {
+    $cancelledOrder = $_GET['transbank_cancelled_order'] ?? false;
+    $cancelledWebpayPlusOrder = $_GET['transbank_webpayplus_cancelled_order'] ?? false;
+    if ($cancelledWebpayPlusOrder) {
+        wc_print_notice(__('Cancelaste la transacción durante el formulario de Webpay Plus.', 'transbank_wc_plugin'),'error');
+    }
+    if ($cancelledOrder) {
+        wc_print_notice(__('Cancelaste la inscripción durante el formulario de Webpay.', 'transbank_wc_plugin'),'error');
+    }
+}

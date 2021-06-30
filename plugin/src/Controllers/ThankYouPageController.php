@@ -52,8 +52,8 @@ class ThankYouPageController
 
             return;
         }
-
-        [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType] = (new ResponseController([]))->getTransactionDetails($finalResponse);
+        $data = (new ResponseController([]))->getTransactionDetails($finalResponse);
+        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = $data;
         require __DIR__.'/../../views/order-summary.php';
     }
 }
