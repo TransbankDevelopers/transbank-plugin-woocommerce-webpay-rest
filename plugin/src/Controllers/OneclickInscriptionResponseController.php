@@ -101,7 +101,7 @@ class OneclickInscriptionResponseController
 
         $this->logger->logInfo('[ONECLICK] Resultado obtenido correctamente: '.print_r($response, true));
         if ($response->isApproved()) {
-            wc_add_notice('La tarjeta ha sido inscrita satisfactoriamente. Ahora puedes realizar el pago.', 'success');
+            wc_add_notice(__('La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.', 'transbank_wc_plugin'), 'success');
             $this->logger->logInfo('[ONECLICK] Inscripción aprobada');
             $token = new WC_Payment_Token_Oneclick();
             $token->set_token($response->getTbkUser()); // Token comes from payment processor

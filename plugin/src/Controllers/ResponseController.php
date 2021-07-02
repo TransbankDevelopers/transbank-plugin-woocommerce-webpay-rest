@@ -138,7 +138,7 @@ class ResponseController
     protected function throwError($msg)
     {
         $error_message = 'Estimado cliente, le informamos que su orden termin&oacute; de forma inesperada: <br />'.$msg;
-        wc_add_notice(__('ERROR: ', 'transbank_webpay_plus_rest').$error_message, 'error');
+        wc_add_notice(__('ERROR: ', 'transbank_wc_plugin').$error_message, 'error');
         exit();
     }
 
@@ -381,9 +381,9 @@ class ResponseController
      */
     public static function getHumanReadablePaymentType($paymentTypeCode)
     {
-        $paymentType = __('Crédito', 'transbank_webpay_plus_rest');
+        $paymentType = __('Crédito', 'transbank_wc_plugin');
         if ($paymentTypeCode == 'VD') {
-            $paymentType = __('Débito', 'transbank_webpay_plus_rest');
+            $paymentType = __('Débito', 'transbank_wc_plugin');
         }
 
         return $paymentType;

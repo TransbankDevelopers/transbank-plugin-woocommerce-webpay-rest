@@ -204,7 +204,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
             wc_add_notice(__(
                 __('Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago.', 'transbank_wc_plugin'),
-                'transbank'
+                'transbank_wc_plugin'
             ), 'error');
 
             return [
