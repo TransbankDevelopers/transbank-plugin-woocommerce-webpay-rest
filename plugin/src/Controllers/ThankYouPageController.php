@@ -37,7 +37,7 @@ class ThankYouPageController
         }
 
         // Transacción aprobada
-        wc_print_notice(__('Transacción aprobada', 'transbank'), 'transbank_wc_plugin');
+        wc_print_notice(__('Transacción aprobada', 'transbank_wc_plugin'), 'success');
         $finalResponse = json_decode($webpayTransaction->transbank_response);
 
         if ($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
