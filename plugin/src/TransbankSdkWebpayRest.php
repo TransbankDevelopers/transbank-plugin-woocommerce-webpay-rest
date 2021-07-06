@@ -6,6 +6,7 @@ use Exception;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
+use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 
@@ -43,12 +44,12 @@ class TransbankSdkWebpayRest
         }
         $environment = isset($config['MODO']) ? $config['MODO'] : 'TEST';
 
-        $options = WebpayPlus\Transaction::getDefaultOptions();
+        $options = Transaction::getDefaultOptions();
         if ($environment !== 'TEST') {
             $options = Options::forProduction($config['COMMERCE_CODE'], $config['API_KEY']);
         }
 
-        $this->transaction = new WebpayPlus\Transaction($options);
+        $this->transaction = new Transaction($options);
     }
 
     /**
@@ -129,5 +130,13 @@ class TransbankSdkWebpayRest
     public function status($token)
     {
         return $this->transaction->status($token);
+    }
+
+    /**
+     * @return Transaction|null
+     */
+    public function getTransaction(): Transaction
+    {
+        return $this->transaction;
     }
 }

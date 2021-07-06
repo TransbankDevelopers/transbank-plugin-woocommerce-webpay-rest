@@ -2,6 +2,9 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+if (!$showedWelcome) {
+    update_site_option('transbank_webpay_rest_showed_welcome_message', true);
+}
 ?>
 
 <hr>
@@ -12,7 +15,7 @@ if (!defined('ABSPATH')) {
 
 <div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh; w">
     <h2>¡Excelente!</h2>
-    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/libwebpay/images/webpay-new.png', dirname(__DIR__)); ?>" alt="">
+    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/images/webpay-new.png', dirname(__DIR__)); ?>" alt="">
     <div>
         <p>Ahora que ya tienes el plugin instalado, tu sitio ya está  habilitado para que tus clientes puedan pagar usando Webpay Plus.
             Asegúrate de que tu tienda esté
@@ -40,7 +43,7 @@ if (!defined('ABSPATH')) {
     Para operar en el ambiente productivo, con dinero real, debes tener tu <strong>código de comercio</strong> y tu <strong>Api Key</strong>.
 
     <h4>Código de comercio</h4>
-    Si no lo tienes, puedes solicitarlo en <a href="https://public.transbank.cl">el sitio web de Transbank</a>.
+    Si no lo tienes, puedes solicitarlo en <a href="https://contratar.transbank.cl">el portal de contratación</a>.
 
     <h4>Tu Api Key</h4>
     Si ya tienes tu código de comercio, lo único que te faltaría es tu Api Key. Para obtenerla, debes completar el siguiente formulario:

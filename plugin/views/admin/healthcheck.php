@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 <div id="transbank_rest_info" class="tab-pane in active">
 
     <div class="transbank_rest_tool">
-        <h3 style="margin-bottom: 0">Verificar configuración </h3>
+        <h3 style="margin-bottom: 0">Verificar configuración Webpay Plus </h3>
         <p>Esta herramienta permite probar tu configuración (ambiente, código de comercio y llave secreta (Api Key
             Secret). Al verificar conexión se envía una solicitud para crear una transacción de prueba.
             Si ocurre algún problema, puedes obtener más información en el tab de "registros (logs)"</p>

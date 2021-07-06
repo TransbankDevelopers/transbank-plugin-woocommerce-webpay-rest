@@ -11,11 +11,17 @@ if (!$transaction) {
 }
 ?>
 
-<a class="button action get-transaction-status" data-order-id="<?php echo $order->get_id(); ?>" data-token="<?php echo $transaction->token; ?>" href="">Consultar estado de la transacción</a>
+<a class="button action get-transaction-status" data-order-id="<?php echo $order->get_id(); ?>" data-buy-order="<?php echo $transaction->buy_order; ?>" data-token="<?php echo $transaction->token; ?>" href="">Consultar estado de la transacción</a>
 
 <p>Esta es la respuesta del API (solo disponible por 7 días desde la fecha de transacción)</p>
 
  <table class="transaction-status-response" cellspacing="0" cellpadding="0" style="display: none">
+     <tr>
+         <th>Producto</th>
+     </tr>
+     <tr>
+         <td class="status-product"></td>
+     </tr>
      <tr>
          <th>Fecha contable:</th>
      </tr>
