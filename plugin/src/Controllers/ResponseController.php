@@ -149,7 +149,7 @@ class ResponseController
      */
     protected function completeWooCommerceOrder(WC_Order $wooCommerceOrder, TransactionCommitResponse $result, $webpayTransaction)
     {
-        [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType] = $this->getTransactionDetails($result);
+        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
         $cardNumber = $result->cardDetail['card_number'];
         $date = $date_accepted->format('d-m-Y / H:i:s');
         update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
@@ -207,7 +207,7 @@ class ResponseController
         $wooCommerceOrder->update_status('failed');
         if ($result !== null) {
             $message = 'Pago rechazado';
-            [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType] = $this->getTransactionDetails($result);
+            list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
             $cardNumber = isset($result->cardDetail['card_number']) ? $result->cardDetail['card_number'] : '-';
 
             $date = $date_accepted->format('d-m-Y / H:i:s');
