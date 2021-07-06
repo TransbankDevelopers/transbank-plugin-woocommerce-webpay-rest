@@ -19,6 +19,8 @@ use WC_Payment_Tokens;
  */
 class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
+    use TransbankRESTPaymentGateway;
+
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT_CHECKOUT = 'wc_gateway_transbank_oneclick_return_payment_checkout';
     /**
@@ -40,6 +42,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function __construct()
     {
         $this->supports = [
+            'refunds',
             'tokenization',
             'products',
             'subscriptions',
@@ -115,6 +118,40 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         );
     }
 
+    public function process_refund($order_id, $amount = null, $reason = '')
+    {
+        $order = new WC_Order($order_id);
+        $transaction = Transaction::getApprovedByOrderId($order_id);
+
+        if (!$transaction) {
+            $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
+
+            return false;
+        }
+        $response = [];
+
+        try {
+            $response = $this->oneclickTransaction->refund($transaction->buy_order, $transaction->child_commerce_code, $transaction->child_buy_order, round($amount));
+            $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
+        } catch (Exception $e) {
+            $order->add_order_note('Error al anular: '.$e->getMessage());
+            return false;
+        }
+
+        if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
+            $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
+
+            return true;
+        } else {
+            $order->add_order_note('Anulación a través de Webpay FALLIDA. '.
+                "\n\n".$jsonResponse);
+
+            return false;
+        }
+
+        return false;
+    }
+
     public function admin_options()
     {
         if ($this->is_valid_for_use()) {
@@ -134,6 +171,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             </div>
             <?php
         }
+    }
+
+    public function getStatus($buyOrder)
+    {
+        return $this->oneclickTransaction->status($buyOrder);
     }
 
     public function is_available()
@@ -498,4 +540,5 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'result' => 'error',
         ];
     }
+
 }

@@ -54,18 +54,21 @@ jQuery(function($) {
       $.post(ajax_object.ajax_url, {
           action: 'get_transaction_status',
           order_id: $(this).data('order-id'),
+          buy_order: $(this).data('buy-order'),
           token: $(this).data('token'),
           nonce: window.ajax_object.nonce
       }, function(response){
           console.log(response);
 
           let $table = $('.transaction-status-response');
-
-          Object.keys(response).forEach(key => {
-              let value = response[key] ? response[key] : '-';
+          let statusData = response.status;
+          Object.keys(statusData).forEach(key => {
+              let value = statusData[key] ? statusData[key] : '-';
               $table.find('.status-' + key).html(value);
           });
-          let niceJson = JSON.stringify(response, null, 2)
+          $table.find('.status-product').html(response.product);
+
+          let niceJson = JSON.stringify(response.raw, null, 2)
           $table.find('.status-raw').html(`<pre>${niceJson}</pre>`);
           $table.show();
           $(this).data('sending', false);

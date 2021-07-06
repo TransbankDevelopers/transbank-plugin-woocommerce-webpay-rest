@@ -9,6 +9,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
@@ -91,6 +92,8 @@ function woocommerce_transbank_rest_init()
      */
     class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
+        use TransbankRESTPaymentGateway;
+
         const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
         private static $URL_FINAL;
 
@@ -158,18 +161,13 @@ function woocommerce_transbank_rest_init()
                 $response = $sdk->refund($transaction->token, round($amount));
                 $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             } catch (Exception $e) {
-                $order->add_order_note('Error al anular: '.$e->getMessage());
+                $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
 
                 return false;
             }
 
             if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
-                $type = $response->getType() === 'REVERSED' ? 'Reversa' : 'Anulación';
-                $order->add_order_note('Refund a través de Webpay ejecutado CORRECTAMENTE.'.
-                    "\nTipo: ".$type.
-                    "\nMonto devuelto: $".number_format($amount, 0, ',', '.').
-                    "\nBalance: $".number_format($response->getBalance(), 0, ',', '.').
-                    "\n\nRespuesta de anulación: \n".$jsonResponse);
+                $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
 
                 return true;
             } else {
