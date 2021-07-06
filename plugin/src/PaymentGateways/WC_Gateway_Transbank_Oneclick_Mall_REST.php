@@ -360,9 +360,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'default'     => '100000',
                 'description' => 'Define el monto máximo que un cliente puede pagar con Oneclick.
                 Si un cliente va a realizar una compra superior a este monto, Oneclick no aparecerá como opción de
-                pago en el Checkout. Dejar en 0 si no se desea tener un límite (no recomendado). Recuerda que Oneclick,
-                al no tener una autorización bancaria para cada pago, es un producto donde el riesgo puede pasar más
-                fácilmente hacia el comercio.',
+                pago en el Checkout. Dejar en 0 si no se desea tener un límite (no recomendado). Recuerda que en
+                Oneclick, al no contar con autentificación bancaria, es tu comercio el que asume el riesgo en caso d
+                e fraude o contracargo',
             ],
         ];
     }
