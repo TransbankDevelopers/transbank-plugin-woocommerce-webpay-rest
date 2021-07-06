@@ -2,6 +2,9 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+if (!$showedWelcome) {
+    update_site_option('transbank_webpay_rest_showed_welcome_message', true);
+}
 ?>
 
 <hr>
@@ -40,7 +43,7 @@ if (!defined('ABSPATH')) {
     Para operar en el ambiente productivo, con dinero real, debes tener tu <strong>código de comercio</strong> y tu <strong>Api Key</strong>.
 
     <h4>Código de comercio</h4>
-    Si no lo tienes, puedes solicitarlo en <a href="https://public.transbank.cl">el sitio web de Transbank</a>.
+    Si no lo tienes, puedes solicitarlo en <a href="https://contratar.transbank.cl">el portal de contratación</a>.
 
     <h4>Tu Api Key</h4>
     Si ya tienes tu código de comercio, lo único que te faltaría es tu Api Key. Para obtenerla, debes completar el siguiente formulario:

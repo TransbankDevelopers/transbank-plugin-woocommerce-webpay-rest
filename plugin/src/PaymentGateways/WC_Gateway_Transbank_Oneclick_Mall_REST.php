@@ -57,12 +57,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'multiple_subscriptions',
         ];
 
+        $this->id = 'transbank_oneclick_mall_rest';
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
         $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
         $this->method_description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/oneclick.svg';
-        $this->id = 'transbank_oneclick_mall_rest';
 
         $this->init_form_fields();
         $this->init_settings();
@@ -156,7 +156,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function admin_options()
     {
         if ($this->is_valid_for_use()) {
-            parent::admin_options();
+            $tab = 'options_oneclick';
+            $environment = $this->get_option('environment');
+            include __DIR__.'/../../views/admin/options-tabs.php';
         } else {
             ?>
             <div class="inline error">
@@ -316,7 +318,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'enabled' => [
                 'title'   => __('Activar/Desactivar', 'transbank_wc_plugin'),
                 'type'    => 'checkbox',
-                'default' => 'yes',
+                'default' => 'no',
             ],
             'environment' => [
                 'title'       => __('Ambiente', 'transbank_wc_plugin'),
