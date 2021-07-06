@@ -7,18 +7,17 @@ use WC_Order;
 
 trait TransbankRESTPaymentGateway
 {
-
     /**
      * @param Oneclick\Responses\MallTransactionRefundResponse $response
-     * @param WC_Order $order
+     * @param WC_Order                                         $order
      * @param $amount
      * @param $jsonResponse
      */
     public function addRefundOrderNote($response, WC_Order $order, $amount, $jsonResponse)
     {
         $type = $response->getType() === 'REVERSED' ? 'Reversa' : 'Anulación';
-        $amountFormatted = '$' . number_format($amount, 0, ',', '.');
-        $balanceFormatted = '$' . number_format($response->getBalance(), 0, ',', '.');
+        $amountFormatted = '$'.number_format($amount, 0, ',', '.');
+        $balanceFormatted = '$'.number_format($response->getBalance(), 0, ',', '.');
         $note = "<div class='transbank_response_note'>
           <p><h3>Reembolso exitoso</h3></p><br />
 
@@ -28,7 +27,7 @@ trait TransbankRESTPaymentGateway
           <strong>Balance:</strong> {$balanceFormatted}<br /><br /><br />
 
           <strong>Respuesta de anulación:</strong> <br />
-          <pre style='overflow-x: scroll'>" . $jsonResponse . '</pre>
+          <pre style='overflow-x: scroll'>".$jsonResponse.'</pre>
         </div>';
 
         $order->add_order_note($note);

@@ -45,8 +45,8 @@ class TransactionStatusController
             unset($response['detail']);
             wp_send_json([
                 'product' => $transaction->product,
-                'status' => $response,
-                'raw' => $status
+                'status'  => $response,
+                'raw'     => $status,
             ]);
 
             return;
@@ -63,8 +63,8 @@ class TransactionStatusController
         try {
             wp_send_json([
                 'product' => $transaction->product,
-                'status' => $sdk->status($transaction->token),
-                'raw' => $sdk->status($transaction->token)
+                'status'  => $sdk->status($transaction->token),
+                'raw'     => $sdk->status($transaction->token),
             ]);
         } catch (TransactionStatusException $e) {
             wp_send_json([

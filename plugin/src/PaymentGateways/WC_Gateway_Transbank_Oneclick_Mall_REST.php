@@ -135,6 +135,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
         } catch (Exception $e) {
             $order->add_order_note('Error al anular: '.$e->getMessage());
+
             return false;
         }
 
@@ -164,9 +165,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'Gateway disabled',
                 'woocommerce'
             ); ?></strong>: <?php esc_html_e(
-                                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
-                                'transbank_wc_plugin'
-                            ); ?>
+                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
+                'transbank_wc_plugin'
+            ); ?>
                 </p>
             </div>
             <?php
@@ -540,5 +541,4 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'result' => 'error',
         ];
     }
-
 }
