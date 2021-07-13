@@ -335,14 +335,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'commerce_code' => [
                 'title'       => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'description' => 'Indica tu código de comercio para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                'description' => 'Ingresa tu código de comercio Mall para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
                 'type'        => 'text',
                 'default'     => '',
             ],
             'child_commerce_code' => [
                 'title'       => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'description' => 'Indica tu código de comercio para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                'description' => 'Indica tu código de comercio Tienda para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
                 'type'        => 'text',
                 'default'     => '',
             ],
