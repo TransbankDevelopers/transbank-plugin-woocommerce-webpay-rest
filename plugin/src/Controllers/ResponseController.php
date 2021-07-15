@@ -401,6 +401,7 @@ class ResponseController
 
         return $paymentType;
     }
+
     /**
      * @param string $msg
      */
