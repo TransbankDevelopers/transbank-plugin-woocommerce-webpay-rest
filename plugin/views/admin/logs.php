@@ -56,9 +56,9 @@ if (!defined('ABSPATH')) {
     $log->getResume(),
     true
 )['logs_list']) ? json_decode(
-        $log->getResume(),
-        true
-    )['logs_list'] : [];
+    $log->getResume(),
+    true
+)['logs_list'] : [];
                             foreach ($logs_list as $index) {
                                 echo '<li>'.$index.'</li>';
                             }
