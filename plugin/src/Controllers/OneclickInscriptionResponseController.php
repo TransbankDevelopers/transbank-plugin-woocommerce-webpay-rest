@@ -24,7 +24,6 @@ class OneclickInscriptionResponseController
         $this->gatewayId = $gatewayId;
     }
 
-
     /**
      * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException
      */
@@ -32,7 +31,7 @@ class OneclickInscriptionResponseController
     {
         $this->logger->logInfo('[ONECLICK] Process inscription return: GET '.print_r($_GET, true).' | POST: '.print_r($_POST, true));
         if ($this->transactionWasTimeout()) {
-            $this->logger->logError('[ONECLICK] Timeout Error' . print_r($_GET, true)  . print_r($_POST, true));
+            $this->logger->logError('[ONECLICK] Timeout Error'.print_r($_GET, true).print_r($_POST, true));
             wc_add_notice('La transacción fue cancelada automáticamente por estar inactivo mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago', 'error');
             wp_redirect(wc_get_checkout_url());
             exit;
@@ -146,7 +145,6 @@ class OneclickInscriptionResponseController
 
         $this->redirectUser($from);
     }
-
 
     /**
      * @return bool
