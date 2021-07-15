@@ -4,7 +4,6 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
-use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
@@ -55,7 +54,7 @@ add_action('woocommerce_subscription_failing_payment_method_updated_transbank_on
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
 add_action('admin_enqueue_scripts', function () {
-    wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__));
+    wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__), [], '1.1');
     wp_enqueue_style('tbk-font-awesome', plugins_url('/css/font-awesome/all.css', __FILE__));
     wp_enqueue_script('tbk-ajax-script', plugins_url('/js/admin.js', __FILE__), ['jquery']);
     wp_enqueue_script('tbk-thickbox', plugins_url('/js/swal.min.js', __FILE__));
@@ -407,14 +406,11 @@ add_action('admin_menu', function () {
     //create new top-level menu
     add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
         $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
-        if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo'])) {
+        if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo', 'transactions'])) {
             wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
         }
 
-        $healthcheck = HealthCheckFactory::create();
-        $datos_hc = json_decode($healthcheck->printFullResume());
         $log = new LogHandler();
-
         include __DIR__.'/views/admin/options-tabs.php';
     }, null);
 

@@ -1,4 +1,7 @@
 <?php
+
+use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -25,6 +28,9 @@ function tbk_is_nav_active($tab, $val)
                     <li class="<?php tbk_is_nav_active($tab, 'options_oneclick'); ?>"><a href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick') ?>">
                             Webpay Oneclick <i class="icon fa fa-arrow-right"></i>
                         </a></li>
+                    <li class="<?php tbk_is_nav_active($tab, 'transactions'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=transactions') ?>">
+                            Transacciones <i class="icon fa fa-arrow-right"></i>
+                        </a></li>
                     <li class="<?php tbk_is_nav_active($tab, 'healthcheck'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck') ?>">
                             Diagnóstico <i class="icon fa fa-arrow-right"></i>
                         </a></li>
@@ -47,7 +53,10 @@ function tbk_is_nav_active($tab, $val)
                 include __DIR__.'/logs.php';
             } elseif ($tab === 'phpinfo') {
                 include __DIR__.'/phpinfo.php';
+            } elseif ($tab === 'transactions') {
+                include __DIR__.'/transactions.php';
             } else {
+                $healthcheck = HealthCheckFactory::create();
                 $datos_hc = json_decode($healthcheck->printFullResume());
                 include __DIR__.'/healthcheck.php';
             }
