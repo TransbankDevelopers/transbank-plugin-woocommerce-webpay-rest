@@ -52,7 +52,13 @@ class ResponseController
      */
     public function response($postData)
     {
+        if ($this->transactionWasTimeout()) {
+            $this->throwError('La transacción fue cancelada automáticamente por estar inactivo mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago');
+            wp_redirect(wc_get_checkout_url());
+            exit;
+        }
         $token_ws = $this->getTokenWs($postData);
+
         $webpayTransaction = Transaction::getByToken($token_ws);
 
         $wooCommerceOrder = $this->getWooCommerceOrderById($webpayTransaction->order_id);
@@ -118,6 +124,8 @@ class ResponseController
         $token_ws = isset($data['token_ws']) ? $data['token_ws'] : (isset($data['TBK_TOKEN']) ? $data['TBK_TOKEN'] : null);
         if (!isset($token_ws)) {
             $this->throwError('No se encontró el token');
+            wp_redirect(wc_get_checkout_url());
+            exit;
         }
 
         return $token_ws;
@@ -133,13 +141,6 @@ class ResponseController
         $wooCommerceOrder = new WC_Order($orderId);
 
         return $wooCommerceOrder;
-    }
-
-    protected function throwError($msg)
-    {
-        $error_message = 'Estimado cliente, le informamos que su orden termin&oacute; de forma inesperada: <br />'.$msg;
-        wc_add_notice(__('ERROR: ', 'transbank_wc_plugin').$error_message, 'error');
-        exit();
     }
 
     /**
@@ -320,6 +321,18 @@ class ResponseController
     }
 
     /**
+     * @return bool
+     */
+    private function transactionWasTimeout()
+    {
+        $buyOrder = $_POST['TBK_ORDEN_COMPRA'] ?? $_GET['TBK_ORDEN_COMPRA'] ?? null;
+        $sessionId = $_POST['TBK_ID_SESION'] ?? $_GET['TBK_ID_SESION'] ?? null;
+        $token = $_POST['TBK_TOKEN'] ?? $_GET['TBK_TOKEN'] ?? null;
+
+        return $buyOrder && $sessionId && !$token;
+    }
+
+    /**
      * @param $amount
      * @param array $result
      * @param $sharesAmount
@@ -387,5 +400,14 @@ class ResponseController
         }
 
         return $paymentType;
+    }
+
+    /**
+     * @param string $msg
+     */
+    protected function throwError(string $msg)
+    {
+        $error_message = __($msg);
+        wc_add_notice($error_message, 'error');
     }
 }

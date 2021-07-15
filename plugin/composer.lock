@@ -798,16 +798,16 @@
         },
         {
             "name": "transbank/transbank-sdk",
-            "version": "2.0.5",
+            "version": "2.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/TransbankDevelopers/transbank-sdk-php.git",
-                "reference": "711f52a290cb4e6fc2466e983c2cc75b82b6acba"
+                "reference": "17e824a0079c6b296383abc3b7d1e681b77a5ec5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TransbankDevelopers/transbank-sdk-php/zipball/711f52a290cb4e6fc2466e983c2cc75b82b6acba",
-                "reference": "711f52a290cb4e6fc2466e983c2cc75b82b6acba",
+                "url": "https://api.github.com/repos/TransbankDevelopers/transbank-sdk-php/zipball/17e824a0079c6b296383abc3b7d1e681b77a5ec5",
+                "reference": "17e824a0079c6b296383abc3b7d1e681b77a5ec5",
                 "shasum": ""
             },
             "require": {
@@ -843,9 +843,9 @@
             ],
             "support": {
                 "issues": "https://github.com/TransbankDevelopers/transbank-sdk-php/issues",
-                "source": "https://github.com/TransbankDevelopers/transbank-sdk-php/tree/2.0.5"
+                "source": "https://github.com/TransbankDevelopers/transbank-sdk-php/tree/2.0.6"
             },
-            "time": "2021-07-06T19:14:18+00:00"
+            "time": "2021-07-12T21:51:21+00:00"
         }
     ],
     "packages-dev": [],
