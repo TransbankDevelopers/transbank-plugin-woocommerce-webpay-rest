@@ -140,7 +140,7 @@ class HealthCheck
         return $result;
     }
 
-    // arma array con informacion del ultimo plugin compatible con el ecommerce
+    // arma array con informacion del último plugin compatible con el ecommerce
     private function getPluginLastVersion()
     {
         $response = wp_remote_get('https://api.github.com/repos/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest');
