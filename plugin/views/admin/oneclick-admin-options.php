@@ -10,7 +10,7 @@ $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
 <hr>
 
 <div style="clear: both">
-    <a target="_blank" href="https://contrata.transbankdevelopers.cl/?wpcommerce=<?php echo $webpayPlusCommerceCode; ?>&wpenv=<?php echo $webpayPlusEnvironment; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
+    <a target="_blank" href="https://contrata.transbankdevelopers.cl/Oneclick/?wpcommerce=<?php echo $webpayPlusCommerceCode; ?>&wpenv=<?php echo $webpayPlusEnvironment; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
         <img style="border-radius: 10px; width: 800px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
     </a>
 </div>
@@ -47,4 +47,3 @@ $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
         </p>
     </div>
 <?php } ?>
-
