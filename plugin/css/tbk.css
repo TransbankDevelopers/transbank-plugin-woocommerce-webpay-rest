@@ -211,3 +211,7 @@
     margin: 0;
     margin-top: 10px;
 }
+
+.tbk-box .woocommerce-save-button.tbk-custom-save-button {
+    display: inline-block;
+}

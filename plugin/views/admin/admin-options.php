@@ -7,6 +7,12 @@ if (!$showedWelcome) {
 }
 ?>
 
+<style>
+    .woocommerce-save-button.button-primary {
+        display: none;
+    }
+</style>
+
 <?php if ($environment === 'TEST') { ?>
     <div class="info-container" style="display: flex">
         <div class="tbk-box" style="margin-right: 10px">
@@ -49,6 +55,7 @@ if (!$showedWelcome) {
     <table class="form-table">
         <?php $this->generate_settings_html(); ?>
     </table>
+    <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
 
 <div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh;">

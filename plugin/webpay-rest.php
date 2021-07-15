@@ -34,7 +34,7 @@ if (!defined('ABSPATH')) {
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
  * WC requires at least: 3.4.0
- * WC tested up to: 5.
+ * WC tested up to: 5.5.1
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
