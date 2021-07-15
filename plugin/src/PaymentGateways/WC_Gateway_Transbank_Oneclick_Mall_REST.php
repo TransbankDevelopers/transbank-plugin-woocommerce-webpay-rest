@@ -322,8 +322,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'environment' => [
                 'title'       => __('Ambiente', 'transbank_wc_plugin'),
                 'type'        => 'select',
-                'description' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
-                    ambiente real (producción). Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
+                'desc_tip' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
+                    ambiente real (producción). <br /><br />Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
                     comercio y llave secreta que tengas configurado abajo, ya que se usará el código de comercio especial del ambiente de pruebas.',
                 'options' => [
                     Options::ENVIRONMENT_INTEGRATION => __('Integración', 'transbank_wc_plugin'),
@@ -334,14 +334,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'commerce_code' => [
                 'title'       => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'description' => 'Ingresa tu código de comercio Mall para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                'desc_tip' => 'Ingresa tu código de comercio Mall para el ambiente de producción. <br /><br />Este se te entregará al completar el proceso de afiliación comercial. <br /><br />Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
                 'type'        => 'text',
                 'default'     => '',
             ],
             'child_commerce_code' => [
                 'title'       => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'description' => 'Indica tu código de comercio Tienda para el ambiente de producción. Este se te entregará al completar el proceso de afiliación comercial. Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                'desc_tip' => 'Indica tu código de comercio Tienda para el ambiente de producción. <br /><br />Este se te entregará al completar el proceso de afiliación comercial. <br /><br />Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
                 'type'        => 'text',
                 'default'     => '',
             ],
@@ -349,7 +349,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'title'       => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
                 'type'        => 'text',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-                'description' => 'Esta llave secreta te la entregará Transbank luego de que completes el proceso de validación (link más abajo). No la compartas con nadie una vez que la tengas. ',
+                'desc_tip' => 'Esta llave secreta te la entregará Transbank luego de que completes el proceso de validación (link más abajo). <br /><br />No la compartas con nadie una vez que la tengas. ',
                 'default'     => '',
             ],
             'max_amount' => [
@@ -357,9 +357,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'type'        => 'number',
                 'options'     => ['step' => 100],
                 'default'     => '100000',
-                'description' => 'Define el monto máximo que un cliente puede pagar con Oneclick.
+                'desc_tip' => 'Define el monto máximo que un cliente puede pagar con Oneclick.<br /><br />
                 Si un cliente va a realizar una compra superior a este monto, Oneclick no aparecerá como opción de
-                pago en el Checkout. Dejar en 0 si no se desea tener un límite (no recomendado). Recuerda que en
+                pago en el Checkout. Dejar en 0 si no se desea tener un límite (no recomendado). <br /><br />Recuerda que en
                 Oneclick, al no contar con autentificación bancaria, es tu comercio el que asume el riesgo en caso d
                 e fraude o contracargo',
             ],
