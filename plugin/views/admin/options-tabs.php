@@ -3,7 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function tbk_is_nav_active($tab, $val) {
+function tbk_is_nav_active($tab, $val)
+{
     if ($tab === $val) {
         echo 'active';
     }
@@ -18,19 +19,19 @@ function tbk_is_nav_active($tab, $val) {
             <div class="tbk-nav">
                 <div class="nav-title">Configuración</div>
                 <ul>
-                    <li class="<?php tbk_is_nav_active($tab,'options'); ?>"><a href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options') ?>">
+                    <li class="<?php tbk_is_nav_active($tab, 'options'); ?>"><a href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options') ?>">
                             Webpay Plus <i class="icon fa fa-arrow-right"></i>
                         </a></li>
-                    <li class="<?php tbk_is_nav_active($tab,'options_oneclick'); ?>"><a href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick') ?>">
+                    <li class="<?php tbk_is_nav_active($tab, 'options_oneclick'); ?>"><a href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick') ?>">
                             Webpay Oneclick <i class="icon fa fa-arrow-right"></i>
                         </a></li>
-                    <li class="<?php tbk_is_nav_active($tab,'healthcheck'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck') ?>">
+                    <li class="<?php tbk_is_nav_active($tab, 'healthcheck'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck') ?>">
                             Diagnóstico <i class="icon fa fa-arrow-right"></i>
                         </a></li>
-                    <li class="<?php tbk_is_nav_active($tab,'logs'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs') ?>">
+                    <li class="<?php tbk_is_nav_active($tab, 'logs'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs') ?>">
                             Registros (logs) <i class="icon fa fa-arrow-right"></i>
                         </a></li>
-                    <li class="<?php tbk_is_nav_active($tab,'phpinfo'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo') ?>">
+                    <li class="<?php tbk_is_nav_active($tab, 'phpinfo'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo') ?>">
                             PHP Info <i class="icon fa fa-arrow-right"></i>
                         </a></li>
                 </ul>
@@ -55,26 +56,26 @@ function tbk_is_nav_active($tab, $val) {
     </div>
 <!--    -->
 <!--    <h2 class="nav-tab-wrapper">-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options') ?><!--"-->
+<!--        <a href="--><?php //echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options')?><!--"-->
 <!--           class="nav-tab --><?php //if ($tab === 'options') {
 //     echo 'nav-tab-active';
-// } ?><!--">Webpay Plus</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick') ?><!--"-->
+// }?><!--">Webpay Plus</a>-->
+<!--        <a href="--><?php //echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick')?><!--"-->
 <!--           class="nav-tab --><?php //if ($tab === 'options_oneclick') {
 //     echo 'nav-tab-active';
-// } ?><!--">Webpay Oneclick</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck') ?><!--"-->
+// }?><!--">Webpay Oneclick</a>-->
+<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck')?><!--"-->
 <!--           class="nav-tab --><?php //if ($tab === 'healthcheck') {
 //     echo 'nav-tab-active';
-// } ?><!--">Diagnóstico</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs') ?><!--"-->
+// }?><!--">Diagnóstico</a>-->
+<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs')?><!--"-->
 <!--           class="nav-tab --><?php //if ($tab === 'logs') {
 //     echo 'nav-tab-active';
-// } ?><!--">Registros (logs)</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo') ?><!--"-->
+// }?><!--">Registros (logs)</a>-->
+<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo')?><!--"-->
 <!--           class="nav-tab --><?php //if ($tab === 'phpinfo') {
 //     echo 'nav-tab-active';
-// } ?><!--">PHP Info</a>-->
+// }?><!--">PHP Info</a>-->
 <!--    </h2>-->
 
 

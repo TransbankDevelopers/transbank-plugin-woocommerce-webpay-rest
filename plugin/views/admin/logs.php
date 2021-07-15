@@ -53,9 +53,9 @@ if (!defined('ABSPATH')) {
                         <ul style="font-size:0.8em;list-style: disc">
                             <?php
                             $logs_list = isset(json_decode(
-        $log->getResume(),
-        true
-    )['logs_list']) ? json_decode(
+    $log->getResume(),
+    true
+)['logs_list']) ? json_decode(
         $log->getResume(),
         true
     )['logs_list'] : [];

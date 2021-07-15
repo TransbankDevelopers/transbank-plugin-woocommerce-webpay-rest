@@ -225,7 +225,7 @@ function woocommerce_transbank_rest_init()
                 'webpay_rest_environment' => [
                     'title'       => __('Ambiente', 'transbank_webpay_plus_rest'),
                     'type'        => 'select',
-                    'desc_tip' => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
+                    'desc_tip'    => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
                     ambiente real (producción). <br /><br />Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
                     comercio y llave secreta que tengas configurado abajo, ya que se usará el código de comercio especial del ambiente de pruebas.',
                     'options' => [
@@ -237,7 +237,7 @@ function woocommerce_transbank_rest_init()
                 'webpay_rest_commerce_code' => [
                     'title'       => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
                     'placeholder' => 'Ej: 597012345678',
-                    'desc_tip' => 'Indica tu código de comercio para el ambiente de producción. <br /><br />Este se te entregará al completar el proceso de afiliación comercial. <br /><br />Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                    'desc_tip'    => 'Indica tu código de comercio para el ambiente de producción. <br /><br />Este se te entregará al completar el proceso de afiliación comercial. <br /><br />Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
                     'type'        => 'text',
                     'default'     => '',
                 ],
@@ -245,7 +245,7 @@ function woocommerce_transbank_rest_init()
                     'title'       => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
                     'type'        => 'text',
                     'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-                    'desc_tip' => 'Esta llave privada te la entregará Transbank luego de que completes el proceso de validación (link más abajo). <br /><br />No la compartas con nadie una vez que la tengas. ',
+                    'desc_tip'    => 'Esta llave privada te la entregará Transbank luego de que completes el proceso de validación (link más abajo). <br /><br />No la compartas con nadie una vez que la tengas. ',
                     'default'     => '',
                 ],
             ];
