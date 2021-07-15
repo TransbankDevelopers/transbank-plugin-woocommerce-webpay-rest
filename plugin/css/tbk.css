@@ -121,12 +121,97 @@
     border-left: solid 3px blue;
     padding: 10px;
 }
-.transbank-rest-credentials h4 {
-    margin: 0;
-    margin-top: 10px;
-}
 
 .transbank_response_note h3 {
     margin: 0 0 10px 0;
     font-size: 1.2em;
+}
+
+
+.tbk-nav {
+    font-size: 14px;
+    width: 200px;
+    background: #fff;
+    margin-left: 5px;
+    border-radius: 10px;
+}
+.tbk-nav .nav-title {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background: #6B1A6B;
+    padding: 15px 15px 15px 20px;
+    color: #fff;
+}
+.tbk-nav ul {
+    list-style: none;
+    margin: 0;
+}
+.tbk-nav ul li {
+    margin: 0;
+    padding: 0;
+}
+.tbk-nav ul li .icon {
+    float: right;
+    opacity: 0;
+    transition: .5s;
+    right: 20px;
+    position: relative;
+}
+.tbk-nav ul li.active {
+    font-weight: bold;
+}
+.tbk-nav ul li.active a{
+    color: #6B1A6B;
+}
+.tbk-nav ul li.active a:hover{
+    color: #6B1A6B;
+}
+.tbk-nav ul li a{
+    vertical-align: middle;
+    display: block;
+    color: #333;
+    text-decoration: none;
+    padding: 15px;
+    /*border-bottom: solid 1px #ccc;*/
+    transition: .5s;
+}
+.tbk-nav ul li a:hover {
+    color: #0a4b78;
+}
+.tbk-nav ul li a:hover .icon {
+    opacity: 1;
+    right: 0;
+}
+.tbk-nav ul li:last-child a {
+    border-bottom: none;
+}
+
+.tbk-container {
+    display: flex;
+}
+.tbk-nav-container {
+    min-width: 200px;
+}
+.tbk-content {
+    margin-left: 20px;
+    flex: 1;
+}
+
+.tbk-wrap {
+    margin-top: 20px;
+}
+
+.tbk-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.tbk-box h4 {
+    margin: 0;
+    margin-top: 10px;
+}
+
+.tbk-box .woocommerce-save-button.tbk-custom-save-button {
+    display: inline-block;
 }

@@ -7,30 +7,43 @@ $webpayPlusEnvironment = $webpayPlus->get_option('webpay_rest_environment');
 $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
 ?>
 
-<hr>
+<style>
+    .woocommerce-save-button.button-primary {
+        display: none;
+    }
+</style>
 
-<div style="clear: both">
-    <a target="_blank" href="https://contrata.transbankdevelopers.cl/Oneclick/?wpcommerce=<?php echo $webpayPlusCommerceCode; ?>&wpenv=<?php echo $webpayPlusEnvironment; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
-        <img style="border-radius: 10px; width: 800px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
-    </a>
+<div class="" style="display: flex; flex-wrap: wrap; margin-bottom: 10px">
+    <div style="flex: 1; margin-bottom: 10px">
+        <div style="margin-right: 10px; height: 100%; background: #fff; border-radius: 10px;">
+            <a target="_blank" href="https://contrata.transbankdevelopers.cl/Oneclick/?wpcommerce=<?php echo $webpayPlusCommerceCode; ?>&wpenv=<?php echo $webpayPlusEnvironment; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
+                <img style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
+            </a>
+        </div>
+    </div>
+
+
+    <div style="flex: 2; margin-bottom: 10px; background: #fff; border-radius: 10px; padding: 20px; display:inline-block">
+        <h3 style="margin-top: 0">Webpay Oneclick Mall</h3>
+        <p>Webpay Oneclick le permite a tus usuarios inscribir su tarjeta en su cuenta de usuario, para que luego puedan
+            comprar con un solo click. </p>
+        <p>Este plugin funciona con Oneclick en modalidad MALL. Esto significa que tienes un <strong>código de comercio
+                Mall</strong> que puede tener uno o varios códigos de comercio tienda o "hijos". Cuando un usuario inscribe su
+            tarjeta, lo hace asociado su tarjeta al código de comercio Mall, pero cuando se realiza una transacción
+            (autorización), esta es realizada por una (o más) tiendas del Mall. El dinero de esa transacción
+            se pagará al código de comercio "tienda" y no al "mall". <br /><br />
+            Este plugin funciona con una tienda Mall y una sola tienda. Todas las transacciones que se realicen usando este
+            método de pago, se autorizarán asociadas al código de comercio tienda.<br></p>
+    </div>
+
 </div>
 
-
-<div style="max-width: 760px; margin: 20px 0; background: #fff; border-radius: 10px; padding: 20px; display:inline-block">
-    <h3>Webpay Oneclick Mall</h3>
-    <p>Este plugin funciona con Oneclick en modalidad MALL. Esto significa que tienes un <strong>código de comercio
-    Mall</strong> que puede tener uno o varios códigos de comercio tienda o "hijos". Cuando un usuario inscribe su
-    tarjeta, lo hace asociado su tarjeta al código de comercio Mall, pero cuando se realiza una transacción
-    (autorización) esta es realizada por una (o más) tiendas del Mall. En el fondo, el dinero de esa transacción
-    se pagará al código de comercio "tienda". <br /><br />
-    Este plugin funciona con una tienda Mall y una sola tienda. Todas las transacciones que se realicen usando este
-    método de pago, se autorizarán asociadas al código de comercio tienda. <br></p>
+<div class="tbk-box">
+    <table class="form-table">
+        <?php $this->generate_settings_html(); ?>
+    </table>
+    <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
-
-
-<table class="form-table">
-    <?php $this->generate_settings_html(); ?>
-</table>
 
 
 <?php if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
