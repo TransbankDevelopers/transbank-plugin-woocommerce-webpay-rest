@@ -1,9 +1,9 @@
 === Transbank Webpay Plus REST ===
 Contributors: TransbankDevelopers
-Tags: transbank, webpay, rest, chile
+Tags: transbank, webpay, oneclick, webpay plus, rest, chile
 Requires at least: 4.0
-Tested up to: 5.6
-Requires PHP: 5.6
+Tested up to: 5.8
+Requires PHP: 7.0
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
 License URI: https://opensource.org/licenses/BSD-3-Clause

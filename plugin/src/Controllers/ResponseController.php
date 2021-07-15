@@ -53,7 +53,7 @@ class ResponseController
     public function response($postData)
     {
         if ($this->transactionWasTimeout()) {
-            $this->throwError('La transacción fue cancelada automáticamente por estar inactivo mucho tiempo en el formulario de pago de Webpay. ');
+            $this->throwError('La transacción fue cancelada automáticamente por estar inactivo mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago');
             wp_redirect(wc_get_checkout_url());
             exit;
         }

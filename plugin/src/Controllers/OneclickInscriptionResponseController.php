@@ -24,15 +24,23 @@ class OneclickInscriptionResponseController
         $this->gatewayId = $gatewayId;
     }
 
+
     /**
      * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException
      */
     public function response()
     {
         $this->logger->logInfo('[ONECLICK] Process inscription return: GET '.print_r($_GET, true).' | POST: '.print_r($_POST, true));
+        if ($this->transactionWasTimeout()) {
+            $this->logger->logError('[ONECLICK] Timeout Error' . print_r($_GET, true)  . print_r($_POST, true));
+            wc_add_notice('La transacción fue cancelada automáticamente por estar inactivo mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago', 'error');
+            wp_redirect(wc_get_checkout_url());
+            exit;
+        }
         $tbkToken = $_GET['TBK_TOKEN'] ?? $_POST['TBK_TOKEN'] ?? null;
         if (!$tbkToken) {
             $this->logger->logError('No se puede acceder a esta página directamente');
+            exit;
         }
 
         try {
@@ -137,6 +145,19 @@ class OneclickInscriptionResponseController
         }
 
         $this->redirectUser($from);
+    }
+
+
+    /**
+     * @return bool
+     */
+    private function transactionWasTimeout()
+    {
+        $buyOrder = $_POST['TBK_ORDEN_COMPRA'] ?? $_GET['TBK_ORDEN_COMPRA'] ?? null;
+        $sessionId = $_POST['TBK_ID_SESION'] ?? $_GET['TBK_ID_SESION'] ?? null;
+        $token = $_POST['TBK_TOKEN'] ?? $_GET['TBK_TOKEN'] ?? null;
+
+        return $buyOrder && $sessionId && !$token;
     }
 
     /**
