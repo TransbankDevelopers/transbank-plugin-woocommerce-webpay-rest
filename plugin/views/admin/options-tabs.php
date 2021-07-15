@@ -28,6 +28,9 @@ function tbk_is_nav_active($tab, $val)
                     <li class="<?php tbk_is_nav_active($tab, 'options_oneclick'); ?>"><a href="<?php echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick') ?>">
                             Webpay Oneclick <i class="icon fa fa-arrow-right"></i>
                         </a></li>
+                    <li class="<?php tbk_is_nav_active($tab, 'transactions'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=transactions') ?>">
+                            Transacciones <i class="icon fa fa-arrow-right"></i>
+                        </a></li>
                     <li class="<?php tbk_is_nav_active($tab, 'healthcheck'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck') ?>">
                             Diagnóstico <i class="icon fa fa-arrow-right"></i>
                         </a></li>
@@ -36,9 +39,6 @@ function tbk_is_nav_active($tab, $val)
                         </a></li>
                     <li class="<?php tbk_is_nav_active($tab, 'phpinfo'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo') ?>">
                             PHP Info <i class="icon fa fa-arrow-right"></i>
-                        </a></li>
-                    <li class="<?php tbk_is_nav_active($tab, 'transactions'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=transactions') ?>">
-                            Transacciones <i class="icon fa fa-arrow-right"></i>
                         </a></li>
                 </ul>
             </div>
