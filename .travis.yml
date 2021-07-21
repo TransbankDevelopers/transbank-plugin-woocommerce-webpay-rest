@@ -24,4 +24,4 @@ deploy:
     on:
       repo: TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest
       tags: true
-      php: 7.3
+      php: 7.1
