@@ -15,6 +15,7 @@ class ErrorHelper
             el archivo transbank-webpay-plus-rest-guzzle7.zip, desactiva el plugin de transbank y sube este nuevo plugin
             como archivo zip. Si te pide reemplazar el que ya tienes, selcciona que si. ';
         }
-        return 'Error: ' . $e->getMessage();
+
+        return 'Error: '.$e->getMessage();
     }
 }

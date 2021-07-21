@@ -270,10 +270,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         if ($addNewCard) {
             $this->logger->logInfo('[Oneclick] Checkout: start inscription');
+
             try {
                 $response = $this->startInscription($order_id);
             } catch (\Throwable $e) {
                 $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($e);
+
                 return wc_add_notice($errorMessage, 'error');
             }
             $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
@@ -291,9 +293,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 return $this->authorizeTransaction($order);
             } catch (\Throwable $e) {
                 $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($e);
+
                 return wc_add_notice($errorMessage, 'error');
             }
-
         }
         wc_add_notice(__('Error interno: no se pudo procesar el pago', 'transbank_wc_plugin'), 'error');
     }
