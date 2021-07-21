@@ -23,8 +23,8 @@ sed -i.bkp "s/Version: VERSION_REPLACE_HERE/Version: ${TRAVIS_TAG#"v"}/g" "$SRC_
 sed -i.bkp "s/VERSION_REPLACE_HERE/${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$README_FILE"
 cp "$SRC_DIR/$COMPOSER_LOCK_FILE" "$SRC_DIR/$COMPOSER_LOCK_FILE.bkp"
 
-PLUGIN_FILE="transbank-webpay-plus-rest.zip"
-PLUGIN_FILE_GUZZLE="transbank-webpay-plus-rest-guzzle7.zip"
+PLUGIN_FILE="transbank-webpay-rest.zip"
+PLUGIN_FILE_GUZZLE="transbank-webpay-rest-guzzle7.zip"
 
 cd $SRC_DIR
 zip -FSr ../$PLUGIN_FILE . -x composer.json composer.lock "$MAIN_FILE.bkp" "$README_FILE.bkp" vendor/tecnickcom/tcpdf/fonts/*
