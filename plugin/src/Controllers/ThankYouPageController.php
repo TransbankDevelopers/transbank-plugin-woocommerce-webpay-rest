@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
+use DateTimeZone;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
@@ -45,7 +46,8 @@ class ThankYouPageController
             $responseCode = $firstTransaction->responseCode ?? null;
             $status = $firstTransaction->status ?? null;
             $responseTitle = ($responseCode === 0 && $status === 'AUTHORIZED') ? 'Transacción Aprobada' : 'Transacción Rechazada';
-            $dateAccepted = new DateTime($finalResponse->transactionDate ?? null);
+            $dateAccepted = new DateTime($finalResponse->transactionDate ?? null, new DateTimeZone('UTC'));
+            $dateAccepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
             $paymentType = ResponseController::getHumanReadablePaymentType($firstTransaction->paymentTypeCode);
             $installmentType = ResponseController::getHumanReadableInstallemntsType($firstTransaction->paymentTypeCode);
             require __DIR__.'/../../views/order-summary-oneclick.php';

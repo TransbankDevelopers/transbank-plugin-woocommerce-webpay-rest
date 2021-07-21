@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
+use DateTimeZone;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
@@ -292,7 +293,8 @@ class ResponseController
         $paymentType = $this->getHumanReadablePaymentType($paymentTypeCode);
 
         $transactionDate = isset($result->transactionDate) ? $result->transactionDate : null;
-        $date_accepted = new DateTime($transactionDate);
+        $date_accepted = new DateTime($transactionDate, new DateTimeZone('UTC'));
+        $date_accepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
 
         return [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType];
     }
