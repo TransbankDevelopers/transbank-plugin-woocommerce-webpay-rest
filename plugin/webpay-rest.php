@@ -4,6 +4,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
+use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
@@ -278,7 +279,14 @@ function woocommerce_transbank_rest_init()
             $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
 
             $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
-            $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+
+            try {
+                $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
+            } catch (\Throwable $e) {
+                $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($e);
+
+                return wc_add_notice($errorMessage, 'error');
+            }
 
             if (!isset($result['token_ws'])) {
                 wc_add_notice(
