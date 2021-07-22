@@ -2,7 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use mysql_xdevapi\Exception;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
@@ -124,30 +123,31 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $transaction = Transaction::getApprovedByOrderId($order_id);
 
         if (!$transaction) {
-            $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
-
-            return false;
+            $message = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
+            do_action('transbank_oneclick_refund_failed', $order, $transaction);
+            $this->failedRefund($order, $message);
         }
         $response = [];
 
         try {
             $response = $this->oneclickTransaction->refund($transaction->buy_order, $transaction->child_commerce_code, $transaction->child_buy_order, round($amount));
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
-        } catch (Exception $e) {
-            $order->add_order_note('Error al anular: '.$e->getMessage());
+            do_action('transbank_oneclick_refund_finished', $order, $transaction, $jsonResponse);
+        } catch (\Exception $e) {
+            $message = 'Error al anular: '.$e->getMessage();
+            do_action('transbank_oneclick_refund_failed', $order, $transaction);
+            $this->failedRefund($order, $message);
 
-            return false;
         }
 
         if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
             $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
-
+            do_action('transbank_oneclick_refund_completed', $order, $transaction);
             return true;
         } else {
-            $order->add_order_note('Anulación a través de Webpay FALLIDA. '.
-                "\n\n".$jsonResponse);
-
-            return false;
+            $message = 'Anulación a través de Webpay FALLIDA. '."\n\n".$jsonResponse;
+            do_action('transbank_oneclick_refund_failed', $order, $transaction);
+            $this->failedRefund($order, $message);
         }
 
         return false;
@@ -278,10 +278,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
                 return wc_add_notice($errorMessage, 'error');
             }
-            $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
+            $this->logger->logInfo('[O neclick] Checkout: inscription response: ');
             $this->logger->logInfo(print_r($response, true));
             $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
 
+            do_action('transbank_oneclick_adding_card_from_order', $order);
             return [
                 'result'   => 'success',
                 'redirect' => $response->getRedirectUrl(),
@@ -370,12 +371,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'title'       => __('Monto máximo de transacción permitido', 'transbank_wc_plugin'),
                 'type'        => 'number',
                 'options'     => ['step' => 100],
-                'default'     => '100000',
+                'default'     => '0',
                 'desc_tip'    => 'Define el monto máximo que un cliente puede pagar con Oneclick.<br /><br />
                 Si un cliente va a realizar una compra superior a este monto, Oneclick no aparecerá como opción de
-                pago en el Checkout. Dejar en 0 si no se desea tener un límite (no recomendado). <br /><br />Recuerda que en
+                pago en el proceso de checkout. Dejar en 0 si no se desea tener un límite (no recomendado). <br /><br />Recuerda que en
                 Oneclick, al no contar con autentificación bancaria, es tu comercio el que asume el riesgo en caso d
-                e fraude o contracargo',
+                e fraude o contracargo. <br /><br />Independiente del monto que definas en esta configuración, en tu
+                contrato de Oneclick, existe un límite de cantidad de transacciones diarias, un monto máximo por
+                transacción y monto acumulado diario. Si un cliente supera ese límite, su transacción será rechazada. ',
             ],
         ];
     }
@@ -510,6 +513,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 wc()->cart->empty_cart();
             }
             $this->add_order_notes($order, $response, 'Oneclick: Transacción Aprobada');
+            do_action('transbank_oneclick_transaction_approved', $order);
         } else {
             $this->logger->logInfo('[Oneclick] Checkout: authorization rejected');
             $errorCode = $response->getDetails()[0]->getResponseCode() ?? null;
@@ -546,14 +550,27 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ]);
 
         if ($response->isApproved()) {
+            do_action('transbank_oneclick_transaction_approved', $order);
             return [
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order),
             ];
         }
 
+        do_action('transbank_oneclick_transaction_failed', $order);
+
         return [
             'result' => 'error',
         ];
+    }
+    /**
+     * @param WC_Order $order
+     * @param string $message
+     * @throws \Exception
+     */
+    protected function failedRefund(WC_Order $order, string $message)
+    {
+        $order->add_order_note($message);
+        throw new \Exception($message);
     }
 }
