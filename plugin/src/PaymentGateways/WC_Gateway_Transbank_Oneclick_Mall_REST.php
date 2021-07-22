@@ -137,12 +137,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $message = 'Error al anular: '.$e->getMessage();
             do_action('transbank_oneclick_refund_failed', $order, $transaction);
             $this->failedRefund($order, $message);
-
         }
 
         if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
             $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
             do_action('transbank_oneclick_refund_completed', $order, $transaction);
+
             return true;
         } else {
             $message = 'Anulación a través de Webpay FALLIDA. '."\n\n".$jsonResponse;
@@ -283,6 +283,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
 
             do_action('transbank_oneclick_adding_card_from_order', $order);
+
             return [
                 'result'   => 'success',
                 'redirect' => $response->getRedirectUrl(),
@@ -551,6 +552,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         if ($response->isApproved()) {
             do_action('transbank_oneclick_transaction_approved', $order);
+
             return [
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order),
@@ -563,14 +565,17 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'result' => 'error',
         ];
     }
+
     /**
      * @param WC_Order $order
-     * @param string $message
+     * @param string   $message
+     *
      * @throws \Exception
      */
     protected function failedRefund(WC_Order $order, string $message)
     {
         $order->add_order_note($message);
+
         throw new \Exception($message);
     }
 }
