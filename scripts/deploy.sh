@@ -16,7 +16,7 @@ if [[ -z "$TRAVIS_TAG" ]]; then
 fi
 
 WP_ORG_USERNAME="transbankdevelopers"
-PLUGIN="transbank-webpay-rest"
+PLUGIN="transbank-webpay-plus-rest"
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 PLUGIN_BUILDS_PATH="$PROJECT_ROOT/builds"
 PLUGIN_BUILD_CONFIG_PATH="$PROJECT_ROOT/build-cfg"
