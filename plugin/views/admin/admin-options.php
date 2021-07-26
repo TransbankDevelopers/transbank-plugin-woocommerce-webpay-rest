@@ -18,8 +18,8 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
     <div class="info-container" style="display: flex">
 
 
-        <?php include('components/info-validacion-webpay-plus-box.php'); ?>
-        <?php include('components/credenciales-box.php'); ?>
+        <?php include 'components/info-validacion-webpay-plus-box.php'; ?>
+        <?php include 'components/credenciales-box.php'; ?>
 
     </div>
 
