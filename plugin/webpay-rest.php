@@ -38,6 +38,7 @@ if (!defined('ABSPATH')) {
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
+$transbankPluginData = null;
 //todo: Eliminar todos estos require y usar PSR-4 de composer
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/ConnectionCheck.php';
@@ -69,6 +70,13 @@ add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'transbank_webpay_r
 
 //Start sessions if not already done
 add_action('init', function () {
+    global $transbankPluginData;
+    try {
+        $transbankPluginData = get_plugin_data( __FILE__ );
+    } catch (Throwable $e) {
+
+    }
+
     if (!headers_sent() && '' == session_id()) {
         session_start([
             'read_and_close' => true,
@@ -135,7 +143,6 @@ function woocommerce_transbank_rest_init()
             $this->init_settings();
 
             add_action('woocommerce_thankyou', [new ThankYouPageController($this->config), 'show'], 1);
-            add_action('woocommerce_receipt_'.$this->id, [$this, 'receipt_page']);
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'registerPluginVersion']);
             add_action('woocommerce_api_wc_gateway_'.$this->id, [$this, 'check_ipn_response']);

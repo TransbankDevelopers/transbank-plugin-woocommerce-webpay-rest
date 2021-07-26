@@ -1,10 +1,29 @@
 <?php
+
+use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
+
 if (!defined('ABSPATH')) {
     exit;
 }
 $webpayPlus = new WC_Gateway_Transbank_Webpay_Plus_REST();
 $webpayPlusEnvironment = $webpayPlus->get_option('webpay_rest_environment');
 $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
+
+$oneclick = new WC_Gateway_Transbank_Oneclick_Mall_REST();
+$oneclickEnvironment = $oneclick->get_option('environment');
+$oneclickCommerceCode = $oneclick->get_option('commerce_code');
+$oneclickMaxAmount = $oneclick->get_option('max_amount');
+
+global $pluginVersion;
+$trackinfo = [
+    'plugin'=> 'wc',
+    'version' => $pluginVersion ?? null,
+    'wpcommerce' => $webpayPlusCommerceCode,
+    'wpenv'=> $webpayPlusEnvironment,
+    'oneclickenv' =>  $oneclickEnvironment,
+    'oneclickcommerce' => $oneclickCommerceCode,
+    'oneclickmaxamount' => $oneclickMaxAmount
+]
 ?>
 
 <style>
@@ -18,6 +37,12 @@ $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
         <div style="margin-right: 10px; height: 100%; background: #fff; border-radius: 10px;">
             <a target="_blank" href="https://contrata.transbankdevelopers.cl/Oneclick/?wpcommerce=<?php echo $webpayPlusCommerceCode; ?>&wpenv=<?php echo $webpayPlusEnvironment; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
                 <img style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
+                <?php
+                global $transbankPluginData;
+                if ($transbankPluginData) {
+                    $pluginVersion = $transbankPluginData['Version'] ?? '0';
+                }?>
+                <img referrerpolicy="origin" style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="https://contrata.transbankdevelopers.cl/plugin-info?<?php echo http_build_query($trackinfo); ?>" alt="">
             </a>
         </div>
     </div>
