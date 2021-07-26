@@ -135,7 +135,6 @@ function woocommerce_transbank_rest_init()
             $this->init_settings();
 
             add_action('woocommerce_thankyou', [new ThankYouPageController($this->config), 'show'], 1);
-            add_action('woocommerce_receipt_'.$this->id, [$this, 'receipt_page']);
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
             add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'registerPluginVersion']);
             add_action('woocommerce_api_wc_gateway_'.$this->id, [$this, 'check_ipn_response']);
