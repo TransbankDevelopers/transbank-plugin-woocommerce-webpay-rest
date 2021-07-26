@@ -16,13 +16,13 @@ $oneclickMaxAmount = $oneclick->get_option('max_amount');
 
 global $pluginVersion;
 $trackinfo = [
-    'plugin'=> 'wc',
-    'version' => $pluginVersion ?? null,
-    'wpcommerce' => $webpayPlusCommerceCode,
-    'wpenv'=> $webpayPlusEnvironment,
-    'oneclickenv' =>  $oneclickEnvironment,
-    'oneclickcommerce' => $oneclickCommerceCode,
-    'oneclickmaxamount' => $oneclickMaxAmount
+    'plugin'            => 'wc',
+    'version'           => $pluginVersion ?? null,
+    'wpcommerce'        => $webpayPlusCommerceCode,
+    'wpenv'             => $webpayPlusEnvironment,
+    'oneclickenv'       => $oneclickEnvironment,
+    'oneclickcommerce'  => $oneclickCommerceCode,
+    'oneclickmaxamount' => $oneclickMaxAmount,
 ]
 ?>
 
