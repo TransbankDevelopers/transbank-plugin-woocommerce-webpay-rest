@@ -29,7 +29,7 @@ $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
             comprar con un solo click. </p>
         <p style="margin: 0">Este plugin funciona en modalidad MALL. Esto significa que tienes un <strong>código de comercio
                 mall</strong> y <strong>código de comercio tienda</strong>. Cuando un usuario inscribe su
-            tarjeta, lo hace asociado su tarjeta al código de comercio Mall, pero cuando se realiza una transacción, el dinero de esa transacción
+            tarjeta, lo hace asociando su tarjeta al código de comercio Mall, pero cuando se realiza una transacción, el dinero de esa transacción
             se pagará al código de comercio "tienda" y no al "mall". <br /><br />
     </div>
     <div style="flex: 1; margin-bottom: 10px; background: #fff; border-radius: 10px; overflow: hidden; display:inline-block">
