@@ -158,6 +158,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if ($this->is_valid_for_use()) {
             $tab = 'options_oneclick';
             $environment = $this->get_option('environment');
+            $showedWelcome = get_site_option('transbank_webpay_oneclick_rest_showed_welcome_message');
+            update_site_option('transbank_webpay_oneclick_rest_showed_welcome_message', true);
             include __DIR__.'/../../views/admin/options-tabs.php';
         } else {
             ?>
