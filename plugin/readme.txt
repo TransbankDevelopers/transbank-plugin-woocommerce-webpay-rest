@@ -8,19 +8,22 @@ Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
 License URI: https://opensource.org/licenses/BSD-3-Clause
 
-Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
+Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick.
 
 == Description ==
-Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus.
+Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.5.1 =
+* Se arregla warning por llamada a función que no existe en página de pago
+
 = 1.5.0 =
 * Se añade soporte para Oneclick Mall REST
 * Soporte para Refunds en Oneclick Mall
 * Soporte para subscripciones con OneClick Mall REST (WooCommerce Subscriptions)
 * Soporte para agregar múltiples tarjetas en cada usuario
 * La redirección de Webpay Plus ahora pasa directamente desde el checkout al formulario de pago (sin pasar por una pantalla intermedia como antes)
-* El resultado de los reemboslos ahora tiene mejor formato en las de notas del pedido.
+* El resultado de los reembolsos ahora tiene mejor formato en las de notas del pedido.
 
 = 1.4.1 =
 * Ahora el API 1.2 de Transbank a veces redirige por GET al finalizar el flujo y el plugin no funcionaba bien cuando esto pasaba. Ya está arreglado.
