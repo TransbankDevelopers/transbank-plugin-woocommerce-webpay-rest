@@ -33,7 +33,7 @@ $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');
             se pagará al código de comercio "tienda" y no al "mall". <br /><br />
     </div>
     <div style="flex: 1; margin-bottom: 10px; background: #fff; border-radius: 10px; overflow: hidden; display:inline-block">
-        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/wFgTkzsd9tA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/aVElZf5xqKQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 
 </div>
@@ -83,7 +83,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
     <p>Encuentra más detalles y funcionalidades en la <a target="_blank" href="http://transbankdevelopers.cl/plugin/woocommerce/">documentación oficial del plugin</a></p>
 
     <h3>Conoce las novedades</h3>
-    <iframe width="100%" height="315" src="https://www.youtube.com/embed/wFgTkzsd9tA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe width="100%" height="315" src="https://www.youtube.com/embed/aVElZf5xqKQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 </div>
 
