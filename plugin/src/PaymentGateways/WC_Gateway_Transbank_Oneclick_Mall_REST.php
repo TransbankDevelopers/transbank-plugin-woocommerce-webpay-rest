@@ -141,7 +141,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
             $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
-            do_action('transbank_oneclick_refund_completed', $order, $transaction);
+            do_action('transbank_oneclick_refund_approved', $order, $transaction);
 
             return true;
         } else {
