@@ -55,6 +55,7 @@ class ResponseController
     {
         if ($this->transactionWasTimeout()) {
             $this->throwError('La transacción fue cancelada automáticamente por estar inactivo mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago');
+            do_action('transbank_webpay_plus_timeout_on_form');
             wp_redirect(wc_get_checkout_url());
             exit;
         }
@@ -70,12 +71,12 @@ class ResponseController
 
             if ($webpayTransaction->status !== Transaction::STATUS_INITIALIZED || $wooCommerceOrder->is_paid()) {
                 $wooCommerceOrder->add_order_note('El usuario canceló la transacción en el formulario de pago, pero esta orden ya estaba pagada o en un estado diferente a INICIALIZADO');
-
                 wp_safe_redirect($redirectUrl);
 
                 return;
             }
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $webpayTransaction);
+            do_action('transbank_webpay_plus_transaction_cancelled_by_user', $wooCommerceOrder, $webpayTransaction);
             wp_safe_redirect($redirectUrl);
 
             return;
@@ -86,6 +87,7 @@ class ResponseController
             //SessionMessageHelper::set('Orden <strong>ya ha sido pagada</strong>.', 'notice');
             $wooCommerceOrder->add_order_note('El usuario intentó pagar esta orden nuevamente, cuando esta ya '.
                 'estaba pagada.');
+            do_action('transbank_webpay_plus_already_paid_transaction', $wooCommerceOrder);
 
             return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
@@ -98,6 +100,7 @@ class ResponseController
                 $wooCommerceOrder->get_status().".\n".
                 'No se ejecutó captura del pago de esta solicitud.'
             );
+            do_action('transbank_webpay_plus_paying_transaction_that_does_not_needs_payment', $wooCommerceOrder);
 
             return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
@@ -107,10 +110,13 @@ class ResponseController
         if ($this->transactionIsApproved($result) && $this->validateTransactionDetails($result, $webpayTransaction)) {
             $this->completeWooCommerceOrder($wooCommerceOrder, $result, $webpayTransaction);
 
+            do_action('transbank_webpay_plus_transaction_approved', $wooCommerceOrder, $webpayTransaction);
+
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
 
         $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $webpayTransaction, $result);
+        do_action('transbank_webpay_plus_transaction_failed', $wooCommerceOrder, $webpayTransaction, $result);
 
         return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
     }

@@ -516,7 +516,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 wc()->cart->empty_cart();
             }
             $this->add_order_notes($order, $response, 'Oneclick: Transacción Aprobada');
-            do_action('transbank_oneclick_transaction_approved', $order);
         } else {
             $this->logger->logInfo('[Oneclick] Checkout: authorization rejected');
             $errorCode = $response->getDetails()[0]->getResponseCode() ?? null;
