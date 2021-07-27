@@ -8,7 +8,7 @@ use WC_Order;
 trait TransbankRESTPaymentGateway
 {
     /**
-     * @param Oneclick\Responses\MallTransactionRefundResponse $response
+     * @param  $response
      * @param WC_Order                                         $order
      * @param $amount
      * @param $jsonResponse
