@@ -17,8 +17,12 @@ $oneclickEnvironment = $oneclick->get_option('environment');
 $oneclickCommerceCode = $oneclick->get_option('commerce_code');
 $oneclickMaxAmount = $oneclick->get_option('max_amount');
 
-global $pluginVersion;
+global $transbankPluginData;
+if ($transbankPluginData) {
+    $pluginVersion = $transbankPluginData['Version'] ?? '0';
+}
 $trackinfo = [
+    'source'            => 'webpay_plus_admin',
     'plugin'            => 'wc',
     'version'           => $pluginVersion ?? null,
     'wpcommerce'        => $webpayPlusCommerceCode,
@@ -79,7 +83,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 </div>
 
 <a href="#" id="show-welcome-message" style="padding-top: 10px" class="">Ver mensaje de bienvenida nuevamente</a>
-<img width="1" height="1" referrerpolicy="origin" style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="https://contrata.transbankdevelopers.cl/plugin-info?source=webpay_plus_admin&<?php echo http_build_query($trackinfo); ?>" alt="">
+<img width="1" height="1" referrerpolicy="origin" style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="https://contrata.transbankdevelopers.cl/plugin-info?<?php echo http_build_query($trackinfo); ?>" alt="">
 
 <script>
     (function($) {
