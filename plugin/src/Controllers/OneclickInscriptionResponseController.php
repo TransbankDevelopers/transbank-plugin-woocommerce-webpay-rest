@@ -98,6 +98,7 @@ class OneclickInscriptionResponseController
             'transbank_response' => json_encode($response),
             'status'             => $response->isApproved() ? Inscription::STATUS_COMPLETED : Inscription::STATUS_FAILED,
         ]);
+        do_action('transbank_oneclick_inscription_finished', $order, $from);
 
         // Todo: guardar la información del usuario al momento de crear la inscripción y luego obtenerla en base al token,
         // por si se pierde la sesión
@@ -108,6 +109,7 @@ class OneclickInscriptionResponseController
 
         $this->logger->logInfo('[ONECLICK] Resultado obtenido correctamente: '.print_r($response, true));
         if ($response->isApproved()) {
+
             wc_add_notice(__('La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.', 'transbank_wc_plugin'), 'success');
             $this->logger->logInfo('[ONECLICK] Inscripción aprobada');
             $token = new WC_Payment_Token_Oneclick();
@@ -130,8 +132,12 @@ class OneclickInscriptionResponseController
                 'token_id' => $token->get_id(),
             ]);
 
+
+
             // Set this token as the users new default token
             WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
+
+            do_action('transbank_oneclick_inscription_approved', $response, $token, $from);
 
             $this->logger->logError('Inscription finished successfully for user #'.$inscription->user_id);
         } else {
@@ -140,6 +146,8 @@ class OneclickInscriptionResponseController
             if ($order) {
                 $order->add_order_note('La inscripción de la tarjeta ha sido rechazada (código de respuesta: '.$response->getResponseCode().')');
             }
+
+            do_action('transbank_oneclick_inscription_failed', $response, $from);
             $this->logger->logInfo('[ONECLICK] Inscripción fallida');
         }
 
