@@ -22,6 +22,7 @@ class PluginInfoHelper
         if ($transbankPluginData) {
             $pluginVersion = $transbankPluginData['Version'] ?? '0';
         }
+
         return [
             'plugin'            => 'wc',
             'version'           => $pluginVersion ?? null,
@@ -38,8 +39,7 @@ class PluginInfoHelper
         $trackinfo = static::getInfo();
         if ($source) {
             $trackinfo['source'] = $source;
-        }
-        ?>
+        } ?>
         <img width="1" height="1" referrerpolicy="origin" style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="https://contrata.transbankdevelopers.cl/plugin-info?<?php echo http_build_query($trackinfo); ?>" alt="">
         <?php
     }

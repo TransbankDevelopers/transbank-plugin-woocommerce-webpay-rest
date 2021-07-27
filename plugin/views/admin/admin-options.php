@@ -1,7 +1,6 @@
 <?php
 
 use Transbank\WooCommerce\WebpayRest\Helpers\PluginInfoHelper;
-use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 
 if (!defined('ABSPATH')) {
     exit;
