@@ -15,7 +15,7 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 
 == Changelog ==
 = 1.5.2 =
-* Se agregan nuevos hooks para que los desarrolladores puedan mejorar su sitio e integrar mejores procesos. Algunos son: transbank_webpay_plus_transaction_failed, transbank_webpay_plus_transaction_approved, transbank_oneclick_refund_approved, transbank_oneclick_transaction_approved, transbank_oneclick_transaction_failed
+* Se agregan nuevos hooks para que los desarrolladores puedan mejorar su sitio e integrar mejores procesos. Algunos son: transbank_webpay_plus_transaction_failed, transbank_webpay_plus_transaction_approved, transbank_oneclick_refund_approved, transbank_oneclick_transaction_approved, transbank_oneclick_transaction_failed, transbank_oneclick_inscription_finished, transbank_oneclick_inscription_completed, transbank_oneclick_inscription_failed
 
 = 1.5.1 =
 * Se arregla warning por llamada a función que no existe en página de pago
