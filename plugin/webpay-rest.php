@@ -160,6 +160,7 @@ function woocommerce_transbank_rest_init()
             if (!$transaction) {
                 $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
                 do_action('transbank_webpay_plus_refund_transaction_not_found', $order, $transaction);
+
                 return false;
             }
             $response = [];
@@ -171,12 +172,14 @@ function woocommerce_transbank_rest_init()
             } catch (Exception $e) {
                 $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
                 do_action('transbank_webpay_plus_refund_failed', $order, $transaction, $e->getMessage());
+
                 throw new Exception('Error al anular: '.$e->getMessage());
             }
 
             if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
                 $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
                 do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $response);
+
                 return true;
             } else {
                 $order->add_order_note('Anulación a través de Webpay FALLIDA. '.
@@ -288,6 +291,7 @@ function woocommerce_transbank_rest_init()
 
             $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
             do_action('transbank_webpay_plus_starting_transaction', $order);
+
             try {
                 $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
             } catch (\Throwable $e) {

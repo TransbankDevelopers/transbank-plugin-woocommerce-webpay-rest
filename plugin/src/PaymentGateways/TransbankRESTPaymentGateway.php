@@ -2,14 +2,13 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use Transbank\Webpay\Oneclick;
 use WC_Order;
 
 trait TransbankRESTPaymentGateway
 {
     /**
      * @param  $response
-     * @param WC_Order                                         $order
+     * @param WC_Order $order
      * @param $amount
      * @param $jsonResponse
      */

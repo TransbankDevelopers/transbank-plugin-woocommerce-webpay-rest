@@ -111,6 +111,7 @@ class ResponseController
             $this->completeWooCommerceOrder($wooCommerceOrder, $result, $webpayTransaction);
 
             do_action('transbank_webpay_plus_transaction_approved', $wooCommerceOrder, $webpayTransaction);
+
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
 
