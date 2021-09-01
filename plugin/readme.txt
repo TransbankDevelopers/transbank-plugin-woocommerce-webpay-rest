@@ -14,6 +14,10 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.5.3 =
+* Se arregla información de pago al pagar con prepago
+* Se arregla caso en que transacción fallida queda anotada como exitosa
+
 = 1.5.2 =
 * Se agregan nuevos hooks para que los desarrolladores puedan mejorar su sitio e integrar mejores procesos. Algunos son: transbank_webpay_plus_transaction_failed, transbank_webpay_plus_transaction_approved, transbank_oneclick_refund_approved, transbank_oneclick_transaction_approved, transbank_oneclick_transaction_failed, transbank_oneclick_inscription_finished, transbank_oneclick_inscription_completed, transbank_oneclick_inscription_failed
 
@@ -92,6 +96,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.5.3
+* Se corrige reconocimiento de tipo de pago y si la transaccion fue exitosa
+
 = 1.4.1 =
 * Se utiliza el nuevo SDk de PHP versión 2.0
 * Ya no es compatible con PHP 5.6.
