@@ -405,7 +405,7 @@ class ResponseController
         $paymentType = __('Crédito', 'transbank_wc_plugin');
         if ($paymentTypeCode == 'VD') {
             $paymentType = __('Débito', 'transbank_wc_plugin');
-        } else if ($paymentTypeCode == 'VP'){
+        } elseif ($paymentTypeCode == 'VP') {
             $paymentType = __('Prepago', 'transbank_wc_plugin');
         }
 
