@@ -289,7 +289,7 @@ class ResponseController
         $sharesNumber = isset($result->installmentsNumber) ? $result->installmentsNumber : null;
         $sharesAmount = isset($result->installmentsAmount) ? $result->installmentsAmount : null;
         $responseCode = isset($result->responseCode) ? $result->responseCode : null;
-        if ($responseCode == 0) {
+        if ($responseCode === 0) {
             $transactionResponse = 'Transacción Aprobada';
         } else {
             $transactionResponse = 'Transacción Rechazada';
@@ -402,9 +402,15 @@ class ResponseController
      */
     public static function getHumanReadablePaymentType($paymentTypeCode)
     {
-        $paymentType = __('Crédito', 'transbank_wc_plugin');
+        if ($paymentTypeCode != null) {
+            $paymentType = __('Crédito', 'transbank_wc_plugin');
+        } else {
+            $paymentType = '';
+        }
         if ($paymentTypeCode == 'VD') {
             $paymentType = __('Débito', 'transbank_wc_plugin');
+        } elseif ($paymentTypeCode == 'VP') {
+            $paymentType = __('Prepago', 'transbank_wc_plugin');
         }
 
         return $paymentType;
