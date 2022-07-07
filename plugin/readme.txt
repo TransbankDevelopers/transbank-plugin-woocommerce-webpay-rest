@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.5.4 =
+* Se agrega la posibilidad de seleccionar el estado de la orden despues de un pago exitoso para Webpay Plus y Webpay Oneclick
+
 = 1.5.3 =
 * Se arregla información de pago al pagar con prepago
 * Se arregla caso en que transacción fallida queda anotada como exitosa
@@ -96,6 +99,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.5.4
+* Se agrega la posibilidad de seleccionar el estado de la orden despues de un pago exitoso para Webpay Plus y Webpay Oneclick
+
 = 1.5.3
 * Se corrige reconocimiento de tipo de pago y si la transaccion fue exitosa
 
