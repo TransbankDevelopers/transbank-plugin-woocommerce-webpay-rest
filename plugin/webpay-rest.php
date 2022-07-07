@@ -133,7 +133,7 @@ function woocommerce_transbank_rest_init()
                 'COMMERCE_CODE'        => trim($this->get_option('webpay_rest_commerce_code', WebpayPlus::DEFAULT_COMMERCE_CODE)),
                 'API_KEY'              => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
                 'ECOMMERCE'            => 'woocommerce',
-                'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', null),
+                'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', ''),
             ];
 
             /**
@@ -259,6 +259,17 @@ function woocommerce_transbank_rest_init()
                     'desc_tip'    => 'Esta llave privada te la entregará Transbank luego de que completes el proceso de validación (link más abajo). <br /><br />No la compartas con nadie una vez que la tengas. ',
                     'default'     => '',
                 ],
+                'webpay_rest_after_payment_order_status' => [
+                    'title'       => __('Order Status', 'transbank_webpay_plus_rest'),
+                    'type'        => 'select',
+                    'desc_tip'    => 'Define el estado de la orden luego del pago exitoso.',
+                    'options' => [
+                        '' => 'Default',
+                        'processing' => 'Processing',
+                        'completed'  => 'Completed',
+                    ],
+                    'default' => '',
+                ]
             ];
         }
 

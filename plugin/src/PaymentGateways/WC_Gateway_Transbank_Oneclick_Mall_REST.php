@@ -212,7 +212,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         /** @var WC_Payment_Token_Oneclick $paymentToken */
         $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
         $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
-        $renewalOrder->payment_complete();
+        $this->setAfterPaymentOrderStatus($renewalOrder);
     }
 
     public static function subscription_payment_method_updated()
@@ -383,6 +383,17 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 contrato de Oneclick, existe un límite de cantidad de transacciones diarias, un monto máximo por
                 transacción y monto acumulado diario. Si un cliente supera ese límite, su transacción será rechazada. ',
             ],
+            'oneclick_after_payment_order_status' => [
+                'title'       => __('Order Status', 'transbank_wc_plugin'),
+                'type'        => 'select',
+                'desc_tip'    => 'Define el estado de la orden luego del pago exitoso.',
+                'options' => [
+                    '' => 'Default',
+                    'processing' => 'Processing',
+                    'completed'  => 'Completed',
+                ],
+                'default' => '',
+            ],
         ];
     }
 
@@ -511,7 +522,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         if ($response->isApproved()) {
             $order->add_payment_token($token);
-            $order->payment_complete();
+            $this->setAfterPaymentOrderStatus($order);
             if (wc()->cart) {
                 wc()->cart->empty_cart();
             }
@@ -579,4 +590,19 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         throw new \Exception($message);
     }
+
+    /**
+     * @param WC_Order $order
+     */
+    private function setAfterPaymentOrderStatus(WC_Order $order){
+        $status = $this->get_option('oneclick_after_payment_order_status');
+        if ($status == ''){
+            $order->payment_complete();
+        }
+        else{
+            $order->payment_complete();
+            $order->update_status($status);
+        }
+    }
+
 }

@@ -197,11 +197,7 @@ class ResponseController
                 'transbank_response' => json_encode($result), ]
         );
 
-        $wooCommerceOrder->payment_complete();
-        $final_status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
-        if ($final_status) {
-            $wooCommerceOrder->update_status($final_status);
-        }
+        $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
 
     /**
@@ -423,5 +419,19 @@ class ResponseController
     {
         $error_message = __($msg);
         wc_add_notice($error_message, 'error');
+    }
+
+    /**
+     * @param WC_Order $order
+     */
+    private function setAfterPaymentOrderStatus(WC_Order $order){
+        $status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
+        if ($status == ''){
+            $order->payment_complete();
+        }
+        else{
+            $order->payment_complete();
+            $order->update_status($status);
+        }
     }
 }
