@@ -82,4 +82,42 @@ jQuery(function($) {
       })
   });
 
+
+  $(".check_exist_tables").on("click",function(e) {
+
+    $(".check_exist_tables").text("Verificando ...");
+    $("#row_tbl_response_status").hide();
+    $("#row_tbl_response_result").hide();
+    $("#row_tbl_error_message").hide();
+    $('.tbk-tbl-response-title').show();
+    $(".tbk_tbl_table_trans").empty();
+
+    $.post(ajax_object.ajax_url, {action: 'check_exist_tables', nonce: ajax_object.nonce}, function(response){
+      $(".check_exist_tables").text("Verificar Tablas");
+      $("#row_tbl_response_status").show();
+      $("#row_tbl_response_status_text").removeClass("label-success").removeClass("label-danger");
+
+      if(!response.error) {
+
+        $("#row_tbl_response_status_text").addClass("label-success").text("OK").show();
+        $("#row_tbl_response_result_text").append(response.msg);
+
+        $("#row_tbl_response_result").show();
+
+      } else {
+
+        $("#row_tbl_response_status_text").addClass("label-danger").text("ERROR").show();
+        $("#row_tbl_error_message_text").append('<code style="display: block; padding: 10px">' + response.error + ' Exception: ' + response.exception +'</code>');
+
+        $("#row_tbl_error_message").show();
+      }
+
+    })
+
+    e.preventDefault();
+  });
+
 })
+
+
+

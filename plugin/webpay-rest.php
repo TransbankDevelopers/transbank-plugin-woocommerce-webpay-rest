@@ -42,11 +42,13 @@ $transbankPluginData = null;
 //todo: Eliminar todos estos require y usar PSR-4 de composer
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/ConnectionCheck.php';
+require_once plugin_dir_path(__FILE__).'libwebpay/TableCheck.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/ReportGenerator.php';
 
 register_activation_hook(__FILE__, 'transbank_webpay_rest_on_webpay_rest_plugin_activation');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
+add_action('wp_ajax_check_exist_tables', 'TableCheck::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::status');
 add_action('wp_ajax_download_report', \Transbank\Woocommerce\ReportGenerator::class.'::download');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
@@ -294,6 +296,7 @@ function woocommerce_transbank_rest_init()
          **/
         public function process_payment($order_id)
         {
+            global $wpdb;
             $order = new WC_Order($order_id);
             $amount = (int) number_format($order->get_total(), 0, ',', '');
             $sessionId = uniqid();
@@ -323,7 +326,7 @@ function woocommerce_transbank_rest_init()
             $url = $result['url'];
             $token_ws = $result['token_ws'];
 
-            Transaction::createTransaction([
+            $insert = Transaction::createTransaction([
                 'order_id'    => $order_id,
                 'buy_order'   => $buyOrder,
                 'amount'      => $amount,
@@ -333,6 +336,15 @@ function woocommerce_transbank_rest_init()
                 'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
                 'status'      => Transaction::STATUS_INITIALIZED,
             ]);
+
+            if( !$insert ) {
+                $transactionTable = Transaction::getTableName();
+                $wpdb->show_errors();
+                $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
+                $this->log->logInfo($errorMessage);
+                //wc_add_notice($errorMessage, 'error');
+                throw new Exception($errorMessage);
+            }
 
             do_action('transbank_webpay_plus_transaction_started', $order, $token_ws);
 
