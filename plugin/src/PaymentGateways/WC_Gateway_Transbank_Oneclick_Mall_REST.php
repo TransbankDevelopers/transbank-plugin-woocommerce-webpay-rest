@@ -455,7 +455,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $email = $userInfo->user_email; // Todo: check if we had to generate a random email as well
         $response = $this->oneclickInscription->start($username, $email, $returnUrl);
 
-        Inscription::create([
+        $insert = Inscription::create([
             'token'                 => $response->getToken(),
             'username'              => $username,
             'order_id'              => $order_id,
@@ -467,6 +467,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'environment'           => $this->oneclickInscription->getOptions()->getIntegrationType(),
             'commerce_code'         => $this->oneclickInscription->getOptions()->getCommerceCode(),
         ]);
+
+        if( !$insert ) {
+            $table = Inscription::getTableName();
+            $wpdb->show_errors();
+            $errorMessage = "La inscripción no se pudo registrar en la tabla: '{$table}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
+            $this->logger->logInfo($errorMessage);
+            throw new Exception($errorMessage);
+        }
 
         return $response;
     }
@@ -483,6 +491,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         WC_Payment_Token_Oneclick $paymentToken = null,
         $amount = null
     ): array {
+        global $wpdb;
+
         if ($paymentToken) {
             $token = $paymentToken;
         } else {
@@ -548,7 +558,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             }
         }
 
-        Transaction::createTransaction([
+        $insert = Transaction::createTransaction([
             'order_id'            => $order->get_id(),
             'buy_order'           => $order->get_id(),
             'child_buy_order'     => $childBuyOrder,
@@ -562,7 +572,16 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'transbank_response'  => json_encode($response),
         ]);
 
-        if ($response->isApproved()) {
+        if( !$insert ) {
+            $transactionTable = Transaction::getTableName();
+            $wpdb->show_errors();
+            $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
+            $this->logger->logInfo($errorMessage);
+            //wc_add_notice($errorMessage, 'error');
+            throw new Exception($errorMessage);
+        }
+
+        if ($response->isApproved() && $insert) {
             do_action('transbank_oneclick_transaction_approved', $order);
 
             return [

@@ -25,7 +25,7 @@ class DatabaseTableInstaller
         return static::createTables();
     }
 
-    public static function createTables(): bool
+    public static function createTableTransaction(): bool
     {
         global $wpdb;
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
@@ -58,6 +58,24 @@ class DatabaseTableInstaller
         ) $charset_collate";
 
         dbDelta($sql);
+
+        $success = empty($wpdb->last_error);
+        if (!$success) {
+            $log = new LogHandler();
+            $log->logError('Error creating transbank tables: '.$transactionTableName);
+            $log->logError($wpdb->last_error);
+
+            add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
+            settings_errors('transbank_webpay_orders_table_error');
+        }
+        return $success;
+    }
+
+    public static function createTableInscription(): bool
+    {
+        global $wpdb;
+        require_once ABSPATH.'wp-admin/includes/upgrade.php';
+        $charset_collate = $wpdb->get_charset_collate();
         /*
         |--------------------------------------------------------------------------
         | Oneclick inscriptions table
@@ -90,11 +108,9 @@ class DatabaseTableInstaller
         dbDelta($sql);
 
         $success = empty($wpdb->last_error);
-        if ($success) {
-            update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
-        } else {
+        if (!$success) {
             $log = new LogHandler();
-            $log->logError('Error creating transbank tables');
+            $log->logError('Error creating transbank tables: '.$inscriptionsTableName);
             $log->logError($wpdb->last_error);
 
             add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
@@ -102,6 +118,16 @@ class DatabaseTableInstaller
         }
 
         return $success;
+    }
+
+    public static function createTables(): bool
+    {
+        $successTransaction = static::createTableTransaction();
+        $successInscription = static::createTableInscription();
+        if ($successTransaction && $successInscription) {
+            update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
+        } 
+        return $successTransaction && $successInscription;
     }
 
     public static function deleteTable()

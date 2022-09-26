@@ -7,6 +7,64 @@ if (!defined('ABSPATH')) {
 <div id="transbank_rest_info" class="">
 
     <div class="transbank_rest_tool">
+        <h3 style="margin-bottom: 0">Verificar existencia de las tablas del plugin</h3>
+        <p>Esta herramienta permite verificar que las tablas asociadas al Plugin de Transbank existan en la base de datos.</p>
+        <div>
+            <ul>
+                <li>Si no existe(n) se fuerza la creación al momento de hacer click.</li>
+                <li>Si arroja algún error debes volver a verificar.</li>
+                <li>Si los errores persisten puedes obtener más información en el tab de "registros (logs)".</li>
+            </ul>
+        </div>  
+        <table class="table table-striped">
+            <tbody>
+            <tr>
+                <td>
+                    <button class="check_exist_tables button">Verificar Tablas</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <hr>
+        <h4 class="tbk-tbl-response-title" style="display: none">Respuesta</h4>
+        <table class="table table-borderless">
+            <tbody>
+            <tr id="row_tbl_response_status" style="display:none">
+                <td>
+                    <div
+                        title="Informa el estado de la verificación de la existencia de las tablas de plugin"
+                        class="label label-info">?
+                    </div>
+                    <strong>Estado: </strong>
+                </td>
+                <td>
+                                    <span id="row_tbl_response_status_text" class="label tbk_tbl_table_trans"
+                                          style="display:none"></span>
+                </td>
+            </tr>
+            <tr id="row_tbl_response_result" style="display:none">
+                <td>
+                    <div title="Resultado de la verificación"
+                         class="label label-info">?
+                    </div>
+                    <strong>Resultado: </strong>
+                </td>
+                <td id="row_tbl_response_result_text" class="tbk_tbl_table_trans"></td>
+            </tr>
+            <tr id="row_tbl_error_message" style="display:none">
+                <td>
+                    <div title="Mensaje de error devuelto por la verificación y Wordpress"
+                         class="label label-info">?
+                    </div>
+                    <strong>Error: </strong>
+                </td>
+                <td id="row_tbl_error_message_text" class="tbk_tbl_table_trans"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="transbank_rest_tool">
         <h3 style="margin-bottom: 0">Verificar configuración Webpay Plus </h3>
         <p>Esta herramienta permite probar tu configuración (ambiente, código de comercio y llave secreta (Api Key
             Secret). Al verificar conexión se envía una solicitud para crear una transacción de prueba.
