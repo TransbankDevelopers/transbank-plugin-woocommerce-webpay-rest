@@ -8,9 +8,14 @@ if (!defined('ABSPATH')) {
 
     <div class="transbank_rest_tool">
         <h3 style="margin-bottom: 0">Verificar existencia de las tablas del plugin</h3>
-        <p>Esta herramienta permite verificar que las tablas asociadas al Plugin de Transbank existan en la base de datos. 
-           Si no existen, se fuerza la creación.
-           Si ocurre algún problema, puedes obtener más información en el tab de "registros (logs)"</p>
+        <p>Esta herramienta permite verificar que las tablas asociadas al Plugin de Transbank existan en la base de datos.</p>
+        <div>
+            <ul>
+                <li>Si no existe(n) se fuerza la creación al momento de hacer click.</li>
+                <li>Si arroja algún error debes volver a verificar.</li>
+                <li>Si los errores persisten puedes obtener más información en el tab de "registros (logs)".</li>
+            </ul>
+        </div>  
         <table class="table table-striped">
             <tbody>
             <tr>
