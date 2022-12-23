@@ -3,12 +3,14 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Exception;
-use Logger;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\LineFormatter;
 
 if (!defined('ABSPATH')) {
     exit;
 }
-
+//require_once(dirname(dirname(__DIR__)) . '/vendor/apache/log4php/src/main/php/Logger.php');
 define('Transbank_webpay_Rest_Webpay_ROOT', dirname(dirname(dirname(__DIR__))));
 
 class LogHandler
@@ -39,32 +41,19 @@ class LogHandler
                 mkdir($this->logDir, 0777, true);
             }
         } catch (Exception $e) {
+            
         }
-
-        $this->configuration = [
-            'appenders' => [
-                'default' => [
-                    'class'  => 'LoggerAppenderRollingFile',
-                    'layout' => [
-                        'class'  => 'LoggerLayoutPattern',
-                        'params' => [
-                            'conversionPattern' => '[%date{Y-m-d H:i:s}] [%-5level] %msg%n',
-                        ],
-                    ],
-                    'params' => [
-                        'file'           => $this->logFile,
-                        'maxFileSize'    => $this->confweight,
-                        'maxBackupIndex' => 10,
-                    ],
-                ],
-            ],
-            'rootLogger' => [
-                'appenders' => ['default'],
-            ],
-        ];
-
-        Logger::configure($this->configuration);
-        $this->logger = Logger::getLogger('main');
+        
+        // the default date format is "Y-m-d H:i:s"
+        $dateFormat = "Y n j, g:i a";
+        // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
+        $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
+        // finally, create a formatter
+        $formatter = new LineFormatter($output, $dateFormat);
+        $stream = new StreamHandler($this->logFile, Logger::INFO);
+        $stream->setFormatter($formatter);
+        $this->logger = $log = new Logger('transbank');
+        $log->pushHandler($stream);
     }
 
     private function formatBytes($path)
@@ -245,11 +234,11 @@ class LogHandler
         $this->digestLogs();
         $content = "[{$args['transactionId']}] [{$args['method']}] [{$args['request']}] [{$args['response']}] ";
         if ($type === true) {
-            $this->logger->info($content);
+            $this->logger->addInfo($content);
         } elseif ($type === false) {
-            $this->logger->error($content);
+            $this->logger->addError($content);
         } else {
-            $this->logger->warn('se ha ingresado parametro no valido en la creacion de log');
+            $this->logger->addWarning('se ha ingresado parametro no valido en la creacion de log');
         }
     }
 
@@ -393,7 +382,7 @@ class LogHandler
     public function logDebug($msg)
     {
         if (self::LOG_DEBUG_ENABLED) {
-            $this->logger->debug('DEBUG: '.$msg);
+            $this->logger->addDebug('DEBUG: '.$msg);
         }
     }
 
@@ -403,7 +392,7 @@ class LogHandler
     public function logInfo($msg)
     {
         if (self::LOG_INFO_ENABLED) {
-            $this->logger->info('INFO: '.$msg);
+            $this->logger->addInfo('INFO: '.$msg);
         }
     }
 
@@ -413,7 +402,7 @@ class LogHandler
     public function logError($msg)
     {
         if (self::LOG_ERROR_ENABLED) {
-            $this->logger->error('ERROR: '.$msg);
+            $this->logger->addError('ERROR: '.$msg);
         }
     }
 }

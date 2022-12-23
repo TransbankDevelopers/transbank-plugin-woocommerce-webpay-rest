@@ -24,7 +24,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: example
     ports:
-    - 3306:3306
+    - 3308:3306
 
   wplugin:
     container_name: webpay_plugin
@@ -37,7 +37,6 @@ services:
     depends_on:
     - webserver
     - dbserver
-
     command: dockerize -wait tcp://dbserver:3306 -wait http://webserver:80 -timeout 40s sh /init.sh
 
 volumes:

@@ -1,10 +1,10 @@
 {
     "require": {
         "transbank/transbank-sdk": "~2.0",
-        "apache/log4php": "2.3.0",
         "tecnickcom/tcpdf": "^6.3",
         "ext-json": "*",
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "monolog/monolog": "^1.27"
     },
     "config": {
         "platform": {
