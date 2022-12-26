@@ -50,7 +50,7 @@ class LogHandler
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         // finally, create a formatter
         $formatter = new LineFormatter($output, $dateFormat);
-        $stream = new StreamHandler($this->logFile, Logger::INFO);
+        $stream = new StreamHandler($this->logFile, Logger::DEBUG);
         $stream->setFormatter($formatter);
         $this->logger = $log = new Logger('transbank');
         $log->pushHandler($stream);
@@ -234,11 +234,11 @@ class LogHandler
         $this->digestLogs();
         $content = "[{$args['transactionId']}] [{$args['method']}] [{$args['request']}] [{$args['response']}] ";
         if ($type === true) {
-            $this->logger->addInfo($content);
+            $this->logger->info($content);
         } elseif ($type === false) {
-            $this->logger->addError($content);
+            $this->logger->error($content);
         } else {
-            $this->logger->addWarning('se ha ingresado parametro no valido en la creacion de log');
+            $this->logger->warning('se ha ingresado parametro no valido en la creacion de log');
         }
     }
 
@@ -382,7 +382,7 @@ class LogHandler
     public function logDebug($msg)
     {
         if (self::LOG_DEBUG_ENABLED) {
-            $this->logger->addDebug('DEBUG: '.$msg);
+            $this->logger->debug('DEBUG: '.$msg);
         }
     }
 
@@ -392,7 +392,7 @@ class LogHandler
     public function logInfo($msg)
     {
         if (self::LOG_INFO_ENABLED) {
-            $this->logger->addInfo('INFO: '.$msg);
+            $this->logger->info('INFO: '.$msg);
         }
     }
 
@@ -402,7 +402,7 @@ class LogHandler
     public function logError($msg)
     {
         if (self::LOG_ERROR_ENABLED) {
-            $this->logger->addError('ERROR: '.$msg);
+            $this->logger->error('ERROR: '.$msg);
         }
     }
 }

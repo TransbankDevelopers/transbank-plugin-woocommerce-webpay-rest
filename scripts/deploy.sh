@@ -46,9 +46,6 @@ rm -fR "$PLUGIN"
 # Unzip the built plugin
 unzip -q -o "$ZIP_FILE" -d $PLUGIN
 
-# HACK: Remove a file that make wordpress svn to fail because of invalid syntax
-rm $PLUGIN/vendor/apache/log4php/src/test/resources/configs/adapters/php/config_invalid_syntax.php
-
 # Clean up any previous svn dir
 rm -fR svn
 
