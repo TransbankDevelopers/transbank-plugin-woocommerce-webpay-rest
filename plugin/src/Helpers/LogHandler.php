@@ -43,6 +43,14 @@ class LogHandler
         } catch (Exception $e) {
             
         }
+
+        try {
+            if (!file_exists($this->logDir)) {
+                wp_mkdir_p($this->logDir);
+            }
+        } catch (Exception $e) {
+            
+        }
         
         // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y n j, g:i a";
