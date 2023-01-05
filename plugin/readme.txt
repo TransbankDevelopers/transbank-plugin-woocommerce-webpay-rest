@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.6.3 =
+* Se mueve la carpeta de logs al interior de la carpeta del plugin
+
 = 1.6.2 =
 * Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
 
@@ -113,6 +116,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.6.3 =
+* Se mueve la carpeta de logs al interior de la carpeta del plugin
+
 = 1.6.2 =
 * Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
 
