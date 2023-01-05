@@ -10,8 +10,8 @@ use Monolog\Formatter\LineFormatter;
 if (!defined('ABSPATH')) {
     exit;
 }
-//require_once(dirname(dirname(__DIR__)) . '/vendor/apache/log4php/src/main/php/Logger.php');
-define('Transbank_webpay_Rest_Webpay_ROOT', dirname(dirname(dirname(__DIR__))));
+
+define('Transbank_webpay_Rest_Webpay_ROOT', dirname(dirname(__DIR__)));
 
 class LogHandler
 {
@@ -27,12 +27,12 @@ class LogHandler
 
     public function __construct($ecommerce = 'woocommerce', $days = 7, $weight = '2MB')
     {
+        $this->logDir = Transbank_webpay_Rest_Webpay_ROOT.'/logs';
         $this->ecommerce = $ecommerce;
-        $this->lockfile = Transbank_webpay_Rest_Webpay_ROOT.'/set_logs_activate.lock';
+        $this->lockfile = $this->logDir.'/set_logs_activate.lock';
         $dia = date('Y-m-d');
         $this->confdays = $days;
         $this->confweight = $weight;
-        $this->logDir = ABSPATH.'log/Transbank_webpay';
         $this->logURL = str_replace($_SERVER['DOCUMENT_ROOT'], '/', $this->logDir);
         $this->logFile = "{$this->logDir}/log_transbank_{$this->ecommerce}_{$dia}.log";
 
