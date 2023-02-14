@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.6.4 =
+* Se mejora el log detallado para darle seguimiento a los errores.
+
 = 1.6.3 =
 * Se mueve la carpeta de logs al interior de la carpeta del plugin
 
@@ -116,6 +119,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.6.4 =
+* Se mejora el log detallado para darle seguimiento a los errores.
+
 = 1.6.3 =
 * Se mueve la carpeta de logs al interior de la carpeta del plugin
 
