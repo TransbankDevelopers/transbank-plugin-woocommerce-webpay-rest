@@ -9,6 +9,7 @@ use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
+use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
 
 /**
  * Class TransbankSdkWebpayRest.
@@ -23,6 +24,10 @@ class TransbankSdkWebpayRest
      * @var LogHandler
      */
     protected $log;
+    /**
+     * @var InteractsWithFullLog
+     */
+    protected $interactsWithFullLog;
 
     protected $transaction = null;
 
@@ -50,6 +55,7 @@ class TransbankSdkWebpayRest
         }
 
         $this->transaction = new Transaction($options);
+        $this->interactsWithFullLog = new InteractsWithFullLog();
     }
 
     /**
@@ -67,20 +73,25 @@ class TransbankSdkWebpayRest
         $result = [];
 
         try {
+            $this->interactsWithFullLog->logWebpayPlusIniciando();
+
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
             $this->log->logInfo('initTransaction - amount: '.$amount.', sessionId: '.$sessionId.
                 ', buyOrder: '.$buyOrder.', txDate: '.$txDate.', txTime: '.$txTime);
 
+            $this->interactsWithFullLog->logWebpayPlusAntesCrearTx($amount, $sessionId, $buyOrder, $returnUrl); // Logs
             $initResult = $this->transaction->create($buyOrder, $sessionId, $amount, $returnUrl);
 
             $this->log->logInfo('createTransaction - initResult: '.json_encode($initResult));
+            $this->interactsWithFullLog->logWebpayPlusDespuesCrearTx($initResult); // Logs
             if (isset($initResult) && isset($initResult->url) && isset($initResult->token)) {
                 $result = [
                     'url'      => $initResult->url,
                     'token_ws' => $initResult->token,
                 ];
             } else {
+                $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxError($initResult); // Logs
                 throw new Exception('No se ha creado la transacción para, amount: '.$amount.', sessionId: '.$sessionId.', buyOrder: '.$buyOrder);
             }
         } catch (Exception $e) {
