@@ -13,6 +13,7 @@ use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
+use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -30,7 +31,7 @@ if (!defined('ABSPATH')) {
  * Plugin Name: Transbank Webpay REST
  * Plugin URI: https://www.transbankdevelopers.cl/plugin/woocommerce/webpay
  * Description: Recibe pagos en línea con Tarjetas de Crédito y Redcompra en tu WooCommerce a través de Webpay Plus y Webpay Oneclick.
- * Version: VERSION_REPLACE_HERE
+ * Version: 1.6.3
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
  * WC requires at least: 3.4.0
@@ -124,6 +125,7 @@ function woocommerce_transbank_rest_init()
             $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
+            $this->interactsWithFullLog = new InteractsWithFullLog();
 
             $this->supports = [
                 'products',
@@ -326,7 +328,7 @@ function woocommerce_transbank_rest_init()
             $url = $result['url'];
             $token_ws = $result['token_ws'];
 
-            $insert = Transaction::createTransaction([
+            $transaction = [
                 'order_id'    => $order_id,
                 'buy_order'   => $buyOrder,
                 'amount'      => $amount,
@@ -335,7 +337,11 @@ function woocommerce_transbank_rest_init()
                 'environment' => $transbankSdkWebpay->getTransaction()->getOptions()->getIntegrationType(),
                 'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
                 'status'      => Transaction::STATUS_INITIALIZED,
-            ]);
+            ];
+
+            $this->interactsWithFullLog->logWebpayPlusAntesCrearTxEnTabla($transaction); // Logs
+ 
+            $insert = Transaction::createTransaction($transaction);
 
             if( !$insert ) {
                 $transactionTable = Transaction::getTableName();
@@ -343,8 +349,11 @@ function woocommerce_transbank_rest_init()
                 $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
                 $this->log->logInfo($errorMessage);
                 //wc_add_notice($errorMessage, 'error');
+                $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxEnTablaError($transaction); // Logs
                 throw new Exception($errorMessage);
             }
+
+            $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxEnTabla($transaction); // Logs
 
             do_action('transbank_webpay_plus_transaction_started', $order, $token_ws);
 

@@ -8,6 +8,7 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
+use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
 use WC_Order;
 
 class ResponseController
@@ -25,6 +26,7 @@ class ResponseController
     public function __construct(array $pluginConfig)
     {
         $this->pluginConfig = $pluginConfig;
+        $this->interactsWithFullLog = new InteractsWithFullLog();
     }
 
     /**
@@ -61,11 +63,18 @@ class ResponseController
         }
         $token_ws = $this->getTokenWs($postData);
 
+        $this->interactsWithFullLog->logWebpayPlusRetornandoDesdeTbk($_SERVER['REQUEST_METHOD'], $postData); // Logs
+
         $webpayTransaction = Transaction::getByToken($token_ws);
+
+        $this->interactsWithFullLog->logWebpayPlusDespuesObtenerTx($token_ws, $webpayTransaction); // Logs
 
         $wooCommerceOrder = $this->getWooCommerceOrderById($webpayTransaction->order_id);
 
         if ($this->transactionWasCanceledByUser()) {
+            $sessionId = $_POST['TBK_ID_SESION'] ?? $_GET['TBK_ID_SESION'] ?? null;
+            $this->interactsWithFullLog->logWebpayPlusRetornandoDesdeTbkFujo3Error($sessionId); // Logs
+
             $params = ['transbank_webpayplus_cancelled_order' => 1];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
 
@@ -89,6 +98,8 @@ class ResponseController
                 'estaba pagada.');
             do_action('transbank_webpay_plus_already_paid_transaction', $wooCommerceOrder);
 
+            $this->interactsWithFullLog->logWebpayPlusCommitTxCarroAprobadoError($token_ws, $webpayTransaction); // Logs
+            
             return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
 
@@ -106,16 +117,24 @@ class ResponseController
         }
 
         $transbankSdkWebpay = new TransbankSdkWebpayRest($this->pluginConfig);
+
+        $this->interactsWithFullLog->logWebpayPlusAntesCommitTx($token_ws, $webpayTransaction); // Logs
+
         $result = $transbankSdkWebpay->commitTransaction($token_ws);
+
+        $this->interactsWithFullLog->logWebpayPlusDespuesCommitTx($token_ws, $result); // Logs
+
         if ($this->transactionIsApproved($result) && $this->validateTransactionDetails($result, $webpayTransaction)) {
             $this->completeWooCommerceOrder($wooCommerceOrder, $result, $webpayTransaction);
 
             do_action('transbank_webpay_plus_transaction_approved', $wooCommerceOrder, $webpayTransaction);
 
+            $this->interactsWithFullLog->logWebpayPlusTodoOk($token_ws, $webpayTransaction); // Logs
+
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         }
 
-        $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $webpayTransaction, $result);
+        $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $webpayTransaction, $result, $token_ws);
         do_action('transbank_webpay_plus_transaction_failed', $wooCommerceOrder, $webpayTransaction, $result);
 
         return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
@@ -173,6 +192,7 @@ class ResponseController
         update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
 
         $message = 'Pago exitoso con Webpay Plus';
+
         $this->addOrderDetailsOnNotes(
             $amount,
             $result,
@@ -197,6 +217,8 @@ class ResponseController
                 'transbank_response' => json_encode($result), ]
         );
 
+        $this->interactsWithFullLog->logWebpayPlusGuardandoCommitExitoso($token_ws); // Logs
+
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
 
@@ -205,7 +227,7 @@ class ResponseController
      * @param array    $result
      * @param $webpayTransaction
      */
-    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result = null)
+    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result = null, $token)
     {
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');
@@ -230,6 +252,8 @@ class ResponseController
                 $date,
                 $wooCommerceOrder
             );
+
+            $this->interactsWithFullLog->logWebpayPlusCommitFallidoError($token, $result); // Logs
         }
 
         Transaction::update(
@@ -286,7 +310,7 @@ class ResponseController
         $sharesAmount = isset($result->installmentsAmount) ? $result->installmentsAmount : null;
         $responseCode = isset($result->responseCode) ? $result->responseCode : null;
         if ($responseCode === 0) {
-            $transactionResponse = 'Transacción Aprobada';
+            $transactionResponse = '¡Transacción Aprobada!';
         } else {
             $transactionResponse = 'Transacción Rechazada';
         }
