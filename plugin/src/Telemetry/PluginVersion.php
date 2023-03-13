@@ -1,12 +1,14 @@
 <?php
 
 namespace Transbank\WooCommerce\WebpayRest\Telemetry;
+use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
+use GuzzleHttp\Client;
 
 class PluginVersion
 {
     protected $soapUri = 'http://www.cumbregroup.com/tbk-webservice/PluginVersion.php?wsdl';
     protected $client = null;
-
+    
     const ENV_INTEGRATION = 'TEST';
     const ENV_PRODUCTION = 'LIVE';
     const PRODUCT_WEBPAY = 1;
@@ -33,8 +35,13 @@ class PluginVersion
         }
     }
 
-    public function registerVersion($commerceCode, $pluginVersion, $ecommerceVersion, $ecommerceId, $environment = self::ENV_PRODUCTION, $product = self::PRODUCT_WEBPAY)
+    public function registerVersion($commerceCode, $pluginVersion, $ecommerceVersion, $ecommerceId, $environment, $product)
     {
+        $log = new LogHandler();
+        $log->logInfo('AQUI SE GUARDO ALGO DE INFORMACION');
+
+        $this->sendMetrics($commerceCode, $pluginVersion, $ecommerceVersion, $ecommerceId, $environment, $product); // Metricas TBK
+
         if ($this->client === null) {
             return null;
         }
@@ -46,5 +53,35 @@ class PluginVersion
         }
 
         return null;
+    }
+
+    public function sendMetrics($commerceCode, $pluginVersion, $ecommerceVersion, $ecommerceId, $environment, $product) {
+        try {
+
+            $log = new LogHandler();
+
+            $log->logInfo(':: Metrics');
+            $log->logInfo($commerceCode);
+
+            $webpayPayload = [
+                'ecommerceId' => $ecommerceId,    
+                'plugin' => 'WooCommerce',
+                'environment' => $environment,
+                'product' => $product,
+                'pluginVersion' => $pluginVersion,
+                'commerceCode' => $commerceCode,
+                'phpVersion' => phpversion(),
+                'ecommerceVersion' => $ecommerceVersion,
+                'metadata' => '',
+            ];
+
+            $client = new Client();
+            
+            $client->request('POST', 'https://tbk-app-y8unz.ondigitalocean.app/records/newRecord', ['form_params' => $webpayPayload]);
+
+            $log->logInfo(':: Saved');
+        } catch (\Exception $e) {
+            $log->logError($e->getMessage());
+        }
     }
 }

@@ -198,15 +198,8 @@ function woocommerce_transbank_rest_init()
 
         public function registerPluginVersion()
         {
-            if (!$this->get_option('webpay_rest_environment', 'TEST') === 'LIVE') {
-                return;
-            }
 
             $commerceCode = $this->get_option('webpay_rest_commerce_code');
-            if ($commerceCode == WebpayPlus::DEFAULT_COMMERCE_CODE) {
-                // If we are using the default commerce code, then abort as the user have not updated that value yet.
-                return;
-            }
 
             $pluginVersion = $this->getPluginVersion();
 
@@ -214,7 +207,9 @@ function woocommerce_transbank_rest_init()
                 $commerceCode,
                 $pluginVersion,
                 wc()->version,
-                PluginVersion::ECOMMERCE_WOOCOMMERCE
+                PluginVersion::ECOMMERCE_WOOCOMMERCE,
+                $this->get_option('webpay_rest_environment'),
+                'webpay',
             );
         }
 
