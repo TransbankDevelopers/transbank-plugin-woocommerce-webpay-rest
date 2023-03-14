@@ -71,8 +71,7 @@ class PluginVersion
                 'pluginVersion' => $pluginVersion,
                 'commerceCode' => $commerceCode,
                 'phpVersion' => phpversion(),
-                'ecommerceVersion' => $ecommerceVersion,
-                'metadata' => '',
+                'ecommerceVersion' => $ecommerceVersion
             ];
 
             $client = new Client();
