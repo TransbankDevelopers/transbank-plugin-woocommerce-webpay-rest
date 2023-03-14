@@ -116,7 +116,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             wc()->version,
             PluginVersion::ECOMMERCE_WOOCOMMERCE,
             $this->get_option('environment'),
-            'oneclick',
+            'oneclick'
         );
     }
 

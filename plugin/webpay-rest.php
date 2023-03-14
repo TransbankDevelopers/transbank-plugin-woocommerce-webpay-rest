@@ -209,7 +209,7 @@ function woocommerce_transbank_rest_init()
                 wc()->version,
                 PluginVersion::ECOMMERCE_WOOCOMMERCE,
                 $this->get_option('webpay_rest_environment'),
-                'webpay',
+                'webpay'
             );
         }
 
