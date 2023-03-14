@@ -9,6 +9,8 @@ use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
+use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
@@ -97,6 +99,33 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
         add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
+        add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'registerPluginVersion']);
+
+    }
+
+    public function registerPluginVersion()
+    {
+
+        $commerceCode = $this->get_option('commerce_code');
+
+        $pluginVersion = $this->getPluginVersion();
+
+        (new PluginVersion())->registerVersion(
+            $commerceCode,
+            $pluginVersion,
+            wc()->version,
+            PluginVersion::ECOMMERCE_WOOCOMMERCE,
+            $this->get_option('environment'),
+            'oneclick'
+        );
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPluginVersion()
+    {
+        return (new WordpressPluginVersion())->get();
     }
 
     public function payment_fields()
