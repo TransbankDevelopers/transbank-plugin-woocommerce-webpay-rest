@@ -67,15 +67,12 @@ class WebpayTransactionsTable extends WP_List_Table
 
         /* -- Ordering parameters -- */
         //Parameters that are going to be used to order the result
-        $orderby = isset($_GET['orderby']) ? esc_sql($_GET['orderby']) : 'ID';
-        $order = isset($_GET['order']) ? esc_sql($_GET['order']) : 'DESC';
-        if (isset($orderby) & isset($order)) {
-            $query .= ' ORDER BY '.$orderby.' '.$order;
-        }
-
+        $orderby = isset($_GET['orderby']) ? sanitize_sql_orderby($_GET['orderby']) : 'ID';
+        $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
+        $query .= ' ORDER BY '.$orderby.' '.$order;
         /* -- Pagination parameters -- */
         //Number of elements in your table?
-        $totalitems = $wpdb->query($query); //return the total number of affected rows
+        $totalitems = $wpdb->query($wpdb->prepare($query)); //return the total number of affected rows
         //How many to display per page?
         $perpage = 20;
         //Which page is this?
@@ -102,7 +99,7 @@ class WebpayTransactionsTable extends WP_List_Table
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
 
         /* -- Fetch the items -- */
-        $this->items = $wpdb->get_results($query);
+        $this->items = $wpdb->get_results($wpdb->prepare($query));
     }
 
     public function column_amount($item)
