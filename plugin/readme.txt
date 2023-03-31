@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.6.7 =
+* Se sanitiza consulta sql por seguridad.
+
 = 1.6.6 =
 * Se corrige un problema con el versionamiento.
 
@@ -30,7 +33,7 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 * Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
 
 = 1.6.1 =
-* Se corrije error con librería "monolog/monolog" 
+* Se corrije error con librería "monolog/monolog"
 
 = 1.6.0 =
 * Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
@@ -125,6 +128,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.6.7 =
+* Se sanitiza consulta sql por seguridad.
+
 = 1.6.6 =
 * Se corrige un problema con el versionamiento.
 
@@ -141,7 +147,7 @@ Arreglado:
 * Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
 
 = 1.6.1 =
-* Se corrije error con librería "monolog/monolog" 
+* Se corrije error con librería "monolog/monolog"
 
 = 1.6.0 =
 * Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
