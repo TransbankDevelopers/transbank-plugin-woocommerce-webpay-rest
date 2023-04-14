@@ -31,4 +31,8 @@ vendor
 transbank-webpay-plus-rest.zip
 transbank-webpay-plus-rest-guzzle7.zip
 
-docker-woocommerce
+docker-woocommerce-*/wp_data
+docker-woocommerce-*/db_data
+docker-woocommerce-*/transbank-webpay-plus-rest
+
+
