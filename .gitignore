@@ -35,4 +35,4 @@ docker-woocommerce-*/wp_data
 docker-woocommerce-*/db_data
 docker-woocommerce-*/transbank-webpay-plus-rest
 
-
+composer.lock

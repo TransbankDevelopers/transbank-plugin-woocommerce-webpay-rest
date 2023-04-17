@@ -1,6 +1,6 @@
 language: php
 php:
-  - '7.1'
+  - '7.2'
   - '7.3'
 script: echo "We don't have tests yet :("
 before_deploy:
@@ -23,4 +23,4 @@ deploy:
     on:
       repo: TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest
       tags: true
-      php: 7.1
+      php: 7.2
