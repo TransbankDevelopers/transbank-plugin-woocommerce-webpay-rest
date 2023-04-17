@@ -14,7 +14,6 @@ README_FILE="readme.txt"
 COMPOSER_FILE="composer.json"
 COMPOSER_LOCK_FILE="composer.lock"
 
-
 cd $SRC_DIR
 composer install --no-dev
 cd ..
@@ -26,15 +25,9 @@ cp "$SRC_DIR/$COMPOSER_LOCK_FILE" "$SRC_DIR/$COMPOSER_LOCK_FILE.bkp"
 PLUGIN_FILE="transbank-webpay-plus-rest.zip"
 PLUGIN_FILE_GUZZLE="transbank-webpay-plus-rest-guzzle7.zip"
 
-cd $SRC_DIR
-zip -FSr ../$PLUGIN_FILE . -x composer.json composer.lock "$MAIN_FILE.bkp" "$README_FILE.bkp" vendor/tecnickcom/tcpdf/fonts/*
-zip -ur ../$PLUGIN_FILE ./vendor/tecnickcom/tcpdf/fonts/helvetica.php
-
 # Create Guzzle 7 version
 sed -i.bkp "s/\"php\": \"7.0\"/\"php\": \"7.2.5\"/g" "$COMPOSER_FILE"
 composer require guzzlehttp/guzzle:^7.0
-zip -FSr ../$PLUGIN_FILE_GUZZLE . -x composer.json composer.lock "$MAIN_FILE.bkp" "$README_FILE.bkp" "$COMPOSER_FILE.bkp" vendor/tecnickcom/tcpdf/fonts/*
-zip -ur ../$PLUGIN_FILE_GUZZLE ./vendor/tecnickcom/tcpdf/fonts/helvetica.php
 
 cp "$COMPOSER_LOCK_FILE.bkp" "$COMPOSER_LOCK_FILE"
 rm "$COMPOSER_LOCK_FILE.bkp"

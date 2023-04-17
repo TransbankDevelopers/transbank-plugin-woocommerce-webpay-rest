@@ -136,14 +136,6 @@ if (!defined('ABSPATH')) {
     </div>
 
     <div class="tbk-box">
-        <fieldset class="tbk_info">
-            <a class="button-primary" id="tbk_pdf_button"
-               href="<?php echo admin_url('admin-ajax.php'); ?>?action=download_report&document=report"
-               target="_blank">
-                Descargar diagnóstico en PDF
-            </a>
-        </fieldset>
-
 
         <h3 class="tbk_title_h3">Información de Plugin / Ambiente</h3>
         <table class="tbk_table_info">
