@@ -3,24 +3,38 @@
 namespace Transbank\Woocommerce;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
-use Transbank\WooCommerce\WebpayRest\Helpers\ReportPdfLog;
+use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 
 class ReportGenerator
 {
-    public static function download()
+    public static function showDiagReport()
     {
-        $document = filter_input(INPUT_GET, 'document', FILTER_SANITIZE_STRING);
         $healthcheck = HealthCheckFactory::create();
+        $myJSON = $healthcheck->printFullResume();
 
-        $json = $healthcheck->printFullResume();
-        $temp = json_decode($json);
-        if ($document == 'report') {
-            unset($temp->php_info);
-        } else {
-            $temp = ['php_info' => $temp->php_info];
+        $loghandler = new LogHandler();
+        $json = json_decode($loghandler->getLastLog(), true);
+        $obj = json_decode($myJSON, true);
+        $obj['php_info'] = null;
+        if (isset($json['log_content'])) {
+            $html = str_replace("\r\n", '*****123', $json['log_content']);
+            $html = str_replace("\n", '*****123', $json['log_content']);
+            $obj += ['logs' => ['log' => explode('*****123', $html)]];
         }
-        $rl = new ReportPdfLog($document);
-        $rl->getReport(json_encode($temp));
-        wp_die();
+        header('Content-disposition: attachment; filename=tbk-webpay-plus.json');
+        header('Content-type: application/json');
+        echo json_encode($obj);
+    }
+
+    public static function showPhpInfoReport()
+    {
+        ob_start();
+        phpinfo();
+        $info = ob_get_contents();
+        ob_end_clean();
+        echo $info;
     }
 }
+
+
+
