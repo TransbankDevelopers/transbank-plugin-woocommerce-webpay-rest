@@ -14,6 +14,9 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.6.8 =
+* Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
+
 = 1.6.7 =
 * Se sanitiza consulta sql por seguridad.
 
@@ -128,6 +131,9 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.6.8 =
+* Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
+
 = 1.6.7 =
 * Se sanitiza consulta sql por seguridad.
 
