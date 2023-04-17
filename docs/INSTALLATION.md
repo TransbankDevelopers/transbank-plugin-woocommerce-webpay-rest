@@ -66,7 +66,7 @@ Para el ambiente de Integración, puedes utilizar las siguientes credenciales pa
 
 1. Guardar los cambios presionando el botón [Save changes]
 
-2. Además, puedes generar un documento de diagnóstico en caso que Transbank te lo pida. Para ello, haz click en el botón "Información" ahí podrás descargar un pdf.
+2. Además, puedes generar un documento de diagnóstico en caso que Transbank te lo pida. Para ello, haz click en el Tab "Diagnóstico" en el botón "Mostrar diagnóstico en Html" ahí podrás visualizarlo en Html e imprimirlo en PDF.
 
   ![Paso 6](img/paso6.png)
 
