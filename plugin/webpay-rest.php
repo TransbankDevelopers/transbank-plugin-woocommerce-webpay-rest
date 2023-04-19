@@ -226,6 +226,7 @@ function woocommerce_transbank_rest_init()
          **/
         public function init_form_fields()
         {
+			$this->description = $this->get_option('webpay_rest_description');
             $this->form_fields = [
                 'enabled' => [
                     'title'   => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
@@ -268,7 +269,13 @@ function woocommerce_transbank_rest_init()
                         'completed'  => 'Completed',
                     ],
                     'default' => '',
-                ]
+                ],
+				'webpay_rest_description' => [
+				    'title'       => __('Descripción', 'transbank_webpay_plus_rest'),
+				    'type'        => 'textarea',
+				    'default'     => 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus',
+				    'placeholder' => 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus',
+				],
             ];
         }
 
