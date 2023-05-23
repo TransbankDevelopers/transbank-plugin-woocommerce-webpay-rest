@@ -121,8 +121,9 @@ function woocommerce_transbank_rest_init()
             $this->icon = plugin_dir_url(__FILE__).'images/webpay.png';
             $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
             $this->title = 'Transbank Webpay Plus';
-            $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
-            $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
+            $description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
+            $this->description = $description;
+            $this->method_description = $description;
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
             $this->interactsWithFullLog = new InteractsWithFullLog();
@@ -271,11 +272,11 @@ function woocommerce_transbank_rest_init()
                     'default' => '',
                 ],
 				'webpay_rest_description' => [
-				    'title'       => __('Descripción', 'transbank_webpay_plus_rest'),
-				    'type'        => 'textarea',
-				    'default'     => 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus',
-				    'placeholder' => 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus',
-				],
+                    'title'       => __('Descripción', 'transbank_webpay_plus_rest'),
+                    'type'        => 'textarea',
+                    'default'     => $description,
+                    'placeholder' => $description,
+                ],
             ];
         }
 
