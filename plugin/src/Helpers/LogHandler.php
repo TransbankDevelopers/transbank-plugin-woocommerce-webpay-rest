@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 define('Transbank_webpay_Rest_Webpay_ROOT', dirname(dirname(__DIR__)));
+define('Transbank_webpay_Rest_Webpay_UPLOADS', untrailingslashit(wp_upload_dir()['basedir'] . '/transbank_webpay_plus_rest'));
 
 class LogHandler
 {
@@ -27,7 +28,7 @@ class LogHandler
 
     public function __construct($ecommerce = 'woocommerce', $days = 7, $weight = '2MB')
     {
-        $this->logDir = Transbank_webpay_Rest_Webpay_ROOT.'/logs';
+        $this->logDir = Transbank_webpay_Rest_Webpay_UPLOADS.'/logs';
         $this->ecommerce = $ecommerce;
         $this->lockfile = $this->logDir.'/set_logs_activate.lock';
         $dia = date('Y-m-d');
@@ -41,7 +42,7 @@ class LogHandler
                 mkdir($this->logDir, 0777, true);
             }
         } catch (Exception $e) {
-            
+
         }
 
         try {
@@ -49,9 +50,9 @@ class LogHandler
                 wp_mkdir_p($this->logDir);
             }
         } catch (Exception $e) {
-            
+
         }
-        
+
         // the default date format is "Y-m-d H:i:s"
         $dateFormat = "Y n j, g:i a";
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
