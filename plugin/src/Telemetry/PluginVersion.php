@@ -1,14 +1,15 @@
 <?php
 
 namespace Transbank\WooCommerce\WebpayRest\Telemetry;
+
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use GuzzleHttp\Client;
 
 class PluginVersion
 {
-    protected $soapUri = 'http://www.cumbregroup.com/tbk-webservice/PluginVersion.php?wsdl';
+    protected $soapUri = 'https://www.cumbregroup.com/tbk-webservice/PluginVersion.php?wsdl';
     protected $client = null;
-    
+
     const ENV_INTEGRATION = 'TEST';
     const ENV_PRODUCTION = 'LIVE';
     const PRODUCT_WEBPAY = 1;
@@ -55,7 +56,8 @@ class PluginVersion
         return null;
     }
 
-    public function sendMetrics($commerceCode, $pluginVersion, $ecommerceVersion, $ecommerceId, $environment, $product) {
+    public function sendMetrics($commerceCode, $pluginVersion, $ecommerceVersion, $ecommerceId, $environment, $product)
+    {
         try {
 
             $log = new LogHandler();
@@ -64,7 +66,7 @@ class PluginVersion
             $log->logInfo($commerceCode);
 
             $webpayPayload = [
-                'ecommerceId' => $ecommerceId,    
+                'ecommerceId' => $ecommerceId,
                 'plugin' => 'WooCommerce',
                 'environment' => $environment,
                 'product' => $product,
@@ -75,7 +77,7 @@ class PluginVersion
             ];
 
             $client = new Client();
-            
+
             $client->request('POST', 'https://tbk-app-y8unz.ondigitalocean.app/records/newRecord', ['form_params' => $webpayPayload]);
 
             $log->logInfo(':: Saved');
