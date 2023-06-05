@@ -12,6 +12,6 @@
 
     <br><br>
 
-    Si quieres, puedes revisar <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion">las instrucciones detalladas de cómo pasar a producción</a>
+    Si quieres, puedes revisar <a target="_blank" href="https://transbankdevelopers.cl/documentacion/como_empezar#puesta-en-produccion" rel="noopener">las instrucciones detalladas de cómo pasar a producción</a>
 
 </div>
