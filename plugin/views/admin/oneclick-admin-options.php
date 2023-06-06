@@ -79,10 +79,10 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
     <h3>¿Que hago ahora?</h3>
     <p>Verifica que todo funcione correctamente. Realiza algunas compras con tarjetas de crédito y de débito, además de
         probar con transacciones aprobadas y rechazadas. <br>Si todo funciona correctamente, solicita tu llave secreta
-        (Api Key Secret). A continuación te explicamos como.  </p>
+        (Api Key Secret). A continuación te explicamos como. </p>
 
     <h3>Documentación</h3>
-    <p>Encuentra más detalles y funcionalidades en la <a target="_blank" href="http://transbankdevelopers.cl/plugin/woocommerce/">documentación oficial del plugin</a></p>
+    <p>Encuentra más detalles y funcionalidades en la <a target="_blank" href="http://transbankdevelopers.cl/plugin/woocommerce/" rel="noopener">documentación oficial del plugin</a></p>
 
     <h3>Conoce las novedades</h3>
     <iframe width="100%" height="315" src="https://www.youtube.com/embed/aVElZf5xqKQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -93,7 +93,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 <script>
     (function($) {
         <?php if (!$showedWelcome) { ?>
-        openWelcomeMessageTransbankWebpayRest();
+            openWelcomeMessageTransbankWebpayRest();
         <?php } ?>
         $('#show-welcome-message').click(function() {
             openWelcomeMessageTransbankWebpayRest();
@@ -107,6 +107,21 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
             });
         }
     })(jQuery);
-
 </script>
-<script> (function() { var qs,js,q,s,d=document, gi=d.getElementById, ce=d.createElement, gt=d.getElementsByTagName, id="typef_orm_share", b="https://embed.typeform.com/"; if(!gi.call(d,id)){ js=ce.call(d,"script"); js.id=id; js.src=b+"embed.js"; q=gt.call(d,"script")[0]; q.parentNode.insertBefore(js,q) } })() </script>
+<script>
+    (function() {
+        var qs, js, q, s, d = document,
+            gi = d.getElementById,
+            ce = d.createElement,
+            gt = d.getElementsByTagName,
+            id = "typef_orm_share",
+            b = "https://embed.typeform.com/";
+        if (!gi.call(d, id)) {
+            js = ce.call(d, "script");
+            js.id = id;
+            js.src = b + "embed.js";
+            q = gt.call(d, "script")[0];
+            q.parentNode.insertBefore(js, q)
+        }
+    })()
+</script>
