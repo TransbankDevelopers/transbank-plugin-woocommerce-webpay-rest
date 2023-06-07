@@ -11,6 +11,11 @@ use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
+use Transbank\WooCommerce\WebpayRest\Helpers\OneclickUtil;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\CreateTransactionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\AuthorizeOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
@@ -240,7 +245,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         /** @var WC_Payment_Token_Oneclick $paymentToken */
         $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-        $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
+        $response = $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
+        if ($response['result'] == 'error'){
+            throw new Exception('Se produjo un error en la autorización');
+        }
         $this->setAfterPaymentOrderStatus($renewalOrder);
     }
 
@@ -509,6 +517,44 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
+     * @param WC_Payment_Token_Oneclick $paymentToken
+     *
+     * @return WC_Payment_Token_Oneclick
+     */
+    private function getWcPaymentToken(WC_Payment_Token_Oneclick $paymentToken = null){
+        if ($paymentToken) {
+            return $paymentToken;
+        } else {
+            $tokenId = wc_clean($_POST["wc-{$this->id}-payment-token"]);
+            /** @var WC_Payment_Token_Oneclick $token */
+            return \WC_Payment_Tokens::get($tokenId);
+        }
+    }
+
+    private function getCommerceCode(){
+        return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('commerce_code') : Oneclick::DEFAULT_COMMERCE_CODE;
+    }
+
+    private function getChildCommerceCode(){
+        return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('child_commerce_code') : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+    }
+
+    private function getEnviroment(){
+        return $this->get_option('environment');
+    }
+
+    private function getApikey(){
+        return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('api_key') : Oneclick::DEFAULT_API_KEY;
+    }
+
+    private function getAmountForAuthorize($amount, $order) {
+        if ($amount == null) {
+            $amount = (int) number_format($order->get_total(), 0, ',', '');
+        }
+        return $amount;
+    }
+
+    /**
      * @param WC_Order $order
      *
      * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
@@ -520,107 +566,48 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         WC_Payment_Token_Oneclick $paymentToken = null,
         $amount = null
     ): array {
-        global $wpdb;
 
-        if ($paymentToken) {
-            $token = $paymentToken;
-        } else {
-            $token_id = wc_clean($_POST["wc-{$this->id}-payment-token"]);
-            /** @var WC_Payment_Token_Oneclick $token */
-            $token = \WC_Payment_Tokens::get($token_id);
-        }
+        try {
 
-        $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token->get_id());
+            $token = $this->getWcPaymentToken($paymentToken);
+            $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token->get_id());
+    
+            $amount = $this->getAmountForAuthorize($amount, $order);
+            $authorizeResponse = OneclickUtil::authorize($this->getEnviroment(), $this->getCommerceCode(), $this->getApikey(), $this->getChildCommerceCode(), $order->get_id(), $amount, $token->get_username(), $token->get_token());
 
-        if ($amount == null) {
-            $amount = (int) number_format($order->get_total(), 0, ',', '');
-        }
-
-        $childCommerceCode = $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('child_commerce_code') : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
-
-        $childBuyOrder = 'C'.$order->get_id();
-        $details = [
-            [
-                'commerce_code'       => $childCommerceCode,
-                'buy_order'           => $childBuyOrder, // Tu propio buyOrder
-                'amount'              => $amount,
-                'installments_number' => 1,
-            ],
-        ];
-
-        $response = $this->oneclickTransaction->authorize(
-            $token->get_username(),
-            $token->get_token(),
-            $order->get_id(),
-            $details
-        );
-
-        $this->logger->logInfo('[Oneclick] Checkout: paying response');
-        $this->logger->logInfo(print_r($response, true));
-        $status = $response->isApproved() ? Transaction::STATUS_APPROVED : Transaction::STATUS_FAILED;
-
-        if ($response->isApproved()) {
             $order->add_payment_token($token);
             $this->setAfterPaymentOrderStatus($order);
             if (wc()->cart) {
                 wc()->cart->empty_cart();
             }
-            $this->add_order_notes($order, $response, 'Oneclick: Transacción Aprobada');
-        } else {
-            $this->logger->logInfo('[Oneclick] Checkout: authorization rejected');
-            $errorCode = $response->getDetails()[0]->getResponseCode() ?? null;
-            $status = $response->getDetails()[0]->getStatus() ?? null;
-            $order->update_status('failed');
-            $this->add_order_notes($order, $response, 'Oneclick: Transacción Rechazada');
-
-            $orderNoteMessage = 'Transacción rechazada';
-            if ($status === 'CONSTRAINTS_VIOLATED') {
-                $message = 'La transacción ha sido rechazada porque se superó el monto máximo por transacción, el monto máximo diario o el número de transacciones diarias configuradas por el comercio para cada usuario';
-                $orderNoteMessage = 'CONSTRAINTS_VIOLATED: '.$message;
-                wc_add_notice($message, 'error');
-            } else {
-                wc_add_notice('La transacción ha sido rechazada (Código de error: '.$errorCode.')', 'error');
-            }
-
-            if ($orderNoteMessage) {
-                $order->add_order_note($orderNoteMessage);
-            }
-        }
-
-        $insert = Transaction::createTransaction([
-            'order_id'            => $order->get_id(),
-            'buy_order'           => $order->get_id(),
-            'child_buy_order'     => $childBuyOrder,
-            'commerce_code'       => $this->oneclickInscription->getOptions()->getCommerceCode(),
-            'child_commerce_code' => $childCommerceCode,
-            'amount'              => $amount,
-            'environment'         => $this->oneclickInscription->getOptions()->getIntegrationType(),
-            'product'             => Transaction::PRODUCT_WEBPAY_ONECLICK,
-            'status'              => $status,
-            'transbank_status'    => $response->getDetails()[0]->getStatus() ?? null,
-            'transbank_response'  => json_encode($response),
-        ]);
-
-        if( !$insert ) {
-            $transactionTable = Transaction::getTableName();
-            $wpdb->show_errors();
-            $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
-            $this->logger->logInfo($errorMessage);
-            //wc_add_notice($errorMessage, 'error');
-            throw new Exception($errorMessage);
-        }
-
-        if ($response->isApproved() && $insert) {
+            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Transacción Aprobada');
             do_action('transbank_oneclick_transaction_approved', $order);
-
             return [
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order),
             ];
+
+        } catch (CreateTransactionOneclickException $e) {
+            $order->update_status('failed');
+            wc_add_notice($e->getMessage(), 'error');
+            $order->add_order_note('Problemas al crear el registro de Transacción');
+        } catch (AuthorizeOneclickException $e) {
+            $order->update_status('failed');
+            wc_add_notice($e->getMessage(), 'error');
+            $order->add_order_note('Transacción con problemas de autorización');
+        } catch (RejectedAuthorizeOneclickException $e) {
+            $order->update_status('failed');
+            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
+            wc_add_notice($e->getMessage(), 'error');
+            $order->add_order_note('Transacción rechazada');
+        } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
+            $order->update_status('failed');
+            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
+            wc_add_notice($e->getMessage(), 'error');
+            $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
         }
-
+        
         do_action('transbank_oneclick_transaction_failed', $order);
-
         return [
             'result' => 'error',
         ];
@@ -652,5 +639,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->update_status($status);
         }
     }
+
+
 
 }
