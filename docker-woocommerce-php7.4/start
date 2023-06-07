@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-docker-compose up -d && \
-echo "
-========================================
-      🌎 Web server: http://localhost:8082
-      ⚙️ Admin: http://localhost:8082/wp-admin
-            user: admin
-            password: admin
-========================================"

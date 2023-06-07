@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-docker-compose run --rm -w /var/www/html/wp-content/plugins/woocommerce-transbank webserver composer update
