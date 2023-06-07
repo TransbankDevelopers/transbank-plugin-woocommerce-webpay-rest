@@ -8,7 +8,7 @@ use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 class DatabaseTableInstaller
 {
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
-    const LATEST_TABLE_VERSION = 4;
+    const LATEST_TABLE_VERSION = 5;
 
     public static function isUpgraded(): bool
     {
@@ -53,6 +53,8 @@ class DatabaseTableInstaller
             `transbank_response` LONGTEXT,
             `product` varchar(30),
             `environment` varchar(20),
+            `error` varchar(255),
+            `detail_error` LONGTEXT,
             `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
         ) $charset_collate";
@@ -101,6 +103,8 @@ class DatabaseTableInstaller
             `environment` varchar(20),
             `commerce_code` varchar(60),
             `transbank_response` LONGTEXT,
+            `error` varchar(255),
+            `detail_error` LONGTEXT,
             `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
         ) $charset_collate";
