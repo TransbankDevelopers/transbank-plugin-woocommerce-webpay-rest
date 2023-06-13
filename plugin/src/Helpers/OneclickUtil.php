@@ -20,6 +20,10 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedAuthorizeOnecli
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\AuthorizeOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedRefundOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RefundOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\NotFoundTransactionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\GetTransactionOneclickException;
 
 class OneclickUtil {
     
@@ -249,5 +253,63 @@ class OneclickUtil {
         );
     }
 
+
+
+    /* Metodo REFUND  */
+    public static function getTransactionApprovedByOrderId($orderId)
+    {
+        try {
+            return Transaction::getApprovedByOrderId($orderId);
+        } catch (Exception $e) {
+            $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada ("orderId": "'.$orderId.'") desde la base de datos. Error: '.$e->getMessage();
+            OneclickUtil::logError($errorMessage);
+            throw new GetTransactionOneclickException($errorMessage, $orderId);
+        }
+    }
+
+    public static function refundInner($environment, $commerceCode, $apiKey, $childCommerceCode, $amount, $transaction)
+    {
+        try {
+            $mallTransaction = new MallTransaction(new Options($apiKey, $commerceCode, $environment));
+            return $mallTransaction->refund($transaction->buy_order, $childCommerceCode, $transaction->child_buy_order, $amount);
+        } catch (Exception $e) {
+            $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay ("buyOrder": "'.$transaction->buy_order.'", "childBuyOrder": "'.$transaction->child_buy_order.'", "amount": "'.$amount.'"). Error: '.$e->getMessage();
+            OneclickUtil::logError($errorMessage);
+            throw new RefundOneclickException($errorMessage, $transaction->buy_order, $transaction->child_buy_order, $transaction);
+        }
+    }
+
+    public static function refundTransaction($environment, $commerceCode, $apiKey, $childCommerceCode, $orderId, $amount)
+    {
+        /*1. Extraemos la transacción */
+        $tx = OneclickUtil::getTransactionApprovedByOrderId($orderId);
+        if (!$tx) {
+            $errorMessage = 'No se encontró una transacción aprobada ("orderId": "'.$orderId.'") en la base de datos';
+            OneclickUtil::logError($errorMessage);
+            throw new NotFoundTransactionOneclickException($errorMessage, $orderId);
+        }
+
+        /*2. Realizamos el refund */
+        $refundResponse = OneclickUtil::refundInner($environment, $commerceCode, $apiKey, $childCommerceCode, $amount, $tx);
+
+        /*3. Validamos si fue exitoso */
+        if (!(($refundResponse->getType() === 'REVERSED' || $refundResponse->getType() === 'NULLIFIED') && (int) $refundResponse->getResponseCode() === 0)) {
+            $errorMessage = 'El refund de la transacción no se pudo realizar en Webpay ("buyOrder": "'.$tx->buy_order.'", "childBuyOrder": "'.$tx->child_buy_order.'", "amount"'.$amount.'". ';
+            OneclickUtil::logError($errorMessage);
+            throw new RejectedRefundOneclickException($errorMessage, $tx->buy_order, $tx->child_buy_order, $tx, $refundResponse);
+        }
+        /*4. Si todo ok guardamos el estado */
+        Transaction::update(
+            $tx->id,
+            [
+                'last_refund_type'    => $refundResponse->getType(),
+                'last_refund_response'   => json_encode($refundResponse)
+            ]
+        );
+        return array(
+            'transaction' => $tx,
+            'refundResponse' => $refundResponse
+        );
+    }
 
 }
