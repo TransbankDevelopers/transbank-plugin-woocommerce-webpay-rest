@@ -2,7 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Exceptions\Webpay;
 
-class RejectedWebpayException extends \Exception
+class RejectedCommitWebpayException extends \Exception
 {
     private $tokenWs;
     private $transaction;
