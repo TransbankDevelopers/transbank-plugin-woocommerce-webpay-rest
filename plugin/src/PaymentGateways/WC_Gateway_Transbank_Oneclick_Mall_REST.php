@@ -2,13 +2,13 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
+use Exception;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\Helpers\OneclickUtil;
@@ -16,6 +16,10 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedAuthorizeOnecli
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\AuthorizeOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedRefundOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RefundOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\NotFoundTransactionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\GetTransactionOneclickException;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
@@ -153,38 +157,41 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        $order = new WC_Order($order_id);
-        $transaction = Transaction::getApprovedByOrderId($order_id);
-
-        if (!$transaction) {
-            $message = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
-            do_action('transbank_oneclick_refund_failed', $order, $transaction);
-            $this->failedRefund($order, $message);
-        }
-        $response = [];
-
+        $order = null;
         try {
-            $response = $this->oneclickTransaction->refund($transaction->buy_order, $transaction->child_commerce_code, $transaction->child_buy_order, round($amount));
-            $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
+            $order = new WC_Order($order_id);
+            $resp = OneclickUtil::refundTransaction($this->getEnviroment(), $this->getCommerceCode(), $this->getApikey(), $this->getChildCommerceCode(), $order->get_id(), round($amount));
+            $refundResponse = $resp['refundResponse'];
+            $transaction = $resp['transaction'];
+            $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
+            $this->addRefundOrderNote($refundResponse, $order, $amount, $jsonResponse);
             do_action('transbank_oneclick_refund_finished', $order, $transaction, $jsonResponse);
-        } catch (\Exception $e) {
-            $message = 'Error al anular: '.$e->getMessage();
-            do_action('transbank_oneclick_refund_failed', $order, $transaction);
-            $this->failedRefund($order, $message);
-        }
-
-        if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
-            $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
             do_action('transbank_oneclick_refund_approved', $order, $transaction);
-
             return true;
-        } else {
-            $message = 'Anulación a través de Webpay FALLIDA. '."\n\n".$jsonResponse;
-            do_action('transbank_oneclick_refund_failed', $order, $transaction);
-            $this->failedRefund($order, $message);
+        } catch (GetTransactionOneclickException $e) {
+            $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ';
+            $order->add_order_note($errorMessage);
+            do_action('transbank_oneclick_refund_failed', $order, null);
+            throw new Exception($errorMessage);
+        } catch (NotFoundTransactionOneclickException $e) {
+            $errorMessage = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
+            $order->add_order_note($errorMessage);
+            do_action('transbank_oneclick_refund_failed', $order, null);
+            throw new Exception($errorMessage);
+        } catch (RefundOneclickException $e) {
+            $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
+            do_action('transbank_oneclick_refund_failed', $order, $e->getTransaction(), $e->getMessage());
+            throw new Exception('Error al anular: '.$e->getMessage());
+        }catch (RejectedRefundOneclickException $e) {
+            $errorMessage = 'Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
+            $order->add_order_note($errorMessage);
+            do_action('transbank_oneclick_refund_failed', $order, $e->getTransaction());
+            throw new Exception($errorMessage);
+        } catch (Exception $e) {
+            $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
+            do_action('transbank_oneclick_refund_failed', $order, null);
+            throw new Exception('Anulación a través de Webpay fallida.');
         }
-
-        return false;
     }
 
     public function admin_options()
