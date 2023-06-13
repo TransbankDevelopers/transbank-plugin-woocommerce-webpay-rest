@@ -1,5 +1,6 @@
 <?php
 use Transbank\Webpay\WebpayPlus;
+use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
@@ -12,8 +13,13 @@ use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
-use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
+use Transbank\WooCommerce\WebpayRest\Helpers\WebpayUtil;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateTransactionWebpayException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\GetTransactionWebpayException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\NotFoundTransactionWebpayException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RefundWebpayException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedRefundWebpayException;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -125,7 +131,6 @@ function woocommerce_transbank_rest_init()
             $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
-            $this->interactsWithFullLog = new InteractsWithFullLog();
 
             $this->supports = [
                 'products',
@@ -158,42 +163,37 @@ function woocommerce_transbank_rest_init()
 
         public function process_refund($order_id, $amount = null, $reason = '')
         {
-            $order = new WC_Order($order_id);
-            $transaction = Transaction::getApprovedByOrderId($order_id);
-
-            if (!$transaction) {
-                $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
-                do_action('transbank_webpay_plus_refund_transaction_not_found', $order, $transaction);
-
-                return false;
-            }
-            $response = [];
-
+            $order = null;
             try {
-                $sdk = new TransbankSdkWebpayRest();
-                $response = $sdk->refund($transaction->token, round($amount));
-                $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
-            } catch (Exception $e) {
-                $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
-                do_action('transbank_webpay_plus_refund_failed', $order, $transaction, $e->getMessage());
-
-                throw new Exception('Error al anular: '.$e->getMessage());
-            }
-
-            if ($response->getType() === 'REVERSED' || ($response->getType() === 'NULLIFIED' && (int) $response->getResponseCode() === 0)) {
-                $this->addRefundOrderNote($response, $order, $amount, $jsonResponse);
-                do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $response);
-
+                $order = new WC_Order($order_id);
+                $resp = WebpayUtil::refundTransaction($this->getEnviroment(), $this->getCommerceCode(), $this->getApikey(), $order->get_id(), round($amount));
+                $refundResponse = $resp['refundResponse'];
+                $transaction = $resp['transaction'];
+                $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
+                $this->addRefundOrderNote($refundResponse, $order, $amount, $jsonResponse);
+                do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $jsonResponse);
                 return true;
-            } else {
-                $order->add_order_note('Anulación a través de Webpay FALLIDA. '.
-                    "\n\n".$jsonResponse);
-                do_action('transbank_webpay_plus_refund_failed', $order, $transaction);
-
+            } catch (GetTransactionWebpayException $e) {
+                $order->add_order_note('Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ');
+                do_action('transbank_webpay_plus_refund_failed', $order, null);
+                return false;
+            } catch (NotFoundTransactionWebpayException $e) {
+                $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
+                do_action('transbank_webpay_plus_refund_transaction_not_found', $order, null);
+                return false;
+            } catch (RefundWebpayException $e) {
+                $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
+                do_action('transbank_webpay_plus_refund_failed', $order, $e->getTransaction(), $e->getMessage());
+                throw new Exception('Error al anular: '.$e->getMessage());
+            }catch (RejectedRefundWebpayException $e) {
+                $order->add_order_note('Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT));
+                do_action('transbank_webpay_plus_refund_failed', $order, $e->getTransaction());
+                throw new Exception('Anulación a través de Webpay fallida.');
+            } catch (Exception $e) {
+                $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
+                do_action('transbank_webpay_plus_refund_failed', $order, null);
                 throw new Exception('Anulación a través de Webpay fallida.');
             }
-
-            return false;
         }
 
         public function registerPluginVersion()
@@ -288,74 +288,49 @@ function woocommerce_transbank_rest_init()
             }
         }
 
+        private function getCommerceCode(){
+            return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('commerce_code') : WebpayPlus::DEFAULT_COMMERCE_CODE;
+        }
+    
+        private function getEnviroment(){
+            return $this->get_option('environment');
+        }
+    
+        private function getApikey(){
+            return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('api_key') : WebpayPlus::DEFAULT_API_KEY;
+        }
+
+
         /**
          * Procesar pago y retornar resultado.
          **/
         public function process_payment($order_id)
         {
-            global $wpdb;
-            $order = new WC_Order($order_id);
-            $amount = (int) number_format($order->get_total(), 0, ',', '');
-            $sessionId = uniqid();
-            $buyOrder = $order_id;
-            $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
-
-            $transbankSdkWebpay = new TransbankSdkWebpayRest($this->config);
-            do_action('transbank_webpay_plus_starting_transaction', $order);
-
             try {
-                $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
-            } catch (\Throwable $e) {
-                $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($e);
-
-                return wc_add_notice($errorMessage, 'error');
-            }
-
-            if (!isset($result['token_ws'])) {
+                $order = new WC_Order($order_id);
+                do_action('transbank_webpay_plus_starting_transaction', $order);
+                $amount = (int) number_format($order->get_total(), 0, ',', '');
+                $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
+                $createResponse = WebpayUtil::createTransaction($this->getEnviroment(), $this->getCommerceCode(), $this->getApikey(), $order->get_id(), $amount, $returnUrl);
+                do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->token);
+                return [
+                    'result'   => 'success',
+                    'redirect' => $createResponse->url.'?token_ws='.$createResponse->token,
+                ];
+            } catch (CreateWebpayException $e) {
+                if (ErrorHelper::isGuzzleError($e)){
+                    return wc_add_notice(ErrorHelper::getGuzzleError(), 'error');
+                }
                 wc_add_notice(
                     'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.<br/>',
                     'error'
                 );
-
                 return;
+            } catch (CreateTransactionWebpayException $e) {
+                throw new \Exception($e->getMessage());
+            } catch (Exception $e) {
+                throw new \Exception($e->getMessage());
             }
-
-            $url = $result['url'];
-            $token_ws = $result['token_ws'];
-
-            $transaction = [
-                'order_id'    => $order_id,
-                'buy_order'   => $buyOrder,
-                'amount'      => $amount,
-                'token'       => $token_ws,
-                'session_id'  => $sessionId,
-                'environment' => $transbankSdkWebpay->getTransaction()->getOptions()->getIntegrationType(),
-                'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
-                'status'      => Transaction::STATUS_INITIALIZED,
-            ];
-
-            $this->interactsWithFullLog->logWebpayPlusAntesCrearTxEnTabla($transaction); // Logs
- 
-            $insert = Transaction::createTransaction($transaction);
-
-            if( !$insert ) {
-                $transactionTable = Transaction::getTableName();
-                $wpdb->show_errors();
-                $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
-                $this->log->logInfo($errorMessage);
-                //wc_add_notice($errorMessage, 'error');
-                $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxEnTablaError($transaction); // Logs
-                throw new Exception($errorMessage);
-            }
-
-            $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxEnTabla($transaction); // Logs
-
-            do_action('transbank_webpay_plus_transaction_started', $order, $token_ws);
-
-            return [
-                'result'   => 'success',
-                'redirect' => $url.'?token_ws='.$token_ws,
-            ];
         }
 
         /**

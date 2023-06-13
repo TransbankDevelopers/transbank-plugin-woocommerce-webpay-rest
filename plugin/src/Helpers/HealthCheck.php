@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -207,30 +205,27 @@ class HealthCheck
 
     public function setCreateTransaction()
     {
-        $transbankSdkWebpay = new TransbankSdkWebpayRest();
-
         $amount = 990;
         $buyOrder = '_Healthcheck_';
         $sessionId = uniqid();
         $returnUrl = 'http://test.com/test';
 
-        $result = $transbankSdkWebpay->createTransaction($amount, $sessionId, $buyOrder, $returnUrl);
         $status = 'Error';
-        if ($result) {
-            if (!empty($result['error']) && isset($result['error'])) {
-                $status = 'Error';
-            } else {
-                $status = 'OK';
-            }
-        } else {
-            if (array_key_exists('error', $result)) {
-                $status = 'Error';
-            }
+        try {
+            $result = WebpayUtil::createInner($this->environment, $this->commerceCode, $this->apiKey, $buyOrder, $sessionId, $amount, $returnUrl);
+            $status = 'OK';
+
+        } catch (\Exception $e) {
+            $status = 'Error';
+            $result = [
+                'error'  => 'Error al crear la transacción',
+                'detail' => $e->getMessage()
+            ];
         }
 
         return [
             'status'   => ['string' => $status],
-            'response' => $result,
+            'response' => $result
         ];
     }
 

@@ -15,7 +15,7 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\UserCancelWebpayException
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\DoubleTokenWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CommitWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\InvalidStatusWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedWebpayException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedCommitWebpayException;
 use WC_Order;
 
 class ResponseController
@@ -131,7 +131,7 @@ class ResponseController
             $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, null, $transaction->token);
             do_action('transbank_webpay_plus_transaction_failed', $wooCommerceOrder, $transaction, null);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
-        } catch (RejectedWebpayException $e) {
+        } catch (RejectedCommitWebpayException $e) {
             $transaction = $e->getTransaction();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, $e->getCommitResponse(), $transaction->token);
