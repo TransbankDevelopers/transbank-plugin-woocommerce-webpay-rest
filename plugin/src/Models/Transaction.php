@@ -9,6 +9,7 @@ class Transaction
 {
     const TRANSACTIONS_TABLE_NAME = 'webpay_rest_transactions';
 
+    const STATUS_PREPARED = 'prepared';
     const STATUS_INITIALIZED = 'initialized';
     const STATUS_FAILED = 'failed';
     const STATUS_ABORTED_BY_USER = 'aborted_by_user';

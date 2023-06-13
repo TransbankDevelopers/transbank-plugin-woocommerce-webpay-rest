@@ -51,6 +51,8 @@ class DatabaseTableInstaller
             `session_id` varchar(100),
             `status` varchar(50) NOT NULL,
             `transbank_response` LONGTEXT,
+            `last_refund_type` varchar(100),
+            `last_refund_response` LONGTEXT,
             `product` varchar(30),
             `environment` varchar(20),
             `error` varchar(255),
