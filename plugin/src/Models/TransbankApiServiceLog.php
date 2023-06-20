@@ -2,6 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
+use function is_multisite;
+
 class TransbankApiServiceLog
 {
     const TABLE_NAME = 'transbank_api_service_log';
