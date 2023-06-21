@@ -46,19 +46,19 @@ function tbk_is_nav_active($tab, $val)
         <div class="tbk-content">
             <?php
             if ($tab === 'options') {
-                include __DIR__.'/admin-options.php';
+                include_once __DIR__.'/admin-options.php';
             } elseif ($tab === 'options_oneclick') {
-                include __DIR__.'/oneclick-admin-options.php';
+                include_once __DIR__.'/oneclick-admin-options.php';
             } elseif ($tab === 'logs') {
-                include __DIR__.'/logs.php';
+                include_once __DIR__.'/logs.php';
             } elseif ($tab === 'phpinfo') {
-                include __DIR__.'/phpinfo.php';
+                include_once __DIR__.'/phpinfo.php';
             } elseif ($tab === 'transactions') {
-                include __DIR__.'/transactions.php';
+                include_once __DIR__.'/transactions.php';
             } else {
                 $healthcheck = HealthCheckFactory::create();
                 $datos_hc = json_decode($healthcheck->printFullResume());
-                include __DIR__.'/healthcheck.php';
+                include_once __DIR__.'/healthcheck.php';
             }
             ?>
         </div>
