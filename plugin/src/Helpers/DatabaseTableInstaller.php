@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 
 require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
@@ -98,6 +99,31 @@ class DatabaseTableInstaller
             `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
         ) $charset_collate";
+
+        dbDelta($sql);
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+    }
+
+    public static function createTableTransbankExecutionErrorLog(): bool
+    {
+        global $wpdb;
+        $charsetCollate = $wpdb->get_charset_collate();
+        $tableName = TransbankExecutionErrorLog::getTableName();
+
+        $sql = "CREATE TABLE `{$tableName}` (
+            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
+            `order_id`         varchar(60) NOT NULL,
+            `service`          varchar(100) NOT NULL,
+            `product`          varchar(30) NOT NULL,
+            `enviroment`       varchar(20) NOT NULL,
+            `commerce_code`    varchar(60) NOT NULL,
+            `data`             LONGTEXT,
+            `error`            varchar(255),
+            `original_error`   LONGTEXT,
+            `custom_error`     LONGTEXT,
+            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
+            PRIMARY KEY (id)
+        ) $charsetCollate";
 
         dbDelta($sql);
         return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
