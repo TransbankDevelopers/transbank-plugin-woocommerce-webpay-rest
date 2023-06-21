@@ -7,7 +7,7 @@ use DateTimeZone;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
-use WC_Gateway_Transbank_Webpay_Plus_REST;
+use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use WC_Order;
 
 class ThankYouPageController
