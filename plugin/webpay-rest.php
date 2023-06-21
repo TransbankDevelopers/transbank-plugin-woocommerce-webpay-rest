@@ -158,7 +158,7 @@ add_action('add_meta_boxes', function () {
     add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post) {
         $order = new WC_Order($post->ID);
         $transaction = Transaction::getApprovedByOrderId($order->get_id());
-        include __DIR__.'/views/get-status.php';
+        include_once __DIR__.'/views/get-status.php';
     }, 'shop_order', 'side', 'core');
 });
 
@@ -171,7 +171,7 @@ add_action('admin_menu', function () {
         }
 
         $log = new LogHandler();
-        include __DIR__.'/views/admin/options-tabs.php';
+        include_once __DIR__.'/views/admin/options-tabs.php';
     }, null);
 
     add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
