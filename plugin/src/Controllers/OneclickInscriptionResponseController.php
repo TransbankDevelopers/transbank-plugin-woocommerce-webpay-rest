@@ -3,9 +3,8 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use \Exception;
-use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
-use Transbank\WooCommerce\WebpayRest\Helpers\OneclickUtil;
+use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
 use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
@@ -20,17 +19,19 @@ use WC_Payment_Tokens;
 class OneclickInscriptionResponseController
 {
     protected $logger;
-    protected $oneclickInscription;
     protected $gatewayId;
-
+    /**
+    * @var OneclickTransbankSdk
+    */
+    protected $oneclickTransbankSdk;
     /**
      * OneclickInscriptionResponseController constructor.
      */
-    public function __construct(MallInscription $oneclickInscription, $gatewayId, $logger = null)
+    public function __construct($gatewayId, $logger = null)
     {
         $this->logger = $logger ?? new LogHandler();
-        $this->oneclickInscription = $oneclickInscription;
         $this->gatewayId = $gatewayId;
+        $this->oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
     }
 
     private function getWcOrder($orderId) {
@@ -62,7 +63,7 @@ class OneclickInscriptionResponseController
     {
         $order = null;
         try {
-            $resp = OneclickUtil::processTbkReturnAndFinishInscription($_SERVER, $_GET, $_POST);
+            $resp = $this->oneclickTransbankSdk->processTbkReturnAndFinishInscription($_SERVER, $_GET, $_POST);
             $inscription = $resp['inscription'];
             $finishInscriptionResponse = $resp['finishInscriptionResponse'];
             $order = $this->getWcOrder($inscription->order_id);

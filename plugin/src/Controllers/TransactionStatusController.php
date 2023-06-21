@@ -3,11 +3,13 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 
 class TransactionStatusController
 {
+
+
     public static function status()
     {
         // Check for nonce security
@@ -34,10 +36,9 @@ class TransactionStatusController
                     'message' => 'El buy_order enviado y el buy_order de la transacción no coinciden',
                 ], 401);
             }
-
-            $oneclick = new WC_Gateway_Transbank_Oneclick_Mall_REST();
-            $status = $oneclick->getStatus($buyOrder);
-            $statusArray = json_decode(json_encode($oneclick->getStatus($buyOrder)), true);
+            $oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
+            $status = $oneclickTransbankSdk->status($orderId, $buyOrder);
+            $statusArray = json_decode(json_encode($status), true);
             $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
 
             $response = array_merge($statusArray, $firstDetail);
@@ -72,3 +73,4 @@ class TransactionStatusController
         }
     }
 }
+
