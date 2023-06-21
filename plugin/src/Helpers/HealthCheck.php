@@ -2,6 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -17,6 +19,10 @@ class HealthCheck
     public $fullResume;
     public $ecommerce;
     public $config;
+    /**
+     * @var WebpayplusTransbankSdk
+     */
+    protected $webpayplusTransbankSdk;
 
     public function __construct($config)
     {
@@ -31,6 +37,7 @@ class HealthCheck
             'curl',
             'json',
         ];
+        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
     }
 
     // valida version de php
@@ -212,7 +219,7 @@ class HealthCheck
 
         $status = 'Error';
         try {
-            $result = WebpayUtil::createInner($this->environment, $this->commerceCode, $this->apiKey, $buyOrder, $sessionId, $amount, $returnUrl);
+            $result = $this->webpayplusTransbankSdk->createInner(0, $buyOrder, $sessionId, $amount, $returnUrl);
             $status = 'OK';
 
         } catch (\Exception $e) {
