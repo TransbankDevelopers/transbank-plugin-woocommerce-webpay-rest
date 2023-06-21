@@ -5,6 +5,8 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 
+require_once ABSPATH.'wp-admin/includes/upgrade.php';
+
 class DatabaseTableInstaller
 {
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
@@ -28,7 +30,6 @@ class DatabaseTableInstaller
     public static function createTableTransaction(): bool
     {
         global $wpdb;
-        require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();
 
         /*
@@ -36,9 +37,9 @@ class DatabaseTableInstaller
         | Webpay Transactions Table
         |--------------------------------------------------------------------------
         */
-        $transactionTableName = Transaction::getTableName();
+        $tableName = Transaction::getTableName();
 
-        $sql = "CREATE TABLE `{$transactionTableName}` (
+        $sql = "CREATE TABLE `{$tableName}` (
             `id` bigint(20) NOT NULL AUTO_INCREMENT,
             `order_id` varchar(60) NOT NULL,
             `buy_order` varchar(60) NOT NULL,
@@ -60,31 +61,20 @@ class DatabaseTableInstaller
         ) $charset_collate";
 
         dbDelta($sql);
-
-        $success = empty($wpdb->last_error);
-        if (!$success) {
-            $log = new LogHandler();
-            $log->logError('Error creating transbank tables: '.$transactionTableName);
-            $log->logError($wpdb->last_error);
-
-            add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
-            settings_errors('transbank_webpay_orders_table_error');
-        }
-        return $success;
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
     }
 
     public static function createTableInscription(): bool
     {
         global $wpdb;
-        require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $charset_collate = $wpdb->get_charset_collate();
         /*
         |--------------------------------------------------------------------------
         | Oneclick inscriptions table
         |--------------------------------------------------------------------------
         */
-        $inscriptionsTableName = Inscription::getTableName();
-        $sql = "CREATE TABLE `{$inscriptionsTableName}` (
+        $tableName = Inscription::getTableName();
+        $sql = "CREATE TABLE `{$tableName}` (
             `id` bigint(20) NOT NULL AUTO_INCREMENT,
             `token` varchar(100) NOT NULL,
             `username` varchar(100),
@@ -110,17 +100,20 @@ class DatabaseTableInstaller
         ) $charset_collate";
 
         dbDelta($sql);
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+    }
 
-        $success = empty($wpdb->last_error);
+    public static function createTableProccessError($tableName, $wpdbError): bool
+    {
+        $success = empty($wpdbError);
         if (!$success) {
             $log = new LogHandler();
-            $log->logError('Error creating transbank tables: '.$inscriptionsTableName);
-            $log->logError($wpdb->last_error);
+            $log->logError('Error creating transbank tables: '.$tableName);
+            $log->logError($wpdbError);
 
-            add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
-            settings_errors('transbank_webpay_orders_table_error');
+            add_settings_error($tableName.'_table_error', '', 'Transbank Webpay: Error creando tabla '.$tableName.': '.$wpdbError, 'error');
+            settings_errors($tableName.'_table_error');
         }
-
         return $success;
     }
 
