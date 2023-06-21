@@ -175,10 +175,12 @@ class DatabaseTableInstaller
     {
         $successTransaction = static::createTableTransaction();
         $successInscription = static::createTableInscription();
-        if ($successTransaction && $successInscription) {
+        $successExecutionErrorLog = static::createTableTransbankExecutionErrorLog();
+        $successTransbankApiServiceLog = static::createTableTransbankApiServiceLog();
+        if ($successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog) {
             update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
-        } 
-        return $successTransaction && $successInscription;
+        }
+        return $successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog;
     }
 
     public static function deleteTable()
