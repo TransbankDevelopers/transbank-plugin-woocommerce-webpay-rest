@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
 use function is_multisite;
+use Exception;
 use Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException;
 
 class Transaction
@@ -121,8 +122,7 @@ class Transaction
             if (!$success) {
                 return array('ok' => false, 'error' => "La tabla '{$transactionTable}' no se encontró en la base de datos.", 'exception' => "{$wpdb->last_error}");
             }
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             return array('ok' => false, 'error' => "La tabla '{$transactionTable}' no se encontró en la base de datos.", 'exception' => "{$e->getMessage()}");
         }
         return array('ok' => true, 'msg' => "La tabla '{$transactionTable}' existe.");
