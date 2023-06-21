@@ -12,7 +12,7 @@ require_once ABSPATH.'wp-admin/includes/upgrade.php';
 class DatabaseTableInstaller
 {
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
-    const LATEST_TABLE_VERSION = 5;
+    const LATEST_TABLE_VERSION = 6;
 
     public static function isUpgraded(): bool
     {
@@ -32,7 +32,7 @@ class DatabaseTableInstaller
     public static function createTableTransaction(): bool
     {
         global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
+        $charsetCollate = $wpdb->get_charset_collate();
 
         /*
         |--------------------------------------------------------------------------
@@ -40,27 +40,28 @@ class DatabaseTableInstaller
         |--------------------------------------------------------------------------
         */
         $tableName = Transaction::getTableName();
-
         $sql = "CREATE TABLE `{$tableName}` (
-            `id` bigint(20) NOT NULL AUTO_INCREMENT,
-            `order_id` varchar(60) NOT NULL,
-            `buy_order` varchar(60) NOT NULL,
-            `child_buy_order` varchar(60),
-            `commerce_code` varchar(60),
-            `child_commerce_code` varchar(60),
-            `amount` bigint(20) NOT NULL,
-            `token` varchar(100),
-            `transbank_status` varchar(100),
-            `session_id` varchar(100),
-            `status` varchar(50) NOT NULL,
-            `transbank_response` LONGTEXT,
-            `product` varchar(30),
-            `environment` varchar(20),
-            `error` varchar(255),
-            `detail_error` LONGTEXT,
-            `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
+            `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
+            `order_id`             varchar(60) NOT NULL,
+            `buy_order`            varchar(60) NOT NULL,
+            `child_buy_order`      varchar(60),
+            `commerce_code`        varchar(60),
+            `child_commerce_code`  varchar(60),
+            `amount`               bigint(20) NOT NULL,
+            `token`                varchar(100),
+            `transbank_status`     varchar(100),
+            `session_id`           varchar(100),
+            `status`               varchar(50) NOT NULL,
+            `transbank_response`   LONGTEXT,
+            `last_refund_type`     varchar(100),
+            `last_refund_response` LONGTEXT,
+            `product`              varchar(30),
+            `environment`          varchar(20),
+            `error`                varchar(255),
+            `detail_error`         LONGTEXT,
+            `created_at`           TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
-        ) $charset_collate";
+        ) $charsetCollate";
 
         dbDelta($sql);
         return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
@@ -69,7 +70,7 @@ class DatabaseTableInstaller
     public static function createTableInscription(): bool
     {
         global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
+        $charsetCollate = $wpdb->get_charset_collate();
         /*
         |--------------------------------------------------------------------------
         | Oneclick inscriptions table
@@ -77,29 +78,29 @@ class DatabaseTableInstaller
         */
         $tableName = Inscription::getTableName();
         $sql = "CREATE TABLE `{$tableName}` (
-            `id` bigint(20) NOT NULL AUTO_INCREMENT,
-            `token` varchar(100) NOT NULL,
-            `username` varchar(100),
-            `email` varchar(50) NOT NULL,
-            `user_id` bigint(20),
-            `token_id` bigint(20),
-            `order_id` bigint(20),
+            `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
+            `token`                 varchar(100) NOT NULL,
+            `username`              varchar(100),
+            `email`                 varchar(50) NOT NULL,
+            `user_id`               bigint(20),
+            `token_id`              bigint(20),
+            `order_id`              bigint(20),
             `pay_after_inscription` TINYINT(1) DEFAULT 0,
-            `finished` TINYINT(1) NOT NULL DEFAULT 0,
-            `response_code` varchar(50),
-            `authorization_code` varchar(50),
-            `card_type` varchar(50),
-            `card_number` varchar(50),
-            `from` varchar(50),
-            `status` varchar(50) NOT NULL,
-            `environment` varchar(20),
-            `commerce_code` varchar(60),
-            `transbank_response` LONGTEXT,
-            `error` varchar(255),
-            `detail_error` LONGTEXT,
-            `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
+            `finished`              TINYINT(1) NOT NULL DEFAULT 0,
+            `response_code`         varchar(50),
+            `authorization_code`    varchar(50),
+            `card_type`             varchar(50),
+            `card_number`           varchar(50),
+            `from`                  varchar(50),
+            `status`                varchar(50) NOT NULL,
+            `environment`           varchar(20),
+            `commerce_code`         varchar(60),
+            `transbank_response`    LONGTEXT,
+            `error`                 varchar(255),
+            `detail_error`          LONGTEXT,
+            `created_at`            TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
-        ) $charset_collate";
+        ) $charsetCollate";
 
         dbDelta($sql);
         return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
