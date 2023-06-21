@@ -3,7 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
-use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
@@ -12,25 +11,23 @@ use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
+use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateTransactionWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\GetTransactionWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\NotFoundTransactionWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RefundWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedRefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Helpers\WebpayUtil;
-
 use WC_Order;
 use WC_Payment_Gateway;
 
-
 /**
-     * @property string icon
-     * @property string  method_title
-     * @property string title
-     * @property string description
-     * @property string id
-     */
+ * @property string icon
+ * @property string  method_title
+ * @property string title
+ * @property string description
+ * @property string id
+ */
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
     use TransbankRESTPaymentGateway;
@@ -42,10 +39,15 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     protected $log;
     protected $config;
 
+    /**
+     * @var WebpayplusTransbankSdk
+     */
+    protected $webpayplusTransbankSdk;
+
     public function __construct()
     {
         self::$URL_FINAL = home_url('/').'?wc-api=TransbankWebpayRestThankYouPage';
-
+        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
         $this->id = 'transbank_webpay_plus_rest';
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
@@ -89,7 +91,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $order = null;
         try {
             $order = new WC_Order($order_id);
-            $resp = WebpayUtil::refundTransaction($this->getEnviroment(), $this->getCommerceCode(), $this->getApikey(), $order->get_id(), round($amount));
+            $resp = $this->webpayplusTransbankSdk->refundTransaction($order->get_id(), round($amount));
             $refundResponse = $resp['refundResponse'];
             $transaction = $resp['transaction'];
             $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
@@ -211,17 +213,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
     }
 
-    private function getCommerceCode(){
-        return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('commerce_code') : WebpayPlus::DEFAULT_COMMERCE_CODE;
-    }
 
-    private function getEnviroment(){
-        return $this->get_option('environment');
-    }
-
-    private function getApikey(){
-        return $this->get_option('environment') === Options::ENVIRONMENT_PRODUCTION ? $this->get_option('api_key') : WebpayPlus::DEFAULT_API_KEY;
-    }
 
 
     /**
@@ -234,7 +226,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             do_action('transbank_webpay_plus_starting_transaction', $order);
             $amount = (int) number_format($order->get_total(), 0, ',', '');
             $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
-            $createResponse = WebpayUtil::createTransaction($this->getEnviroment(), $this->getCommerceCode(), $this->getApikey(), $order->get_id(), $amount, $returnUrl);
+            $createResponse = $this->webpayplusTransbankSdk->createTransaction($order->get_id(), $amount, $returnUrl);
             do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->token);
             return [
                 'result'   => 'success',
@@ -242,12 +234,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             ];
         } catch (CreateWebpayException $e) {
             if (ErrorHelper::isGuzzleError($e)){
-                return wc_add_notice(ErrorHelper::getGuzzleError(), 'error');
+                wc_add_notice(ErrorHelper::getGuzzleError(), 'error');
+                return;
             }
-            wc_add_notice(
-                'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.<br/>',
-                'error'
-            );
+            wc_add_notice('Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.<br/>', 'error');
             return;
         } catch (CreateTransactionWebpayException $e) {
             throw new \Exception($e->getMessage());
@@ -265,7 +255,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         update_site_option('transbank_webpay_rest_showed_welcome_message', true);
         $tab = 'options';
         $environment = $this->config['MODO'];
-        include __DIR__.'/../../views/admin/options-tabs.php';
+        include_once __DIR__.'/../../views/admin/options-tabs.php';
     }
 
     /**

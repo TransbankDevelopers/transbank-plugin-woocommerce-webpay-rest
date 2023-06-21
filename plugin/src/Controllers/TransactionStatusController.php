@@ -2,10 +2,9 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Transbank\Webpay\WebpayPlus\Exceptions\TransactionStatusException;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
-use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
+use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 
 class TransactionStatusController
 {
@@ -58,15 +57,15 @@ class TransactionStatusController
             ], 401);
         }
 
-        $sdk = new TransbankSdkWebpayRest();
-
         try {
+            $webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
+            $resp = $webpayplusTransbankSdk->status($transaction->token);
             wp_send_json([
                 'product' => $transaction->product,
-                'status'  => $sdk->status($transaction->token),
-                'raw'     => $sdk->status($transaction->token),
+                'status'  => $resp,
+                'raw'     => $resp,
             ]);
-        } catch (TransactionStatusException $e) {
+        } catch (\Exception $e) {
             wp_send_json([
                 'message' => $e->getMessage(),
             ], 422);
