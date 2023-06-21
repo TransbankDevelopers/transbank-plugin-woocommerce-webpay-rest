@@ -183,9 +183,16 @@ class DatabaseTableInstaller
 
     public static function deleteTable()
     {
+        static::deleteTableByName(Transaction::getTableName());
+        static::deleteTableByName(Inscription::getTableName());
+        static::deleteTableByName(TransbankApiServiceLog::getTableName());
+        static::deleteTableByName(TransbankExecutionErrorLog::getTableName());
+    }
+
+    public static function deleteTableByName($tableName)
+    {
         global $wpdb;
-        $table_name = Transaction::getTableName();
-        $sql = "DROP TABLE IF EXISTS `$table_name`";
+        $sql = "DROP TABLE IF EXISTS `$tableName`";
         $wpdb->query($sql);
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
