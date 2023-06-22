@@ -54,16 +54,19 @@ class WebpayplusTransbankSdk extends TransbankSdk
     protected function afterExecutionTbkApi($orderId, $service, $input, $response)
     {
         $this->logInfo('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => RESPONSE: '.json_encode($response));
+        $this->createApiServiceLogBase($orderId, $service, 'webpay_plus', $input, $response);
     }
 
     protected function errorExecutionTbkApi($orderId, $service, $input, $error, $originalError, $customError)
     {
         $this->logError('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => ERROR: '.(isset($customError) ? $customError : $originalError));
+        $this->createErrorApiServiceLogBase($orderId, $service, 'webpay_plus', $input, $error, $originalError, $customError);
     }
 
     protected function errorExecution($orderId, $service, $input, $error, $originalError, $customError)
     {
         $this->logError('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => ERROR: '.(isset($customError) ? $customError : $originalError));
+        $this->createTransbankExecutionErrorLogBase($orderId, $service, 'webpay_plus', $input, $error, $originalError, $customError);
     }
 
     /* Metodo STATUS  */
@@ -244,7 +247,14 @@ class WebpayplusTransbankSdk extends TransbankSdk
             'amount'  => $amount,
         ]);
         
-
+        /*4. Si todo ok guardamos el estado */
+        Transaction::update(
+            $tx->id,
+            [
+                'last_refund_type'    => $refundResponse->getType(),
+                'last_refund_response'   => json_encode($refundResponse)
+            ]
+        );
         return array(
             'transaction' => $tx,
             'refundResponse' => $refundResponse
@@ -382,4 +392,22 @@ class WebpayplusTransbankSdk extends TransbankSdk
         return $this->saveTransactionWithErrorByTransaction(Transaction::getByToken($token), $error, $detailError);
     }
 
+    
+
+    
+        /**
+     * @param array $result
+     * @param $webpayTransaction
+     *
+     * @return bool
+     */
+    /*
+    protected function validateTransactionDetails($result, $webpayTransaction)
+    {
+        if (!isset($result->responseCode)) {
+            return false;
+        }
+
+        return $result->buyOrder == $webpayTransaction->buy_order && $result->sessionId == $webpayTransaction->session_id && $result->amount == $webpayTransaction->amount;
+    }*/
 }
