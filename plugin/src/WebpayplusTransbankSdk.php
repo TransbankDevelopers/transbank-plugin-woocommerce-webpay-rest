@@ -60,13 +60,29 @@ class WebpayplusTransbankSdk extends TransbankSdk
     protected function errorExecutionTbkApi($orderId, $service, $input, $error, $originalError, $customError)
     {
         $this->logErrorWithOrderId($orderId, $service, $input, $error, $originalError, $customError);
-        $this->createErrorApiServiceLogBase($orderId, $service, 'webpay_plus', $input, $error, $originalError, $customError);
+        $this->createErrorApiServiceLogBase(
+            $orderId,
+            $service,
+            'webpay_plus',
+            $input,
+            $error,
+            $originalError,
+            $customError
+        );
     }
 
     protected function errorExecution($orderId, $service, $input, $error, $originalError, $customError)
     {
         $this->logErrorWithOrderId($orderId, $service, $input, $error, $originalError, $customError);
-        $this->createTransbankExecutionErrorLogBase($orderId, $service, 'webpay_plus', $input, $error, $originalError, $customError);
+        $this->createTransbankExecutionErrorLogBase(
+            $orderId,
+            $service,
+            'webpay_plus',
+            $input,
+            $error,
+            $originalError,
+            $customError
+        );
     }
 
     /* Metodo STATUS  */
