@@ -2,8 +2,12 @@
 
 namespace Transbank\WooCommerce\WebpayRest;
 
+use \Exception;
 use Transbank\Webpay\Options;
+use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
+use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
+use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 
 /**
  * Class TransbankSdk.
@@ -55,6 +59,21 @@ class TransbankSdk
         $this->logError('BUY_ORDER: '.$buyOrder.' => '.$errorMsg.' => data: '.json_encode($param));
     }
 
+    protected function createApiServiceLogBase($orderId, $service, $product, $input, $response)
+    {
+        TransbankApiServiceLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), json_encode($response));
+    }
+
+    protected function createErrorApiServiceLogBase($orderId, $service, $product, $input, $error, $originalError, $customError)
+    {
+        TransbankApiServiceLog::createError($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), $error, $originalError, $customError);
+        $this->createTransbankExecutionErrorLogBase($orderId, $service, $product, $input, $error, $originalError, $customError);
+    }
+
+    protected function createTransbankExecutionErrorLogBase($orderId, $service, $product, $data, $error, $originalError, $customError)
+    {
+        TransbankExecutionErrorLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($data), $error, $originalError, $customError);
+    }
   
 }
 
