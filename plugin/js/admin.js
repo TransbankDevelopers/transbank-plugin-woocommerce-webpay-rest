@@ -77,9 +77,10 @@ jQuery(function($) {
 
       }.bind(this))
       .fail(function(e, a) {
-        alert('Falló la consulta de cuotas: ' + e.responseJSON.message)
-        $(this).data('sending', false);
-        $(this).html('Consultar estado de la transacción');
+          $('.error-status-raw').html(`<p>${e.responseJSON.message}</p>`);
+          $('.error-transaction-status-response').show();
+          $(this).data('sending', false);
+          $(this).html('Consultar estado de la transacción');
       })
   });
 
