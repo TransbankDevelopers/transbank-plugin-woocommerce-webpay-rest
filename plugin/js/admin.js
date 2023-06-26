@@ -13,7 +13,6 @@ jQuery(function($) {
     $(".tbk_table_trans").empty();
 
     $.post(ajax_object.ajax_url, {action: 'check_connection', nonce: ajax_object.nonce}, function(resp){
-      console.log(resp);
       $(".check_conn").text("Verificar Conexión");
       $('.tbk-response-title').show();
       $("#response_title").show();
@@ -59,8 +58,6 @@ jQuery(function($) {
           token: $(this).data('token'),
           nonce: window.ajax_object.nonce
       }, function(response){
-          console.log(response);
-
           let $table = $('.transaction-status-response');
           let statusData = response.status;
           Object.keys(statusData).forEach(key => {
