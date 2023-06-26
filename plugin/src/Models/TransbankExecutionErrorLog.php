@@ -21,7 +21,7 @@ class TransbankExecutionErrorLog
         }
     }
 
-    public static function create($orderId, $service, $product, $enviroment, $commerceCode, $input, $error, $originalError, $customError)
+    public static function create($orderId, $service, $product, $enviroment, $commerceCode, $data, $error, $originalError, $customError)
     {
         global $wpdb;
 
@@ -31,7 +31,7 @@ class TransbankExecutionErrorLog
             'product'          => $product,
             'enviroment'       => $enviroment,
             'commerce_code'    => $commerceCode,
-            'input'            => $input,
+            'data'             => $data,
             'error'            => $error,
             'original_error'   => $originalError,
             'custom_error'     => $customError
