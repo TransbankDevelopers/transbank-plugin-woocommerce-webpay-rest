@@ -74,16 +74,35 @@ class OneclickTransbankSdk extends TransbankSdk
     protected function afterExecutionTbkApi($orderId, $service, $input, $response)
     {
         $this->logInfo('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => RESPONSE: '.json_encode($response));
+        $this->createApiServiceLogBase($orderId, $service, 'webpay_oneclick', $input, $response);
     }
 
     protected function errorExecutionTbkApi($orderId, $service, $input, $error, $originalError, $customError)
     {
-        $this->logError('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => ERROR: '.(isset($customError) ? $customError : $originalError));
+        $this->logErrorWithOrderId($orderId, $service, $input, $error, $originalError, $customError);
+        $this->createErrorApiServiceLogBase(
+            $orderId,
+            $service,
+            'webpay_oneclick',
+            $input,
+            $error,
+            $originalError,
+            $customError
+        );
     }
 
-    protected function errorExecution($orderId, $service, $input, $error, $originalError, $customError)
+    protected function errorExecution($orderId, $service, $data, $error, $originalError, $customError)
     {
-        $this->logError('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => ERROR: '.(isset($customError) ? $customError : $originalError));
+        $this->logErrorWithOrderId($orderId, $service, $data, $error, $originalError, $customError);
+        $this->createTransbankExecutionErrorLogBase(
+            $orderId,
+            $service,
+            'webpay_oneclick',
+            $data,
+            $error,
+            $originalError,
+            $customError
+        );
     }
 
     /* Metodo STATUS  */
@@ -456,7 +475,14 @@ class OneclickTransbankSdk extends TransbankSdk
             $this->errorExecution($orderId, 'refund', $params, 'RejectedRefundOneclickException', $errorMessage, $errorMessage);
             throw new RejectedRefundOneclickException($errorMessage, $tx->buy_order, $tx->child_buy_order, $tx, $response);
         }
-
+        /*4. Si todo ok guardamos el estado */
+        Transaction::update(
+            $tx->id,
+            [
+                'last_refund_type'    => $response->getType(),
+                'last_refund_response'   => json_encode($response)
+            ]
+        );
         return array(
             'transaction' => $tx,
             'refundResponse' => $response
