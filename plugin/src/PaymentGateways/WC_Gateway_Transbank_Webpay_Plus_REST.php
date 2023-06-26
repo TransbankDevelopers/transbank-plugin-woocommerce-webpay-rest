@@ -86,7 +86,17 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
     }
 
-
+    /**
+	 * Process refund.
+	 *
+	 * If the gateway declares 'refunds' support, this will allow it to refund.
+	 * a passed in amount.
+	 *
+	 * @param  int        $order_id Order ID.
+	 * @param  float|null $amount Refund amount.
+	 * @param  string     $reason Refund reason.
+	 * @return boolean True or false based on success, or a WP_Error object.
+	 */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
         $order = null;
