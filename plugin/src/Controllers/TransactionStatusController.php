@@ -60,7 +60,7 @@ class TransactionStatusController
 
         try {
             $webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
-            $resp = $webpayplusTransbankSdk->status($transaction->token);
+            $resp = $webpayplusTransbankSdk->status($transaction->order_id, $transaction->token);
             wp_send_json([
                 'product' => $transaction->product,
                 'status'  => $resp,
