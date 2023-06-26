@@ -63,7 +63,11 @@ class TransbankSdk
         $messageError = (isset($customError) ? $customError : $originalError);
         $this->logError('ORDER_ID: '.$orderId.', SERVICE: '.$service.', INPUT: '.json_encode($input).' => EXCEPTION: '.$error.' , ERROR: '.$messageError);
     }
-    
+
+    protected function logInfoWithOrderId($orderId, $service, $message, $data){
+        $this->logInfo('ORDER_ID: '.$orderId.', SERVICE: '.$service.', message: '.$message.', DATA: '.json_encode($data));
+    }
+
     protected function createApiServiceLogBase($orderId, $service, $product, $input, $response)
     {
         TransbankApiServiceLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), json_encode($response));
