@@ -76,6 +76,7 @@ class TransbankSdk
     protected function createErrorApiServiceLogBase($orderId, $service, $product, $input, $error, $originalError, $customError)
     {
         TransbankApiServiceLog::createError($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), $error, $originalError, $customError);
+        $this->createTransbankExecutionErrorLogBase($orderId, $service, $product, $input, $error, $originalError, $customError);
     }
 
     protected function createTransbankExecutionErrorLogBase($orderId, $service, $product, $data, $error, $originalError, $customError)
