@@ -408,22 +408,5 @@ class WebpayplusTransbankSdk extends TransbankSdk
         return $this->saveTransactionWithErrorByTransaction(Transaction::getByToken($token), $error, $detailError);
     }
 
-    
-
-    
-        /**
-     * @param array $result
-     * @param $webpayTransaction
-     *
-     * @return bool
-     */
-    /*
-    protected function validateTransactionDetails($result, $webpayTransaction)
-    {
-        if (!isset($result->responseCode)) {
-            return false;
-        }
-
-        return $result->buyOrder == $webpayTransaction->buy_order && $result->sessionId == $webpayTransaction->session_id && $result->amount == $webpayTransaction->amount;
-    }*/
 }
+
