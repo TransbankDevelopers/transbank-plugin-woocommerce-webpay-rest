@@ -37,6 +37,7 @@ class WebpayTransactionsTable extends WP_List_Table
             'amount'           => __('Monto'),
             'created_at'       => __('Fecha creación'),
             'transaction_date' => __('Fecha Transacción Transbank'),
+            'last_refund_type' => __('Último refund'),
             'error' => __('Error'),
             'detail_error' => __('Detalle de Error'),
         ];

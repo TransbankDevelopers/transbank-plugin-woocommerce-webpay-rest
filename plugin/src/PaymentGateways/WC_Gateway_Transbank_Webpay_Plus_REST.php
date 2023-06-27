@@ -86,6 +86,17 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
     }
 
+    /**
+	 * Process refund.
+	 *
+	 * If the gateway declares 'refunds' support, this will allow it to refund.
+	 * a passed in amount.
+	 *
+	 * @param  int        $order_id Order ID.
+	 * @param  float|null $amount Refund amount.
+	 * @param  string     $reason Refund reason.
+	 * @return boolean True or false based on success, or a WP_Error object.
+	 */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
         $order = null;
@@ -99,26 +110,28 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $jsonResponse);
             return true;
         } catch (GetTransactionWebpayException $e) {
-            $order->add_order_note('Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ');
-            do_action('transbank_webpay_plus_refund_failed', $order, null);
-            return false;
+            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
         } catch (NotFoundTransactionWebpayException $e) {
-            $order->add_order_note('Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ');
-            do_action('transbank_webpay_plus_refund_transaction_not_found', $order, null);
-            return false;
+            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_transaction_not_found', null, null);
         } catch (RefundWebpayException $e) {
-            $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
-            do_action('transbank_webpay_plus_refund_failed', $order, $e->getTransaction(), $e->getMessage());
-            throw new Exception('Error al anular: '.$e->getMessage());
+            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), null);
         }catch (RejectedRefundWebpayException $e) {
-            $order->add_order_note('Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT));
-            do_action('transbank_webpay_plus_refund_failed', $order, $e->getTransaction());
-            throw new Exception('Anulación a través de Webpay fallida.');
+            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), $e->getRefundResponse());
         } catch (Exception $e) {
-            $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
-            do_action('transbank_webpay_plus_refund_failed', $order, null);
-            throw new Exception('Anulación a través de Webpay fallida.');
+            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
         }
+    }
+
+    private function processRefundError($order, $exception, $action, $tx, $response){
+        $messageError = '<strong>Error en el reembolso:</strong><br />';
+        $messageError = $messageError.$exception->getMessage();
+        if (isset($response))
+        {
+            $messageError = $messageError."\n\n".json_encode($exception->getRefundResponse(), JSON_PRETTY_PRINT);
+        }
+        $order->add_order_note($messageError);
+        do_action($action, $order, $tx, $exception->getMessage());
+        throw new Exception($messageError);
     }
 
     public function registerPluginVersion()
