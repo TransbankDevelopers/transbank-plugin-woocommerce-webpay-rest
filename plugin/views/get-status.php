@@ -110,6 +110,6 @@ if (!$transaction) {
  </table>
 
  <div class="error-transaction-status-response" cellspacing="0" cellpadding="0" style="display: none">
-    <div style="font-weight: bold;">Error consultando estado de la transacción</div>
+    <div>Error consultando estado de la transacción</div>
     <div class="error-status-raw"></div>
 </div>
