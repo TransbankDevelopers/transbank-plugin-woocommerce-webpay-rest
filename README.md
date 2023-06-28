@@ -77,3 +77,56 @@ En ese PR deben incluirse los siguientes cambios:
 
 Luego de obtener aprobación del pull request, debes mezclar a master e inmediatamente generar un release en GitHub con el tag `vX.Y.Z`. En la descripción del release debes poner lo mismo que agregaste al changelog.
 Con eso Travis CI generará automáticamente una nueva versión del plugin y actualizará el Release de Github con el zip del plugin, además de crear el release en el SVN de Wordpress.org.
+
+## Estándares generales
+
+- Para los commits nos basamos en las siguientes normas: https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits👀
+- Todas las mezclas a master se hacen mediante Pull Request ⬇️
+- Usamos inglés para los mensajes de commit 💬
+- Se pueden usar tokens como WIP en el subject de un commit separando el token con ':', por ejemplo -> 'WIP: this is a useful commit message'
+- Para los nombres de ramas también usamos inglés
+- Se asume que una rama de feature no mezclada, es un feature no terminado ⚠️
+- El nombre de las ramas va en minúscula 🔤
+- El nombre de la rama se separa con '-' y las ramas comienzan con alguno de los short lead tokens definidos a continuación, por ejemplo -> 'feat/tokens-configuration' 🌿
+  
+### **Short lead tokens**
+
+`WIP` = En progreso
+
+`feat` = Nuevos features
+
+`fix` = Corrección de un bug
+
+`docs` = Cambios solo de documentación
+
+`style` = Cambios que no afectan el significado del código (espaciado, formateo de código, comillas faltantes, etc)
+
+`refactor` = Un cambio en el código que no arregla un bug ni agrega una funcionalidad
+
+`perf` = Cambio que mejora el rendimiento
+
+`test` = Agregar test faltantes o los corrige
+
+`chore` = Cambios en el build o herramientas auxiliares y librerías
+
+
+## Reglas
+
+1️⃣ -  Si no se añaden test en el pull request, se debe añadir un video o gif mostrando el cambio realizado y demostrando que la rama no rompe nada.
+
+2️⃣ -  El pr debe tener 2 o mas aprobaciones para hacer el merge
+
+3️⃣ - si un commit revierte  un commit anterior debera comenzar con "revert:" seguido con texto del commit anterior
+
+## Pull Request
+
+### Asunto ✉️
+
+- Debe comenzar con el short lead token definido para la rama, seguido de ':' y una breve descripción del cambio
+- Usar imperativos en tiempo presente: "change" no "changed" ni "changes"
+- No usar mayúscula en el inicio
+- No usar punto . al final
+
+### Descripción 📃
+
+Igual que en el asunto, usar imperativo y en tiempo presente. Debe incluir una mayor explicación de lo que se hizo en el pull request. Si no se añaden test en el pull request, se debe añadir un video o gif mostrando el cambio realizado y demostrando que la rama no rompe nada.
