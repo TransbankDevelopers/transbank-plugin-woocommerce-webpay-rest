@@ -1,5 +1,3 @@
-function updateConfig(){
-}
 jQuery(function($) {
   $(".check_conn").on("click",function(e) {
 
