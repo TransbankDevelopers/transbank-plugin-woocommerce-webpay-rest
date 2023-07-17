@@ -41,7 +41,7 @@ $trackinfo = PluginInfoHelper::getInfo();
 </div>
 
 <div class="tbk-box">
-    <table class="form-table">
+    <table class="form-table" role="presentation">
         <?php $this->generate_settings_html(); ?>
     </table>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
@@ -85,7 +85,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
     <p>Encuentra más detalles y funcionalidades en la <a target="_blank" href="http://transbankdevelopers.cl/plugin/woocommerce/" rel="noopener">documentación oficial del plugin</a></p>
 
     <h3>Conoce las novedades</h3>
-    <iframe width="100%" height="315" src="https://www.youtube.com/embed/aVElZf5xqKQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe title="Video que muestra las novedades del plugin" width="100%" height="315" src="https://www.youtube.com/embed/aVElZf5xqKQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 </div>
 
