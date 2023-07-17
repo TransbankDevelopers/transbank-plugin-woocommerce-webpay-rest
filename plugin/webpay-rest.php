@@ -85,9 +85,9 @@ function woocommerce_transbank_rest_init()
         return;
     }
 
-    require __DIR__.'/src/Tokenization/WC_Payment_Token_Oneclick.php';
+    require_once __DIR__.'/src/Tokenization/WC_Payment_Token_Oneclick.php';
 
-    
+
 
     /**
      * Añadir Transbank Plus a Woocommerce.
