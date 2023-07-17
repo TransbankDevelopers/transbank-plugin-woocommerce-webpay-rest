@@ -288,11 +288,20 @@
     overflow: hidden;
 }
 
+.tbk-plugin-info-container.logs {
+    max-width: 40%;
+}
+
 .info-column-plugin {
     padding: 4px 0px;
     text-align: left;
     word-wrap: break-word;
     border-bottom: dashed 1px #ccc;
+}
+
+.info-column-plugin.log {
+    border-bottom: none;
+    border-top: dashed 1px #ccc;
 }
 
 .tbk_title_legend {
