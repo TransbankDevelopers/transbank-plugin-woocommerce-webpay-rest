@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
 <div class="tbk-box">
     <div id="php_info" class="tab-pane">
         <fieldset class="tbk_info">
-            <h3 class="tbk_title_h3">Informe PHP info</h3>
+            <legend class="tbk_title_legend">Informe PHP info</legend>
             <a class="button-primary" href="<?php echo admin_url('admin-ajax.php'); ?>?action=show_php_info_report" target="_blank" rel="noopener">
                 Mostrar PHP Info en Html
             </a>
