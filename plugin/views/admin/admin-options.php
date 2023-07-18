@@ -30,7 +30,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 <?php } ?>
 
 <div class="tbk-box">
-    <table class="form-table">
+    <table class="form-table" role="presentation">
         <?php $this->generate_settings_html(); ?>
     </table>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
