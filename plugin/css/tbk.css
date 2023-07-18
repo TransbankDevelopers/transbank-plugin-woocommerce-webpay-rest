@@ -7,12 +7,10 @@
 .tbk_table_info td {
     width: 300px;
     border-bottom: dashed 1px #ccc;
-    max-width: 50%;
 }
 
 .tbk_table_td {
     width: 200px;
-    max-width: 30%;
 }
 
 .tbk_table_trans pre {
@@ -275,7 +273,6 @@
     background: #eee;
     border-radius: 5px;
     border:solid 1px #999;
-    font-size: 95%;
     text-wrap: unset;
     overflow-wrap: anywhere;
 }
@@ -307,7 +304,7 @@
 .tbk_title_legend {
     color: #1d2327;
     font-size: 1.3em;
-    margin: 1em 0;
+    margin: 16px 0;
     display: block;
     font-weight: 600;
 }
