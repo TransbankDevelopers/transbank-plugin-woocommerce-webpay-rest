@@ -49,12 +49,12 @@ class ThankYouPageController
             $dateAccepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
             $paymentType = ResponseController::getHumanReadablePaymentType($firstTransaction->paymentTypeCode);
             $installmentType = ResponseController::getHumanReadableInstallemntsType($firstTransaction->paymentTypeCode);
-            require __DIR__.'/../../views/order-summary-oneclick.php';
+            require_once __DIR__.'/../../views/order-summary-oneclick.php';
 
             return;
         }
         $data = (new ResponseController([]))->getTransactionDetails($finalResponse);
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = $data;
-        require __DIR__.'/../../views/order-summary.php';
+        require_once __DIR__.'/../../views/order-summary.php';
     }
 }
