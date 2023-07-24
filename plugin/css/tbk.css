@@ -23,19 +23,21 @@
     margin-top: 10px;
 }
 .transaction-status-response pre {
-    max-width: 100%;
     width: 250px;
     overflow: scroll;
 }
 
-.transaction-status-response th {
-    width: 100%;
+.transaction-status-response dt {
     padding: 5px;
-    background: #ddd;
+    background: #d7cad2;
     text-align: left;
+    font-weight: bold;
+
 }
-.transaction-status-response td {
+.transaction-status-response dd {
     padding: 5px 5px 10px 5px;
+    text-align: left;
+    margin-left: 0;
 }
 
 .error-transaction-status-response {
@@ -144,7 +146,6 @@
     margin: 0 0 10px 0;
     font-size: 1.2em;
 }
-
 
 .tbk-nav {
     font-size: 14px;
