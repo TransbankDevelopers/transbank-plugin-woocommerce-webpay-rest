@@ -15,7 +15,7 @@ if (!$transaction) {
 
 <p>Esta es la respuesta del API (solo disponible por 7 días desde la fecha de transacción)</p>
 
-<div class="transaction-status-response" id="transaction_status_admin" cellspacing="0" cellpadding="0" style="display: none">
+<div class="transaction-status-response" id="transaction_status_admin" style="display: none">
     <dl class="transaction-status-response">
         <dt>Producto</dt>
         <dd class="status-product"></dd>
@@ -78,7 +78,7 @@ if (!$transaction) {
     </dl>
 </div>
 
-<div class="error-transaction-status-response" cellspacing="0" cellpadding="0" style="display: none">
+<div class="error-transaction-status-response" style="display: none">
     <div>Error consultando estado de la transacción</div>
     <div class="error-status-raw"></div>
 </div>
