@@ -10,7 +10,6 @@ jQuery(function($) {
         $.post(ajax_object.ajax_url, {action: 'check_connection', nonce: ajax_object.nonce}, function(response){
             $(".check_conn").text("Verificar Conexión");
 
-
             if(response.status.string == "OK") {
                 $("#response_url_text").text(response.response.url);
                 $("#response_token_text").html('<pre>'+response.response.token+'</pre>');

@@ -15,101 +15,70 @@ if (!$transaction) {
 
 <p>Esta es la respuesta del API (solo disponible por 7 días desde la fecha de transacción)</p>
 
- <table class="transaction-status-response" cellspacing="0" cellpadding="0" style="display: none">
-     <tr>
-         <th>Producto</th>
-     </tr>
-     <tr>
-         <td class="status-product"></td>
-     </tr>
-     <tr>
-         <th>Fecha contable:</th>
-     </tr>
-     <tr>
-         <td class="status-accountingDate"></td>
-     </tr>
-     <tr>
-         <th>Fecha de transacción:</th>
-     </tr>
-     <tr>
-         <td class="status-transactionDate"></td>
-     </tr>
-     <tr>
-         <th>Estado:</th>
-     </tr>
-     <tr>
-         <td class="status-status"></td>
-     </tr>
-     <tr>
-         <th>Monto de la transacción:</th>
-     </tr>
-     <tr>
-         <td class="status-amount"></td>
-     </tr>
-     <tr>
-         <th>Balance:</th>
-     </tr>
-     <tr>
-         <td class="status-balance"></td>
-     </tr>
-     <tr>
-         <th>Código de autorización:</th>
-     </tr>
-     <tr>
-         <td class="status-authorizationCode"></td>
-     </tr>
-     <tr>
-         <th>VCI:</th>
-     </tr>
-     <tr>
-         <td class="status-vci"></td>
-     </tr>
-     <tr>
-         <th>Orden de compra:</th>
-     </tr>
-     <tr>
-         <td class="status-buyOrder"></td>
-     </tr>
-     <tr>
-         <th>ID Sesión:</th>
-     </tr>
-     <tr>
-         <td class="status-sessionId"></td>
-     </tr>
-     <tr>
-         <th>Tipo de pago:</th>
-     </tr>
-     <tr>
-         <td class="status-paymentTypeCode"></td>
-     </tr>
-     <tr>
-         <th>Código de respuesta:</th>
-     </tr>
-     <tr>
-         <td class="status-responseCode"></td>
-     </tr>
-     <tr>
-         <th>Número de cuotas:</th>
-     </tr>
-     <tr>
-         <td class="status-installmentsAmount"></td>
-     </tr>
-     <tr>
-         <th>Monto de cada cuota:</th>
-     </tr>
-     <tr>
-         <td class="status-installmentsNumber"></td>
-     </tr>
-     <tr>
-         <th>Respuesta completa:</th>
-     </tr>
-     <tr>
-         <td class="status-raw"></td>
-     </tr>
+<div class="transaction-status-response" id="transaction_status_admin" cellspacing="0" cellpadding="0" style="display: none">
+    <dl class="transaction-status-response">
+        <dt>Producto</dt>
+        <dd class="status-product"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Fecha contable:</dt>
+        <dd class="status-accountingDate"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Fecha de transacción:</dt>
+        <dd class="status-transactionDate"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Estado:</dt>
+        <dd class="status-status"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Monto de la transacción:</dt>
+        <dd class="status-amount"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Balance:</dt>
+        <dd class="status-balance"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Código de autorización:</dt>
+        <dd class="status-authorizationCode"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>VCI:</dt>
+        <dd class="status-vci"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Orden de compra:</dt>
+        <dd class="status-buyOrder"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>ID Sesión:</dt>
+        <dd class="status-sessionId"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Tipo de pago:</dt>
+        <dd class="status-paymentTypeCode"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Código de respuesta:</dt>
+        <dd class="status-responseCode"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Número de cuotas:</dt>
+        <dd class="status-installmentsNumber"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt>Monto de cada cuota:</dt>
+        <dd class="status-installmentsAmount"></dd>
+    </dl>
+    <dl class="transaction-status-response">
+        <dt >Respuesta Completa:</dt>
+        <dd class="status-raw"></dd>
+    </dl>
+</div>
 
- </table>
-
- <div class="error-transaction-status-response" cellspacing="0" cellpadding="0" style="display: none">
+<div class="error-transaction-status-response" cellspacing="0" cellpadding="0" style="display: none">
     <div>Error consultando estado de la transacción</div>
     <div class="error-status-raw"></div>
 </div>
