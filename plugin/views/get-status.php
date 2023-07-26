@@ -56,7 +56,7 @@ if (!$transaction) {
         <dt>Código de comercio:</dt>
         <dd class="status-commerceCode"></dd>
     </dl>
-    <dl class="transaction-status-response" id="tbk_wpp_session_id">
+    <dl class="transaction-status-response tbk-hide" id="tbk_wpp_session_id">
         <dt>ID Sesión:</dt>
         <dd class="status-sessionId"></dd>
     </dl>
