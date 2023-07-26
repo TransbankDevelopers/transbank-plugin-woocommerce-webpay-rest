@@ -45,6 +45,12 @@ jQuery(function($) {
         }, function(response){
             let $table = $('.transaction-status-response');
             let statusData = response.status;
+            if(response.product == "webpay_plus"){
+                $("#tbk_wpp_vci").removeClass("tbk-hide");
+                $("#tbk_wpp_session_id").removeClass("tbk-hide");
+            }else{
+                $("#tbk_wpoc_commerce_code").removeClass("tbk-hide");
+            }
             Object.keys(statusData).forEach(key => {
                 let value = statusData[key] ? statusData[key] : '-';
                 $table.find('.status-' + key).html(value);
