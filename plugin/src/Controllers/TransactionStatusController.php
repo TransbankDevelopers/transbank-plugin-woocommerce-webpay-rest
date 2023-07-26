@@ -20,7 +20,7 @@ class TransactionStatusController
         }
 
         $orderId = filter_input(INPUT_POST, 'order_id', FILTER_SANITIZE_NUMBER_INT);
-        $buyOrder = filter_input(INPUT_POST, 'buy_order', FILTER_SANITIZE_NUMBER_INT);
+        $buyOrder = filter_input(INPUT_POST, 'buy_order', FILTER_SANITIZE_STRING);
         $token = filter_input(INPUT_POST, 'token', FILTER_SANITIZE_STRING);
 
         $transaction = Transaction::getApprovedByOrderId($orderId);
@@ -42,7 +42,7 @@ class TransactionStatusController
             $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
 
             $response = array_merge($statusArray, $firstDetail);
-            unset($response['detail']);
+            unset($response['details']);
             wp_send_json([
                 'product' => $transaction->product,
                 'status'  => $response,
