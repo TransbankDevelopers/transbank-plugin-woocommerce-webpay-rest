@@ -17,7 +17,7 @@ if (!$transaction) {
 
 <div class="transaction-status-response" id="transaction_status_admin" style="display: none">
     <dl class="transaction-status-response">
-        <dt>Producto</dt>
+        <dt>Producto:</dt>
         <dd class="status-product"></dd>
     </dl>
     <dl class="transaction-status-response">
@@ -44,7 +44,7 @@ if (!$transaction) {
         <dt>Código de autorización:</dt>
         <dd class="status-authorizationCode"></dd>
     </dl>
-    <dl class="transaction-status-response">
+    <dl class="transaction-status-response tbk-hide" id="tbk_wpp_vci">
         <dt>VCI:</dt>
         <dd class="status-vci"></dd>
     </dl>
@@ -52,7 +52,11 @@ if (!$transaction) {
         <dt>Orden de compra:</dt>
         <dd class="status-buyOrder"></dd>
     </dl>
-    <dl class="transaction-status-response">
+    <dl class="transaction-status-response tbk-hide" id="tbk_wpoc_commerce_code">
+        <dt>Código de comercio:</dt>
+        <dd class="status-commerceCode"></dd>
+    </dl>
+    <dl class="transaction-status-response tbk-hide" id="tbk_wpp_session_id">
         <dt>ID Sesión:</dt>
         <dd class="status-sessionId"></dd>
     </dl>
