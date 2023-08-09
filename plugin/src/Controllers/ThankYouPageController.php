@@ -4,10 +4,9 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
-use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
-use WC_Gateway_Transbank_Webpay_Plus_REST;
+use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use WC_Order;
 
 class ThankYouPageController
@@ -50,12 +49,12 @@ class ThankYouPageController
             $dateAccepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
             $paymentType = ResponseController::getHumanReadablePaymentType($firstTransaction->paymentTypeCode);
             $installmentType = ResponseController::getHumanReadableInstallemntsType($firstTransaction->paymentTypeCode);
-            require __DIR__.'/../../views/order-summary-oneclick.php';
+            require_once __DIR__.'/../../views/order-summary-oneclick.php';
 
             return;
         }
         $data = (new ResponseController([]))->getTransactionDetails($finalResponse);
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = $data;
-        require __DIR__.'/../../views/order-summary.php';
+        require_once __DIR__.'/../../views/order-summary.php';
     }
 }

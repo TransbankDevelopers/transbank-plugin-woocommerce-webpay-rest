@@ -1,22 +1,20 @@
 
 .tbk_table_info {
-	width: 600px;
-	max-width: 50%;
+    width: 600px;
+    max-width: 50%;
 }
 
 .tbk_table_info td {
-	width: 300px;
+    width: 300px;
     border-bottom: dashed 1px #ccc;
-	max-width: 50%;
 }
 
 .tbk_table_td {
-	width: 200px;
-	max-width: 30%;
+    width: 200px;
 }
 
 .tbk_table_trans pre {
-	font-size: 12px;
+    font-size: 12px;
 }
 
 .transaction-status-response {
@@ -25,21 +23,34 @@
     margin-top: 10px;
 }
 .transaction-status-response pre {
-    max-width: 100%;
     width: 250px;
     overflow: scroll;
 }
 
-.transaction-status-response th {
-    width: 100%;
+.transaction-status-response dt {
     padding: 5px;
-    background: #ddd;
+    background: #d7cad2;
     text-align: left;
+    font-weight: bold;
+
 }
-.transaction-status-response td {
+.transaction-status-response dd {
     padding: 5px 5px 10px 5px;
+    text-align: left;
+    margin-left: 0;
 }
 
+.error-transaction-status-response {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.error-status-raw {
+    color: red;
+    width: 250px;
+}
 
 .swal-modal {
     width: 700px;
@@ -88,6 +99,15 @@
     font-size: 10px;
 }
 
+.label-danger {
+    background: #ec3206;
+    border-radius: 5px;
+    padding: 5px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 10px;
+}
+
 #row_response_token_text pre {
     padding: 5px;
     background: #eee;
@@ -126,7 +146,6 @@
     margin: 0 0 10px 0;
     font-size: 1.2em;
 }
-
 
 .tbk-nav {
     font-size: 14px;
@@ -214,4 +233,79 @@
 
 .tbk-box .woocommerce-save-button.tbk-custom-save-button {
     display: inline-block;
+}
+
+
+.tbk-response-container {
+    display: grid;
+    grid-template-columns: 20px 80px 1fr;
+    grid-gap: 5px;
+    align-items: flex-start;
+    overflow: hidden;
+}
+
+.tbk_response_status {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.tbk-hide {
+    display: none !important;
+}
+.highlight-text {
+    font-weight: bold;
+}
+
+.info-column {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+.info-value {
+    text-align:left;
+}
+
+.token pre {
+    margin-top: 0;
+    padding: 5px;
+    background: #eee;
+    border-radius: 5px;
+    border:solid 1px #999;
+    text-wrap: unset;
+    overflow-wrap: anywhere;
+}
+
+.tbk-plugin-info-container {
+    display: grid;
+    grid-template-columns: 20px 200px 1fr;
+    grid-gap: 5px;
+    align-items: flex-start;
+    overflow: hidden;
+}
+
+.tbk-plugin-info-container.logs {
+    max-width: 40%;
+}
+
+.info-column-plugin {
+    padding: 4px 0px;
+    text-align: left;
+    word-wrap: break-word;
+    border-bottom: dashed 1px #ccc;
+}
+
+.info-column-plugin.log {
+    border-bottom: none;
+    border-top: dashed 1px #ccc;
+}
+
+.tbk_title_legend {
+    color: #1d2327;
+    font-size: 1.3em;
+    margin: 16px 0;
+    display: block;
+    font-weight: 600;
 }

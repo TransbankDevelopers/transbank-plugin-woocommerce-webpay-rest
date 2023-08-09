@@ -1,19 +1,11 @@
 <?php
-use Transbank\Webpay\WebpayPlus;
-use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
-use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
-use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
-use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
-use Transbank\WooCommerce\WebpayRest\TransbankSdkWebpayRest;
-use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
+use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -93,11 +85,12 @@ function woocommerce_transbank_rest_init()
         return;
     }
 
-    require __DIR__.'/src/Tokenization/WC_Payment_Token_Oneclick.php';
+    require_once __DIR__.'/src/Tokenization/WC_Payment_Token_Oneclick.php';
+
 
     /**
      * @property string icon
-     * @property string  method_title
+     * @property string method_title
      * @property string title
      * @property string description
      * @property string id
@@ -121,8 +114,7 @@ function woocommerce_transbank_rest_init()
             $this->icon = plugin_dir_url(__FILE__).'images/webpay.png';
             $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
             $this->title = 'Transbank Webpay Plus';
-            $description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
-            $this->description = $description;
+            $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
             $this->method_description = $description;
             $this->plugin_url = plugins_url('/', __FILE__);
             $this->log = new LogHandler();
@@ -324,69 +316,7 @@ function woocommerce_transbank_rest_init()
                     'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.<br/>',
                     'error'
                 );
-
-                return;
-            }
-
-            $url = $result['url'];
-            $token_ws = $result['token_ws'];
-
-            $transaction = [
-                'order_id'    => $order_id,
-                'buy_order'   => $buyOrder,
-                'amount'      => $amount,
-                'token'       => $token_ws,
-                'session_id'  => $sessionId,
-                'environment' => $transbankSdkWebpay->getTransaction()->getOptions()->getIntegrationType(),
-                'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
-                'status'      => Transaction::STATUS_INITIALIZED,
-            ];
-
-            $this->interactsWithFullLog->logWebpayPlusAntesCrearTxEnTabla($transaction); // Logs
- 
-            $insert = Transaction::createTransaction($transaction);
-
-            if( !$insert ) {
-                $transactionTable = Transaction::getTableName();
-                $wpdb->show_errors();
-                $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
-                $this->log->logInfo($errorMessage);
-                //wc_add_notice($errorMessage, 'error');
-                $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxEnTablaError($transaction); // Logs
-                throw new Exception($errorMessage);
-            }
-
-            $this->interactsWithFullLog->logWebpayPlusDespuesCrearTxEnTabla($transaction); // Logs
-
-            do_action('transbank_webpay_plus_transaction_started', $order, $token_ws);
-
-            return [
-                'result'   => 'success',
-                'redirect' => $url.'?token_ws='.$token_ws,
-            ];
-        }
-
-        /**
-         * Opciones panel de administración.
-         **/
-        public function admin_options()
-        {
-            $showedWelcome = get_site_option('transbank_webpay_rest_showed_welcome_message');
-            update_site_option('transbank_webpay_rest_showed_welcome_message', true);
-            $tab = 'options';
-            $environment = $this->config['MODO'];
-            include __DIR__.'/views/admin/options-tabs.php';
-        }
-
-        /**
-         * @return mixed
-         */
-        public function getPluginVersion()
-        {
-            return (new WordpressPluginVersion())->get();
-        }
-    }
-
+              
     /**
      * Añadir Transbank Plus a Woocommerce.
      **/
@@ -456,7 +386,7 @@ add_action('add_meta_boxes', function () {
     add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post) {
         $order = new WC_Order($post->ID);
         $transaction = Transaction::getApprovedByOrderId($order->get_id());
-        include __DIR__.'/views/get-status.php';
+        include_once __DIR__.'/views/get-status.php';
     }, 'shop_order', 'side', 'core');
 });
 
@@ -469,7 +399,7 @@ add_action('admin_menu', function () {
         }
 
         $log = new LogHandler();
-        include __DIR__.'/views/admin/options-tabs.php';
+        include_once __DIR__.'/views/admin/options-tabs.php';
     }, null);
 
     add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {

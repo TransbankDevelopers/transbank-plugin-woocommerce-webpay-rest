@@ -4,8 +4,8 @@ if (!defined('ABSPATH')) {
 }
 ?>
 <br />
-<h2>Detalles del pago</h2>
-<table class="shop_table order_details">
+<h2 id="payment_details">Detalles del pago</h2>
+<table class="shop_table order_details" aria-describedby="payment_details">
     <tfoot>
     <tr>
         <th scope="row">Respuesta de la Transacción:</th>

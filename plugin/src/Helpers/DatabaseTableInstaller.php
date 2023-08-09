@@ -4,11 +4,15 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
+use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
+
+require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
 class DatabaseTableInstaller
 {
     const TABLE_VERSION_OPTION_KEY = 'webpay_orders_table_version';
-    const LATEST_TABLE_VERSION = 4;
+    const LATEST_TABLE_VERSION = 6;
 
     public static function isUpgraded(): bool
     {
@@ -28,95 +32,143 @@ class DatabaseTableInstaller
     public static function createTableTransaction(): bool
     {
         global $wpdb;
-        require_once ABSPATH.'wp-admin/includes/upgrade.php';
-        $charset_collate = $wpdb->get_charset_collate();
+        $charsetCollate = $wpdb->get_charset_collate();
 
         /*
         |--------------------------------------------------------------------------
         | Webpay Transactions Table
         |--------------------------------------------------------------------------
         */
-        $transactionTableName = Transaction::getTableName();
-
-        $sql = "CREATE TABLE `{$transactionTableName}` (
-            `id` bigint(20) NOT NULL AUTO_INCREMENT,
-            `order_id` varchar(60) NOT NULL,
-            `buy_order` varchar(60) NOT NULL,
-            `child_buy_order` varchar(60),
-            `commerce_code` varchar(60),
-            `child_commerce_code` varchar(60),
-            `amount` bigint(20) NOT NULL,
-            `token` varchar(100),
-            `transbank_status` varchar(100),
-            `session_id` varchar(100),
-            `status` varchar(50) NOT NULL,
-            `transbank_response` LONGTEXT,
-            `product` varchar(30),
-            `environment` varchar(20),
-            `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
+        $tableName = Transaction::getTableName();
+        $sql = "CREATE TABLE `{$tableName}` (
+            `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
+            `order_id`             varchar(60) NOT NULL,
+            `buy_order`            varchar(60) NOT NULL,
+            `child_buy_order`      varchar(60),
+            `commerce_code`        varchar(60),
+            `child_commerce_code`  varchar(60),
+            `amount`               bigint(20) NOT NULL,
+            `token`                varchar(100),
+            `transbank_status`     varchar(100),
+            `session_id`           varchar(100),
+            `status`               varchar(50) NOT NULL,
+            `transbank_response`   LONGTEXT,
+            `last_refund_type`     varchar(100),
+            `last_refund_response` LONGTEXT,
+            `product`              varchar(30),
+            `environment`          varchar(20),
+            `error`                varchar(255),
+            `detail_error`         LONGTEXT,
+            `created_at`           TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
-        ) $charset_collate";
+        ) $charsetCollate";
 
         dbDelta($sql);
-
-        $success = empty($wpdb->last_error);
-        if (!$success) {
-            $log = new LogHandler();
-            $log->logError('Error creating transbank tables: '.$transactionTableName);
-            $log->logError($wpdb->last_error);
-
-            add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
-            settings_errors('transbank_webpay_orders_table_error');
-        }
-        return $success;
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
     }
 
     public static function createTableInscription(): bool
     {
         global $wpdb;
-        require_once ABSPATH.'wp-admin/includes/upgrade.php';
-        $charset_collate = $wpdb->get_charset_collate();
+        $charsetCollate = $wpdb->get_charset_collate();
         /*
         |--------------------------------------------------------------------------
         | Oneclick inscriptions table
         |--------------------------------------------------------------------------
         */
-        $inscriptionsTableName = Inscription::getTableName();
-        $sql = "CREATE TABLE `{$inscriptionsTableName}` (
-            `id` bigint(20) NOT NULL AUTO_INCREMENT,
-            `token` varchar(100) NOT NULL,
-            `username` varchar(100),
-            `email` varchar(50) NOT NULL,
-            `user_id` bigint(20),
-            `token_id` bigint(20),
-            `order_id` bigint(20),
+        $tableName = Inscription::getTableName();
+        $sql = "CREATE TABLE `{$tableName}` (
+            `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
+            `token`                 varchar(100) NOT NULL,
+            `username`              varchar(100),
+            `email`                 varchar(50) NOT NULL,
+            `user_id`               bigint(20),
+            `token_id`              bigint(20),
+            `order_id`              bigint(20),
             `pay_after_inscription` TINYINT(1) DEFAULT 0,
-            `finished` TINYINT(1) NOT NULL DEFAULT 0,
-            `response_code` varchar(50),
-            `authorization_code` varchar(50),
-            `card_type` varchar(50),
-            `card_number` varchar(50),
-            `from` varchar(50),
-            `status` varchar(50) NOT NULL,
-            `environment` varchar(20),
-            `commerce_code` varchar(60),
-            `transbank_response` LONGTEXT,
-            `created_at` TIMESTAMP NOT NULL  DEFAULT NOW(),
+            `finished`              TINYINT(1) NOT NULL DEFAULT 0,
+            `response_code`         varchar(50),
+            `authorization_code`    varchar(50),
+            `card_type`             varchar(50),
+            `card_number`           varchar(50),
+            `from`                  varchar(50),
+            `status`                varchar(50) NOT NULL,
+            `environment`           varchar(20),
+            `commerce_code`         varchar(60),
+            `transbank_response`    LONGTEXT,
+            `error`                 varchar(255),
+            `detail_error`          LONGTEXT,
+            `created_at`            TIMESTAMP NOT NULL  DEFAULT NOW(),
             PRIMARY KEY (id)
-        ) $charset_collate";
+        ) $charsetCollate";
 
         dbDelta($sql);
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+    }
 
-        $success = empty($wpdb->last_error);
+    public static function createTableTransbankExecutionErrorLog(): bool
+    {
+        global $wpdb;
+        $charsetCollate = $wpdb->get_charset_collate();
+        $tableName = TransbankExecutionErrorLog::getTableName();
+
+        $sql = "CREATE TABLE `{$tableName}` (
+            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
+            `order_id`         varchar(60) NOT NULL,
+            `service`          varchar(100) NOT NULL,
+            `product`          varchar(30) NOT NULL,
+            `enviroment`       varchar(20) NOT NULL,
+            `commerce_code`    varchar(60) NOT NULL,
+            `data`             LONGTEXT,
+            `error`            varchar(255),
+            `original_error`   LONGTEXT,
+            `custom_error`     LONGTEXT,
+            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
+            PRIMARY KEY (id)
+        ) $charsetCollate";
+
+        dbDelta($sql);
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+    }
+
+    public static function createTableTransbankApiServiceLog(): bool
+    {
+        global $wpdb;
+        
+        $charsetCollate = $wpdb->get_charset_collate();
+        $tableName = TransbankApiServiceLog::getTableName();
+
+        $sql = "CREATE TABLE `{$tableName}` (
+            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
+            `order_id`         varchar(60) NOT NULL,
+            `service`          varchar(100) NOT NULL,
+            `product`          varchar(30) NOT NULL,
+            `enviroment`       varchar(20) NOT NULL,
+            `commerce_code`    varchar(60) NOT NULL,
+            `input`            LONGTEXT,
+            `response`         LONGTEXT,
+            `error`            varchar(255),
+            `original_error`   LONGTEXT,
+            `custom_error`     LONGTEXT,
+            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
+            PRIMARY KEY (id)
+        ) $charsetCollate";
+
+        dbDelta($sql);
+        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+    }
+
+    public static function createTableProccessError($tableName, $wpdbError): bool
+    {
+        $success = empty($wpdbError);
         if (!$success) {
             $log = new LogHandler();
-            $log->logError('Error creating transbank tables: '.$inscriptionsTableName);
-            $log->logError($wpdb->last_error);
+            $log->logError('Error creating transbank tables: '.$tableName);
+            $log->logError($wpdbError);
 
-            add_settings_error('transbank_webpay_orders_table_error', '', 'Transbank Webpay: Error creando tabla webpay_orders: '.$wpdb->last_error, 'error');
-            settings_errors('transbank_webpay_orders_table_error');
+            add_settings_error($tableName.'_table_error', '', 'Transbank Webpay: Error creando tabla '.$tableName.': '.$wpdbError, 'error');
+            settings_errors($tableName.'_table_error');
         }
-
         return $success;
     }
 
@@ -124,17 +176,26 @@ class DatabaseTableInstaller
     {
         $successTransaction = static::createTableTransaction();
         $successInscription = static::createTableInscription();
-        if ($successTransaction && $successInscription) {
+        $successExecutionErrorLog = static::createTableTransbankExecutionErrorLog();
+        $successTransbankApiServiceLog = static::createTableTransbankApiServiceLog();
+        if ($successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog) {
             update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
-        } 
-        return $successTransaction && $successInscription;
+        }
+        return $successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog;
     }
 
     public static function deleteTable()
     {
+        static::deleteTableByName(Transaction::getTableName());
+        static::deleteTableByName(Inscription::getTableName());
+        static::deleteTableByName(TransbankApiServiceLog::getTableName());
+        static::deleteTableByName(TransbankExecutionErrorLog::getTableName());
+    }
+
+    public static function deleteTableByName($tableName)
+    {
         global $wpdb;
-        $table_name = Transaction::getTableName();
-        $sql = "DROP TABLE IF EXISTS `$table_name`";
+        $sql = "DROP TABLE IF EXISTS `$tableName`";
         $wpdb->query($sql);
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
