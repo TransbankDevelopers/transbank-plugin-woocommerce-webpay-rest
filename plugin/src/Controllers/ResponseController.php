@@ -182,17 +182,19 @@ class ResponseController
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
         $cardNumber = $result->cardDetail['card_number'];
         $date = $date_accepted->format('d-m-Y / H:i:s');
-        update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
-        update_post_meta($wooCommerceOrder->get_id(), 'buyOrder', $result->buyOrder);
-        update_post_meta($wooCommerceOrder->get_id(), 'authorizationCode', $authorizationCode);
-        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $cardNumber);
-        update_post_meta($wooCommerceOrder->get_id(), 'paymentCodeResult', $paymentCodeResult);
-        update_post_meta($wooCommerceOrder->get_id(), 'amount', $amount);
-        update_post_meta($wooCommerceOrder->get_id(), 'installmentsNumber', $sharesNumber ? $sharesNumber : '0');
-        update_post_meta($wooCommerceOrder->get_id(), 'installmentsAmount', $sharesAmount ? $sharesAmount : '0');
-        update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date);
-        update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
-        update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
+
+        $wooCommerceOrder->update_meta_data('transactionResponse', $transactionResponse);
+        $wooCommerceOrder->update_meta_data('buyOrder', $result->buyOrder);
+        $wooCommerceOrder->update_meta_data('authorizationCode', $authorizationCode);
+        $wooCommerceOrder->update_meta_data('cardNumber', $cardNumber);
+        $wooCommerceOrder->update_meta_data('paymentCodeResult', $paymentCodeResult);
+        $wooCommerceOrder->update_meta_data('amount', $amount);
+        $wooCommerceOrder->update_meta_data('installmentsNumber', $sharesNumber ? $sharesNumber : '0');
+        $wooCommerceOrder->update_meta_data('installmentsAmount', $sharesAmount ? $sharesAmount : '0');
+        $wooCommerceOrder->update_meta_data('transactionDate', $date);
+        $wooCommerceOrder->update_meta_data('webpay_transaction_id', $webpayTransaction->id);
+        $wooCommerceOrder->update_meta_data('webpay_rest_response', json_encode($result));
+        $wooCommerceOrder->save();
 
         $message = 'Pago exitoso con Webpay Plus';
 

@@ -6,6 +6,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -62,6 +63,12 @@ add_action('admin_enqueue_scripts', function () {
 });
 
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'transbank_webpay_rest_add_rest_action_links');
+
+add_action('before_woocommerce_init', function () {
+    if (class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+    }
+});
 
 //Start sessions if not already done
 add_action('init', function () {
@@ -155,11 +162,15 @@ add_action('admin_notices', function () {
 register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 
 add_action('add_meta_boxes', function () {
-    add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post) {
-        $order = new WC_Order($post->ID);
+    $screen = wc_get_container()->get(CustomOrdersTableController::class)->custom_orders_table_usage_is_enabled()
+        ? wc_get_page_screen_id('shop-order')
+        : 'shop_order';
+
+    add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post_or_order_object) {
+        $order = ($post_or_order_object instanceof WP_Post) ? wc_get_order($post_or_order_object->ID) : $post_or_order_object;
         $transaction = Transaction::getApprovedByOrderId($order->get_id());
         include_once __DIR__.'/views/get-status.php';
-    }, 'shop_order', 'side', 'core');
+    }, $screen, 'side', 'core');
 });
 
 add_action('admin_menu', function () {
