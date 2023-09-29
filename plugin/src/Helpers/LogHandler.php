@@ -11,7 +11,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('Transbank_webpay_Rest_Webpay_ROOT', dirname(dirname(__DIR__)));
 define('Transbank_webpay_Rest_Webpay_UPLOADS', untrailingslashit(wp_upload_dir()['basedir'] . '/transbank_webpay_plus_rest'));
 
 class LogHandler
@@ -28,6 +27,9 @@ class LogHandler
 
     public function __construct($ecommerce = 'woocommerce', $days = 7, $weight = '2MB')
     {
+        // Unique string to avoid anyone outside to guess logs files names
+        $uniqueId = uniqid('', true);
+
         $this->logDir = Transbank_webpay_Rest_Webpay_UPLOADS.'/logs';
         $this->ecommerce = $ecommerce;
         $this->lockfile = $this->logDir.'/set_logs_activate.lock';
@@ -35,7 +37,7 @@ class LogHandler
         $this->confdays = $days;
         $this->confweight = $weight;
         $this->logURL = str_replace($_SERVER['DOCUMENT_ROOT'], '/', $this->logDir);
-        $this->logFile = "{$this->logDir}/log_transbank_{$this->ecommerce}_{$dia}.log";
+        $this->logFile = "{$this->logDir}/log_transbank_{$this->ecommerce}_{$dia}_{$uniqueId}.log";
 
         try {
             if (!file_exists($this->logDir)) {
