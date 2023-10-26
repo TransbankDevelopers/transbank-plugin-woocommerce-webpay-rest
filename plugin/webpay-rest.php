@@ -126,8 +126,6 @@ function transbank_webpay_rest_on_webpay_rest_plugin_activation()
 
         return;
     }
-    $pluginObject = new WC_Gateway_Transbank_Webpay_Plus_REST();
-    $pluginObject->registerPluginVersion();
 }
 
 function on_transbank_rest_webpay_plugins_loaded()

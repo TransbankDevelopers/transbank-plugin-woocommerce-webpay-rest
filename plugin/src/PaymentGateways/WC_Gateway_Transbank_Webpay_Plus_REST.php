@@ -7,9 +7,7 @@ use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
-use Transbank\WooCommerce\WebpayRest\Telemetry\PluginVersion;
 use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
-use Transbank\WooCommerce\WebpayRest\Helpers\WordpressPluginVersion;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
@@ -78,7 +76,6 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         add_action('woocommerce_thankyou', [new ThankYouPageController($this->config), 'show'], 1);
         add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
-        add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'registerPluginVersion']);
         add_action('woocommerce_api_wc_gateway_'.$this->id, [$this, 'check_ipn_response']);
 
         if (!$this->is_valid_for_use()) {
@@ -132,23 +129,6 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $order->add_order_note($messageError);
         do_action($action, $order, $tx, $exception->getMessage());
         throw new Exception($messageError);
-    }
-
-    public function registerPluginVersion()
-    {
-
-        $commerceCode = $this->get_option('webpay_rest_commerce_code');
-
-        $pluginVersion = $this->getPluginVersion();
-
-        (new PluginVersion())->registerVersion(
-            $commerceCode,
-            $pluginVersion,
-            wc()->version,
-            PluginVersion::ECOMMERCE_WOOCOMMERCE,
-            $this->get_option('webpay_rest_environment'),
-            'webpay'
-        );
     }
 
     /**
@@ -271,11 +251,4 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         include_once __DIR__.'/../../views/admin/options-tabs.php';
     }
 
-    /**
-     * @return mixed
-     */
-    public function getPluginVersion()
-    {
-        return (new WordpressPluginVersion())->get();
-    }
 }
