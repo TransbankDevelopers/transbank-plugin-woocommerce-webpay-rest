@@ -123,8 +123,6 @@ function transbank_webpay_rest_on_webpay_rest_plugin_activation()
     woocommerce_transbank_rest_init();
     if (!class_exists(WC_Gateway_Transbank_Webpay_Plus_REST::class)) {
         exit('Se necesita tener WooCommerce instalado y activo para poder activar este plugin');
-
-        return;
     }
 }
 
