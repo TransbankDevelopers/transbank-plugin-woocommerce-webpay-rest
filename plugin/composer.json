@@ -12,7 +12,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Transbank\\WooCommerce\\WebpayRest\\": "src/"
+            "Transbank\\WooCommerce\\WebpayRest\\": "src/",
+            "Transbank\\Plugin\\": "shared/"
         }
     },
     "description": "Transbank WooCommerce Plugin",
