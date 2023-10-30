@@ -83,7 +83,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             3
         );
         add_action('woocommerce_api_'.strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
-            new OneclickInscriptionResponseController($this->id, $this->logger),
+            new OneclickInscriptionResponseController($this->id),
             'response',
         ]);
 

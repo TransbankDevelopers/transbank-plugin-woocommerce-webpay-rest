@@ -27,7 +27,7 @@ class OneclickInscriptionResponseController
     /**
      * OneclickInscriptionResponseController constructor.
      */
-    public function __construct($gatewayId, $logger = null)
+    public function __construct($gatewayId)
     {
         $this->logger = TbkFactory::createLogger();
         $this->gatewayId = $gatewayId;
