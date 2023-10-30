@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
@@ -162,7 +163,7 @@ class DatabaseTableInstaller
     {
         $success = empty($wpdbError);
         if (!$success) {
-            $log = new LogHandler();
+            $log = TbkFactory::createLogger();;
             $log->logError('Error creating transbank tables: '.$tableName);
             $log->logError($wpdbError);
 

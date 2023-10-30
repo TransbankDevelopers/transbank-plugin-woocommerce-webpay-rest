@@ -1,7 +1,6 @@
 <?php
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
@@ -160,11 +159,9 @@ add_action('admin_menu', function () {
     //create new top-level menu
     add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
         $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
-        if (!in_array($tab, ['healthcheck', 'logs', 'phpinfo', 'transactions'])) {
+        if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
             wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
         }
-
-        $log = new LogHandler();
         include_once __DIR__.'/views/admin/options-tabs.php';
     }, null);
 

@@ -5,7 +5,6 @@ namespace Transbank\WooCommerce\WebpayRest;
 use \Exception;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 
@@ -21,9 +20,6 @@ class TransbankSdk
 
     protected $childCommerceCode;
 
-    /**
-     * @var LogHandler
-     */
     protected $log;
 
 

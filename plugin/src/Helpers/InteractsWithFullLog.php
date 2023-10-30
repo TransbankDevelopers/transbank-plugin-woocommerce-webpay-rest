@@ -2,13 +2,13 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
  
 class InteractsWithFullLog {
 
     public function __construct()
     {
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
     }
 
     public function logWebpayPlusInstallConfigLoad($webpayCommerceCode, $webpayDefaultOrderStateIdAfterPayment){

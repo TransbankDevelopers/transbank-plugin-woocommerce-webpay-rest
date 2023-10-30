@@ -3,11 +3,11 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\CreateTransactionOneclickException;
@@ -34,9 +34,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * @var Oneclick\MallInscription
      */
     protected $oneclickInscription;
-    /**
-     * @var LogHandler
-     */
     protected $logger;
     /**
      * @var OneclickTransbankSdk
@@ -74,7 +71,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->init_form_fields();
         $this->init_settings();
 
-        $this->logger = (new LogHandler());
+        $this->logger = TbkFactory::createLogger();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
         $this->oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
@@ -195,10 +192,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        (new LogHandler())->logInfo('New scheduled_subscription_payment for Order #'.$renewalOrder->get_id());
+        $this->logger->logInfo('New scheduled_subscription_payment for Order #'.$renewalOrder->get_id());
         $customerId = $renewalOrder->get_customer_id();
         if (!$customerId) {
-            (new LogHandler())->logError('There is no costumer id on the renewal order');
+            $this->logger->logError('There is no costumer id on the renewal order');
 
             throw new Exception('There is no costumer id on the renewal order');
         }
