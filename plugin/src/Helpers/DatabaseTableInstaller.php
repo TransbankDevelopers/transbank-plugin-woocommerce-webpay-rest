@@ -163,7 +163,7 @@ class DatabaseTableInstaller
     {
         $success = empty($wpdbError);
         if (!$success) {
-            $log = TbkFactory::createLogger();;
+            $log = TbkFactory::createLogger();
             $log->logError('Error creating transbank tables: '.$tableName);
             $log->logError($wpdbError);
 
