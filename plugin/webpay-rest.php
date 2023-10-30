@@ -36,14 +36,12 @@ $transbankPluginData = null;
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/ConnectionCheck.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/TableCheck.php';
-require_once plugin_dir_path(__FILE__).'libwebpay/ReportGenerator.php';
 
 register_activation_hook(__FILE__, 'transbank_webpay_rest_on_webpay_rest_plugin_activation');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
 add_action('wp_ajax_check_exist_tables', 'TableCheck::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::status');
-add_action('wp_ajax_show_php_info_report', \Transbank\Woocommerce\ReportGenerator::class.'::showPhpInfoReport');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
