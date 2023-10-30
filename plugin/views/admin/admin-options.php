@@ -1,7 +1,5 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\Helpers\PluginInfoHelper;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -62,7 +60,6 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 </div>
 
 <a href="#" id="show-welcome-message" style="padding-top: 10px" class="">Ver mensaje de bienvenida nuevamente</a>
-<?php PluginInfoHelper::printImage('webpay_plus_admin'); ?>
 
 <script>
     (function($) {

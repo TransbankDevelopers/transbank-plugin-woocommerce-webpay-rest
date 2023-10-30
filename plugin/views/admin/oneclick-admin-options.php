@@ -19,7 +19,6 @@ $trackinfo = PluginInfoHelper::getInfo();
         <div style="margin-right: 10px; height: 100%; background: #fff; border-radius: 10px;">
             <a target="_blank" href="https://contrata.transbankdevelopers.cl/Oneclick/?wpcommerce=<?php echo $trackinfo['wpcommerce']; ?>&wpenv=<?php echo $trackinfo['wpenv']; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
                 <img style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
-                <?php PluginInfoHelper::printImage('oneclick_admin'); ?>
             </a>
         </div>
     </div>
