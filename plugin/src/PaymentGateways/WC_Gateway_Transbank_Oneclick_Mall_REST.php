@@ -275,8 +275,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
                 return wc_add_notice($errorMessage, 'error');
             }
-            $this->logger->logInfo('[O neclick] Checkout: inscription response: ');
-            $this->logger->logInfo(print_r($response, true));
+            $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
+            $this->logger->logInfo(json_encode($response));
             $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
 
             do_action('transbank_oneclick_adding_card_from_order', $order);
