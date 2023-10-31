@@ -7,12 +7,12 @@ use DateTimeZone;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\TimeoutWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\UserCancelWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\DoubleTokenWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CommitWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\InvalidStatusWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedCommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use WC_Order;
 
@@ -62,7 +62,7 @@ class ResponseController
 
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException
+     * @throws \Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException
      */
     public function response($postData)
     {

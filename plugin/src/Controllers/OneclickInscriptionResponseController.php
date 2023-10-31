@@ -6,13 +6,13 @@ use \Exception;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\FinishInscriptionOneclickException;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedInscriptionOneclickException;
-use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\GetInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\FinishInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\RejectedInscriptionOneclickException;
+use  Transbank\Plugin\Exceptions\Oneclick\GetInscriptionOneclickException;
 use WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
 
@@ -57,7 +57,7 @@ class OneclickInscriptionResponseController
     }
 
     /**
-     * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException
+     * @throws \Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException
      */
     public function response()
     {

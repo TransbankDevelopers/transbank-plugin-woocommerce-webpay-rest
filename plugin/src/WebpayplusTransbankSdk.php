@@ -7,19 +7,19 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\TimeoutWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\UserCancelWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\DoubleTokenWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CommitWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\InvalidStatusWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedCommitWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedRefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\NotFoundTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\GetTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\StatusWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
 
 /**
  * Class WebpayplusTransbankSdk.

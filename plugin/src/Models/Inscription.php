@@ -4,7 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Models;
 
 use function is_multisite;
 use Exception;
-use Transbank\WooCommerce\WebpayRest\Exceptions\TokenNotFoundOnDatabaseException;
+use Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException;
 
 class Inscription
 {

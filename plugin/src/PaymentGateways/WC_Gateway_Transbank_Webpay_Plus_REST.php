@@ -10,12 +10,12 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\GetTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\NotFoundTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedRefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
 use WC_Order;
 use WC_Payment_Gateway;
 
