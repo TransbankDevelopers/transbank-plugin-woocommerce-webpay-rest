@@ -1,7 +1,5 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -51,8 +49,6 @@ function tbk_is_nav_active($tab, $val)
             } elseif ($tab === 'transactions') {
                 include_once __DIR__.'/transactions.php';
             } else {
-                $healthcheck = HealthCheckFactory::create();
-                $datos_hc = json_decode($healthcheck->printFullResume());
                 include_once __DIR__.'/healthcheck.php';
             }
             ?>
