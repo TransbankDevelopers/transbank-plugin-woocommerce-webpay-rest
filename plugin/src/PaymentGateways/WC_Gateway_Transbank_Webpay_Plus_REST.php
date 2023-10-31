@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
@@ -128,7 +129,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
         $order->add_order_note($messageError);
         do_action($action, $order, $tx, $exception->getMessage());
-        throw new Exception($messageError);
+        throw new EcommerceException($messageError);
     }
 
     /**

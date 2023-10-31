@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
@@ -127,25 +128,25 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
             do_action('transbank_oneclick_refund_failed', $order, null);
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
         } catch (NotFoundTransactionOneclickException $e) {
             $errorMessage = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
             do_action('transbank_oneclick_refund_failed', $order, null);
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
         } catch (RefundOneclickException $e) {
             $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
             do_action('transbank_oneclick_refund_failed', $order, $e->getTransaction(), $e->getMessage());
-            throw new Exception('Error al anular: '.$e->getMessage());
+            throw new EcommerceException('Error al anular: '.$e->getMessage(), $e);
         }catch (RejectedRefundOneclickException $e) {
             $errorMessage = 'Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
             $order->add_order_note($errorMessage);
             do_action('transbank_oneclick_refund_failed', $order, $e->getTransaction());
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
         } catch (Exception $e) {
             $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
             do_action('transbank_oneclick_refund_failed', $order, null);
-            throw new Exception('Anulación a través de Webpay fallida.');
+            throw new EcommerceException('Anulación a través de Webpay fallida.', $e);
         }
     }
 
@@ -197,14 +198,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if (!$customerId) {
             $this->logger->logError('There is no costumer id on the renewal order');
 
-            throw new Exception('There is no costumer id on the renewal order');
+            throw new EcommerceException('There is no costumer id on the renewal order');
         }
 
         /** @var WC_Payment_Token_Oneclick $paymentToken */
         $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
         $response = $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
         if ($response['result'] == 'error'){
-            throw new Exception('Se produjo un error en la autorización');
+            throw new EcommerceException('Se produjo un error en la autorización');
         }
         $this->setAfterPaymentOrderStatus($renewalOrder);
     }
