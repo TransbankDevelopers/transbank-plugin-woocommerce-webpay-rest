@@ -118,7 +118,7 @@ class Transaction
         $transactionTable = static::getTableName();
         $sql = "SELECT COUNT(1) FROM ".$transactionTable;
         try {
-            $sqlResult = $wpdb->get_results($sql);
+            $wpdb->get_results($sql);
             $success = empty($wpdb->last_error);
             if (!$success) {
                 return array('ok' => false, 'error' => "La tabla '{$transactionTable}' no se encontró en la base de datos.", 'exception' => "{$wpdb->last_error}");
