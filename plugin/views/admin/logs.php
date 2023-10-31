@@ -1,7 +1,13 @@
 <?php
+
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+
 if (!defined('ABSPATH')) {
     exit;
 }
+$log = TbkFactory::createLogger();
+$resume = $log->getInfo();
+$lastLog = $log->getLogDetail(basename($resume['last']));
 ?>
 <div class="tbk-box">
     <div id="logs" class="tab-pane">
@@ -31,7 +37,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="info-column-plugin log">
                 <span class="label">
-                    <?php echo json_decode($log->getResume(), true)['log_dir']; ?>
+                    <?php echo $resume['dir']; ?>
                 </span>
                 </div>
             </div>
@@ -46,7 +52,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="info-column-plugin log">
                 <span class="label">
-                   <?php echo json_decode($log->getResume(), true)['logs_count']['log_count']; ?>
+                   <?php echo $resume['length']; ?>
                 </span>
                 </div>
             </div>
@@ -62,15 +68,8 @@ if (!defined('ABSPATH')) {
                 <div class="info-column-plugin log">
                 <span class="label">
                    <?php
-                   $logs_list = isset(json_decode(
-                           $log->getResume(),
-                           true
-                       )['logs_list']) ? json_decode(
-                       $log->getResume(),
-                       true
-                   )['logs_list'] : [];
-                   foreach ($logs_list as $index) {
-                       echo '<li>'.$index.'</li>';
+                   foreach ($resume['logs'] as $index) {
+                       echo '<li>'.$index['filename'].'</li>';
                    }
                    ?>
                 </span>
@@ -80,7 +79,6 @@ if (!defined('ABSPATH')) {
 
 
         <h3 class="tbk_title_h3">Últimos Registros</h3>
-        <?php $lastLog = json_decode($log->getLastLog(), true); ?>
         <div id="tbk-last-logs" >
             <div class="tbk-plugin-info-container logs" id="div_last_log">
                 <div class="info-column">
@@ -93,7 +91,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="info-column-plugin">
                         <span class="label">
-                            <?php echo $lastLog['log_file'] ?? '-'; ?>
+                            <?php echo $lastLog['filename'] ?? '-'; ?>
                         </span>
                 </div>
             </div>
@@ -108,7 +106,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="info-column-plugin">
                         <span class="label">
-                            <?php echo $lastLog['log_size'] ?? '-'; ?>
+                            <?php echo $lastLog['size'] ?? '-'; ?>
                         </span>
                 </div>
             </div>
@@ -123,7 +121,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="info-column-plugin">
                         <span class="label">
-                            <?php echo $lastLog['log_regs_lines'] ?? '-'; ?>
+                            <?php echo $lastLog['lines'] ?? '-'; ?>
                         </span>
                 </div>
             </div>
@@ -132,7 +130,7 @@ if (!defined('ABSPATH')) {
         <div id="tbk_last_log_content">
             <pre>
             <span style="font-size: 10px; padding: 5px; font-family:monospace; display: block; background: white;">
-                <?php echo $lastLog['log_content'] ?? '-'; ?>
+                <?php echo $lastLog['content'] ?? '-'; ?>
             </span>
         </pre>
         </div>

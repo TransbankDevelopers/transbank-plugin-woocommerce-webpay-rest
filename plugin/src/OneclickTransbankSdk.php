@@ -3,13 +3,13 @@
 namespace Transbank\WooCommerce\WebpayRest;
 
 use \Exception;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;
@@ -47,7 +47,7 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function __construct($environment, $commerceCode, $apiKey, $childCommerceCode)
     {
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
         $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ? $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);

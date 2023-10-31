@@ -3,7 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use \Exception;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use  Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
@@ -27,9 +27,9 @@ class OneclickInscriptionResponseController
     /**
      * OneclickInscriptionResponseController constructor.
      */
-    public function __construct($gatewayId, $logger = null)
+    public function __construct($gatewayId)
     {
-        $this->logger = $logger ?? new LogHandler();
+        $this->logger = TbkFactory::createLogger();
         $this->gatewayId = $gatewayId;
         $this->oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
     }

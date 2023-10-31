@@ -37,9 +37,6 @@ function tbk_is_nav_active($tab, $val)
                     <li class="<?php tbk_is_nav_active($tab, 'logs'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs') ?>">
                             Registros (logs) <i class="icon fa fa-arrow-right"></i>
                         </a></li>
-                    <li class="<?php tbk_is_nav_active($tab, 'phpinfo'); ?>"><a href="<?php echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo') ?>">
-                            PHP Info <i class="icon fa fa-arrow-right"></i>
-                        </a></li>
                 </ul>
             </div>
         </div>
@@ -51,8 +48,6 @@ function tbk_is_nav_active($tab, $val)
                 include_once __DIR__.'/oneclick-admin-options.php';
             } elseif ($tab === 'logs') {
                 include_once __DIR__.'/logs.php';
-            } elseif ($tab === 'phpinfo') {
-                include_once __DIR__.'/phpinfo.php';
             } elseif ($tab === 'transactions') {
                 include_once __DIR__.'/transactions.php';
             } else {

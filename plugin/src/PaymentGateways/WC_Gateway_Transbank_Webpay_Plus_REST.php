@@ -3,11 +3,11 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
@@ -53,7 +53,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
         $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
         $this->plugin_url = plugins_url('/', __FILE__);
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
 
         $this->supports = [
             'products',

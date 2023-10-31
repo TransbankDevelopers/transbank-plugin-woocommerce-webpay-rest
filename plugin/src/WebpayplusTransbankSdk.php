@@ -3,9 +3,9 @@
 namespace Transbank\WooCommerce\WebpayRest;
 
 use \Exception;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\UserCancelWebpayException;
@@ -34,7 +34,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     public function __construct($environment, $commerceCode, $apiKey)
     {
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
         $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
     }

@@ -1,6 +1,6 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
@@ -9,6 +9,7 @@ class TableCheck
 {
     public static function check()
     {
+        $logger = TbkFactory::createLogger();
         try {
             $resp = Transaction::checkExistTable();
             if ($resp['ok']){
@@ -22,7 +23,7 @@ class TableCheck
             }
         }
         catch(Exception $e) {
-            (new LogHandler())->logInfo("Error ejecutando comprobación. Exception "."{$e->getMessage()}");
+            $logger->logInfo("Error ejecutando comprobación. Exception "."{$e->getMessage()}");
             $resp = array('ok' => false, 'error' => "Error ejecutando comprobación.", 'exception' => "{$e->getMessage()}");
         }
 

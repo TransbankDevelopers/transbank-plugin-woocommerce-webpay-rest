@@ -196,20 +196,6 @@ class HealthCheck
         return ['data' => $result];
     }
 
-    // guarda en array informacion de funcion phpinfo
-    private function getPhpInfo()
-    {
-        ob_start();
-        phpinfo();
-        $info = ob_get_contents();
-        ob_end_clean();
-        $newinfo = strstr($info, '<table>');
-        $newinfo = strstr($newinfo, '<h1>PHP Credits</h1>', true);
-        $return = ['string' => ['content' => str_replace('</div></body></html>', '', $newinfo)]];
-
-        return $return;
-    }
-
     public function setCreateTransaction()
     {
         $amount = 990;
@@ -242,8 +228,7 @@ class HealthCheck
         $this->fullResume = [
             'server_resume'         => $this->getServerResume(),
             'php_extensions_status' => $this->getExtensionsValidate(),
-            'commerce_info'         => $this->getCommerceInfo(),
-            'php_info'              => $this->getPhpInfo(),
+            'commerce_info'         => $this->getCommerceInfo()
         ];
 
         return $this->fullResume;
@@ -253,11 +238,6 @@ class HealthCheck
     public function printCommerceInfo()
     {
         return json_encode($this->getCommerceInfo());
-    }
-
-    public function printPhpInfo()
-    {
-        return json_encode($this->getPhpInfo());
     }
 
     // imprime en formato json la validacion de extensiones / modulos de php

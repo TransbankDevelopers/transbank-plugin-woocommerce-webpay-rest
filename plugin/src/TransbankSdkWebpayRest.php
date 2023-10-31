@@ -3,12 +3,12 @@
 namespace Transbank\WooCommerce\WebpayRest;
 
 use Exception;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
-use Transbank\WooCommerce\WebpayRest\Helpers\LogHandler;
 use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
 
 /**
@@ -20,9 +20,6 @@ class TransbankSdkWebpayRest
      * @var Options
      */
     public $options;
-    /**
-     * @var LogHandler
-     */
     protected $log;
     /**
      * @var InteractsWithFullLog
@@ -38,7 +35,7 @@ class TransbankSdkWebpayRest
      */
     public function __construct($config = null)
     {
-        $this->log = new LogHandler();
+        $this->log = TbkFactory::createLogger();
         if (!isset($config)) {
             $configProvider = new ConfigProvider();
             $config = [
