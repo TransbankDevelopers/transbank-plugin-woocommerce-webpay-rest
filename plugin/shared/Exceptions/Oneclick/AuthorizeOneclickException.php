@@ -2,7 +2,9 @@
 
 namespace Transbank\Plugin\Exceptions\Oneclick;
 
-class AuthorizeOneclickException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class AuthorizeOneclickException extends BaseException
 {
 
 }

@@ -2,13 +2,15 @@
 
 namespace Transbank\Plugin\Exceptions\Webpay;
 
-class StatusWebpayException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class StatusWebpayException extends BaseException
 {
     private $token;
 
-    public function __construct($message, $token, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $token, \Exception $previous = null) {
         $this->token = $token;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getToken() {

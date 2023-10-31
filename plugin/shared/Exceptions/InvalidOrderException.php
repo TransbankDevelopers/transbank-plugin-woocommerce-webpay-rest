@@ -2,6 +2,6 @@
 
 namespace Transbank\Plugin\Exceptions;
 
-class InvalidOrderException extends \Exception
+class InvalidOrderException extends BaseException
 {
 }

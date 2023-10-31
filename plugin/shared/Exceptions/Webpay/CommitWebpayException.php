@@ -2,15 +2,17 @@
 
 namespace Transbank\Plugin\Exceptions\Webpay;
 
-class CommitWebpayException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class CommitWebpayException extends BaseException
 {
     private $tbkToken;
     private $transaction;
 
-    public function __construct($message, $tbkToken, $transaction, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $tbkToken, $transaction, \Exception $previous = null) {
         $this->tbkToken = $tbkToken;
         $this->transaction = $transaction;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getTbkToken() {

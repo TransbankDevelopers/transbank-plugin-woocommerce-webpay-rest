@@ -2,6 +2,6 @@
 
 namespace Transbank\Plugin\Exceptions;
 
-class TableNotExistOnDatabaseException extends \Exception
+class TableNotExistOnDatabaseException extends BaseException
 {
 }

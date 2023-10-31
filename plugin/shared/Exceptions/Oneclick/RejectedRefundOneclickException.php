@@ -2,19 +2,21 @@
 
 namespace Transbank\Plugin\Exceptions\Oneclick;
 
-class RejectedRefundOneclickException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class RejectedRefundOneclickException extends BaseException
 {
     private $buyOrder;
     private $childBuyOrder;
     private $transaction;
     private $refundResponse;
 
-    public function __construct($message, $buyOrder, $childBuyOrder, $transaction, $refundResponse, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $buyOrder, $childBuyOrder, $transaction, $refundResponse, \Exception $previous = null) {
         $this->buyOrder = $buyOrder;
         $this->childBuyOrder = $childBuyOrder;
         $this->transaction = $transaction;
         $this->refundResponse = $refundResponse;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getBuyOrder() {

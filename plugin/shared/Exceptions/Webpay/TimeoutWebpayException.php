@@ -2,17 +2,19 @@
 
 namespace Transbank\Plugin\Exceptions\Webpay;
 
-class TimeoutWebpayException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class TimeoutWebpayException extends BaseException
 {
     private $buyOrder;
     private $sessionId;
     private $transaction;
 
-    public function __construct($message, $buyOrder, $sessionId, $transaction, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $buyOrder, $sessionId, $transaction, \Exception $previous = null) {
         $this->buyOrder = $buyOrder;
         $this->sessionId = $sessionId;
         $this->transaction = $transaction;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getBuyOrder() {

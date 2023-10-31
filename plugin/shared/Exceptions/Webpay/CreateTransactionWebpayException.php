@@ -2,7 +2,9 @@
 
 namespace Transbank\Plugin\Exceptions\Webpay;
 
-class CreateTransactionWebpayException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class CreateTransactionWebpayException extends BaseException
 {
 
 }

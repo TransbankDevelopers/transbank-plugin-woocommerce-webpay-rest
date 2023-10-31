@@ -2,6 +2,6 @@
 
 namespace Transbank\Plugin\Exceptions;
 
-class TokenNotFoundOnDatabaseException extends \Exception
+class TokenNotFoundOnDatabaseException extends BaseException
 {
 }

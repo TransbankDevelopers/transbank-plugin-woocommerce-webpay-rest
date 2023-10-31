@@ -2,13 +2,15 @@
 
 namespace Transbank\Plugin\Exceptions\Oneclick;
 
-class StatusOneclickException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class StatusOneclickException extends BaseException
 {
     private $buyOrder;
 
-    public function __construct($message, $buyOrder, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $buyOrder, \Exception $previous = null) {
         $this->buyOrder = $buyOrder;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getBuyOrder() {

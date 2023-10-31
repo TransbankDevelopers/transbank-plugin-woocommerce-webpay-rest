@@ -2,13 +2,15 @@
 
 namespace Transbank\Plugin\Exceptions\Webpay;
 
-class GetTransactionWebpayException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class GetTransactionWebpayException extends BaseException
 {
     private $orderId;
 
-    public function __construct($message, $orderId, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $orderId, \Exception $previous = null) {
         $this->orderId = $orderId;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getOrderId() {

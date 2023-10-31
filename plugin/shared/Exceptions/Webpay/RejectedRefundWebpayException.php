@@ -2,17 +2,19 @@
 
 namespace Transbank\Plugin\Exceptions\Webpay;
 
-class RejectedRefundWebpayException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class RejectedRefundWebpayException extends BaseException
 {
     private $token;
     private $transaction;
     private $refundResponse;
 
-    public function __construct($message, $token, $transaction, $refundResponse, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $token, $transaction, $refundResponse, \Exception $previous = null) {
         $this->token = $token;
         $this->transaction = $transaction;
         $this->refundResponse = $refundResponse;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getToken() {

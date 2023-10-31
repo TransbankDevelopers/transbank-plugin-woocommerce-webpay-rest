@@ -2,17 +2,19 @@
 
 namespace Transbank\Plugin\Exceptions\Oneclick;
 
-class RejectedInscriptionOneclickException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class RejectedInscriptionOneclickException extends BaseException
 {
     private $tbkToken;
     private $inscription;
     private $finishInscriptionResponse;
 
-    public function __construct($message, $tbkToken, $inscription, $finishInscriptionResponse, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $tbkToken, $inscription, $finishInscriptionResponse, \Exception $previous = null) {
         $this->tbkToken = $tbkToken;
         $this->inscription = $inscription;
         $this->finishInscriptionResponse = $finishInscriptionResponse;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getTbkToken() {

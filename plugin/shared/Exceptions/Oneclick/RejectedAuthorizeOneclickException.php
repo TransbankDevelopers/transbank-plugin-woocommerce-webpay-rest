@@ -2,13 +2,15 @@
 
 namespace Transbank\Plugin\Exceptions\Oneclick;
 
-class RejectedAuthorizeOneclickException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class RejectedAuthorizeOneclickException extends BaseException
 {
     private $authorizeResponse;
 
-    public function __construct($message, $authorizeResponse, $code = 0, \Exception $previous = null) {
+    public function __construct($message, $authorizeResponse, \Exception $previous = null) {
         $this->authorizeResponse = $authorizeResponse;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $previous);
     }
 
     public function getAuthorizeResponse() {

@@ -2,7 +2,9 @@
 
 namespace Transbank\Plugin\Exceptions\Oneclick;
 
-class StartInscriptionOneclickException extends \Exception
+use Transbank\Plugin\Exceptions\BaseException;
+
+class StartInscriptionOneclickException extends BaseException
 {
 
 }
