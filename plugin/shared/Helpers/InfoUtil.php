@@ -11,7 +11,7 @@ class InfoUtil
      */
     public static function getValidatephp()
     {
-        if (version_compare(phpversion(), '7.4.28', '<=') &&
+        if (version_compare(phpversion(), '8.1.8', '<=') &&
                 version_compare(phpversion(), '7.0.0', '>=')) {
             return [
                 'status'  => 'OK',
@@ -67,9 +67,8 @@ class InfoUtil
     {
         $result = [];
         $extensions = [
-            'openssl',
-            'SimpleXML',
-            'soap',
+            'curl',
+            'json',
             'dom',
         ];
         foreach ($extensions as $value) {
