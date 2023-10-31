@@ -10,7 +10,8 @@ class RejectedRefundWebpayException extends BaseException
     private $transaction;
     private $refundResponse;
 
-    public function __construct($message, $token, $transaction, $refundResponse, \Exception $previous = null) {
+    public function __construct($message, $token, $transaction, $refundResponse,
+     \Exception $previous = null) {
         $this->token = $token;
         $this->transaction = $transaction;
         $this->refundResponse = $refundResponse;

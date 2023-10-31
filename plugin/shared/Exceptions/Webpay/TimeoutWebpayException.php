@@ -10,7 +10,8 @@ class TimeoutWebpayException extends BaseException
     private $sessionId;
     private $transaction;
 
-    public function __construct($message, $buyOrder, $sessionId, $transaction, \Exception $previous = null) {
+    public function __construct($message, $buyOrder, $sessionId, $transaction,
+     \Exception $previous = null) {
         $this->buyOrder = $buyOrder;
         $this->sessionId = $sessionId;
         $this->transaction = $transaction;

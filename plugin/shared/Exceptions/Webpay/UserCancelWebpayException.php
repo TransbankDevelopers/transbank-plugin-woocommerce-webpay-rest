@@ -9,7 +9,8 @@ class UserCancelWebpayException extends BaseException
     private $tbkToken;
     private $transaction;
 
-    public function __construct($message, $tbkToken, $transaction, \Exception $previous = null) {
+    public function __construct($message, $tbkToken, $transaction,
+     \Exception $previous = null) {
         $this->tbkToken = $tbkToken;
         $this->transaction = $transaction;
         parent::__construct($message, $previous);

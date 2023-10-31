@@ -10,7 +10,8 @@ class RejectedInscriptionOneclickException extends BaseException
     private $inscription;
     private $finishInscriptionResponse;
 
-    public function __construct($message, $tbkToken, $inscription, $finishInscriptionResponse, \Exception $previous = null) {
+    public function __construct($message, $tbkToken, $inscription, $finishInscriptionResponse,
+        \Exception $previous = null) {
         $this->tbkToken = $tbkToken;
         $this->inscription = $inscription;
         $this->finishInscriptionResponse = $finishInscriptionResponse;

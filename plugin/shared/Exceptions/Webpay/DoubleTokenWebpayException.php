@@ -10,7 +10,8 @@ class DoubleTokenWebpayException extends BaseException
     private $tbkToken2;
     private $transaction;
 
-    public function __construct($message, $tbkToken1, $tbkToken2, $transaction, \Exception $previous = null) {
+    public function __construct($message, $tbkToken1, $tbkToken2, $transaction,
+     \Exception $previous = null) {
         $this->tbkToken1 = $tbkToken1;
         $this->tbkToken2 = $tbkToken2;
         $this->transaction = $transaction;

@@ -10,7 +10,8 @@ class RejectedCommitWebpayException extends BaseException
     private $transaction;
     private $commitResponse;
 
-    public function __construct($message, $tokenWs, $transaction, $commitResponse, \Exception $previous = null) {
+    public function __construct($message, $tokenWs, $transaction, $commitResponse,
+     \Exception $previous = null) {
         $this->tokenWs = $tokenWs;
         $this->transaction = $transaction;
         $this->commitResponse = $commitResponse;

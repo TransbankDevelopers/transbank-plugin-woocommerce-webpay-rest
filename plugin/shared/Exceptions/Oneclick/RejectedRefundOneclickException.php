@@ -11,7 +11,8 @@ class RejectedRefundOneclickException extends BaseException
     private $transaction;
     private $refundResponse;
 
-    public function __construct($message, $buyOrder, $childBuyOrder, $transaction, $refundResponse, \Exception $previous = null) {
+    public function __construct($message, $buyOrder, $childBuyOrder, $transaction, $refundResponse,
+     \Exception $previous = null) {
         $this->buyOrder = $buyOrder;
         $this->childBuyOrder = $childBuyOrder;
         $this->transaction = $transaction;
