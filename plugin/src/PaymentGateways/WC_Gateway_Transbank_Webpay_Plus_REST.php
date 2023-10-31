@@ -46,7 +46,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function __construct()
     {
         self::$URL_FINAL = home_url('/').'?wc-api=TransbankWebpayRestThankYouPage';
-        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
+        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk();
         $this->id = 'transbank_webpay_plus_rest';
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');

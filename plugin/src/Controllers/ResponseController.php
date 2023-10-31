@@ -37,7 +37,7 @@ class ResponseController
     {
         $this->pluginConfig = $pluginConfig;
         $this->interactsWithFullLog = new InteractsWithFullLog();
-        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
+        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk();
     }
 
     /**

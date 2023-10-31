@@ -20,6 +20,7 @@ use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
+use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 
 /**
  * Class WebpayplusTransbankSdk.
@@ -32,10 +33,14 @@ class WebpayplusTransbankSdk extends TransbankSdk
      */
     protected $webpayplusTransaction;
 
-    public function __construct($environment, $commerceCode, $apiKey)
+    public function __construct()
     {
+        $conf = new ConfigProvider();
         $this->log = TbkFactory::createLogger();
-        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
+        $this->options = $this->createOptions(
+            $conf->getConfig('webpay_rest_environment'),
+            $conf->getConfig('webpay_rest_commerce_code'),
+            $conf->getConfig('webpay_rest_api_key'));
         $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
     }
 
