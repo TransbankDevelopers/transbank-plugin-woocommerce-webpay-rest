@@ -75,7 +75,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->logger = TbkFactory::createLogger();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
-        $this->oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
+        $this->oneclickTransbankSdk = new OneclickTransbankSdk();
         
         add_action(
             'woocommerce_scheduled_subscription_payment_'.$this->id,

@@ -31,7 +31,7 @@ class OneclickInscriptionResponseController
     {
         $this->logger = TbkFactory::createLogger();
         $this->gatewayId = $gatewayId;
-        $this->oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
+        $this->oneclickTransbankSdk = new OneclickTransbankSdk();
     }
 
     private function getWcOrder($orderId) {

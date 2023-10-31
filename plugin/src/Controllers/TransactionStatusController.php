@@ -36,7 +36,7 @@ class TransactionStatusController
                     'message' => 'El buy_order enviado y el buy_order de la transacción no coinciden',
                 ], 401);
             }
-            $oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
+            $oneclickTransbankSdk = new OneclickTransbankSdk();
             $status = $oneclickTransbankSdk->status($orderId, $buyOrder);
             $statusArray = json_decode(json_encode($status), true);
             $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
