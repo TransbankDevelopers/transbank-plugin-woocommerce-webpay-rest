@@ -1,7 +1,5 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\Helpers\HealthCheckFactory;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -51,37 +49,9 @@ function tbk_is_nav_active($tab, $val)
             } elseif ($tab === 'transactions') {
                 include_once __DIR__.'/transactions.php';
             } else {
-                $healthcheck = HealthCheckFactory::create();
-                $datos_hc = json_decode($healthcheck->printFullResume());
                 include_once __DIR__.'/healthcheck.php';
             }
             ?>
         </div>
     </div>
-<!--    -->
-<!--    <h2 class="nav-tab-wrapper">-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options')?><!--"-->
-<!--           class="nav-tab --><?php //if ($tab === 'options') {
-//     echo 'nav-tab-active';
-// }?><!--">Webpay Plus</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options_oneclick')?><!--"-->
-<!--           class="nav-tab --><?php //if ($tab === 'options_oneclick') {
-//     echo 'nav-tab-active';
-// }?><!--">Webpay Oneclick</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=healthcheck')?><!--"-->
-<!--           class="nav-tab --><?php //if ($tab === 'healthcheck') {
-//     echo 'nav-tab-active';
-// }?><!--">Diagnóstico</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs')?><!--"-->
-<!--           class="nav-tab --><?php //if ($tab === 'logs') {
-//     echo 'nav-tab-active';
-// }?><!--">Registros (logs)</a>-->
-<!--        <a href="--><?php //echo admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=phpinfo')?><!--"-->
-<!--           class="nav-tab --><?php //if ($tab === 'phpinfo') {
-//     echo 'nav-tab-active';
-// }?><!--">PHP Info</a>-->
-<!--    </h2>-->
-
-
-
 </div>

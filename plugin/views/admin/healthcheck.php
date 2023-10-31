@@ -1,7 +1,14 @@
 <?php
+
+use Transbank\Plugin\Helpers\InfoUtil;
+use Transbank\Plugin\Helpers\WoocommerceInfoUtil;
+
 if (!defined('ABSPATH')) {
     exit;
 }
+
+$summary = InfoUtil::getSummary();
+$eSummary = WoocommerceInfoUtil::getSummary();
 ?>
 
 <div id="transbank_rest_info" class="">
@@ -167,11 +174,11 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label" id="software_ecommerce">
-                    <?php echo $datos_hc->server_resume->plugin_info->ecommerce; ?>
+                    <?php echo $eSummary['ecommerce']; ?>
                 </span>
             </div>
             <div class="info-column-plugin">
-                <div title="Versión de <?php echo $datos_hc->server_resume->plugin_info->ecommerce; ?> instalada en el servidor"
+                <div title="Versión de <?php echo $eSummary['ecommerce']; ?> instalada en el servidor"
                      class="label label-info">?
                 </div>
             </div>
@@ -180,11 +187,11 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label" id="version_ecommerce">
-                    <?php echo $datos_hc->server_resume->plugin_info->ecommerce_version; ?>
+                    <?php echo $eSummary['currentEcommerceVersion']; ?>
                 </span>
             </div>
             <div class="info-column-plugin">
-                <div title="Versión del plugin Webpay para <?php echo $datos_hc->server_resume->plugin_info->ecommerce; ?> instalada actualmente"
+                <div title="Versión del plugin Webpay para <?php echo $eSummary['ecommerce']; ?> instalada actualmente"
                      class="label label-info">?
                 </div>
             </div>
@@ -193,11 +200,11 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label" id="current_version_plugin">
-                    <?php echo $datos_hc->server_resume->plugin_info->current_plugin_version; ?>
+                    <?php echo $eSummary['currentPluginVersion']; ?>
                 </span>
             </div>
             <div class="info-column-plugin">
-                <div title="Última versión del plugin Webpay para <?php echo $datos_hc->server_resume->plugin_info->ecommerce; ?> disponible"
+                <div title="Última versión del plugin Webpay para <?php echo $eSummary['ecommerce']; ?> disponible"
                      class="label label-info">?
                 </div>
             </div>
@@ -206,7 +213,7 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label" id="last_version_available">
-                    <?php echo $datos_hc->server_resume->plugin_info->last_plugin_version; ?>
+                    <?php echo $eSummary['lastPluginVersion']; ?>
                 </span>
             </div>
         </div>
@@ -224,7 +231,7 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label" id="software_server">
-                    <?php echo $datos_hc->server_resume->server_version->server_software; ?>
+                    <?php echo $summary['server']; ?>
                 </span>
             </div>
             <div class="info-column-plugin">
@@ -237,11 +244,11 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label
-                   <?php if ($datos_hc->server_resume->php_version->status == 'OK') {
+                   <?php if ($summary['php']['status'] == 'OK') {
                     echo 'label-success';
                 } else {
                     echo 'label-danger';
-                } ?>"><?php echo $datos_hc->server_resume->php_version->status; ?>
+                } ?>"><?php echo $summary['php']['status']; ?>
                 </span>
             </div>
             <div class="info-column-plugin">
@@ -254,7 +261,7 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="info-column-plugin">
                 <span class="label" id="php_version">
-                    <?php echo $datos_hc->server_resume->php_version->version; ?>
+                    <?php echo $summary['php']['version']; ?>
                 </span>
             </div>
 
@@ -272,48 +279,48 @@ if (!defined('ABSPATH')) {
                 <td style="font-weight:bold">json</td>
                 <td>
                         <span class="label
-                            <?php if ($datos_hc->php_extensions_status->json->status == 'OK') {
+                            <?php if ($summary['phpExtensions']['json']['status'] == 'OK') {
                             echo 'label-success';
                         } else {
                             echo 'label-danger';
                         } ?>">
-                            <?php echo $datos_hc->php_extensions_status->json->status; ?>
+                            <?php echo $summary['phpExtensions']['json']['status']; ?>
                         </span>
                 </td>
                 <td class="tbk_table_td">
-                    <?php echo $datos_hc->php_extensions_status->json->version; ?>
+                    <?php echo $summary['phpExtensions']['json']['version']; ?>
                 </td>
             </tr>
             <tr>
                 <td style="font-weight:bold">dom</td>
                 <td>
                         <span class="label
-                            <?php if ($datos_hc->php_extensions_status->dom->status == 'OK') {
+                            <?php if ($summary['phpExtensions']['dom']['status'] == 'OK') {
                             echo 'label-success';
                         } else {
                             echo 'label-danger';
                         } ?>">
-                            <?php echo $datos_hc->php_extensions_status->dom->status; ?>
+                            <?php echo $summary['phpExtensions']['dom']['status']; ?>
                         </span>
                 </td>
                 <td class="tbk_table_td">
-                    <?php echo $datos_hc->php_extensions_status->dom->version; ?>
+                    <?php echo $summary['phpExtensions']['dom']['version']; ?>
                 </td>
             </tr>
             <tr>
                 <td style="font-weight:bold">curl</td>
                 <td>
                         <span class="label
-                        <?php if ($datos_hc->php_extensions_status->curl->status == 'OK') {
+                        <?php if ($summary['phpExtensions']['curl']['status'] == 'OK') {
                             echo 'label-success';
                         } else {
                             echo 'label-danger';
                         } ?>">
-                            <?php echo $datos_hc->php_extensions_status->curl->status; ?>
+                            <?php echo $summary['phpExtensions']['curl']['status']; ?>
                         </span>
                 </td>
                 <td class="tbk_table_td">
-                    <?php echo $datos_hc->php_extensions_status->curl->version; ?>
+                    <?php echo $summary['phpExtensions']['curl']['version']; ?>
                 </td>
             </tr>
         </table>

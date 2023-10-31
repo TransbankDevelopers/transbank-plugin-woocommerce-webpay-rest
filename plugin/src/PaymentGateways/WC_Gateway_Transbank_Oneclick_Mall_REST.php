@@ -3,20 +3,21 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\CreateTransactionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\AuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedRefundOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RefundOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\NotFoundTransactionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\GetTransactionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RejectedRefundOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RefundOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\NotFoundTransactionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Token_Oneclick;
@@ -74,7 +75,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->logger = TbkFactory::createLogger();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
-        $this->oneclickTransbankSdk = new OneclickTransbankSdk(get_option('environment'), get_option('commerce_code'), get_option('api_key'), get_option('child_commerce_code'));
+        $this->oneclickTransbankSdk = new OneclickTransbankSdk();
         
         add_action(
             'woocommerce_scheduled_subscription_payment_'.$this->id,
@@ -127,25 +128,25 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
             do_action('transbank_oneclick_refund_failed', $order, null);
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
         } catch (NotFoundTransactionOneclickException $e) {
             $errorMessage = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
             do_action('transbank_oneclick_refund_failed', $order, null);
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
         } catch (RefundOneclickException $e) {
             $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
             do_action('transbank_oneclick_refund_failed', $order, $e->getTransaction(), $e->getMessage());
-            throw new Exception('Error al anular: '.$e->getMessage());
+            throw new EcommerceException('Error al anular: '.$e->getMessage(), $e);
         }catch (RejectedRefundOneclickException $e) {
             $errorMessage = 'Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
             $order->add_order_note($errorMessage);
             do_action('transbank_oneclick_refund_failed', $order, $e->getTransaction());
-            throw new Exception($errorMessage);
+            throw new EcommerceException($errorMessage, $e);
         } catch (Exception $e) {
             $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
             do_action('transbank_oneclick_refund_failed', $order, null);
-            throw new Exception('Anulación a través de Webpay fallida.');
+            throw new EcommerceException('Anulación a través de Webpay fallida.', $e);
         }
     }
 
@@ -197,14 +198,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if (!$customerId) {
             $this->logger->logError('There is no costumer id on the renewal order');
 
-            throw new Exception('There is no costumer id on the renewal order');
+            throw new EcommerceException('There is no costumer id on the renewal order');
         }
 
         /** @var WC_Payment_Token_Oneclick $paymentToken */
         $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
         $response = $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
         if ($response['result'] == 'error'){
-            throw new Exception('Se produjo un error en la autorización');
+            throw new EcommerceException('Se produjo un error en la autorización');
         }
         $this->setAfterPaymentOrderStatus($renewalOrder);
     }
@@ -274,8 +275,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
                 return wc_add_notice($errorMessage, 'error');
             }
-            $this->logger->logInfo('[O neclick] Checkout: inscription response: ');
-            $this->logger->logInfo(print_r($response, true));
+            $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
+            $this->logger->logInfo(json_encode($response));
             $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
 
             do_action('transbank_oneclick_adding_card_from_order', $order);

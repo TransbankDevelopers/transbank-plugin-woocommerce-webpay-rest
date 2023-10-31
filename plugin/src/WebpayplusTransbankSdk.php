@@ -7,19 +7,20 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\TimeoutWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\UserCancelWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\DoubleTokenWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CommitWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\InvalidStatusWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedCommitWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedRefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\NotFoundTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\GetTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\StatusWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
+use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 
 /**
  * Class WebpayplusTransbankSdk.
@@ -32,10 +33,14 @@ class WebpayplusTransbankSdk extends TransbankSdk
      */
     protected $webpayplusTransaction;
 
-    public function __construct($environment, $commerceCode, $apiKey)
+    public function __construct()
     {
+        $conf = new ConfigProvider();
         $this->log = TbkFactory::createLogger();
-        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
+        $this->options = $this->createOptions(
+            $conf->getConfig('webpay_rest_environment'),
+            $conf->getConfig('webpay_rest_commerce_code'),
+            $conf->getConfig('webpay_rest_api_key'));
         $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
     }
 
@@ -97,15 +102,15 @@ class WebpayplusTransbankSdk extends TransbankSdk
             if (ErrorUtil::isApiMismatchError($e)) {
                 $errorMessage = 'Esta utilizando una version de api distinta a la utilizada para crear la transacción';
                 $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
-                throw new StatusWebpayException($errorMessage, $token);
+                throw new StatusWebpayException($errorMessage, $token, $e);
             } elseif (ErrorUtil::isMaxTimeError($e)) {
                 $errorMessage = 'Ya pasaron mas de 7 dias desde la creacion de la transacción, ya no es posible consultarla por este medio';
                 $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
-                throw new StatusWebpayException($errorMessage, $token);
+                throw new StatusWebpayException($errorMessage, $token, $e);
             }
             $errorMessage = 'Ocurrió un error al tratar de obtener el status ( token: '.$token.') de la transacción Webpay en Transbank: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
-            throw new StatusWebpayException($errorMessage, $token);
+            throw new StatusWebpayException($errorMessage, $token, $e);
         }
     }
 
@@ -125,7 +130,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de crear la transacción en Transbank: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'create', $params, 'CreateWebpayException', $e->getMessage(), $errorMessage);
-            throw new CreateWebpayException($errorMessage);
+            throw new CreateWebpayException($errorMessage, $e);
         }
     }
 
@@ -202,7 +207,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada para la "orden": "'.$orderId.'" desde la base de datos. Error: '.$e->getMessage();
             $this->errorExecution($orderId, 'create', [], 'GetTransactionWebpayException', $e->getMessage(), $errorMessage);
-            throw new GetTransactionWebpayException($errorMessage, $orderId);
+            throw new GetTransactionWebpayException($errorMessage, $orderId, $e);
         }
     }
 
@@ -219,7 +224,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay con el "token": "'.$token.'" y "monto": "'.$amount.'". Error: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'refund', $params, 'RefundWebpayException', $e->getMessage(), $errorMessage);
-            throw new RefundWebpayException($errorMessage, $token, $tx);
+            throw new RefundWebpayException($errorMessage, $token, $tx, $e);
         }
     }
 
@@ -338,7 +343,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $errorMessage = 'Ocurrió un error al ejecutar el commit de la transacción: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'commit', $params, 'CommitWebpayException', $e->getMessage(), $errorMessage);
             $this->saveTransactionWithErrorByTransaction($transaction, 'CommitWebpayException', $errorMessage);
-            throw new CommitWebpayException($errorMessage, $token, $transaction);
+            throw new CommitWebpayException($errorMessage, $token, $transaction, $e);
         }
     }
 

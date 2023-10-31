@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
@@ -10,12 +11,12 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\CreateTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\GetTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\NotFoundTransactionWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Webpay\RejectedRefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
 use WC_Order;
 use WC_Payment_Gateway;
 
@@ -45,7 +46,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function __construct()
     {
         self::$URL_FINAL = home_url('/').'?wc-api=TransbankWebpayRestThankYouPage';
-        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk(get_option('webpay_rest_environment'), get_option('webpay_rest_commerce_code'), get_option('webpay_rest_api_key'));
+        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk();
         $this->id = 'transbank_webpay_plus_rest';
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
@@ -128,7 +129,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
         $order->add_order_note($messageError);
         do_action($action, $order, $tx, $exception->getMessage());
-        throw new Exception($messageError);
+        throw new EcommerceException($messageError);
     }
 
     /**

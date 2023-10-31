@@ -10,24 +10,25 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\FinishInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\GetInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\CreateTransactionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\AuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RejectedRefundOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\RefundOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\NotFoundTransactionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\GetTransactionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\StatusOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\StartOneclickException;
-use Transbank\WooCommerce\WebpayRest\Exceptions\Oneclick\StartInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RejectedInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\FinishInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\GetInscriptionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RejectedRefundOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\RefundOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\NotFoundTransactionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
+use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 
 /**
  * Class OneclickTransbankSdk.
@@ -45,11 +46,17 @@ class OneclickTransbankSdk extends TransbankSdk
      */
     protected $mallInscription;
 
-    public function __construct($environment, $commerceCode, $apiKey, $childCommerceCode)
+    public function __construct()
     {
+        $conf = new ConfigProvider();
         $this->log = TbkFactory::createLogger();
-        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
-        $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ? $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+        $environment = $conf->getConfig('environment');
+        $this->options = $this->createOptions(
+            $environment,
+            $conf->getConfig('commerce_code'),
+            $conf->getConfig('api_key'));
+        $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ?
+            $conf->getConfig('child_commerce_code') : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
     }
@@ -116,7 +123,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener el status ( buyOrder: '.$buyOrder.') de la transacción Oneclick en Transbank: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusOneclickException', $e->getMessage(), $errorMessage);
-            throw new StatusOneclickException($errorMessage, $buyOrder);
+            throw new StatusOneclickException($errorMessage, $buyOrder, $e);
         }
     }
 
@@ -135,7 +142,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar iniciar la inscripcion: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'start', $params, 'StartOneclickException', $e->getMessage(), $errorMessage);
-            throw new StartOneclickException($errorMessage);
+            throw new StartOneclickException($errorMessage, $e);
         }
     }
 
@@ -254,7 +261,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $error = 'Ocurrió un error al obtener la inscripción: '.$e->getMessage();
             $this->logError($error);
-            throw new GetInscriptionOneclickException($error);
+            throw new GetInscriptionOneclickException($error, $e);
         }
     }
 
@@ -277,7 +284,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $errorMessage = 'Ocurrió un error al ejecutar la inscripción: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'finish', $params, 'FinishInscriptionOneclickException', $e->getMessage(), $errorMessage);
             $ins = $this->saveInscriptionWithError($tbkToken, $errorMessage);
-            throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins);
+            throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins, $e);
         }
     }
 
@@ -327,7 +334,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $errorMessage = 'Ocurrió un error al ejecutar la autorización: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'authorize', $params, 'AuthorizeOneclickException', $e->getMessage(), $errorMessage);
             $this->saveTransactionWithError($txId, 'AuthorizeOneclickException', $errorMessage);
-            throw new AuthorizeOneclickException($e->getMessage());
+            throw new AuthorizeOneclickException($e->getMessage(), $e);
         }
     }
 
@@ -429,7 +436,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada ("orderId": "'.$orderId.'") desde la base de datos. Error: '.$e->getMessage();
             $this->logError($errorMessage);
-            throw new GetTransactionOneclickException($errorMessage, $orderId);
+            throw new GetTransactionOneclickException($errorMessage, $orderId, $e);
         }
     }
 
@@ -448,7 +455,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay ("buyOrder": "'.$buyOrder.'", "childBuyOrder": "'.$childBuyOrder.'", "amount": "'.$amount.'"). Error: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'refund', $params, 'RefundOneclickException', $e->getMessage(), $errorMessage);
-            throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder, $transaction);
+            throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder, $transaction, $e);
         }
     }
 

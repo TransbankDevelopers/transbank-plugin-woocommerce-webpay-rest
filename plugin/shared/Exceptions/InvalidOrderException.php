@@ -2,7 +2,6 @@
 
 namespace Transbank\Plugin\Exceptions;
 
-class EcommerceException extends BaseException
+class InvalidOrderException extends BaseException
 {
-
 }
