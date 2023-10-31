@@ -116,7 +116,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener el status ( buyOrder: '.$buyOrder.') de la transacción Oneclick en Transbank: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusOneclickException', $e->getMessage(), $errorMessage);
-            throw new StatusOneclickException($errorMessage, $buyOrder);
+            throw new StatusOneclickException($errorMessage, $buyOrder, $e);
         }
     }
 
@@ -135,7 +135,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar iniciar la inscripcion: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'start', $params, 'StartOneclickException', $e->getMessage(), $errorMessage);
-            throw new StartOneclickException($errorMessage);
+            throw new StartOneclickException($errorMessage, $e);
         }
     }
 
@@ -254,7 +254,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $error = 'Ocurrió un error al obtener la inscripción: '.$e->getMessage();
             $this->logError($error);
-            throw new GetInscriptionOneclickException($error);
+            throw new GetInscriptionOneclickException($error, $e);
         }
     }
 
@@ -277,7 +277,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $errorMessage = 'Ocurrió un error al ejecutar la inscripción: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'finish', $params, 'FinishInscriptionOneclickException', $e->getMessage(), $errorMessage);
             $ins = $this->saveInscriptionWithError($tbkToken, $errorMessage);
-            throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins);
+            throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins, $e);
         }
     }
 
@@ -327,7 +327,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $errorMessage = 'Ocurrió un error al ejecutar la autorización: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'authorize', $params, 'AuthorizeOneclickException', $e->getMessage(), $errorMessage);
             $this->saveTransactionWithError($txId, 'AuthorizeOneclickException', $errorMessage);
-            throw new AuthorizeOneclickException($e->getMessage());
+            throw new AuthorizeOneclickException($e->getMessage(), $e);
         }
     }
 
@@ -429,7 +429,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada ("orderId": "'.$orderId.'") desde la base de datos. Error: '.$e->getMessage();
             $this->logError($errorMessage);
-            throw new GetTransactionOneclickException($errorMessage, $orderId);
+            throw new GetTransactionOneclickException($errorMessage, $orderId, $e);
         }
     }
 
@@ -448,7 +448,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay ("buyOrder": "'.$buyOrder.'", "childBuyOrder": "'.$childBuyOrder.'", "amount": "'.$amount.'"). Error: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'refund', $params, 'RefundOneclickException', $e->getMessage(), $errorMessage);
-            throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder, $transaction);
+            throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder, $transaction, $e);
         }
     }
 
