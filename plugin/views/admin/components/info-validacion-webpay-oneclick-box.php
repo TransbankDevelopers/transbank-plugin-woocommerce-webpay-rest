@@ -8,7 +8,7 @@
     <h4>Tu Api Key: Proceso de validación</h4>
     Si ya tienes tus códigos de comercio, lo único que te faltaría es tu Api Key. Para obtenerla, debes completar el siguiente formulario:
     <br>
-    <a href="https://form.typeform.com/to/fZqOJyFZ?typeform-medium=embed-snippet&from=woocommerce_webpayoneclick&wpcommerce=<?php echo $webpayPlusCommerceCode; ?>&wpenv=<?php echo $webpayPlusEnvironment; ?>" style="margin-top: 5px; display: inline-block;clear: both" data-mode="popup" class="typeform-share link button-primary" data-size="100" data-submit-close-delay="25">Comenzar proceso de validación</a>
+    <a href="https://transbankdevelopers.typeform.com/to/fZqOJyFZ" style="margin-top: 5px; display: inline-block;clear: both" data-mode="popup" class="typeform-share link button-primary" data-size="100" data-submit-close-delay="25">Comenzar proceso de validación</a>
 
     <br><br>
 
