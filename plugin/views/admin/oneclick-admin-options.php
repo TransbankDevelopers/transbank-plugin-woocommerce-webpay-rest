@@ -17,7 +17,7 @@ $trackinfo = PluginInfoHelper::getInfo();
 <div class="" style="display: flex; flex-wrap: wrap; margin-bottom: 10px">
     <div style="flex: 1; margin-bottom: 10px">
         <div style="margin-right: 10px; height: 100%; background: #fff; border-radius: 10px;">
-            <a target="_blank" href="https://contrata.transbankdevelopers.cl/Oneclick/?wpcommerce=<?php echo $trackinfo['wpcommerce']; ?>&wpenv=<?php echo $trackinfo['wpenv']; ?>&utm_source=woocommerce_plugin&utm_medium=banner&utm_campaign=contrata">
+            <a target="_blank" href="https://contrata-oneclick.continuumhq.dev/Oneclick">
                 <img style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
             </a>
         </div>
