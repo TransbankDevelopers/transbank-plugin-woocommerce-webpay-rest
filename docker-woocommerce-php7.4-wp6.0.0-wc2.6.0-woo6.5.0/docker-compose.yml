@@ -11,7 +11,7 @@ x-common-variables: &common-variables
 services:
   db:
     image: mysql:5.7
-    container_name: php7.4-wp6.0.0-wc6.0.0-woo6.5.0_mysql
+    container_name: php7.4-wp6.0.0-wc2.6.0-woo6.5.0_mysql
     ports:
       - "33060:3306"
     volumes:
@@ -26,7 +26,7 @@ services:
     depends_on:
       - db
     image: wordpress:6.0.0-php7.4-apache
-    container_name: php7.4-wp6.0.0-wc6.0.0-woo6.5.0_wordpress
+    container_name: php7.4-wp6.0.0-wc2.6.0-woo6.5.0_wordpress
     ports:
       - "8000:80"
     restart: always
@@ -34,13 +34,12 @@ services:
       <<: *common-variables
     volumes:
       - ./wp_data:/var/www/html
-      - ./transbank-webpay-plus-rest:/var/www/html/wp-content/plugins/transbank-webpay-plus-rest
   wordpress-cli:
     depends_on:
       - db
       - wordpress
     image: wordpress:cli-2.6.0-php7.4
-    container_name: php7.4-wp6.0.0-wc6.0.0-woo6.5.0_wordpress_cli
+    container_name: php7.4-wp6.0.0-wc2.6.0-woo6.5.0_wordpress_cli
     # vstm: This is required to run wordpress-cli with the same
     # user-id as wordpress. This way there are no permission problems
     # when running the cli
