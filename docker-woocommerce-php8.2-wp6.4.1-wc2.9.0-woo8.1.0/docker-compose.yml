@@ -1,0 +1,80 @@
+version: '3.4'
+
+x-common-variables: &common-variables
+  WORDPRESS_DB_HOST: db:3306
+  WORDPRESS_DB_USER: wordpress
+  WORDPRESS_DB_PASSWORD: wordpress
+  WORDPRESS_DB_NAME: wordpress
+  WORDPRESS_TABLE_PREFIX: "wp_"
+  WORDPRESS_DEBUG: 1
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.1.0_mysql
+    ports:
+      - "33060:3306"
+    volumes:
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:6.4.1-php8.2-apache
+    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.1.0_wordpress
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      <<: *common-variables
+    volumes:
+      - ./wp_data:/var/www/html
+  wordpress-cli:
+    depends_on:
+      - db
+      - wordpress
+    image: wordpress:cli-2.9.0-php8.2
+    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.1.0_wordpress_cli
+    # vstm: This is required to run wordpress-cli with the same
+    # user-id as wordpress. This way there are no permission problems
+    # when running the cli
+    user: "33:33"
+    environment:
+      <<: *common-variables
+    # vstm: The sleep 40 is required so that the command is run after
+    # mysql is initialized. Depending on your machine this might take
+    # longer or it can go faster.
+    command: >
+      /bin/sh -c '
+      sleep 40;
+      sed -i "s|# END WordPress|php_value upload_max_filesize 5000M \\n php_value post_max_size 5000M \\n php_value memory_limit 256M \\n php_value max_execution_time 300 \\n php_value max_input_time 300 \\n |g" /var/www/html/.htaccess;
+      wp core install --path="/var/www/html" --url="http://localhost:8000" --title="Transbank Store" --admin_user=admin --admin_password=admin --admin_email=transbankdevelopers@continuum.cl;
+      wp --allow-root plugin install woocommerce --version=8.1.0 --activate; 
+      wp --allow-root theme install storefront --activate;
+      wp --allow-root wc tool run install_pages --user=admin;
+      wp --allow-root wc product create --name="Zapatos deportivos" --sku=1 --regular_price=1000 --status=publish --user=admin;
+      wp --allow-root db query "UPDATE wp_options SET option_value=\"CLP\" WHERE option_name=\"woocommerce_currency\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\"General Bustamante 24\" WHERE option_name=\"woocommerce_store_address\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\"Of M, Piso 7\" WHERE option_name=\"woocommerce_store_address_2\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\"Providencia\" WHERE option_name=\"woocommerce_store_city\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\"CL\" WHERE option_name=\"woocommerce_default_country\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\"7500000\" WHERE option_name=\"woocommerce_store_postcode\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=0 WHERE option_name=\"woocommerce_price_num_decimals\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\".\" WHERE option_name=\"woocommerce_price_thousand_sep\";";
+      wp --allow-root db query "UPDATE wp_options SET option_value=\",\" WHERE option_name=\"woocommerce_price_decimal_sep\";";
+      wp --allow-root config set WP_DEBUG true;
+      wp --allow-root config set --add --type=constant WP_DEBUG_LOG true;
+      wp --allow-root config set --add --type=constant WP_DEBUG_DISPLAY false;
+      wp --allow-root config set --add --type=constant WPS_DEBUG true;
+      wp --allow-root config set --add --type=constant WPS_DEBUG_SCRIPTS true;
+      wp --allow-root config set --add --type=constant WPS_DEBUG_STYLES true;
+      '
+    volumes_from:
+      - wordpress
+    links:
+      - db
