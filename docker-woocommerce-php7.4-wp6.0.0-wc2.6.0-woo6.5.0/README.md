@@ -2,7 +2,7 @@
 
 #  Woocommerce Docker para desarrollo
 
-### PHP 7.4 + Wordpress 6.0.0 + Wordpress Cli 6.0.0 + Mysql 5.7 + Woocommerce 6.5.0
+### PHP 7.4 + Wordpress 6.0.0 + Wordpress Cli 2.6.0 + Mysql 5.7 + Woocommerce 6.5.0
 
 ### Requerimientos
 

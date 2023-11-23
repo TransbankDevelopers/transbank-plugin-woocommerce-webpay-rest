@@ -11,7 +11,7 @@ x-common-variables: &common-variables
 services:
   db:
     image: mysql:5.7
-    container_name: php7.4-wp6.0.0-wc6.0.0-woo6.0.0_mysql
+    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.1.0_mysql
     ports:
       - "33060:3306"
     volumes:
@@ -25,8 +25,8 @@ services:
   wordpress:
     depends_on:
       - db
-    image: wordpress:6.0.0-php7.4-apache
-    container_name: php7.4-wp6.0.0-wc6.0.0-woo6.0.0_wordpress
+    image: wordpress:6.4.1-php8.2-apache
+    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.1.0_wordpress
     ports:
       - "8000:80"
     restart: always
@@ -34,13 +34,12 @@ services:
       <<: *common-variables
     volumes:
       - ./wp_data:/var/www/html
-      - ./transbank-webpay-plus-rest:/var/www/html/wp-content/plugins/transbank-webpay-plus-rest
   wordpress-cli:
     depends_on:
       - db
       - wordpress
-    image: wordpress:cli-2.6.0-php7.4
-    container_name: php7.4-wp6.0.0-wc6.0.0-woo6.0.0_wordpress_cli
+    image: wordpress:cli-2.9.0-php8.2
+    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.1.0_wordpress_cli
     # vstm: This is required to run wordpress-cli with the same
     # user-id as wordpress. This way there are no permission problems
     # when running the cli
@@ -55,7 +54,7 @@ services:
       sleep 40;
       sed -i "s|# END WordPress|php_value upload_max_filesize 5000M \\n php_value post_max_size 5000M \\n php_value memory_limit 256M \\n php_value max_execution_time 300 \\n php_value max_input_time 300 \\n |g" /var/www/html/.htaccess;
       wp core install --path="/var/www/html" --url="http://localhost:8000" --title="Transbank Store" --admin_user=admin --admin_password=admin --admin_email=transbankdevelopers@continuum.cl;
-      wp --allow-root plugin install woocommerce --version=6.0.0 --activate; 
+      wp --allow-root plugin install woocommerce --version=8.1.0 --activate; 
       wp --allow-root theme install storefront --activate;
       wp --allow-root wc tool run install_pages --user=admin;
       wp --allow-root wc product create --name="Zapatos deportivos" --sku=1 --regular_price=1000 --status=publish --user=admin;
