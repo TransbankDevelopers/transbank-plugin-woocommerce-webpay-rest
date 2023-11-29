@@ -7,6 +7,7 @@ use DateTimeZone;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
+use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
@@ -182,17 +183,19 @@ class ResponseController
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
         $cardNumber = $result->cardDetail['card_number'];
         $date = $date_accepted->format('d-m-Y / H:i:s');
-        update_post_meta($wooCommerceOrder->get_id(), 'transactionResponse', $transactionResponse);
-        update_post_meta($wooCommerceOrder->get_id(), 'buyOrder', $result->buyOrder);
-        update_post_meta($wooCommerceOrder->get_id(), 'authorizationCode', $authorizationCode);
-        update_post_meta($wooCommerceOrder->get_id(), 'cardNumber', $cardNumber);
-        update_post_meta($wooCommerceOrder->get_id(), 'paymentCodeResult', $paymentCodeResult);
-        update_post_meta($wooCommerceOrder->get_id(), 'amount', $amount);
-        update_post_meta($wooCommerceOrder->get_id(), 'installmentsNumber', $sharesNumber ? $sharesNumber : '0');
-        update_post_meta($wooCommerceOrder->get_id(), 'installmentsAmount', $sharesAmount ? $sharesAmount : '0');
-        update_post_meta($wooCommerceOrder->get_id(), 'transactionDate', $date);
-        update_post_meta($wooCommerceOrder->get_id(), 'webpay_transaction_id', $webpayTransaction->id);
-        update_post_meta($wooCommerceOrder->get_id(), 'webpay_rest_response', json_encode($result));
+        $hPosHelper = new HposHelper();
+
+        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', $transactionResponse);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'buyOrder', $result->buyOrder);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'authorizationCode', $authorizationCode);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'cardNumber', $cardNumber);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'paymentCodeResult', $paymentCodeResult);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'amount', $amount);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsNumber', $sharesNumber ? $sharesNumber : '0');
+        $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsAmount', $sharesAmount ? $sharesAmount : '0');
+        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionDate', $date);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'webpay_transaction_id', $webpayTransaction->id);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', json_encode($result));
 
         $message = 'Pago exitoso con Webpay Plus';
 
