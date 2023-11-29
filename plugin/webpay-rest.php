@@ -68,7 +68,10 @@ if ($hPosExists)
 {
     add_action('before_woocommerce_init', function () {
         if (class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
-            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+                'custom_order_tables',
+                __FILE__,
+                true);
         }
     });
 }
@@ -164,14 +167,24 @@ register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 if ($hPosExists)
 {
     add_action('add_meta_boxes', function () {
-        $screen = wc_get_container()->get(Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class)->custom_orders_table_usage_is_enabled()
+        $screen = wc_get_container()
+            ->get(Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class)
+            ->custom_orders_table_usage_is_enabled()
             ? wc_get_page_screen_id('shop-order')
             : 'shop_order';
-        add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post_or_order_object) {
-            $order = ($post_or_order_object instanceof WP_Post) ? wc_get_order($post_or_order_object->ID) : $post_or_order_object;
-            $transaction = Transaction::getApprovedByOrderId($order->get_id());
-            include_once __DIR__.'/views/get-status.php';
-        }, $screen, 'side', 'core');
+        add_meta_box(
+            'transbank_check_payment_status',
+            __('Verificar estado del pago', 'transbank_wc_plugin'),
+            function ($post_or_order_object) {
+                $order = ($post_or_order_object instanceof WP_Post)
+                ? wc_get_order($post_or_order_object->ID)
+                : $post_or_order_object;
+                $transaction = Transaction::getApprovedByOrderId($order->get_id());
+                include_once __DIR__.'/views/get-status.php';
+            },
+            $screen,
+            'side',
+            'core');
     });
 }
 else
