@@ -26,8 +26,8 @@ if (!defined('ABSPATH')) {
  * Version: VERSION_REPLACE_HERE
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
- * WC requires at least: 3.4.0
- * WC tested up to: 5.5.1
+ * WC requires at least: 7.0
+ * WC tested up to: 8.3
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
@@ -82,6 +82,11 @@ add_action('woocommerce_blocks_loaded', function() {
     }
 });
 
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+	}
+} );
 
 $hposHelper = new HposHelper();
 $hPosExists = $hposHelper->checkIfHposExists();
