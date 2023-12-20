@@ -1,0 +1,22 @@
+{
+	"name": "woocommerce-gateway-webpay",
+	"title": "WooCommerce Webpay Rest",
+	"version": "1.0.0",
+	"author": "Transbank Developers",
+	"license": "BSD-3-Clause",
+	"keywords": [],
+	"engines": {
+		"node": ">=6.9.4",
+		"npm": ">=1.1.0"
+	},
+	"devDependencies": {
+		"@woocommerce/dependency-extraction-webpack-plugin": "^1.7.0",
+		"@wordpress/scripts": "17.1.0",
+		"cross-env": "6.0.3"
+	},
+	"scripts": {
+		"start": "wp-scripts start",
+		"build": "wp-scripts build",
+		"check-engines": "wp-scripts check-engines"
+	}
+}
