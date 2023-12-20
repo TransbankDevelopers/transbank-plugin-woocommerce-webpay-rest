@@ -67,7 +67,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->method_title = 'Webpay Oneclick';
         $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
         $this->method_description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/oneclick.svg';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/oneclick.png';
 
         $this->init_form_fields();
         $this->init_settings();
@@ -76,7 +76,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
         $this->oneclickTransbankSdk = new OneclickTransbankSdk();
-        
+
         add_action(
             'woocommerce_scheduled_subscription_payment_'.$this->id,
             [$this, 'scheduled_subscription_payment'],
@@ -479,7 +479,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
             $token = $this->getWcPaymentToken($paymentToken);
             $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token->get_id());
-    
+
             $amount = $this->getAmountForAuthorize($amount, $order);
             $authorizeResponse = $this->oneclickTransbankSdk->authorize($order->get_id(), $amount, $token->get_username(), $token->get_token());
 
@@ -514,7 +514,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             wc_add_notice($e->getMessage(), 'error');
             $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
         }
-        
+
         do_action('transbank_oneclick_transaction_failed', $order);
         return [
             'result' => 'error',
