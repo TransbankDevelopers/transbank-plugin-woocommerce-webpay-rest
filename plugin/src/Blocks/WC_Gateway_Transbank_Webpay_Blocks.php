@@ -30,13 +30,13 @@ final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType {
     }
 
     public function get_payment_method_data() {
-		return [
-			'title' => $this->gateway->title,
-			'description' => $this->gateway->description,
-			'supports' => $this->gateway->supports,
+        return [
+            'title' => $this->gateway->title,
+            'description' => $this->gateway->description,
+            'supports' => $this->gateway->supports,
             'icon' => $this->gateway->icon
-		];
-	}
+        ];
+    }
 
     private function getGateway() {
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
