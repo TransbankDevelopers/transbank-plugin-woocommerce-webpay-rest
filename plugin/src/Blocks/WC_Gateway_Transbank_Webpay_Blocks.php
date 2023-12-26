@@ -3,7 +3,7 @@
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 
-final class WC_Gateway_Transbank_Webpay_Blocks extends AbstractPaymentMethodType {
+final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType {
     private $gateway;
     protected $name = 'transbank_webpay_plus_rest';
 

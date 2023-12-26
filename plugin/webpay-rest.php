@@ -75,8 +75,8 @@ add_action('woocommerce_blocks_loaded', function() {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
             function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-                $payment_method_registry->register( new WC_Gateway_Transbank_Webpay_Blocks() );
-                $payment_method_registry->register( new WC_Gateway_Transbank_Oneclick_Blocks() );
+                $payment_method_registry->register( new WCGatewayTransbankWebpayBlocks() );
+                $payment_method_registry->register( new WCGatewayTransbankOneclickBlocks() );
             }
         );
     }

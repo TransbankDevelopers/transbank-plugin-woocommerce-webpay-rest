@@ -3,7 +3,7 @@
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 
-final class WC_Gateway_Transbank_Oneclick_Blocks extends AbstractPaymentMethodType {
+final class WCGatewayTransbankOneclickBlocks extends AbstractPaymentMethodType {
     private $gateway;
     protected $name = 'transbank_oneclick_mall_rest';
 
