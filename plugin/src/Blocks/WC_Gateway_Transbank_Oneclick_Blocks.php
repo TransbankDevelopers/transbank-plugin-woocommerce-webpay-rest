@@ -8,7 +8,7 @@ final class WCGatewayTransbankOneclickBlocks extends AbstractPaymentMethodType {
 
     public function initialize() {
         $this->settings = get_option('transbank_oneclick_mall_rest_settings', []);
-        $this->gateway = $this->get_gateway();
+        $this->gateway = $this->getGateway();
     }
 
     public function is_active() {
@@ -38,7 +38,7 @@ final class WCGatewayTransbankOneclickBlocks extends AbstractPaymentMethodType {
 		];
 	}
 
-    private function get_gateway() {
+    private function getGateway() {
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
         if(isset($gateways[$this->name])) {
             return $gateways[$this->name];
