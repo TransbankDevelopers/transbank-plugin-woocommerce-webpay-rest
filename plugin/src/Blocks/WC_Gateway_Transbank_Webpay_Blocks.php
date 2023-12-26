@@ -1,7 +1,6 @@
 <?php
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 
 final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType {
     private $gateway;
@@ -9,7 +8,7 @@ final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType {
 
     public function initialize() {
         $this->settings = get_option('transbank_webpay_plus_rest_settings', []);
-        $this->gateway = new WC_Gateway_Transbank_Webpay_Plus_REST();
+        $this->gateway = $this->get_gateway();
     }
 
     public function is_active() {
@@ -38,4 +37,12 @@ final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType {
             'icon' => $this->gateway->icon
 		];
 	}
+
+    private function get_gateway() {
+        $gateways = WC()->payment_gateways->get_available_payment_gateways();
+        if(isset($gateways[$this->name])) {
+            return $gateways[$this->name];
+        }
+        return null;
+    }
 }
