@@ -18,7 +18,7 @@ final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType {
 
     public function get_payment_method_script_handles() {
         $scriptPath = dirname(dirname(plugin_dir_path(__FILE__))) . '/js/front/';
-        $scriptInfo = require($scriptPath . 'webpay_blocks.asset.php');
+        $scriptInfo = require_once $scriptPath . 'webpay_blocks.asset.php';
         wp_register_script(
             'wc_transbank_webpay_payment',
             dirname(dirname(plugins_url('/', __FILE__))) . '/js/front/webpay_blocks.js',
