@@ -63,13 +63,6 @@ add_action('admin_enqueue_scripts', function () {
 
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'transbank_webpay_rest_add_rest_action_links');
 
-add_action('plugins_loaded', function() {
-    if(class_exists('WC_Payment_Gateway')) {
-        require_once 'src/PaymentGateways/WC_Gateway_Transbank_Webpay_Plus_REST.php';
-        require_once 'src/PaymentGateways/WC_Gateway_Transbank_Oneclick_Mall_REST.php';
-    }
-});
-
 add_action('woocommerce_blocks_loaded', function() {
     if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ){
         require_once 'src/Blocks/WC_Gateway_Transbank_Webpay_Blocks.php';
