@@ -1,12 +1,12 @@
 {
-	"name": "woocommerce-gateway-webpay",
+	"name": "transbank-woocommerce-gateway",
 	"title": "WooCommerce Webpay Rest",
 	"version": "1.0.0",
 	"author": "Transbank Developers",
 	"license": "BSD-3-Clause",
 	"keywords": [],
 	"engines": {
-		"node": ">=6.9.4",
+		"node": "^16",
 		"npm": ">=1.1.0"
 	},
 	"devDependencies": {
