@@ -68,6 +68,4 @@ export const noticeHandler = ( productId ) => {
                 break;
         }
     }
-
-    return;
 };
