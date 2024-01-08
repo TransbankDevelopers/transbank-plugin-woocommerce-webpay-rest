@@ -44,7 +44,7 @@ const Label = () => {
 };
 
 const TransbankOneclickBlocks = {
-	name: "transbank_oneclick_mall_rest",
+	name: settings.id,
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
