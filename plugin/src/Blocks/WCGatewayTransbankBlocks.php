@@ -13,6 +13,7 @@ trait WCGatewayTransbankBlocks
     public function initialize() {
         $this->settings = get_option( $this->paymentId . '_settings', []);
         $this->gateway = $this->get_gateway();
+        add_action( 'woocommerce_rest_checkout_process_payment_with_context', [$this, 'processErrorPayment'], 10, 2 );
     }
 
     public function get_payment_method_script_handles() {
@@ -42,5 +43,20 @@ trait WCGatewayTransbankBlocks
             return $gateways[$this->paymentId];
         }
         return null;
+    }
+
+    public function processErrorPayment(PaymentContext $context, PaymentResult &$result) {
+        add_action(
+            'wc_gateway_transbank_process_payment_error_' . $this->paymentId,
+            function( $error, $shouldThrowError = false ) use ( &$result ) {
+                $payment_details                 = $result->payment_details;
+                $payment_details['errorMessage'] = wp_strip_all_tags( $error->getMessage() );
+                $result->set_payment_details( $payment_details );
+                $result->set_status('failure');
+                if ($shouldThrowError) {
+                    throw $error;
+                }
+            }, 10, 2
+        );
     }
 }
