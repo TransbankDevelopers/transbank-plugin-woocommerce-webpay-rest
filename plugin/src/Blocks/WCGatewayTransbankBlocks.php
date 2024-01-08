@@ -1,6 +1,8 @@
 <?php
 
 namespace Transbank\WooCommerce\WebpayRest\Blocks;
+use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
+use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 
 trait WCGatewayTransbankBlocks
 {
