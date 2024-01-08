@@ -27,9 +27,11 @@ const requestToHandle = (request) => {
 // Export configuration.
 module.exports = {
 	...defaultConfig,
-	entry: 
-		{'webpay_blocks': '/src/Blocks/js/webpay_checkout.js',
-		'oneclick_blocks': '/src/Blocks/js/oneclick_checkout.js'}
+	entry:
+        {'webpay_blocks': '/src/Blocks/js/webpay_checkout.js',
+        'oneclick_blocks': '/src/Blocks/js/oneclick_checkout.js',
+        'notice_handler': '/src/Blocks/js/notice_handler.js',
+        }
 	,
 	output: {
 		path: path.resolve( __dirname, 'js/front' ),
