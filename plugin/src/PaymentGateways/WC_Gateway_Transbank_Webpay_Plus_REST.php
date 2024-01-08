@@ -215,6 +215,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      **/
     public function process_payment($order_id)
     {
+        $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
         try {
             $order = new WC_Order($order_id);
             do_action('transbank_webpay_plus_starting_transaction', $order);
@@ -228,10 +229,14 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             ];
         } catch (CreateWebpayException $e) {
             if (ErrorHelper::isGuzzleError($e)){
+                $errorMessage = ErrorHelper::getGuzzleError();
+                do_action($errorHookName, new Exception($errorMessage), true);
                 wc_add_notice(ErrorHelper::getGuzzleError(), 'error');
                 return;
             }
-            wc_add_notice('Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.<br/>', 'error');
+            $errorMessage = 'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.';
+            do_action($errorHookName, new Exception($errorMessage), true);
+            wc_add_notice($errorMessage, 'error');
             return;
         } catch (CreateTransactionWebpayException $e) {
             throw new \Exception($e->getMessage());
