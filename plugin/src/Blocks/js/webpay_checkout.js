@@ -1,10 +1,12 @@
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
+import { noticeHandler } from './notice_handler';
 
 const settings = getSetting( 'transbank_webpay_plus_rest_data', {} );
-
 const label = decodeEntities( settings.title );
+
+noticeHandler(settings.id);
 
 const Content = () => {
 	return decodeEntities( settings.description );
