@@ -234,69 +234,75 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function process_payment($order_id)
     {
-        $order = new WC_Order($order_id);
+        $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
+        $shouldThrowException = false;
 
-        if (!$order->needs_payment() && !wcs_is_subscription($order_id)) {
-            $this->logger->logError('This order was already paid or does not need payment');
-            wc_add_notice(__(
-                'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
-                'transbank_wc_plugin'
-            ), 'error');
+        try
+        {
+            $order = new WC_Order($order_id);
 
-            return [
-                'result' => 'error',
-            ];
-        }
+            if (!$order->needs_payment() && !wcs_is_subscription($order_id)) {
+                $this->logger->logError('This order was already paid or does not need payment');
+                $errorMessage = __(
+                    'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
+                    'transbank_wc_plugin'
+                );
 
-        $paymentMethodOption = $_POST["wc-{$this->id}-payment-token"] ?? null;
-        $addNewCard = 'new' === $paymentMethodOption || $paymentMethodOption === null;
-        $payWithSavedToken = $paymentMethodOption !== null && !$addNewCard;
+                throw new EcommerceException($errorMessage);
+            }
 
-        if (!get_current_user_id()) {
-            $order->add_order_note('El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout) cuenta de usuario');
-            $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
-            wc_add_notice(__(
-                'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago.',
-                'transbank_wc_plugin'
-            ), 'error');
+            $paymentMethodOption = $_POST["wc-{$this->id}-payment-token"] ?? null;
+            $addNewCard = 'new' === $paymentMethodOption || $paymentMethodOption === null;
+            $payWithSavedToken = $paymentMethodOption !== null && !$addNewCard;
 
-            return [
-                'result' => 'error',
-            ];
-        }
+            if (!get_current_user_id()) {
+                $order->add_order_note('El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout) cuenta de usuario');
+                $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
 
-        if ($addNewCard) {
-            $this->logger->logInfo('[Oneclick] Checkout: start inscription');
+                $errorMessage = __(
+                    'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago.',
+                    'transbank_wc_plugin'
+                );
 
-            try {
+                throw new EcommerceException($errorMessage);
+            }
+
+            if ($addNewCard) {
+                $this->logger->logInfo('[Oneclick] Checkout: start inscription');
+
                 $response = $this->startInscription($order_id);
-            } catch (\Throwable $e) {
-                $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($e);
 
-                return wc_add_notice($errorMessage, 'error');
+                $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
+                $this->logger->logInfo(json_encode($response));
+                $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
+
+                do_action('transbank_oneclick_adding_card_from_order', $order);
+
+                return [
+                    'result'   => 'success',
+                    'redirect' => $response->getRedirectUrl(),
+                ];
             }
-            $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
-            $this->logger->logInfo(json_encode($response));
-            $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
 
-            do_action('transbank_oneclick_adding_card_from_order', $order);
+            if ($payWithSavedToken) {
+
+                $shouldThrowException = true;
+                return $this->authorizeTransaction($order);
+
+            }
+            $errorMessage = __('Error interno: no se pudo procesar el pago', 'transbank_wc_plugin');
+            throw new EcommerceException($errorMessage);
+        }
+        catch (\Throwable $exception) {
+            $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
+            do_action($errorHookName, $exception, $shouldThrowException);
+            wc_add_notice($errorMessage, 'error');
 
             return [
-                'result'   => 'success',
-                'redirect' => $response->getRedirectUrl(),
+                'result' => 'error',
+                'redirect' => ''
             ];
         }
-
-        if ($payWithSavedToken) {
-            try {
-                return $this->authorizeTransaction($order);
-            } catch (\Throwable $e) {
-                $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($e);
-
-                return wc_add_notice($errorMessage, 'error');
-            }
-        }
-        wc_add_notice(__('Error interno: no se pudo procesar el pago', 'transbank_wc_plugin'), 'error');
     }
 
     /**
@@ -497,28 +503,22 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         } catch (CreateTransactionOneclickException $e) {
             $order->update_status('failed');
-            wc_add_notice($e->getMessage(), 'error');
             $order->add_order_note('Problemas al crear el registro de Transacción');
         } catch (AuthorizeOneclickException $e) {
             $order->update_status('failed');
-            wc_add_notice($e->getMessage(), 'error');
             $order->add_order_note('Transacción con problemas de autorización');
         } catch (RejectedAuthorizeOneclickException $e) {
             $order->update_status('failed');
             $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
-            wc_add_notice($e->getMessage(), 'error');
             $order->add_order_note('Transacción rechazada');
         } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
             $order->update_status('failed');
             $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
-            wc_add_notice($e->getMessage(), 'error');
             $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
         }
 
         do_action('transbank_oneclick_transaction_failed', $order);
-        return [
-            'result' => 'error',
-        ];
+        throw $e;
     }
 
     /**
