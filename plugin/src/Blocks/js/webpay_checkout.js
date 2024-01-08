@@ -25,7 +25,7 @@ const Label = () => {
 };
 
 const TransbankWebpayBlocks = {
-	name: "transbank_webpay_plus_rest",
+	name: settings.id,
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
