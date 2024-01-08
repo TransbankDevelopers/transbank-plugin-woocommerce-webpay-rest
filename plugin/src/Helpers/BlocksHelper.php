@@ -28,7 +28,8 @@ class BlocksHelper
 
     public function checkBlocksEnabled() {
 
-        if(class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' )  && CartCheckoutUtils::is_checkout_block_default()) {
+        if(class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' )
+            && CartCheckoutUtils::is_checkout_block_default()) {
             return true;
         }
         return false;
