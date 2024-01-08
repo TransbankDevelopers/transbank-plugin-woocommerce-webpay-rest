@@ -35,7 +35,8 @@ trait WCGatewayTransbankBlocks
             'title' => $this->gateway->title,
             'description' => $this->gateway->description,
             'supports' => $this->gateway->supports,
-            'icon' => $this->gateway->icon
+            'icon' => $this->gateway->icon,
+            'id' => $this->gateway->id
         ];
     }
 
