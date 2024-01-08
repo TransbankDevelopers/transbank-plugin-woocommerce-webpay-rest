@@ -412,8 +412,6 @@ class ResponseController
 
     protected function addErrorQueryParams($url, $errorCode) {
         $params = ['transbank_status' => $errorCode];
-        $returnUrl = add_query_arg($params, $url);
-
-        return $returnUrl;
+        return add_query_arg($params, $url);
     }
 }
