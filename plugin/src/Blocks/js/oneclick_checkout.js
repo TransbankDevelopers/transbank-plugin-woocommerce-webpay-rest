@@ -1,12 +1,31 @@
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
+const { useEffect } = window.wp.element;
 
 const settings = getSetting( 'transbank_oneclick_mall_rest_data', {} );
 
 const label = decodeEntities( settings.title );
 
-const Content = () => {
+const Content = ( props ) => {
+
+	const {eventRegistration, emitResponse} = props;
+	const { onCheckoutFail } = eventRegistration;
+	useEffect( () => {
+		const onError = ( { processingResponse } ) => {
+			if ( processingResponse.paymentDetails.errorMessage ) {
+				return {
+					type: emitResponse.responseTypes.ERROR,
+					message: processingResponse.paymentDetails.errorMessage,
+					messageContext: emitResponse.noticeContexts.PAYMENTS,
+				};
+			}
+			return true;
+		};
+		const unsubscribe = onCheckoutFail( onError );
+		return unsubscribe;
+	}, [ onCheckoutFail ] );
+
 	return decodeEntities( settings.description );
 };
 
