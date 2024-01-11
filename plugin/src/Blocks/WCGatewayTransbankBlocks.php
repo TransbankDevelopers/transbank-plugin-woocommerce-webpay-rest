@@ -62,4 +62,11 @@ trait WCGatewayTransbankBlocks
             }, 10, 2
         );
     }
+
+    public function is_active() {
+        if(isset($this->gateway)) {
+            return $this->gateway->enabled == 'yes';
+        }
+        return false;
+    }
 }
