@@ -28,11 +28,9 @@ class BlocksHelper
 
     public function checkBlocksEnabled() {
 
-        if(class_exists( 'Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' )
-            && CartCheckoutUtils::is_checkout_block_default()) {
-            return true;
-        }
-        return false;
+        $checkout_page = wc_get_page_id('checkout');
+        return has_block('woocommerce/checkout', $checkout_page);
+
     }
 
 }
