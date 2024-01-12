@@ -21,7 +21,14 @@ final class PluginLogger implements ILogger {
     public function __construct(LogConfig $config) {
         $this->config = $config;
         $logDir = $this->config->getLogDir();
-        $logFile = "{$logDir}/log_transbank.log";
+        $cacheLogName = 'transbank_log_name';
+        $logFile = get_transient($cacheLogName);
+        if (!$logFile) {
+            $uniqueId = uniqid('', true);
+            $logFile = "{$logDir}/log_transbank_{$uniqueId}.log";
+            $expireTime = strtotime('tomorrow') - time();
+            set_transient($cacheLogName, $logFile, $expireTime);
+        }
         $dateFormat = "Y-m-d H:i:s";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
