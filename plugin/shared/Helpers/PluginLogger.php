@@ -66,7 +66,12 @@ final class PluginLogger implements ILogger {
     {
         $files = glob($this->config->getLogDir().'/*.log');
         if (!$files) {
-            return [];
+            return [
+                'dir'      => $this->config->getLogDir(),
+                'length'   => 0,
+                'logs'     => [],
+                'last'     => ''
+            ];
         }
         $files = array_combine($files, array_map('filemtime', $files));
         arsort($files);
