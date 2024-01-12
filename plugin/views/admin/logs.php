@@ -60,7 +60,7 @@ $folderHasLogs = $resume['length'] > 0;
             <?php if ($folderHasLogs) { ?>
                 <div class="tbk-plugin-info-container logs" id="div_logs_list">
                     <div class="info-column">
-                        <div title="Lista los archivos archivos que guardan la información de cada compra mediante Webpay"
+                        <div title="Lista los archivos que guardan la información de cada compra mediante Webpay"
                             class="label label-info">?
                         </div>
                     </div>
