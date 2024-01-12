@@ -94,6 +94,9 @@ final class PluginLogger implements ILogger {
 
     public function getLogDetail($filename, $replaceNewline = false)
     {
+        if ($filename == '') {
+            return [];
+        }
         $fle = $this->config->getLogDir().'/'.$filename;
         $content = file_get_contents($fle);
         if ($replaceNewline && $content !== false) {
