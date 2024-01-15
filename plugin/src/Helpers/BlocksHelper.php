@@ -26,11 +26,18 @@ class BlocksHelper
     const WEBPAY_COMMIT_ERROR = 16;
     const WEBPAY_EXCEPTION = 17;
 
-    public function checkBlocksEnabled() {
+    public static function checkBlocksEnabled() {
 
         $checkout_page = wc_get_page_id('checkout');
         return has_block('woocommerce/checkout', $checkout_page);
 
+    }
+
+    public static function addLegacyNotices($Message, $type) {
+        if (self::checkBlocksEnabled()) {
+            return;
+        }
+        wc_add_notice($Message, $type);
     }
 
 }
