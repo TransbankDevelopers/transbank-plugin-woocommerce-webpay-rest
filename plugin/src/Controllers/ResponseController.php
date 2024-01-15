@@ -393,7 +393,7 @@ class ResponseController
     protected function throwError(string $msg)
     {
         $error_message = __($msg);
-        wc_add_notice($error_message, 'error');
+        BlocksHelper::addLegacyNotices($error_message, 'error');
     }
 
     /**

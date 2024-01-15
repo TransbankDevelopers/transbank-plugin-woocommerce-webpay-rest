@@ -78,7 +78,7 @@ class OneclickInscriptionResponseController
                 $this->logger->logError('You were logged out');
             }
 
-            wc_add_notice(__('La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.', 'transbank_wc_plugin'), 'success');
+            BlocksHelper::addLegacyNotices(__('La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.', 'transbank_wc_plugin'), 'success');
             $this->logger->logInfo('[ONECLICK] Inscripción aprobada');
             $token = $this->savePaymentToken($inscription, $finishInscriptionResponse);
             if ($order) {
@@ -97,7 +97,7 @@ class OneclickInscriptionResponseController
             $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
 
         } catch (TimeoutInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $params = ['transbank_status' => BlocksHelper::ONECLICK_TIMEOUT];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
             wp_redirect($redirectUrl);
@@ -105,10 +105,10 @@ class OneclickInscriptionResponseController
         }  catch (WithoutTokenInscriptionOneclickException $e) {
             exit;
         } catch (GetInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             throw $e;
         } catch (UserCancelInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'warning');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'warning');
             $inscription = $e->getInscription();
             if ($inscription != null) {
                 $order = $this->getWcOrder($inscription->order_id);
@@ -127,12 +127,12 @@ class OneclickInscriptionResponseController
             $inscription = $e->getInscription();
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_INVALID_STATUS);
         } catch (FinishInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $inscription = $e->getInscription();
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_FINISH_ERROR);
             exit;
         }  catch (RejectedInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $inscription = $e->getInscription();
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_REJECTED_INSCRIPTION);
             exit;

@@ -9,6 +9,7 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
+use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
@@ -296,7 +297,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         catch (\Throwable $exception) {
             $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
             do_action($errorHookName, $exception, $shouldThrowException);
-            wc_add_notice($errorMessage, 'error');
+            BlocksHelper::addLegacyNotices($errorMessage, 'error');
 
             return [
                 'result' => 'error',

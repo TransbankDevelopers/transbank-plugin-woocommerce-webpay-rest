@@ -9,6 +9,7 @@ use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
+use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
@@ -231,12 +232,12 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             if (ErrorHelper::isGuzzleError($e)){
                 $errorMessage = ErrorHelper::getGuzzleError();
                 do_action($errorHookName, new Exception($errorMessage), true);
-                wc_add_notice(ErrorHelper::getGuzzleError(), 'error');
+                BlocksHelper::addLegacyNotices(ErrorHelper::getGuzzleError(), 'error');
                 return;
             }
             $errorMessage = 'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.';
             do_action($errorHookName, new Exception($errorMessage), true);
-            wc_add_notice($errorMessage, 'error');
+            BlocksHelper::addLegacyNotices($errorMessage, 'error');
             return;
         } catch (CreateTransactionWebpayException $e) {
             throw new \Exception($e->getMessage());
