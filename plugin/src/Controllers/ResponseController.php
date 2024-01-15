@@ -112,7 +112,6 @@ class ResponseController
                 wp_safe_redirect($redirectUrl);
                 return;
             }
-            $this->webpayplusTransbankSdk->logInfo('[TEST] Estoy en el catch por cancelacion del usuario');
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $transaction);
             do_action('transbank_webpay_plus_transaction_cancelled_by_user', $wooCommerceOrder, $transaction);
             $urlWithErrorCode = $this->addErrorQueryParams($redirectUrl, BlocksHelper::WEBPAY_USER_CANCELED);
