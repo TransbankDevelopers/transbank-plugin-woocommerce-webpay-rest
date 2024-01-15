@@ -33,11 +33,11 @@ class BlocksHelper
 
     }
 
-    public static function addLegacyNotices($Message, $type) {
+    public static function addLegacyNotices($message, $type) {
         if (self::checkBlocksEnabled()) {
             return;
         }
-        wc_add_notice($Message, $type);
+        wc_add_notice($message, $type);
     }
 
 }
