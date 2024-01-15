@@ -21,7 +21,14 @@ final class PluginLogger implements ILogger {
     public function __construct(LogConfig $config) {
         $this->config = $config;
         $logDir = $this->config->getLogDir();
-        $logFile = "{$logDir}/log_transbank.log";
+        $cacheLogName = 'transbank_log_name';
+        $logFile = get_transient($cacheLogName);
+        if (!$logFile) {
+            $uniqueId = uniqid('', true);
+            $logFile = "{$logDir}/log_transbank_{$uniqueId}.log";
+            $expireTime = strtotime('tomorrow') - time();
+            set_transient($cacheLogName, $logFile, $expireTime);
+        }
         $dateFormat = "Y-m-d H:i:s";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
@@ -59,7 +66,12 @@ final class PluginLogger implements ILogger {
     {
         $files = glob($this->config->getLogDir().'/*.log');
         if (!$files) {
-            return [];
+            return [
+                'dir'      => $this->config->getLogDir(),
+                'length'   => 0,
+                'logs'     => [],
+                'last'     => ''
+            ];
         }
         $files = array_combine($files, array_map('filemtime', $files));
         arsort($files);
@@ -82,6 +94,9 @@ final class PluginLogger implements ILogger {
 
     public function getLogDetail($filename, $replaceNewline = false)
     {
+        if ($filename == '') {
+            return [];
+        }
         $fle = $this->config->getLogDir().'/'.$filename;
         $content = file_get_contents($fle);
         if ($replaceNewline && $content !== false) {
