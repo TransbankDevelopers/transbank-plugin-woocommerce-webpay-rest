@@ -8,6 +8,7 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
+use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
@@ -98,7 +99,8 @@ class ResponseController
         } catch (TimeoutWebpayException $e) {
             $this->throwError($e->getMessage());
             do_action('transbank_webpay_plus_timeout_on_form');
-            wp_redirect(wc_get_checkout_url());
+            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_TIMEOUT);
+            wp_redirect($urlWithErrorCode);
             exit;
         } catch (UserCancelWebpayException $e) {
             $params = ['transbank_webpayplus_cancelled_order' => 1];
@@ -112,12 +114,14 @@ class ResponseController
             }
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $transaction);
             do_action('transbank_webpay_plus_transaction_cancelled_by_user', $wooCommerceOrder, $transaction);
-            wp_safe_redirect($redirectUrl);
+            $urlWithErrorCode = $this->addErrorQueryParams($redirectUrl, BlocksHelper::WEBPAY_USER_CANCELED);
+            wp_safe_redirect($urlWithErrorCode);
             return;
         } catch (DoubleTokenWebpayException $e) {
             $this->throwError($e->getMessage());
             do_action('transbank_webpay_plus_unexpected_error');
-            wp_redirect(wc_get_checkout_url());
+            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_DOUBLE_TOKEN);
+            wp_redirect($urlWithErrorCode);
         } catch (InvalidStatusWebpayException $e) {
             $transaction = $e->getTransaction();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
@@ -139,7 +143,8 @@ class ResponseController
         } catch (\Exception $e) {
             $this->throwError($e->getMessage());
             do_action('transbank_webpay_plus_unexpected_error');
-            wp_redirect(wc_get_checkout_url());
+            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_EXCEPTION);
+            wp_redirect($urlWithErrorCode);
         }
         return "";
     }
@@ -387,7 +392,7 @@ class ResponseController
     protected function throwError(string $msg)
     {
         $error_message = __($msg);
-        wc_add_notice($error_message, 'error');
+        BlocksHelper::addLegacyNotices($error_message, 'error');
     }
 
     /**
@@ -402,5 +407,10 @@ class ResponseController
             $order->payment_complete();
             $order->update_status($status);
         }
+    }
+
+    protected function addErrorQueryParams($url, $errorCode) {
+        $params = ['transbank_status' => $errorCode];
+        return add_query_arg($params, $url);
     }
 }

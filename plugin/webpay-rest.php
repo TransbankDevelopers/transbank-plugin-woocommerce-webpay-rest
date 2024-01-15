@@ -6,6 +6,8 @@ use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
+use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
+use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
 
 if (!defined('ABSPATH')) {
     exit();
@@ -26,8 +28,8 @@ if (!defined('ABSPATH')) {
  * Version: VERSION_REPLACE_HERE
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
- * WC requires at least: 3.4.0
- * WC tested up to: 5.5.1
+ * WC requires at least: 7.0
+ * WC tested up to: 8.3
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
@@ -61,6 +63,25 @@ add_action('admin_enqueue_scripts', function () {
 
 add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'transbank_webpay_rest_add_rest_action_links');
 
+add_action('woocommerce_blocks_loaded', function() {
+    if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ){
+        require_once 'src/Blocks/WC_Gateway_Transbank_Webpay_Blocks.php';
+        require_once 'src/Blocks/WC_Gateway_Transbank_Oneclick_Blocks.php';
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+                $payment_method_registry->register( new WCGatewayTransbankWebpayBlocks() );
+                $payment_method_registry->register( new WCGatewayTransbankOneclickBlocks() );
+            }
+        );
+    }
+});
+
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+    }
+} );
 
 $hposHelper = new HposHelper();
 $hPosExists = $hposHelper->checkIfHposExists();

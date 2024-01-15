@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use \Exception;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use  Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
@@ -76,8 +77,8 @@ class OneclickInscriptionResponseController
             if (!$userInfo) {
                 $this->logger->logError('You were logged out');
             }
-
-            wc_add_notice(__('La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.', 'transbank_wc_plugin'), 'success');
+            $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
+            BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
             $this->logger->logInfo('[ONECLICK] Inscripción aprobada');
             $token = $this->savePaymentToken($inscription, $finishInscriptionResponse);
             if ($order) {
@@ -93,44 +94,47 @@ class OneclickInscriptionResponseController
 
             do_action('transbank_oneclick_inscription_approved', $finishInscriptionResponse, $token, $from);
             $this->logger->logInfo('Inscription finished successfully for user #'.$inscription->user_id);
-            $this->redirectUser($from);
+            $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
 
         } catch (TimeoutInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
-            wp_redirect(wc_get_checkout_url());
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
+            $params = ['transbank_status' => BlocksHelper::ONECLICK_TIMEOUT];
+            $redirectUrl = add_query_arg($params, wc_get_checkout_url());
+            wp_redirect($redirectUrl);
             exit;
         }  catch (WithoutTokenInscriptionOneclickException $e) {
             exit;
         } catch (GetInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             throw $e;
         } catch (UserCancelInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'warning');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'warning');
             $inscription = $e->getInscription();
             if ($inscription != null) {
                 $order = $this->getWcOrder($inscription->order_id);
             }
             if ($order != null) {
                 $order->add_order_note('El usuario canceló la inscripción en el formulario de pago');
-                $params = ['transbank_cancelled_order' => 1];
+                $params = ['transbank_cancelled_order' => 1,
+                        'transbank_status' => BlocksHelper::ONECLICK_USER_CANCELED];
                 $redirectUrl = add_query_arg($params, wc_get_checkout_url());
                 wp_safe_redirect($redirectUrl);
                 exit;
             }
-            $this->redirectUser($inscription->from);
+            $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_USER_CANCELED);
             exit;
         }catch (InvalidStatusInscriptionOneclickException $e) {
             $inscription = $e->getInscription();
-            $this->redirectUser($inscription->from);
+            $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_INVALID_STATUS);
         } catch (FinishInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $inscription = $e->getInscription();
-            $this->redirectUser($inscription->from);
+            $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_FINISH_ERROR);
             exit;
         }  catch (RejectedInscriptionOneclickException $e) {
-            wc_add_notice($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $inscription = $e->getInscription();
-            $this->redirectUser($inscription->from);
+            $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_REJECTED_INSCRIPTION);
             exit;
         } catch (Exception $e) {
             throw $e;
@@ -141,7 +145,7 @@ class OneclickInscriptionResponseController
     /**
      * @param $from
      */
-    public function redirectUser($from)
+    public function redirectUser($from, $errorCode = null)
     {
         $redirectUrl = null;
         if ($from === 'checkout') {
@@ -155,6 +159,10 @@ class OneclickInscriptionResponseController
             );
         }
         if ($redirectUrl) {
+            if (isset($errorCode)) {
+                $params = ['transbank_status' => $errorCode];
+                $redirectUrl = add_query_arg($params, $redirectUrl);
+            }
             wp_redirect($redirectUrl);
         }
 
