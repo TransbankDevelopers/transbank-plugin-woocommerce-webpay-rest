@@ -77,8 +77,8 @@ class OneclickInscriptionResponseController
             if (!$userInfo) {
                 $this->logger->logError('You were logged out');
             }
-
-            BlocksHelper::addLegacyNotices(__('La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.', 'transbank_wc_plugin'), 'success');
+            $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
+            BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
             $this->logger->logInfo('[ONECLICK] Inscripción aprobada');
             $token = $this->savePaymentToken($inscription, $finishInscriptionResponse);
             if ($order) {
