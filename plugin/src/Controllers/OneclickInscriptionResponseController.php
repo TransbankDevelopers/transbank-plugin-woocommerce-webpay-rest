@@ -103,7 +103,10 @@ class OneclickInscriptionResponseController
             wp_redirect($redirectUrl);
             exit;
         }  catch (WithoutTokenInscriptionOneclickException $e) {
-            exit;
+            $params = ['transbank_status' => BlocksHelper::ONECLICK_WITHOUT_TOKEN];
+            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
+            $redirectUrl = add_query_arg($params, wc_get_checkout_url());
+            wp_safe_redirect($redirectUrl);
         } catch (GetInscriptionOneclickException $e) {
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             throw $e;
