@@ -11,11 +11,10 @@ class WoocommerceInfoUtil
         if (!class_exists('WooCommerce')) {
             throw new EcommerceException('No existe instalación WooCommerce');
         }
-        global $woocommerce;
-        if (!$woocommerce->version) {
+        if (!defined('WC_VERSION')) {
             throw new EcommerceException('No se puede obtener la versión de WooCommerce');
         }
-        return $woocommerce->version;
+        return WC_VERSION;
     }
 
     public static function getPluginVersion()
