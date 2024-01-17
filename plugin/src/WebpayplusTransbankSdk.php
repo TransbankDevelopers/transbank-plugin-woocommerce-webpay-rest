@@ -116,7 +116,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     /* Metodo CREATE  */
     public function createInner($orderId, $buyOrder, $sessionId, $amount, $returnUrl)
-    {   
+    {
         $params = [
             'sessionId'  => $sessionId,
             'amount' => $amount,
@@ -153,6 +153,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             'order_id'    => $orderId,
             'buy_order'   => $buyOrder,
             'amount'      => $amount,
+            'environment'   => $this->getEnviroment(),
             'session_id'  => $sessionId,
             'commerce_code'  => $this->getCommerceCode(),
             'product'     => Transaction::PRODUCT_WEBPAY_PLUS,
@@ -267,7 +268,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             'token'  => $tx->token,
             'amount'  => $amount,
         ]);
-        
+
         /*4. Si todo ok guardamos el estado */
         Transaction::update(
             $tx->id,
@@ -313,7 +314,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             }
             throw new TimeoutWebpayException($errorMessage, $tbkOrdenCompra, $tbkSessionId, $transaction);
         }
-        
+
         if (!isset($tokenWs) && isset($tbkToken)) {
             $errorMessage = 'La transacción fue anulada por el usuario.';
             $transaction = $this->saveTransactionWithErrorByToken($tbkToken, 'UserCancelWebpayException', $errorMessage);
