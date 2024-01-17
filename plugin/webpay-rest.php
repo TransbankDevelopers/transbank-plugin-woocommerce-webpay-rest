@@ -33,7 +33,6 @@ if (!defined('ABSPATH')) {
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
-$transbankPluginData = null;
 //todo: Eliminar todos estos require y usar PSR-4 de composer
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/ConnectionCheck.php';
@@ -100,13 +99,6 @@ if ($hPosExists)
 
 //Start sessions if not already done
 add_action('init', function () {
-    global $transbankPluginData;
-
-    try {
-        $transbankPluginData = get_plugin_data(__FILE__);
-    } catch (Throwable $e) {
-    }
-
     if (!headers_sent() && '' == session_id()) {
         session_start([
             'read_and_close' => true,
