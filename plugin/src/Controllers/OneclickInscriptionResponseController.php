@@ -101,7 +101,6 @@ class OneclickInscriptionResponseController
             $params = ['transbank_status' => BlocksHelper::ONECLICK_TIMEOUT];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
             wp_redirect($redirectUrl);
-            exit;
         }  catch (WithoutTokenInscriptionOneclickException $e) {
             $params = ['transbank_status' => BlocksHelper::ONECLICK_WITHOUT_TOKEN];
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
@@ -122,10 +121,8 @@ class OneclickInscriptionResponseController
                         'transbank_status' => BlocksHelper::ONECLICK_USER_CANCELED];
                 $redirectUrl = add_query_arg($params, wc_get_checkout_url());
                 wp_safe_redirect($redirectUrl);
-                exit;
             }
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_USER_CANCELED);
-            exit;
         }catch (InvalidStatusInscriptionOneclickException $e) {
             $inscription = $e->getInscription();
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_INVALID_STATUS);
@@ -133,12 +130,10 @@ class OneclickInscriptionResponseController
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $inscription = $e->getInscription();
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_FINISH_ERROR);
-            exit;
         }  catch (RejectedInscriptionOneclickException $e) {
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $inscription = $e->getInscription();
             $this->redirectUser($inscription->from, BlocksHelper::ONECLICK_REJECTED_INSCRIPTION);
-            exit;
         } catch (Exception $e) {
             throw $e;
         }
@@ -168,7 +163,5 @@ class OneclickInscriptionResponseController
             }
             wp_redirect($redirectUrl);
         }
-
-        exit();
     }
 }
