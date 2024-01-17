@@ -62,7 +62,7 @@ class WebpayTransactionsTable extends WP_List_Table
      */
     public function prepare_items()
     {
-        global $wpdb, $_wp_column_headers;
+        global $wpdb;
         $screen = get_current_screen();
 
         /* -- Preparing your query -- */
@@ -98,7 +98,6 @@ class WebpayTransactionsTable extends WP_List_Table
 
         /* -- Register the Columns -- */
         $columns = $this->get_columns();
-        $_wp_column_headers[$screen->id] = $columns;
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
 
         /* -- Fetch the items -- */
