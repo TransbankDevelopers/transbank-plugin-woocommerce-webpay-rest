@@ -15,15 +15,6 @@ $trackinfo = PluginInfoHelper::getInfo();
 </style>
 
 <div class="" style="display: flex; flex-wrap: wrap; margin-bottom: 10px">
-    <div style="flex: 1; margin-bottom: 10px">
-        <div style="margin-right: 10px; height: 100%; background: #fff; border-radius: 10px;">
-            <a target="_blank" href="https://contrata-oneclick.continuumhq.dev/Oneclick">
-                <img style="border-radius: 10px; width: 400px; margin-right: 10px; display: block" src="<?php echo plugins_url('/images/oneclick-banner.jpg', dirname(__DIR__)); ?>" alt="">
-            </a>
-        </div>
-    </div>
-
-
     <div style="flex: 1; margin-bottom: 10px; margin-right: 10px;  background: #fff; border-radius: 10px; padding: 20px; display:inline-block">
         <h3 style="margin-top: 0">Webpay Oneclick Mall</h3>
         <p>Webpay Oneclick le permite a tus usuarios inscribir su tarjeta en su cuenta de usuario dentro de tu sitio, para que luego puedan
