@@ -72,7 +72,7 @@ class WebpayTransactionsTable extends WP_List_Table
             !is_numeric($_GET['paged']) ||
             $_GET['paged'] <= 0) ? 1 :  esc_sql($_GET['paged']);
 
-        $perPage = 5;
+        $perPage = 20;
         $offset = ($paged - 1) * $perPage;
 
         $totalItemsQuery = 'SELECT COUNT(*) FROM '.Transaction::getTableName();
