@@ -65,9 +65,6 @@ class WebpayTransactionsTable extends WP_List_Table
         global $wpdb, $_wp_column_headers;
         $screen = get_current_screen();
 
-        $totalItemsQuery = 'SELECT COUNT(*) FROM '.Transaction::getTableName();
-        $itemsQuery = 'SELECT * FROM '.Transaction::getTableName().' ORDER BY %i %i LIMIT %d, %d';
-
         $orderby = isset($_GET['orderby']) ? sanitize_sql_orderby($_GET['orderby']) : 'ID';
         $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
 
@@ -78,12 +75,15 @@ class WebpayTransactionsTable extends WP_List_Table
         $perPage = 5;
         $offset = ($paged - 1) * $perPage;
 
+        $totalItemsQuery = 'SELECT COUNT(*) FROM '.Transaction::getTableName();
+        $itemsQuery = 'SELECT * FROM '.Transaction::getTableName().' ORDER BY %i '.$order.' LIMIT %d, %d';
+
         $totalItems = $wpdb->get_var($totalItemsQuery);
         $totalPages = ceil($totalItems / $perPage);
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $itemsQuery,
-            [$orderby, $order, (int)$offset, (int)$perPage]
+            [$orderby, (int)$offset, (int)$perPage]
         ));
 
         $this->set_pagination_args([
