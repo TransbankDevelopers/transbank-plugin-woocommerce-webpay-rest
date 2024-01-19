@@ -17,9 +17,9 @@ class WebpayTransactionsTable extends WP_List_Table
     public function __construct()
     {
         parent::__construct([
-            'singular' => 'transbank_transaction', //Singular label
-            'plural'   => 'transbank_transactions', //plural label, also this well be one of the table css class
-            'ajax'     => false, //We won't support Ajax for this table
+            'singular' => 'transbank_transaction',
+            'plural'   => 'transbank_transactions',
+            'ajax'     => false,
         ]);
     }
 
@@ -65,46 +65,41 @@ class WebpayTransactionsTable extends WP_List_Table
         global $wpdb, $_wp_column_headers;
         $screen = get_current_screen();
 
-        /* -- Preparing your query -- */
         $query = 'SELECT * FROM '.Transaction::getTableName();
 
-        /* -- Ordering parameters -- */
-        //Parameters that are going to be used to order the result
         $orderby = isset($_GET['orderby']) ? sanitize_sql_orderby($_GET['orderby']) : 'ID';
         $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
         $query .= ' ORDER BY %s %s';
-        /* -- Pagination parameters -- */
-        //Number of elements in your table?
+
         $totalitems = $wpdb->query($wpdb->prepare(
             $query,
             [$orderby, $order]
-        )); //return the total number of affected rows
-        //How many to display per page?
+        ));
+
         $perpage = 20;
-        //Which page is this?
+
         $paged = !empty($_GET['paged']) ? esc_sql($_GET['paged']) : '';
-        //Page Number
+
         if (empty($paged) || !is_numeric($paged) || $paged <= 0) {
             $paged = 1;
-        } //How many pages do we have in total?
-        $totalpages = ceil($totalitems / $perpage); //adjust the query to take pagination into account
+        }
+        $totalpages = ceil($totalitems / $perpage);
+
         if (!empty($paged) && !empty($perpage)) {
             $offset = ($paged - 1) * $perpage;
             $query .= ' LIMIT %d, %d';
-        } /* -- Register the pagination -- */
+        }
+
         $this->set_pagination_args([
             'total_items' => $totalitems,
             'total_pages' => $totalpages,
             'per_page'    => $perpage,
         ]);
-        //The pagination links are automatically built according to those parameters
 
-        /* -- Register the Columns -- */
         $columns = $this->get_columns();
         $_wp_column_headers[$screen->id] = $columns;
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
 
-        /* -- Fetch the items -- */
         $this->items = $wpdb->get_results($wpdb->prepare(
             $query,
             [$orderby, $order, (int)$offset, (int)$perpage]
