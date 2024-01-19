@@ -65,30 +65,26 @@ class WebpayTransactionsTable extends WP_List_Table
         global $wpdb, $_wp_column_headers;
         $screen = get_current_screen();
 
-        $query = 'SELECT * FROM '.Transaction::getTableName();
+        $totalItemsQuery = 'SELECT COUNT(*) FROM '.Transaction::getTableName();
+        $itemsQuery = 'SELECT * FROM '.Transaction::getTableName().' ORDER BY %i %i LIMIT %d, %d';
 
         $orderby = isset($_GET['orderby']) ? sanitize_sql_orderby($_GET['orderby']) : 'ID';
         $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
-        $query .= ' ORDER BY %s %s';
 
-        $totalItems = $wpdb->query($wpdb->prepare(
-            $query,
-            [$orderby, $order]
-        ));
+        $paged = (empty($_GET['paged']) ||
+            !is_numeric($_GET['paged']) ||
+            $_GET['paged'] <= 0) ? 1 :  esc_sql($_GET['paged']);
 
-        $perPage = 20;
+        $perPage = 5;
+        $offset = ($paged - 1) * $perPage;
 
-        $paged = !empty($_GET['paged']) ? esc_sql($_GET['paged']) : '';
-
-        if (empty($paged) || !is_numeric($paged) || $paged <= 0) {
-            $paged = 1;
-        }
+        $totalItems = $wpdb->get_var($totalItemsQuery);
         $totalPages = ceil($totalItems / $perPage);
 
-        if (!empty($paged) && !empty($perPage)) {
-            $offset = ($paged - 1) * $perPage;
-            $query .= ' LIMIT %d, %d';
-        }
+        $this->items = $wpdb->get_results($wpdb->prepare(
+            $itemsQuery,
+            [$orderby, $order, (int)$offset, (int)$perPage]
+        ));
 
         $this->set_pagination_args([
             'total_items' => $totalItems,
@@ -99,11 +95,6 @@ class WebpayTransactionsTable extends WP_List_Table
         $columns = $this->get_columns();
         $_wp_column_headers[$screen->id] = $columns;
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
-
-        $this->items = $wpdb->get_results($wpdb->prepare(
-            $query,
-            [$orderby, $order, (int)$offset, (int)$perPage]
-        ));
     }
 
     public function column_amount($item)
