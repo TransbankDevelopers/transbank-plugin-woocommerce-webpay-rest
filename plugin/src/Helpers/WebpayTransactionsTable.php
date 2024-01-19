@@ -71,29 +71,29 @@ class WebpayTransactionsTable extends WP_List_Table
         $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
         $query .= ' ORDER BY %s %s';
 
-        $totalitems = $wpdb->query($wpdb->prepare(
+        $totalItems = $wpdb->query($wpdb->prepare(
             $query,
             [$orderby, $order]
         ));
 
-        $perpage = 20;
+        $perPage = 20;
 
         $paged = !empty($_GET['paged']) ? esc_sql($_GET['paged']) : '';
 
         if (empty($paged) || !is_numeric($paged) || $paged <= 0) {
             $paged = 1;
         }
-        $totalpages = ceil($totalitems / $perpage);
+        $totalPages = ceil($totalItems / $perPage);
 
-        if (!empty($paged) && !empty($perpage)) {
-            $offset = ($paged - 1) * $perpage;
+        if (!empty($paged) && !empty($perPage)) {
+            $offset = ($paged - 1) * $perPage;
             $query .= ' LIMIT %d, %d';
         }
 
         $this->set_pagination_args([
-            'total_items' => $totalitems,
-            'total_pages' => $totalpages,
-            'per_page'    => $perpage,
+            'total_items' => $totalItems,
+            'total_pages' => $totalPages,
+            'per_page'    => $perPage,
         ]);
 
         $columns = $this->get_columns();
@@ -102,7 +102,7 @@ class WebpayTransactionsTable extends WP_List_Table
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $query,
-            [$orderby, $order, (int)$offset, (int)$perpage]
+            [$orderby, $order, (int)$offset, (int)$perPage]
         ));
     }
 
