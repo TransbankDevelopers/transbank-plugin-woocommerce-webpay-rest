@@ -31,6 +31,11 @@ class ResponseController
     protected $webpayplusTransbankSdk;
 
     /**
+     * @var InteractsWithFullLog
+     */
+    private $interactsWithFullLog;
+
+    /**
      * ResponseController constructor.
      *
      * @param array $pluginConfig
