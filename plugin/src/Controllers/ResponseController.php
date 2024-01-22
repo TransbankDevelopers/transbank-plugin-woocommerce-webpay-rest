@@ -228,7 +228,7 @@ class ResponseController
      * @param array    $result
      * @param $webpayTransaction
      */
-    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result = null, $token)
+    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result, $token)
     {
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');
