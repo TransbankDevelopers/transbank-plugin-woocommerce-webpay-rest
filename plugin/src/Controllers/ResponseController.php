@@ -31,6 +31,11 @@ class ResponseController
     protected $webpayplusTransbankSdk;
 
     /**
+     * @var InteractsWithFullLog
+     */
+    private $interactsWithFullLog;
+
+    /**
      * ResponseController constructor.
      *
      * @param array $pluginConfig
@@ -47,7 +52,7 @@ class ResponseController
      *
      * @return string
      */
-    public static function getHumanReadableInstallemntsType($paymentTypeCode): string
+    public static function getHumanReadableInstallmentsType($paymentTypeCode): string
     {
         $installmentTypes = [
             'VD' => 'Venta Débito',
@@ -220,7 +225,7 @@ class ResponseController
             $wooCommerceOrder
         );
 
-        $this->interactsWithFullLog->logWebpayPlusGuardandoCommitExitoso($token_ws); // Logs
+        $this->interactsWithFullLog->logWebpayPlusGuardandoCommitExitoso($result->buyOrder);
 
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
@@ -288,7 +293,7 @@ class ResponseController
         } else {
             $transactionResponse = 'Transacción Rechazada';
         }
-        $paymentCodeResult = self::getHumanReadableInstallemntsType($paymentTypeCode);
+        $paymentCodeResult = self::getHumanReadableInstallmentsType($paymentTypeCode);
 
         $paymentType = $this->getHumanReadablePaymentType($paymentTypeCode);
 

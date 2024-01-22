@@ -48,7 +48,7 @@ class ThankYouPageController
             $dateAccepted = new DateTime($finalResponse->transactionDate ?? null, new DateTimeZone('UTC'));
             $dateAccepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
             $paymentType = ResponseController::getHumanReadablePaymentType($firstTransaction->paymentTypeCode);
-            $installmentType = ResponseController::getHumanReadableInstallemntsType($firstTransaction->paymentTypeCode);
+            $installmentType = ResponseController::getHumanReadableInstallmentsType($firstTransaction->paymentTypeCode);
             require_once __DIR__.'/../../views/order-summary-oneclick.php';
 
             return;
