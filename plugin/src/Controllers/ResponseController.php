@@ -52,7 +52,7 @@ class ResponseController
      *
      * @return string
      */
-    public static function getHumanReadableInstallemntsType($paymentTypeCode): string
+    public static function getHumanReadableInstallmentsType($paymentTypeCode): string
     {
         $installmentTypes = [
             'VD' => 'Venta Débito',
@@ -293,7 +293,7 @@ class ResponseController
         } else {
             $transactionResponse = 'Transacción Rechazada';
         }
-        $paymentCodeResult = self::getHumanReadableInstallemntsType($paymentTypeCode);
+        $paymentCodeResult = self::getHumanReadableInstallmentsType($paymentTypeCode);
 
         $paymentType = $this->getHumanReadablePaymentType($paymentTypeCode);
 
