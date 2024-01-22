@@ -140,8 +140,8 @@ class InteractsWithFullLog {
         }
     }
 
-    public function logWebpayPlusGuardandoCommitExitoso($token){
-        $this->log->logInfo('C.5. Transacción con commit exitoso en Transbank y guardado => token: '.$token);
+    public function logWebpayPlusGuardandoCommitExitoso($buyOrder){
+        $this->log->logInfo('C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$buyOrder);
     }
 
     public function logWebpayPlusGuardandoCommitError($token, $result){

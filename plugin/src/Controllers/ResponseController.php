@@ -225,7 +225,7 @@ class ResponseController
             $wooCommerceOrder
         );
 
-        $this->interactsWithFullLog->logWebpayPlusGuardandoCommitExitoso($token_ws); // Logs
+        $this->interactsWithFullLog->logWebpayPlusGuardandoCommitExitoso($result->buyOrder);
 
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
