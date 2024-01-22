@@ -2,9 +2,15 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
- 
+
 class InteractsWithFullLog {
+
+    /**
+    * @var PluginLogger
+    */
+    private $log;
 
     public function __construct()
     {
