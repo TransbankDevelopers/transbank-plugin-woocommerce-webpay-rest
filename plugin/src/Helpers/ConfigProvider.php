@@ -2,7 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\Webpay\WebpayPlus;
 use WC_Payment_Gateway;
 
 class ConfigProvider extends WC_Payment_Gateway
@@ -18,7 +17,7 @@ class ConfigProvider extends WC_Payment_Gateway
         if (!empty($value)) {
             return $value;
         }
-        $config = WebpayPlus\Transaction::getDefaultOptions();
+        $config = Transbank\Webpay\WebpayPlus\Transaction::getDefaultOptions();
         switch ($option) {
             case 'webpay_rest_environment':
                 return $config->getIntegrationType();
