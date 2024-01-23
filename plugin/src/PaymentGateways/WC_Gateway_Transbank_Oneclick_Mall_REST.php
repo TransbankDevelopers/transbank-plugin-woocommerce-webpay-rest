@@ -124,24 +124,24 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->addRefundOrderNote($refundResponse, $order, $amount, $jsonResponse);
             do_action('transbank_oneclick_refund_finished', $order, $transaction, $jsonResponse);
             do_action('wc_transbank_oneclick_refund_approved', [
-                'order' => $order,
+                'order' => $order->get_data(),
                 'transbankTransaction' => $transaction
             ]);
             return true;
         } catch (GetTransactionOneclickException $e) {
             $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
-            do_action('wc_transbank_oneclick_refund_failed', ['order' => $order]);
+            do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException($errorMessage, $e);
         } catch (NotFoundTransactionOneclickException $e) {
             $errorMessage = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
-            do_action('wc_transbank_oneclick_refund_failed', ['order' => $order]);
+            do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException($errorMessage, $e);
         } catch (RefundOneclickException $e) {
             $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
             do_action('wc_transbank_oneclick_refund_failed',  [
-                'order' => $order,
+                'order' => $order->get_data(),
                 'transbankTransaction' => $e->getTransaction(),
                 'errorMessage' => $e->getMessage()
             ]);
@@ -150,13 +150,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $errorMessage = 'Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
             $order->add_order_note($errorMessage);
             do_action('wc_transbank_oneclick_refund_failed', [
-                'order' => $order,
+                'order' => $order->get_data(),
                 'transbankTransaction' => $e->getTransaction()
             ]);
             throw new EcommerceException($errorMessage, $e);
         } catch (Exception $e) {
             $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
-            do_action('wc_transbank_oneclick_refund_failed', ['order' => $order]);
+            do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException('Anulación a través de Webpay fallida.', $e);
         }
     }
@@ -506,7 +506,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 wc()->cart->empty_cart();
             }
             $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Transacción Aprobada');
-            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order]);
+            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
             return [
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order),
@@ -528,7 +528,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
         }
 
-        do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order]);
+        do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
         throw $e;
     }
 
