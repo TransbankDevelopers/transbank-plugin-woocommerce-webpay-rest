@@ -98,7 +98,10 @@ class ResponseController
             }
             $commitResponse = $this->webpayplusTransbankSdk->commitTransaction($transaction->order_id, $transaction->token);
             $this->completeWooCommerceOrder($wooCommerceOrder, $commitResponse, $transaction);
-            do_action('transbank_webpay_plus_transaction_approved', $wooCommerceOrder, $transaction);
+            do_action('wc_transbank_webpay_plus_transaction_approved', [
+                'order' => $wooCommerceOrder,
+                'transbankTransaction' => $transaction
+            ]);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
 
         } catch (TimeoutWebpayException $e) {
@@ -131,19 +134,29 @@ class ResponseController
             $transaction = $e->getTransaction();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, null, $transaction->token);
-            do_action('transbank_webpay_plus_transaction_failed', $wooCommerceOrder, $transaction, null);
+            do_action('wc_transbank_webpay_plus_transaction_failed', [
+                'order' => $wooCommerceOrder,
+                'transbankTransaction' => $transaction
+            ]);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (RejectedCommitWebpayException $e) {
             $transaction = $e->getTransaction();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, $e->getCommitResponse(), $transaction->token);
-            do_action('transbank_webpay_plus_transaction_failed', $wooCommerceOrder, $transaction, $e->getCommitResponse());
+            do_action('wc_transbank_webpay_plus_transaction_failed', [
+                'order' => $wooCommerceOrder,
+                'transbankTransaction' => $transaction,
+                'transbankResponse' => $e->getCommitResponse()
+            ]);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (CommitWebpayException $e) {
             $transaction = $e->getTransaction();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, null, $transaction->token);
-            do_action('transbank_webpay_plus_transaction_failed', $wooCommerceOrder, $transaction, null);
+            do_action('wc_transbank_webpay_plus_transaction_failed', [
+                'order' => $wooCommerceOrder,
+                'transbankTransaction' => $transaction
+            ]);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (\Exception $e) {
             $this->throwError($e->getMessage());
