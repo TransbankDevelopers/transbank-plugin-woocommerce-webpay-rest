@@ -69,7 +69,10 @@ class OneclickInscriptionResponseController
             $finishInscriptionResponse = $resp['finishInscriptionResponse'];
             $order = $this->getWcOrder($inscription->order_id);
             $from = $inscription->from;
-            do_action('transbank_oneclick_inscription_finished', $order, $from);
+            do_action('wc_transbank_oneclick_inscription_finished', [
+                'order' => $order,
+                'from' => $from
+            ]);
 
             // Todo: guardar la información del usuario al momento de crear la inscripción y luego obtenerla en base al token,
             // por si se pierde la sesión
@@ -92,7 +95,11 @@ class OneclickInscriptionResponseController
             // Set this token as the users new default token
             WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
 
-            do_action('transbank_oneclick_inscription_approved', $finishInscriptionResponse, $token, $from);
+            do_action('wc_transbank_oneclick_inscription_approved', [
+                'transbankInscriptionResponse' => $finishInscriptionResponse,
+                'transbankToken' => $token,
+                'from' =>$from
+            ]);
             $this->logger->logInfo('Inscription finished successfully for user #'.$inscription->user_id);
             $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
 
