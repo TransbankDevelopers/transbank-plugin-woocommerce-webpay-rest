@@ -2,9 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
-use function is_multisite;
-
-class TransbankApiServiceLog
+class TransbankApiServiceLog extends BaseModel
 {
     const TABLE_NAME = 'transbank_api_service_log';
 
@@ -13,19 +11,12 @@ class TransbankApiServiceLog
      */
     public static function getTableName(): string
     {
-        global $wpdb;
-        if (is_multisite()) {
-            return $wpdb->base_prefix.static::TABLE_NAME;
-        } else {
-            return $wpdb->prefix.static::TABLE_NAME;
-        }
+        return static::getBaseTableName(static::TABLE_NAME);
     }
 
     public static function create($orderId, $service, $product, $enviroment, $commerceCode, $input, $response)
     {
-        global $wpdb;
-
-        return $wpdb->insert(static::getTableName(), [
+        return static::insertBase(static::getTableName(), [
             'order_id'         => $orderId,
             'service'          => $service,
             'product'          => $product,
@@ -38,9 +29,7 @@ class TransbankApiServiceLog
 
     public static function createError($orderId, $service, $product, $enviroment, $commerceCode, $input, $error, $originalError, $customError)
     {
-        global $wpdb;
-
-        return $wpdb->insert(static::getTableName(), [
+        return static::insertBase(static::getTableName(), [
             'order_id'         => $orderId,
             'service'          => $service,
             'product'          => $product,
