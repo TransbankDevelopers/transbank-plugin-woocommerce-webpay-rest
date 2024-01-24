@@ -10,7 +10,7 @@ class TransactionStatusController
 {
 
 
-    public static function status()
+    public static function getStatus()
     {
         // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
