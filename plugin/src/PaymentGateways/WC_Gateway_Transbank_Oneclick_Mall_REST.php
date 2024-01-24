@@ -271,7 +271,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             if ($addNewCard) {
                 $this->logger->logInfo('[Oneclick] Checkout: start inscription');
 
-                $response = $this->startInscription($order_id);
+                $response = $this->start($order_id);
 
                 $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
                 $this->logger->logInfo(json_encode($response));
@@ -312,7 +312,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function add_payment_method()
     {
-        $response = $this->startInscription(null, 'my_account');
+        $response = $this->start(null, 'my_account');
         $redirectUrl = $response->getRedirectUrl();
 
         return wp_redirect($redirectUrl);
@@ -436,7 +436,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      *
      * @return Oneclick\Responses\InscriptionStartResponse
      */
-    public function startInscription(
+    public function start(
         int $orderId = null,
         string $from = 'checkout'
     ): Oneclick\Responses\InscriptionStartResponse {
