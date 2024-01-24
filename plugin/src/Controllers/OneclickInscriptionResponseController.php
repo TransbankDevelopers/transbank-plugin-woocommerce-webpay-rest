@@ -70,7 +70,7 @@ class OneclickInscriptionResponseController
             $order = $this->getWcOrder($inscription->order_id);
             $from = $inscription->from;
             do_action('wc_transbank_oneclick_inscription_finished', [
-                'order' => $order,
+                'order' => $order->get_data(),
                 'from' => $from
             ]);
 
