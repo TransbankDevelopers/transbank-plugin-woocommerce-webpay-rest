@@ -63,7 +63,6 @@ class WebpayTransactionsTable extends WP_List_Table
     public function prepare_items()
     {
         global $wpdb;
-        $screen = get_current_screen();
 
         /* -- Preparing your query -- */
         $query = 'SELECT * FROM '.Transaction::getTableName();
