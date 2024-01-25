@@ -23,7 +23,7 @@ class TransbankSdk
     /**
      * @var MaskData
      */
-    protected $dataMasker;
+    public $dataMasker;
 
     public function logInfo($str)
     {
