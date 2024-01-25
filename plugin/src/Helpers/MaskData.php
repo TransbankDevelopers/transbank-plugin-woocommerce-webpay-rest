@@ -52,7 +52,7 @@ class MaskData
      * @param string $input data to be masked.
      * @param string $pattern the pattern to maintain from original data.
      * @param int $charsToKeep number of original chars to keep at start and end.
-     * @return string a string with '@' and email domain.
+     * @return string a string masked.
      */
     private function mask($input, $pattern = null, $charsToKeep = 4 ){
         $len = strlen($input);
