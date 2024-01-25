@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest;
 
 use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
+use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
 
 /**
  * Class TransbankSdk.
@@ -19,6 +20,10 @@ class TransbankSdk
 
     protected $log;
 
+    /**
+     * @var MaskData
+     */
+    protected $dataMasker;
 
     public function logInfo($str)
     {
@@ -40,9 +45,11 @@ class TransbankSdk
 
     public function logInfoData($buyOrder, $msg, $param)
     {
+        $maskedBuyOrder = $this->dataMasker->maskBuyOrder($buyOrder);
         $param['environment'] = $this->getEnviroment();
         $param['commerceCode'] = $this->getCommerceCode();
-        $this->logInfo('BUY_ORDER: '.$buyOrder.' => '.$msg.' => data: '.json_encode($param));
+        $maskedParams = $this->dataMasker->maskData($param);
+        $this->logInfo('BUY_ORDER: '.$maskedBuyOrder.' => '.$msg.' => data: '.json_encode($maskedParams));
     }
 
     public function logErrorData($buyOrder, $errorMsg, $param)
@@ -53,12 +60,14 @@ class TransbankSdk
     }
 
     protected function logErrorWithOrderId($orderId, $service, $input, $error, $originalError, $customError){
+        $maskedInput = $this->dataMasker->maskData($input);
         $messageError = (isset($customError) ? $customError : $originalError);
-        $this->logError('ORDER_ID: '.$orderId.', SERVICE: '.$service.', INPUT: '.json_encode($input).' => EXCEPTION: '.$error.' , ERROR: '.$messageError);
+        $this->logError('ORDER_ID: '.$orderId.', SERVICE: '.$service.', INPUT: '.json_encode($maskedInput).' => EXCEPTION: '.$error.' , ERROR: '.$messageError);
     }
 
     protected function logInfoWithOrderId($orderId, $service, $message, $data){
-        $this->logInfo('ORDER_ID: '.$orderId.', SERVICE: '.$service.', message: '.$message.', DATA: '.json_encode($data));
+        $maskedData = $this->dataMasker->maskData($data);
+        $this->logInfo('ORDER_ID: '.$orderId.', SERVICE: '.$service.', message: '.$message.', DATA: '.json_encode($maskedData));
     }
 
     protected function createApiServiceLogBase($orderId, $service, $product, $input, $response)
@@ -76,6 +85,6 @@ class TransbankSdk
     {
         TransbankExecutionErrorLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($data), $error, $originalError, $customError);
     }
-  
+
 }
 
