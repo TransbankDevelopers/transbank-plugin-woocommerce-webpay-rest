@@ -2,9 +2,8 @@
 
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\WoocommerceInfoUtil;
-
 if (!defined('ABSPATH')) {
-    exit;
+    return;
 }
 
 $summary = InfoUtil::getSummary();

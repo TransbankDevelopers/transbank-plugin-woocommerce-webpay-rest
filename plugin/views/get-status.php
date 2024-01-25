@@ -1,9 +1,7 @@
 <?php
-
 if (!defined('ABSPATH')) {
-    exit;
+    return;
 }
-
 if (!$transaction) {
     echo 'No hay transacciones webpay aprobadas para esta orden';
 

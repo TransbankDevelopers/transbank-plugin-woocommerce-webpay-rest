@@ -10,9 +10,8 @@ use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
 
 if (!defined('ABSPATH')) {
-    exit();
-} // Exit if accessed directly
-
+    return;
+}
 /**
  * The plugin bootstrap file.
  *
