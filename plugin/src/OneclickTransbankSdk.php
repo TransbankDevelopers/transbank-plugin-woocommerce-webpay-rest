@@ -55,7 +55,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
-        $this->dataMasker = new MaskData($environment);
+        $this->dataMasker = new MaskData($this->getEnviroment());
     }
 
     /**
