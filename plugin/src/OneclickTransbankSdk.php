@@ -3,7 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest;
 
 use \Exception;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
 use Transbank\Webpay\Oneclick;
@@ -28,7 +27,6 @@ use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 
 /**
  * Class OneclickTransbankSdk.
@@ -46,17 +44,12 @@ class OneclickTransbankSdk extends TransbankSdk
      */
     protected $mallInscription;
 
-    public function __construct()
+    public function __construct($log, $environment, $commerceCode, $apiKey, $childCommerceCode)
     {
-        $conf = new ConfigProvider();
-        $this->log = TbkFactory::createLogger();
-        $environment = $conf->getConfig('environment');
-        $this->options = $this->createOptions(
-            $environment,
-            $conf->getConfig('commerce_code'),
-            $conf->getConfig('api_key'));
+        $this->log = $log;
+        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
         $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ?
-            $conf->getConfig('child_commerce_code') : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+            $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
     }
