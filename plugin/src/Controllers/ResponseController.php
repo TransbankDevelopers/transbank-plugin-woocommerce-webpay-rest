@@ -6,7 +6,6 @@ use DateTime;
 use DateTimeZone;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Helpers\InteractsWithFullLog;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
@@ -25,15 +24,12 @@ class ResponseController
      */
     protected $pluginConfig;
 
+    protected $logger;
+
     /**
      * @var Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
      */
     protected $webpayplusTransbankSdk;
-
-    /**
-     * @var InteractsWithFullLog
-     */
-    private $interactsWithFullLog;
 
     /**
      * ResponseController constructor.
@@ -42,8 +38,8 @@ class ResponseController
      */
     public function __construct(array $pluginConfig)
     {
+        $this->logger = TbkFactory::createLogger();
         $this->pluginConfig = $pluginConfig;
-        $this->interactsWithFullLog = new InteractsWithFullLog();
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
     }
 
@@ -236,8 +232,8 @@ class ResponseController
             $wooCommerceOrder
         );
 
-        $this->interactsWithFullLog->logWebpayPlusGuardandoCommitExitoso($result->buyOrder);
-
+        $this->logger->logInfo(
+            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$result->buyOrder);
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
 
@@ -272,7 +268,8 @@ class ResponseController
                 $wooCommerceOrder
             );
 
-            $this->interactsWithFullLog->logWebpayPlusCommitFallidoError($token, $result); // Logs
+            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$token);
+            $this->logger->logError(json_encode($result));
         }
 
         Transaction::update(
