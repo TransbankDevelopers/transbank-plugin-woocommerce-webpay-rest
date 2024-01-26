@@ -10,13 +10,13 @@ class TransactionStatusController
 {
 
 
-    public static function status()
+    public static function getStatus()
     {
         // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
 
         if (!wp_verify_nonce($nonce, 'my-ajax-nonce')) {
-            exit('Busted!');
+            return;
         }
 
         $orderId = filter_input(INPUT_POST, 'order_id', FILTER_SANITIZE_NUMBER_INT);

@@ -9,7 +9,7 @@ class PluginInfoHelper
 {
     public static function getInfo()
     {
-        global $transbankPluginData;
+        $transbankPluginData = get_plugin_data(dirname(__FILE__, 3) . '/webpay-rest.php');
         $webpayPlus = new WC_Gateway_Transbank_Webpay_Plus_REST();
         $webpayPlusEnvironment = $webpayPlus->get_option('webpay_rest_environment');
         $webpayPlusCommerceCode = $webpayPlus->get_option('webpay_rest_commerce_code');

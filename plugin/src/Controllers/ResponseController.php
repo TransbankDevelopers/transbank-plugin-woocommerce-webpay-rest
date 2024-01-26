@@ -109,7 +109,6 @@ class ResponseController
             do_action('transbank_webpay_plus_timeout_on_form');
             $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_TIMEOUT);
             wp_redirect($urlWithErrorCode);
-            exit;
         } catch (UserCancelWebpayException $e) {
             $params = ['transbank_webpayplus_cancelled_order' => 1];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
@@ -178,7 +177,6 @@ class ResponseController
         if (!isset($token_ws)) {
             $this->throwError('No se encontró el token');
             wp_redirect(wc_get_checkout_url());
-            exit;
         }
 
         return $token_ws;
@@ -248,7 +246,7 @@ class ResponseController
      * @param array    $result
      * @param $webpayTransaction
      */
-    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result = null, $token)
+    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result, $token)
     {
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');

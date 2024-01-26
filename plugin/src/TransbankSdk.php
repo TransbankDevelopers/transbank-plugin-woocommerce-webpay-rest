@@ -2,9 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest;
 
-use \Exception;
-use Transbank\Webpay\Options;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 
@@ -14,7 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 class TransbankSdk
 {
     /**
-    * @var Options
+    * @var Transbank\Webpay\Options
     */
     public $options;
 

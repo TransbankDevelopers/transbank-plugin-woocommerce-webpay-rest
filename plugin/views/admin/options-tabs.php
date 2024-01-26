@@ -1,7 +1,7 @@
 <?php
 
 if (!defined('ABSPATH')) {
-    exit;
+    return;
 }
 
 function tbk_is_nav_active($tab, $val)

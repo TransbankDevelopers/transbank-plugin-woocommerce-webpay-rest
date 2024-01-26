@@ -10,9 +10,8 @@ use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
 
 if (!defined('ABSPATH')) {
-    exit();
-} // Exit if accessed directly
-
+    return;
+}
 /**
  * The plugin bootstrap file.
  *
@@ -33,7 +32,6 @@ if (!defined('ABSPATH')) {
  */
 add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
-$transbankPluginData = null;
 //todo: Eliminar todos estos require y usar PSR-4 de composer
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/ConnectionCheck.php';
@@ -43,7 +41,7 @@ register_activation_hook(__FILE__, 'transbank_webpay_rest_on_webpay_rest_plugin_
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
 add_action('wp_ajax_check_exist_tables', 'TableCheck::check');
-add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::status');
+add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
@@ -100,13 +98,6 @@ if ($hPosExists)
 
 //Start sessions if not already done
 add_action('init', function () {
-    global $transbankPluginData;
-
-    try {
-        $transbankPluginData = get_plugin_data(__FILE__);
-    } catch (Throwable $e) {
-    }
-
     if (!headers_sent() && '' == session_id()) {
         session_start([
             'read_and_close' => true,
@@ -155,10 +146,10 @@ function transbank_webpay_rest_add_rest_action_links($links)
 
 function transbank_webpay_rest_on_webpay_rest_plugin_activation()
 {
-    woocommerce_transbank_rest_init();
-    if (!class_exists(WC_Gateway_Transbank_Webpay_Plus_REST::class)) {
-        exit('Se necesita tener WooCommerce instalado y activo para poder activar este plugin');
+    if (!class_exists('WC_Payment_Gateway')) {
+        trigger_error('Se necesita tener WooCommerce instalado y activo para poder activar este plugin', E_USER_ERROR);
     }
+    woocommerce_transbank_rest_init();
 }
 
 function on_transbank_rest_webpay_plugins_loaded()

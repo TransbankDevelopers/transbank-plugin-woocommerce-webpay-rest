@@ -2,39 +2,32 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
-use function is_multisite;
 use Exception;
 use Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException;
 
-class Inscription
+class Inscription extends BaseModel
 {
     const INSCRIPTIONS_TABLE_NAME = 'transbank_inscriptions';
     const STATUS_INITIALIZED = 'initialized';
     const STATUS_FAILED = 'failed';
     const STATUS_COMPLETED = 'completed';
 
+    /**
+     * @return string
+     */
     public static function getTableName(): string
     {
-        global $wpdb;
-        if (is_multisite()) {
-            return $wpdb->base_prefix.static::INSCRIPTIONS_TABLE_NAME;
-        } else {
-            return $wpdb->prefix.static::INSCRIPTIONS_TABLE_NAME;
-        }
+        return static::getBaseTableName(static::INSCRIPTIONS_TABLE_NAME);
     }
 
     public static function create(array $data)
     {
-        global $wpdb;
-
-        return $wpdb->insert(static::getTableName(), $data);
+        return static::insertBase(static::getTableName(), $data);
     }
 
     public static function update($inscriptionId, array $data)
     {
-        global $wpdb;
-
-        return $wpdb->update(static::getTableName(), $data, ['id' => $inscriptionId]);
+        return static::updateBase(static::getTableName(), $inscriptionId, $data);
     }
 
     /**
@@ -55,19 +48,6 @@ class Inscription
 
     public static function checkExistTable()
     {
-        global $wpdb;
-        $transactionTable = static::getTableName();
-        $sql = "SELECT COUNT(1) FROM ".$transactionTable;
-        try {
-            $wpdb->get_results($sql);
-            $success = empty($wpdb->last_error);
-            if (!$success) {
-                return array('ok' => false, 'error' => "La tabla '{$transactionTable}' no se encontró en la base de datos.", 'exception' => "{$wpdb->last_error}");
-            }
-        }
-        catch(Exception $e) {
-            return array('ok' => false, 'error' => "La tabla '{$transactionTable}' no se encontró en la base de datos.", 'exception' => "{$e->getMessage()}");
-        }
-        return array('ok' => true, 'msg' => "La tabla '{$transactionTable}' existe.");
+        return static::checkExistTableBase(static::getTableName());
     }
 }

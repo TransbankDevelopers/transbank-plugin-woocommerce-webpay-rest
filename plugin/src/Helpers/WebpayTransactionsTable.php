@@ -62,8 +62,7 @@ class WebpayTransactionsTable extends WP_List_Table
      */
     public function prepare_items()
     {
-        global $wpdb, $_wp_column_headers;
-        $screen = get_current_screen();
+        global $wpdb;
 
         $orderby = isset($_GET['orderby']) ? sanitize_sql_orderby($_GET['orderby']) : 'ID';
         $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
@@ -93,7 +92,6 @@ class WebpayTransactionsTable extends WP_List_Table
         ]);
 
         $columns = $this->get_columns();
-        $_wp_column_headers[$screen->id] = $columns;
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
     }
 

@@ -1,10 +1,10 @@
 <?php
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-
 if (!defined('ABSPATH')) {
-    exit;
+    return;
 }
+
 $log = TbkFactory::createLogger();
 $resume = $log->getInfo();
 $lastLog = $log->getLogDetail(basename($resume['last']));

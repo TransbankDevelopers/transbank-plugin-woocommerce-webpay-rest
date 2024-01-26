@@ -1,51 +1,82 @@
 jQuery(function($) {
-    $(".check_conn").on("click",function(e) {
+    const hideElement = (name) => $(`#${name}`).addClass("tbk-hide");
+    const showElement = (name) => $(`#${name}`).removeClass("tbk-hide");
+    const post = (action, data, fnOk, fnError) => {
+        $.post(ajax_object.ajax_url, {action, nonce: ajax_object.nonce, ...data}, function(resp){
+            fnOk(resp);
+        });
+    }
 
-        $(".check_conn").text("Verificando ...");
-
-        $("#tbk_response_status").removeClass("tbk-hide");
-        $("#div_status_ok").addClass("tbk-hide");
-        $("#div_status_error").addClass("tbk-hide");
-
-        $.post(ajax_object.ajax_url, {action: 'check_connection', nonce: ajax_object.nonce}, function(response){
-            $(".check_conn").text("Verificar Conexión");
-
-            if(response.status.string == "OK") {
-                $("#response_url_text").text(response.response.url);
-                $("#response_token_text").html('<pre>'+response.response.token+'</pre>');
-
-                $("#div_status_ok").removeClass("tbk-hide");
-
-            } else {
-                $("#error_response_text").text(response.response.error);
-                $("#error_detail_response_text").html('<code style="display: block; padding: 10px">'+response.response.detail+'</code>');
-
-                $("#div_status_error").removeClass("tbk-hide");
-            }
-
-        })
-
+    const blockButton = (e, btnName, msg) => {
+        if ($(`.${btnName}`).data('sending') === true) {
+            return false;
+        }
+        $(`.${btnName}`).data('sending', true).html(msg);
         e.preventDefault();
+        return true;
+    }
+
+    const releaseButton = (btnName, msg) => {
+        $(`.${btnName}`).data('sending', false).html(msg);
+    }
+
+    $(".check_conn").on("click",function(e) {
+        if (!blockButton(e, 'check_conn', 'Verificando ...')){
+            return;
+        }
+        showElement("tbk_response_status");
+        hideElement("div_status_error");
+        hideElement("div_status_ok");
+        post('check_connection', {}, (resp) => {
+            if(resp.status.string == "OK") {
+                $("#response_url_text").text(resp.response.url);
+                $("#response_token_text").html('<pre>'+resp.response.token+'</pre>');
+                showElement("div_status_ok");
+            } else {
+                $("#error_response_text").text(resp.response.error);
+                $("#error_detail_response_text").html('<code style="display: block; padding: 10px">'+resp.response.detail+'</code>');
+                showElement("div_status_error");
+            }
+            releaseButton('check_conn',"Verificar Conexión");
+        });
+    });
+
+    $(".check_exist_tables").on("click",function(e) {
+        if (!blockButton(e, 'check_exist_tables', 'Verificando ...')){
+            return;
+        }
+        showElement("tbk-tbl-response-title");
+        showElement("tbl_response_status_text");
+        hideElement("div_tables_status_result");
+        hideElement("div_tables_error");
+
+        post('check_exist_tables', {}, (resp) => {
+            showElement("div_tables_status");
+            if(!resp.error) {
+                $("#tbl_response_status_text").addClass("label-success").text("OK").show();
+                $("#tbl_response_result_text").text(resp.msg);
+                showElement("div_tables_status_result");
+            } else {
+                $("#tbl_response_status_text").addClass("label-danger").text("ERROR").show();
+                $("#tbl_error_message_text").html('<code style="display: block; padding: 10px">' + resp.error + ' Exception: ' + resp.exception +'</code>');
+                showElement("div_tables_error");
+            }
+            releaseButton('check_exist_tables',"Verificar Tablas");
+        });
     });
 
     $('.get-transaction-status').on("click",function(e) {
-        if ($(this).data('sending') === true) {
+        if (!blockButton(e, 'get-transaction-status', 'Consultando al API REST...')){
             return;
         }
-        $(this).data('sending', true);
-        $(this).html('Consultando al API REST...');
-        e.preventDefault();
-
-        $.post(ajax_object.ajax_url, {
-            action: 'get_transaction_status',
-            order_id: $(this).data('order-id'),
-            buy_order: $(this).data('buy-order'),
-            token: $(this).data('token'),
-            nonce: window.ajax_object.nonce
-        }, function(response){
+        post('get_transaction_status', {
+            order_id: $('.get-transaction-status').data('order-id'),
+            buy_order: $('.get-transaction-status').data('buy-order'),
+            token: $('.get-transaction-status').data('token')
+        }, (resp) => {
             let $table = $('.transaction-status-response');
-            let statusData = response.status;
-            if(response.product == "webpay_plus"){
+            let statusData = resp.status;
+            if(resp.product == "webpay_plus"){
                 $("#tbk_wpp_vci").removeClass("tbk-hide");
                 $("#tbk_wpp_session_id").removeClass("tbk-hide");
             }else{
@@ -55,54 +86,15 @@ jQuery(function($) {
                 let value = statusData[key] ? statusData[key] : '-';
                 $table.find('.status-' + key).html(value);
             });
-            $table.find('.status-product').html(response.product);
-
-            let niceJson = JSON.stringify(response.raw, null, 2)
+            $table.find('.status-product').html(resp.product);
+            let niceJson = JSON.stringify(resp.raw, null, 2)
             $table.find('.status-raw').html(`<pre>${niceJson}</pre>`);
             $table.show();
-            $(this).data('sending', false);
-            $(this).html('Consultar estado de la transacción');
-
-        }.bind(this))
-            .fail(function(e, a) {
-                $('.error-status-raw').html(`<p>${e.responseJSON.message}</p>`);
-                $('.error-transaction-status-response').show();
-                $(this).data('sending', false);
-                $(this).html('Consultar estado de la transacción');
-            })
+            releaseButton('get-transaction-status','Consultar estado de la transacción');
+        }, (error) => {
+            $('.error-status-raw').html(`<p>${error.responseJSON.message}</p>`);
+            $('.error-transaction-status-response').show();
+            releaseButton('get-transaction-status','Consultar estado de la transacción');
+        });
     });
-
-
-    $(".check_exist_tables").on("click",function(e) {
-        $(".check_exist_tables").text("Verificando ...");
-        $("#tbk-tbl-response-title").removeClass("tbk-hide");
-        $("#div_tables_status").addClass("tbk-hide");
-        $("#div_tables_status_result").addClass("tbk-hide");
-        $("#div_tables_error").addClass("tbk-hide");
-        $("#tbl_response_status_text").removeClass();
-
-        $.post(ajax_object.ajax_url, {action: 'check_exist_tables', nonce: ajax_object.nonce}, function(response){
-            $(".check_exist_tables").text("Verificar Tablas");
-            $("#div_tables_status").removeClass("tbk-hide");
-
-            if(!response.error) {
-
-                $("#tbl_response_status_text").addClass("label-success").text("OK").show();
-                $("#tbl_response_result_text").text(response.msg);
-
-                $("#div_tables_status_result").removeClass("tbk-hide");
-
-            } else {
-
-                $("#tbl_response_status_text").addClass("label-danger").text("ERROR").show();
-                $("#tbl_error_message_text").html('<code style="display: block; padding: 10px">' + response.error + ' Exception: ' + response.exception +'</code>');
-
-                $("#div_tables_error").removeClass("tbk-hide");
-            }
-
-        })
-
-        e.preventDefault();
-    });
-
 })

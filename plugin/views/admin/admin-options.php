@@ -1,8 +1,9 @@
 <?php
 
 if (!defined('ABSPATH')) {
-    exit;
+    return;
 }
+
 if (!$showedWelcome) {
     update_site_option('transbank_webpay_rest_showed_welcome_message', true);
 }

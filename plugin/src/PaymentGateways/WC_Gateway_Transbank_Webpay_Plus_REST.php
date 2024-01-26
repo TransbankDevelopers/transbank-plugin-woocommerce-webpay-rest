@@ -197,7 +197,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      **/
     public function check_ipn_response()
     {
-        @ob_clean();
+        ob_clean();
         if (isset($_POST)) {
             header('HTTP/1.1 200 OK');
             $data = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $_GET : $_POST;
