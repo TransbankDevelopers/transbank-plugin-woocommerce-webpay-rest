@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-
 class BlocksHelper
 {
 

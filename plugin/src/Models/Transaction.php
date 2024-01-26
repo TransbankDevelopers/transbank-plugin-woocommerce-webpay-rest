@@ -2,7 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
-use Exception;
 use Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException;
 
 class Transaction extends BaseModel
