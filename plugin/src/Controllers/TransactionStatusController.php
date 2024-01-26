@@ -2,9 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 
 class TransactionStatusController
 {
@@ -36,7 +35,7 @@ class TransactionStatusController
                     'message' => 'El buy_order enviado y el buy_order de la transacción no coinciden',
                 ], 401);
             }
-            $oneclickTransbankSdk = new OneclickTransbankSdk();
+            $oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
             $status = $oneclickTransbankSdk->status($orderId, $buyOrder);
             $statusArray = json_decode(json_encode($status), true);
             $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
@@ -59,7 +58,7 @@ class TransactionStatusController
         }
 
         try {
-            $webpayplusTransbankSdk = new WebpayplusTransbankSdk();
+            $webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
             $resp = $webpayplusTransbankSdk->status($transaction->order_id, $transaction->token);
             wp_send_json([
                 'product' => $transaction->product,
