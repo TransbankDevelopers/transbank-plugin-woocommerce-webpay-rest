@@ -5,7 +5,6 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use \Exception;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use  Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
 use  Transbank\Plugin\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
@@ -22,7 +21,7 @@ class OneclickInscriptionResponseController
     protected $logger;
     protected $gatewayId;
     /**
-    * @var OneclickTransbankSdk
+    * @var Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk
     */
     protected $oneclickTransbankSdk;
     /**
@@ -32,7 +31,7 @@ class OneclickInscriptionResponseController
     {
         $this->logger = TbkFactory::createLogger();
         $this->gatewayId = $gatewayId;
-        $this->oneclickTransbankSdk = new OneclickTransbankSdk();
+        $this->oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
     }
 
     private function getWcOrder($orderId) {

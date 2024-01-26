@@ -10,7 +10,6 @@ use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
@@ -38,7 +37,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     protected $oneclickInscription;
     protected $logger;
     /**
-     * @var OneclickTransbankSdk
+     * @var Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk
      */
     protected $oneclickTransbankSdk;
 
@@ -76,7 +75,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->logger = TbkFactory::createLogger();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
-        $this->oneclickTransbankSdk = new OneclickTransbankSdk();
+        $this->oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
 
         add_action(
             'woocommerce_scheduled_subscription_payment_'.$this->id,
