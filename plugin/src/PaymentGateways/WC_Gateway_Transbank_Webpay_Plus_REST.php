@@ -11,7 +11,6 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\CreateTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
@@ -40,14 +39,14 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     protected $config;
 
     /**
-     * @var WebpayplusTransbankSdk
+     * @var Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
      */
     protected $webpayplusTransbankSdk;
 
     public function __construct()
     {
         self::$URL_FINAL = home_url('/').'?wc-api=TransbankWebpayRestThankYouPage';
-        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk();
+        $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
         $this->id = 'transbank_webpay_plus_rest';
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');

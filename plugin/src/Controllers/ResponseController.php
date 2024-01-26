@@ -15,7 +15,7 @@ use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use WC_Order;
 
 class ResponseController
@@ -26,7 +26,7 @@ class ResponseController
     protected $pluginConfig;
 
     /**
-     * @var WebpayplusTransbankSdk
+     * @var Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
      */
     protected $webpayplusTransbankSdk;
 
@@ -44,7 +44,7 @@ class ResponseController
     {
         $this->pluginConfig = $pluginConfig;
         $this->interactsWithFullLog = new InteractsWithFullLog();
-        $this->webpayplusTransbankSdk = new WebpayplusTransbankSdk();
+        $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
     }
 
     /**

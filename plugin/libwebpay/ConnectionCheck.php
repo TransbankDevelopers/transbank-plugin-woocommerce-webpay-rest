@@ -1,6 +1,6 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 
 class ConnectionCheck
 {
@@ -23,7 +23,7 @@ class ConnectionCheck
 
         $status = 'Error';
         try {
-            $webpayplusTransbankSdk = new WebpayplusTransbankSdk();
+            $webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
             $result = $webpayplusTransbankSdk->createInner(0, $buyOrder, $sessionId, $amount, $returnUrl);
             $status = 'OK';
 
