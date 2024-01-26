@@ -209,14 +209,14 @@ class OneclickTransbankSdk extends TransbankSdk
         if ($tbkOrdenCompra && $tbkSessionId && !$tbkToken) {
             $errorMessage = 'La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.';
             $this->errorExecution(0, 'finish', $params1, 'TimeoutInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken, $errorMessage);
+            $inscription = $this->saveInscriptionWithError($tbkToken, 'TimeoutInscriptionOneclickException', $errorMessage);
             throw new TimeoutInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
         
         if (isset($tbkOrdenCompra)) {
             $errorMessage = 'La inscripción fue anulada por el usuario o hubo un error en el formulario de inscripción.';
             $this->errorExecution(0, 'finish', $params1, 'UserCancelInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken, $errorMessage);
+            $inscription = $this->saveInscriptionWithError($tbkToken, 'UserCancelInscriptionOneclickException', $errorMessage);
             throw new UserCancelInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
 
@@ -283,19 +283,21 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar la inscripción: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'finish', $params, 'FinishInscriptionOneclickException', $e->getMessage(), $errorMessage);
-            $ins = $this->saveInscriptionWithError($tbkToken, $errorMessage);
+            $ins = $this->saveInscriptionWithError($tbkToken, 'FinishInscriptionOneclickException', $errorMessage);
             throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins, $e);
         }
     }
 
-    public function saveInscriptionWithError($tbkToken, $error)
+    public function saveInscriptionWithError($tbkToken, $error, $detailError)
     {
         $inscription = Inscription::getByToken($tbkToken);
         if ($inscription == null) {
             return null;
         }
         Inscription::update($inscription->id, [
-            'status' => Inscription::STATUS_FAILED
+            'status' => Inscription::STATUS_FAILED,
+            'error' => $error,
+            'detail_error' => $detailError
         ]);
         return $inscription;
     }
