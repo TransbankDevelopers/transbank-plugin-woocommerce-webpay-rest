@@ -37,3 +37,6 @@ transbank-webpay-plus-rest-guzzle7.zip
 docker-woocommerce-*/wp_data
 docker-woocommerce-*/db_data
 docker-woocommerce-*/transbank-webpay-plus-rest
+
+# Woocoomerce blocks genereted files
+plugin/js/front/
