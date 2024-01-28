@@ -7,7 +7,7 @@
         <div>
             <p>WooCommerce no se encuentra activo o no está instalado.</p>
             <p>
-                <a class="button button-primary tbk_button_primary" href="<?= $actionButton['action'] ?>">
+                <a class="button button-primary tbk-button-primary" href="<?= $actionButton['action'] ?>">
                     <?= $actionButton['text'] ?>
                 </a>
             </p>

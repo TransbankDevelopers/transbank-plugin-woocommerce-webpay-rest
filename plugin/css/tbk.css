@@ -318,3 +318,18 @@
     display: inline-flex;
     align-items: center;
 }
+
+.button.tbk-button-primary {
+    background: #D5006C;
+    border-color: #D5006C;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.button.tbk-button-primary:hover,
+.button.tbk-button-primary:focus {
+    background: #C00063;
+    border-color: #C00063;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
