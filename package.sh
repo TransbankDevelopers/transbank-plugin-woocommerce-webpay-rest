@@ -37,12 +37,12 @@ PLUGIN_FILE="transbank-webpay-plus-rest.zip"
 PLUGIN_FILE_GUZZLE="transbank-webpay-plus-rest-guzzle7.zip"
 
 cd $SRC_DIR
-zip -FSr ../$PLUGIN_FILE . -x composer.json composer.lock webpack.config.js"$MAIN_FILE.bkp" "$README_FILE.bkp"
+zip -FSr ../$PLUGIN_FILE . -x composer.json composer.lock webpack.config.js package.json package-lock.json "*.bkp"
 
 # Create Guzzle 7 version
 sed -i.bkp "s/\"php\": \"7.0\"/\"php\": \"7.2.5\"/g" "$COMPOSER_FILE"
 composer require guzzlehttp/guzzle:^7.0
-zip -FSr ../$PLUGIN_FILE_GUZZLE . -x composer.json composer.lock webpack.config.js"$MAIN_FILE.bkp" "$README_FILE.bkp" "$COMPOSER_FILE.bkp"
+zip -FSr ../$PLUGIN_FILE_GUZZLE . -x composer.json composer.lock webpack.config.js package.json package-lock.json "*.bkp"
 
 cp "$COMPOSER_LOCK_FILE.bkp" "$COMPOSER_LOCK_FILE"
 rm "$COMPOSER_LOCK_FILE.bkp"
