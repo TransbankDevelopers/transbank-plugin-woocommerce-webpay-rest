@@ -42,7 +42,6 @@ add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
 add_action('wp_ajax_check_exist_tables', TableCheck::class.'check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
-add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
 add_action('woocommerce_subscription_failing_payment_method_updated_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'subscription_payment_method_updated'], 10, 3);
@@ -58,8 +57,6 @@ add_action('admin_enqueue_scripts', function () {
         'nonce'    => wp_create_nonce('my-ajax-nonce'),
     ]);
 });
-
-add_filter('plugin_action_links_'.plugin_basename(__FILE__), 'transbank_webpay_rest_add_rest_action_links');
 
 add_action('woocommerce_blocks_loaded', function() {
     if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ){
