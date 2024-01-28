@@ -28,6 +28,7 @@ ehthumbs_vista.db
 
 # Dependencies
 vendor
+node_modules
 composer.lock
 package-lock.json
 
