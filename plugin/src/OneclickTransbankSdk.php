@@ -36,6 +36,8 @@ use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 class OneclickTransbankSdk extends TransbankSdk
 {
 
+    const OPTION_KEY = 'woocommerce_transbank_oneclick_mall_rest_settings';
+
     /**
      * @var MallTransaction
      */
@@ -48,15 +50,26 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function __construct()
     {
-        $conf = new ConfigProvider();
+        $config = get_option(self::OPTION_KEY);
         $this->log = TbkFactory::createLogger();
-        $environment = $conf->getConfig('environment');
+        $environment = $config['environment'];
+
         $this->options = $this->createOptions(
-            $environment,
-            $conf->getConfig('commerce_code'),
-            $conf->getConfig('api_key'));
-        $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ?
-            $conf->getConfig('child_commerce_code') : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+            Options::ENVIRONMENT_INTEGRATION,
+            Oneclick::DEFAULT_COMMERCE_CODE,
+            Oneclick::DEFAULT_API_KEY
+        );
+        $this->childCommerceCode = Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+
+        if ($environment == Options::ENVIRONMENT_PRODUCTION) {
+            $this->options = $this->createOptions(
+                $environment,
+                $config['commerce_code'],
+                $config['api_key']
+            );
+            $this->childCommerceCode = $config['child_commerce_code'];
+        }
+
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
     }
@@ -212,7 +225,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $inscription = $this->saveInscriptionWithError($tbkToken, $errorMessage);
             throw new TimeoutInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
-        
+
         if (isset($tbkOrdenCompra)) {
             $errorMessage = 'La inscripción fue anulada por el usuario o hubo un error en el formulario de inscripción.';
             $this->errorExecution(0, 'finish', $params1, 'UserCancelInscriptionOneclickException', $errorMessage, $errorMessage);
