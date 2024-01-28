@@ -236,3 +236,45 @@ function transbank_rest_check_cancelled_checkout()
         wc_print_notice(__('Cancelaste la inscripción durante el formulario de Webpay.', 'transbank_wc_plugin'), 'error');
     }
 }
+
+function noticeMissingWoocommerce() {
+    add_action(
+        'admin_notices',
+        function () {
+            $isWooInstalled = false;
+            $currentUserCanInstallPlugins = current_user_can('install_plugins');
+
+            $tbkLogo = sprintf('%s%s', plugin_dir_url(__FILE__), './images/tbk-logo.png');
+
+            $activateLink = wp_nonce_url(
+                self_admin_url('plugins.php?action=activate&plugin=woocommerce/woocommerce.php&plugin_status=all'),
+                'activate-plugin_woocommerce/woocommerce.php'
+            );
+
+            $installLink = wp_nonce_url(
+                self_admin_url('update.php?action=install-plugin&plugin=woocommerce'),
+                'install-plugin_woocommerce'
+            );
+
+            if (function_exists('get_plugins')) {
+                $allPlugins  = get_plugins();
+                $isWooInstalled = !empty($allPlugins['woocommerce/woocommerce.php']);
+            }
+            $actionButton = [];
+
+            if ($isWooInstalled && $currentUserCanInstallPlugins) {
+                $actionButton['text'] = 'Activar Woocoomerce';
+                $actionButton['action'] = esc_html($activateLink);
+            } else {
+                if ($currentUserCanInstallPlugins) {
+                    $actionButton['text'] = 'Instalar Woocoomerce';
+                    $actionButton['action'] = esc_html($installLink);
+                } else {
+                    $actionButton['text'] = 'Revisar Woocoomerce';
+                    $actionButton['action'] = 'https://wordpress.org/plugins/woocommerce/';
+                }
+            }
+            include_once(plugin_dir_path(__FILE__) .'views/admin/components/notcie-missing-woocommerce.php');
+        }
+    );
+}
