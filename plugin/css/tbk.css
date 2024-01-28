@@ -309,3 +309,12 @@
     display: block;
     font-weight: 600;
 }
+
+.tbk-notice-container {
+    padding: 0;
+}
+
+.tbk-notice {
+    display: inline-flex;
+    align-items: center;
+}

@@ -1,5 +1,5 @@
-<div id="message" class="notice notice-error tbk_notice_container">
-    <div class="tbk_notice">
+<div id="message" class="notice notice-error tbk-notice-container">
+    <div class="tbk-notice">
         <div>
             <img src="<?= esc_url($tbkLogo) ?>" height="70px" alt="Transbank logo" />
         </div>
