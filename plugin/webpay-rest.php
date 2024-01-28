@@ -271,7 +271,7 @@ function noticeMissingWoocommerce() {
                     $actionButton['action'] = 'https://wordpress.org/plugins/woocommerce/';
                 }
             }
-            include_once(plugin_dir_path(__FILE__) .'views/admin/components/notcie-missing-woocommerce.php');
+            include_once(plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php');
         }
     );
 }
