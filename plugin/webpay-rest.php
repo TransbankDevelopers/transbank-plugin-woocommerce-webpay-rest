@@ -36,7 +36,7 @@ if (!defined('ABSPATH')) {
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 
 register_activation_hook(__FILE__, 'transbank_webpay_rest_on_webpay_rest_plugin_activation');
-add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
+add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
@@ -112,29 +112,12 @@ function woocommerceTransbankInit() {
     }
 }
 
-function woocommerce_transbank_rest_init()
-{
-    if (!class_exists('WC_Payment_Gateway')) {
-        return;
-    }
-
-    /**
-     * Añadir Transbank Plus a Woocommerce.
-     **/
-    function woocommerce_add_transbank_gateway($methods)
-    {
+function registerPaymentGateways() {
+    add_filter('woocommerce_payment_gateways', function($methods) {
         $methods[] = WC_Gateway_Transbank_Webpay_Plus_REST::class;
         $methods[] = WC_Gateway_Transbank_Oneclick_Mall_REST::class;
-
         return $methods;
-    }
-
-    /**
-     * Muestra detalle de pago a Cliente a finalizar compra.
-     **/
-    function pay_transbank_webpay_content($orderId)
-    {
-    }
+    });
 }
 
 function transbank_webpay_rest_add_rest_action_links($links)
@@ -152,7 +135,6 @@ function transbank_webpay_rest_on_webpay_rest_plugin_activation()
     if (!class_exists('WC_Payment_Gateway')) {
         trigger_error('Se necesita tener WooCommerce instalado y activo para poder activar este plugin', E_USER_ERROR);
     }
-    woocommerce_transbank_rest_init();
 }
 
 function on_transbank_rest_webpay_plugins_loaded()
