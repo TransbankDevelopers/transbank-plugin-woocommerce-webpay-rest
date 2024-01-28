@@ -127,8 +127,7 @@ function registerAdminMenu() {
             if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
                 wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
             }
-            var_dump('cargando admin');
-            echo 'cacacaca';
+
             include_once __DIR__.'/views/admin/options-tabs.php';
         }, null);
 
