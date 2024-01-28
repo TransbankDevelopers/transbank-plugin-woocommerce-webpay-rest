@@ -8,6 +8,7 @@ use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Onecli
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
+use Transbank\WooCommerce\WebpayRest\Utils\ConnectionCheck;
 
 if (!defined('ABSPATH')) {
     return;
@@ -30,16 +31,14 @@ if (!defined('ABSPATH')) {
  * WC requires at least: 7.0
  * WC tested up to: 8.3
  */
-add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 
-//todo: Eliminar todos estos require y usar PSR-4 de composer
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
-require_once plugin_dir_path(__FILE__).'libwebpay/ConnectionCheck.php';
 require_once plugin_dir_path(__FILE__).'libwebpay/TableCheck.php';
 
 register_activation_hook(__FILE__, 'transbank_webpay_rest_on_webpay_rest_plugin_activation');
+add_action('plugins_loaded', 'woocommerce_transbank_rest_init', 0);
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
-add_action('wp_ajax_check_connection', 'ConnectionCheck::check');
+add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
 add_action('wp_ajax_check_exist_tables', 'TableCheck::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
 add_filter('woocommerce_payment_gateways', 'woocommerce_add_transbank_gateway');
