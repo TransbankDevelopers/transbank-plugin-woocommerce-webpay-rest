@@ -169,18 +169,6 @@ function transbank_rest_remove_database()
     DatabaseTableInstaller::deleteTable();
 }
 
-add_action('admin_notices', function () {
-    if (!class_exists(WC_Gateway_Transbank_Webpay_Plus_REST::class)) {
-        return;
-    }
-    if (!WC_Gateway_Transbank_Webpay_Plus_REST::is_valid_for_use()) {
-        ?>
-        <div class="notice notice-error">
-            <p><?php _e('Woocommerce debe estar configurado en pesos chilenos (CLP) para habilitar Webpay', 'transbank_wc_plugin'); ?></p>
-        </div>
-        <?php
-    }
-});
 register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 
 if ($hPosExists)
