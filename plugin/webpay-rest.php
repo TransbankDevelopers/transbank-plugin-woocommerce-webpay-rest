@@ -38,6 +38,7 @@ require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
+
 add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
 add_action('wp_ajax_check_exist_tables', TableCheck::class.'check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
@@ -109,6 +110,8 @@ function woocommerceTransbankInit() {
         noticeMissingWoocommerce();
         return;
     }
+
+    registerAdminMenu();
 }
 
 function registerPaymentGateways() {
@@ -116,6 +119,24 @@ function registerPaymentGateways() {
         $methods[] = WC_Gateway_Transbank_Webpay_Plus_REST::class;
         $methods[] = WC_Gateway_Transbank_Oneclick_Mall_REST::class;
         return $methods;
+    });
+}
+
+function registerAdminMenu() {
+    add_action('admin_menu', function () {
+        add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
+            $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
+            if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
+                wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
+            }
+            var_dump('cargando admin');
+            echo 'cacacaca';
+            include_once __DIR__.'/views/admin/options-tabs.php';
+        }, null);
+
+        add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
+            wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options'));
+        }, null);
     });
 }
 
@@ -186,21 +207,6 @@ else
         }, 'shop_order', 'side', 'core');
     });
 }
-
-add_action('admin_menu', function () {
-    //create new top-level menu
-    add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
-        $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
-        if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
-            wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
-        }
-        include_once __DIR__.'/views/admin/options-tabs.php';
-    }, null);
-
-    add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
-        wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest&tbk_tab=options'));
-    }, null);
-});
 
 function transbank_rest_before_cart()
 {
