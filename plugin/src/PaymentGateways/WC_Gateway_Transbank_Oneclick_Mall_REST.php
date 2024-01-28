@@ -19,9 +19,9 @@ use Transbank\Plugin\Exceptions\Oneclick\RejectedRefundOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\RefundOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\NotFoundTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Order;
 use WC_Payment_Gateway_CC;
-use WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
 
 /**
@@ -90,6 +90,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ]);
 
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
+        add_filter('woocommerce_payment_token_class', [$this, 'set_payment_token_class']);
         add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
 
     }
@@ -235,6 +236,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $item['method']['brand'] = $payment_token->get_card_type();
 
         return $item;
+    }
+
+    public function set_payment_token_class() {
+        return WC_Payment_Token_Oneclick::class;
     }
 
     /**
