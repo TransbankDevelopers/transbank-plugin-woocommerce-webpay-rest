@@ -199,7 +199,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
@@ -244,7 +244,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * Procesar pago y retornar resultado.
      **
      *
-     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
      */
     public function process_payment($order_id)
     {
@@ -321,7 +321,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Oneclick\Exceptions\InscriptionStartException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
      */
     public function add_payment_method()
     {
@@ -414,7 +414,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
-        /** @var Oneclick\Responses\TransactionDetail $firstDetail */
+        /** @var Transbank\Webpay\Oneclick\Responses\TransactionDetail $firstDetail */
         $firstDetail = $response->getDetails()[0];
         $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
         $sharesAmount = $firstDetail->getInstallmentsAmount() ?? '-';
@@ -445,9 +445,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * @param string   $from
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Oneclick\Exceptions\InscriptionStartException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
      *
-     * @return Oneclick\Responses\InscriptionStartResponse
+     * @return Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse
      */
     public function start(
         int $orderId = null,
@@ -485,7 +485,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     /**
      * @param WC_Order $order
      *
-     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
      *
      * @return array
      */
