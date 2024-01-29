@@ -137,7 +137,7 @@ class MaskData
     }
 
     /**
-     * Mask necesary fields from input when environment is production
+     * Mask necessary fields from input when environment is production
      * If environment is production then original value is returned
      *
      * @param array $data An array containing data to mask.
