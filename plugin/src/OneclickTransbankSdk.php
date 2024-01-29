@@ -216,7 +216,7 @@ class OneclickTransbankSdk extends TransbankSdk
         if ($tbkOrdenCompra && $tbkSessionId && !$tbkToken) {
             $errorMessage = 'La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.';
             $this->errorExecution(0, 'finish', $params1, 'TimeoutInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken, 
+            $inscription = $this->saveInscriptionWithError($tbkToken,
                 'TimeoutInscriptionOneclickException', $errorMessage);
             throw new TimeoutInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
@@ -224,7 +224,7 @@ class OneclickTransbankSdk extends TransbankSdk
         if (isset($tbkOrdenCompra)) {
             $errorMessage = 'La inscripción fue anulada por el usuario o hubo un error en el formulario de inscripción.';
             $this->errorExecution(0, 'finish', $params1, 'UserCancelInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken, 
+            $inscription = $this->saveInscriptionWithError($tbkToken,
                 'UserCancelInscriptionOneclickException', $errorMessage);
             throw new UserCancelInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
@@ -244,17 +244,17 @@ class OneclickTransbankSdk extends TransbankSdk
             $errorMessage = 'La inscripción no se encuentra en estado inicializada: '.$tbkToken;
             $this->errorExecution($inscription->order_id, 'finish', 
                 $params, 'InvalidStatusInscriptionOneclickException', $errorMessage, $errorMessage);
-            throw new InvalidStatusInscriptionOneclickException($errorMessage, 
+            throw new InvalidStatusInscriptionOneclickException($errorMessage,
                 $tbkToken, $inscription);
         }
-        $finishInscriptionResponse = $this->finishInscription($inscription->order_id, 
+        $finishInscriptionResponse = $this->finishInscription($inscription->order_id,
             $tbkToken, $inscription);
         if (!$finishInscriptionResponse->isApproved()) {
             $errorMessage = 'La inscripción de la tarjeta ha sido rechazada (código de respuesta: '.
                 $finishInscriptionResponse->getResponseCode().')';
-            $this->errorExecution($inscription->order_id, 'finish', $params, 
+            $this->errorExecution($inscription->order_id, 'finish', $params,
                 'RejectedInscriptionOneclickException', $errorMessage, $errorMessage);
-            throw new RejectedInscriptionOneclickException($errorMessage, 
+            throw new RejectedInscriptionOneclickException($errorMessage,
                 $tbkToken, $inscription, $finishInscriptionResponse);
         }
         return array(
