@@ -452,7 +452,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function start(
         int $orderId = null,
         string $from = 'checkout'
-    ): Oneclick\Responses\InscriptionStartResponse {
+    ) {
         // The user selected Oneclick, Pay with new card and choosed to save it in their account.
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
