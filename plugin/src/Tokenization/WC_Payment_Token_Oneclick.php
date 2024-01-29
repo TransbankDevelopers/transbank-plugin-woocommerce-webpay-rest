@@ -1,5 +1,7 @@
 <?php
 
+namespace Transbank\WooCommerce\WebpayRest\Tokenization;
+
 use Transbank\Webpay\Options;
 
 class WC_Payment_Token_Oneclick extends \WC_Payment_Token
