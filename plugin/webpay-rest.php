@@ -225,6 +225,7 @@ function noticeMissingWoocommerce() {
     add_action(
         'admin_notices',
         function () {
+            $noticeDescription = "WooCommerce no se encuentra activo o no está instalado.";
             $actionButton = [];
             $isWooInstalled = false;
             $isWooActivated = false;
@@ -258,11 +259,13 @@ function noticeMissingWoocommerce() {
             if (!$isWooInstalled && $currentUserCanInstallPlugins) {
                 $actionButton['text'] = 'Instalar Woocommerce';
                 $actionButton['action'] = esc_html($installLink);
+                $noticeDescription = "Woocommerce no se encuentra instalado.";
             }
 
             if ($isWooInstalled && !$isWooActivated && $currentUserCanActivatePlugins) {
                 $actionButton['text'] = 'Activar Woocommerce';
                 $actionButton['action'] = esc_html($activateLink);
+                $noticeDescription = "Woocommerce no se encuentra activado.";
             }
 
             include_once(plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php');
