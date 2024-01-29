@@ -207,4 +207,26 @@ class MaskData
         return $value;
     }
 
+        /**
+     * Returns type of element to determine how iterate over this
+     *
+     * @param string $value to evaluate.
+     * @return int a constant representing the type of element
+     */
+    private function getValueType($value){
+        $valueType = $this::NO_ITERABLE;
+        if(is_object($value)){
+            $valueType = $this::OBJECT;
+        }
+        if (is_array($value)){
+            if ($this->isAssociative($value)){
+                $valueType = $this::ASSOCIATIVE_ARRAY;
+            }
+            else {
+                $valueType = $this::INDEXED_ARRAY;
+            }
+        }
+
+        return $valueType;
+    }
 }
