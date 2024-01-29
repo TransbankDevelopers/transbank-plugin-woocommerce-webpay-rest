@@ -132,39 +132,28 @@ class MaskData
      * @return array copy of input, with fields masked.
      */
     public function maskData($data){
-        if ($this->isIntegration){
-            return $data;
-        }
-        $newData = $this->copyWithSubArray($data);
-        foreach ($newData as $key => $value) {
-            if(is_object($value)) {
-                foreach($value as $detailKey => $detailValue) {
-                    $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
-                    $newData[$key]->$detailKey = $maskedValue ? $maskedValue : $detailValue;
+            if ($this->isIntegration){
+                return $data;
+            }
+            $newData = $this->copyWithSubArray($data);
+            foreach ($newData as $key => $value) {
+                switch($this->getValueType($value)){
+                    case $this::OBJECT:
+                        $newData[$key] = $this->maskObject($value);
+                        break;
+                    case $this::ASSOCIATIVE_ARRAY:
+                        $newData[$key] = $this->maskAssociativeArray($value);
+                        break;
+                    case $this::INDEXED_ARRAY:
+                        $newData[$key] = $this->maskIndexedArray($value);
+                        break;
+                    default:
+                        $maskedValue = $this->getMaskedValue($key, $value);
+                        $newData[$key] = $maskedValue;
+                        break;
                 }
             }
-            else if (is_array($value)) {
-                if ($this->isAssociative($value)) {
-                    foreach($value as $detailKey => $detailValue) {
-                        $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
-                        $newData[$key][$detailKey] = $maskedValue ? $maskedValue : $detailValue;
-                    }
-                }
-                else {
-                    foreach($value as $detail) {
-                        foreach($detail as $detailKey => $detailValue) {
-                            $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
-                            $detail->$detailKey = $maskedValue ? $maskedValue : $detailValue;
-                        }
-                    }
-                }
-            }
-            else {
-                $maskedValue = $this->getMaskedValue($key, $value);
-                $newData[$key] = $maskedValue ? $maskedValue : $value;
-            }
-        }
-        return $newData;
+            return $newData;
     }
 
     /**
