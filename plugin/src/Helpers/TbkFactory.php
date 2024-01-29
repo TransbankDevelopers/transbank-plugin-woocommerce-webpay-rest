@@ -23,21 +23,41 @@ class TbkFactory
     public static function createWebpayplusTransbankSdk()
     {
         $config = get_option(WebpayplusTransbankSdk::OPTION_KEY);
+        if (!isset($config)){
+            $config = [];
+        }
+        $environment = isset($config['webpay_rest_environment']) ? 
+            $config['webpay_rest_environment'] : null;
+        $commerceCode = isset($config['webpay_rest_commerce_code']) ? 
+            $config['webpay_rest_commerce_code'] : null;
+        $apiKey = isset($config['webpay_rest_api_key']) ? 
+            $config['webpay_rest_api_key'] : null;
         return new WebpayplusTransbankSdk(static::createLogger(),
-            $config['webpay_rest_environment'],
-            $config['webpay_rest_commerce_code'],
-            $config['webpay_rest_api_key']
+            $environment,
+            $commerceCode,
+            $apiKey
         );
     }
 
     public static function createOneclickTransbankSdk()
     {
         $config = get_option(OneclickTransbankSdk::OPTION_KEY);
+        if (!isset($config)){
+            $config = [];
+        }
+        $environment = isset($config['environment']) ? 
+            $config['environment'] : null;
+        $commerceCode = isset($config['commerce_code']) ? 
+            $config['commerce_code'] : null;
+        $apiKey = isset($config['api_key']) ? 
+            $config['api_key'] : null;
+        $childCommerceCode = isset($config['child_commerce_code']) ? 
+            $config['child_commerce_code'] : null;
         return new OneclickTransbankSdk(static::createLogger(),
-            $config['environment'],
-            $config['commerce_code'],
-            $config['api_key'],
-            $config['child_commerce_code']
+            $environment,
+            $commerceCode,
+            $apiKey,
+            $childCommerceCode
         );
     }
 
