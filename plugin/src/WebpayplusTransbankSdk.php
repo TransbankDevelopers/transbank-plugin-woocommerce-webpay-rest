@@ -397,15 +397,15 @@ class WebpayplusTransbankSdk extends TransbankSdk
         if ($transaction->status !== Transaction::STATUS_INITIALIZED) {
             $errorMessage = 'Se quiso guardar la excepción: '.$error.' ('.$detailError.') '.' y la transacción no se encuentra en estado inicializada: '.$transaction->token;
             $this->logError($errorMessage);
-            return $transaction;
         }
         $this->saveTransactionWithError($transaction->id, $error, $detailError);
-        return $transaction;
     }
 
     public function saveTransactionWithErrorByToken($token, $error, $detailError)
     {
-        return $this->saveTransactionWithErrorByTransaction(Transaction::getByToken($token), $error, $detailError);
+        $transaction = Transaction::getByToken($token);
+        $this->saveTransactionWithErrorByTransaction($transaction, $error, $detailError);
+        return $transaction;
     }
 
 }
