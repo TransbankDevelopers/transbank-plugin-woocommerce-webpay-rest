@@ -139,19 +139,19 @@ function registerAdminMenu() {
 
 function registerPluginActionLinks() {
     add_filter('plugin_action_links_'.plugin_basename(__FILE__), function ($actionLinks) {
-        $webpaySettingLink = sprintf(
+        $webpaySettingsLink = sprintf(
             '<a href="%s">%s</a>',
             admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest'),
             'Configurar Webpay Plus'
         );
-        $oneclickSettingLink = sprintf(
+        $oneclickSettingsLink = sprintf(
             '<a href="%s">%s</a>',
             admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_oneclick_mall_rest'),
             'Configurar Webpay Oneclick'
         );
         $newLinks = [
-            $webpaySettingLink,
-            $oneclickSettingLink,
+            $webpaySettingsLink,
+            $oneclickSettingsLink,
         ];
 
         return array_merge($actionLinks, $newLinks);
