@@ -4,6 +4,8 @@ jQuery(function($) {
     const post = (action, data, fnOk, fnError) => {
         $.post(ajax_object.ajax_url, {action, nonce: ajax_object.nonce, ...data}, function(resp){
             fnOk(resp);
+        }).fail(function(error) {
+            fnError(error);
         });
     }
 
