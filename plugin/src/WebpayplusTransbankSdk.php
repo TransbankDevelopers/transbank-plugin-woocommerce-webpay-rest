@@ -26,6 +26,8 @@ use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
 class WebpayplusTransbankSdk extends TransbankSdk
 {
 
+    const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
+
     /**
      * @var \Transbank\Webpay\WebpayPlus\Transaction
      */
@@ -44,7 +46,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     private function createOptions($environment, $commerceCode, $apiKey)
     {
         $options = \Transbank\Webpay\WebpayPlus\Transaction::getDefaultOptions();
-        if ($environment == 'LIVE') {
+        if ($environment == Options::ENVIRONMENT_PRODUCTION) {
             $options = Options::forProduction($commerceCode, $apiKey);
         }
         return $options;

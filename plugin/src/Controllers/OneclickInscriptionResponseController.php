@@ -13,7 +13,7 @@ use  Transbank\Plugin\Exceptions\Oneclick\WithoutTokenInscriptionOneclickExcepti
 use  Transbank\Plugin\Exceptions\Oneclick\FinishInscriptionOneclickException;
 use  Transbank\Plugin\Exceptions\Oneclick\RejectedInscriptionOneclickException;
 use  Transbank\Plugin\Exceptions\Oneclick\GetInscriptionOneclickException;
-use WC_Payment_Token_Oneclick;
+use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
 
 class OneclickInscriptionResponseController

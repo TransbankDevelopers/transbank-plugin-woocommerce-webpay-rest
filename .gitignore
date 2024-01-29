@@ -26,7 +26,11 @@ ehthumbs_vista.db
 # Folder config file
 [Dd]esktop.ini
 
+# Dependencies
 vendor
+node_modules
+composer.lock
+package-lock.json
 
 transbank-webpay-plus-rest.zip
 transbank-webpay-plus-rest-guzzle7.zip
@@ -35,4 +39,5 @@ docker-woocommerce-*/wp_data
 docker-woocommerce-*/db_data
 docker-woocommerce-*/transbank-webpay-plus-rest
 
-composer.lock
+# Woocoomerce blocks genereted files
+plugin/js/front/

@@ -34,6 +34,8 @@ use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
 class OneclickTransbankSdk extends TransbankSdk
 {
 
+    const OPTION_KEY = 'woocommerce_transbank_oneclick_mall_rest_settings';
+
     /**
      * @var MallTransaction
      */
@@ -60,7 +62,7 @@ class OneclickTransbankSdk extends TransbankSdk
     private function createOptions($environment, $commerceCode, $apiKey)
     {
         $options = \Transbank\Webpay\Oneclick\MallTransaction::getDefaultOptions();
-        if ($environment == 'LIVE') {
+        if ($environment == Options::ENVIRONMENT_PRODUCTION) {
             $options = Options::forProduction($commerceCode, $apiKey);
         }
         return $options;
@@ -205,7 +207,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $inscription = $this->saveInscriptionWithError($tbkToken, 'TimeoutInscriptionOneclickException', $errorMessage);
             throw new TimeoutInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
-        
+
         if (isset($tbkOrdenCompra)) {
             $errorMessage = 'La inscripción fue anulada por el usuario o hubo un error en el formulario de inscripción.';
             $this->errorExecution(0, 'finish', $params1, 'UserCancelInscriptionOneclickException', $errorMessage, $errorMessage);
