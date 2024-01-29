@@ -70,28 +70,15 @@ class MaskData
     }
 
     /**
-     * Obtain a substring with '@' and the email domain.
-     *
-     * @param string $email An email to be evaluated.
-     * @return string a string with '@' and email domain.
-     */
-    private function getEmailPattern($email) {
-        $pos = strpos($email, '@');
-        $len = strlen($email);
-        $since = $pos - $len;
-        $to = $len - $pos;
-        return substr($email, $since, $to);
-    }
-
-    /**
      * Mask an email, and maintain the domain.
      *
      * @param string $email An email to be masked.
      * @return string email masked.
      */
     private function maskEmail($email){
-        $emailPattern = $this->getEmailPattern($email);
-        return $this->mask($email, $emailPattern);
+        return preg_replace_callback('/^(.{1,4})[^@]*(@.*)$/', function ($match) {
+            return $match[1] . str_repeat('x', strlen($match[0]) - strlen($match[1]) - strlen($match[2])) . $match[2];
+        }, $email);
     }
 
     /**
