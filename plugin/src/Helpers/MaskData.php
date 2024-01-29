@@ -5,6 +5,10 @@ use Transbank\Webpay\Options;
 class MaskData
 {
 
+    private const INDEXED_ARRAY = 0;
+    private const ASSOCIATIVE_ARRAY = 1;
+    private const OBJECT = 2;
+    private const NO_ITERABLE = 3;
     private $keysToMask = [
         'child_commerce_code' => 'mask',
         'parentBuyOrder' => 'maskBuyOrder',
