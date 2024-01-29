@@ -126,6 +126,12 @@ class MaskData
         return $this->mask($sessionId, $sessionPatternToKeep, $charsToKeep);
     }
 
+    /**
+     * Determine if an array is associative
+     *
+     * @param array $array an array to evaluate
+     * @return boolean `true` if is associative, `false` otherwise
+     */
     private function isAssociative($array) {
         return (bool)count(array_filter(array_keys($array), 'is_string'));
     }
