@@ -5,12 +5,10 @@ namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 use Exception;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
@@ -33,12 +31,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
     /**
-     * @var Oneclick\MallInscription
+     * @var Transbank\Webpay\Oneclick\MallInscription
      */
     protected $oneclickInscription;
     protected $logger;
     /**
-     * @var OneclickTransbankSdk
+     * @var Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk
      */
     protected $oneclickTransbankSdk;
 
@@ -76,7 +74,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->logger = TbkFactory::createLogger();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
-        $this->oneclickTransbankSdk = new OneclickTransbankSdk();
+        $this->oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
 
         add_action(
             'woocommerce_scheduled_subscription_payment_'.$this->id,
@@ -201,7 +199,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
@@ -246,7 +244,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * Procesar pago y retornar resultado.
      **
      *
-     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
      */
     public function process_payment($order_id)
     {
@@ -323,7 +321,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Oneclick\Exceptions\InscriptionStartException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
      */
     public function add_payment_method()
     {
@@ -416,7 +414,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
-        /** @var Oneclick\Responses\TransactionDetail $firstDetail */
+        /** @var Transbank\Webpay\Oneclick\Responses\TransactionDetail $firstDetail */
         $firstDetail = $response->getDetails()[0];
         $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
         $sharesAmount = $firstDetail->getInstallmentsAmount() ?? '-';
@@ -447,14 +445,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * @param string   $from
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Oneclick\Exceptions\InscriptionStartException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
      *
-     * @return Oneclick\Responses\InscriptionStartResponse
+     * @return Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse
      */
     public function start(
         int $orderId = null,
         string $from = 'checkout'
-    ): Oneclick\Responses\InscriptionStartResponse {
+    ) {
         // The user selected Oneclick, Pay with new card and choosed to save it in their account.
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
@@ -487,7 +485,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     /**
      * @param WC_Order $order
      *
-     * @throws Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
      *
      * @return array
      */

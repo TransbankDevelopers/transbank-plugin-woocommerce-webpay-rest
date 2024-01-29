@@ -30,12 +30,12 @@ module.exports = {
 	entry:
         {'webpay_blocks': '/src/Blocks/js/webpay_checkout.js',
         'oneclick_blocks': '/src/Blocks/js/oneclick_checkout.js',
-        'notice_handler': '/src/Blocks/js/notice_handler.js',
+        'notice_handler': '/src/Blocks/js/notice_handler.js'
         }
 	,
 	output: {
 		path: path.resolve( __dirname, 'js/front' ),
-		filename: '[name].js',
+		filename: '[name].js'
 	},
 	plugins: [
 		...defaultConfig.plugins.filter(

@@ -3,7 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest;
 
 use \Exception;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick\MallInscription;
 use Transbank\Webpay\Oneclick\MallTransaction;
 use Transbank\Webpay\Oneclick;
@@ -28,7 +27,6 @@ use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
-use Transbank\WooCommerce\WebpayRest\Helpers\ConfigProvider;
 
 /**
  * Class OneclickTransbankSdk.
@@ -48,28 +46,12 @@ class OneclickTransbankSdk extends TransbankSdk
      */
     protected $mallInscription;
 
-    public function __construct()
+    public function __construct($log, $environment, $commerceCode, $apiKey, $childCommerceCode)
     {
-        $config = get_option(self::OPTION_KEY);
-        $this->log = TbkFactory::createLogger();
-        $environment = $config['environment'];
-
-        $this->options = $this->createOptions(
-            Options::ENVIRONMENT_INTEGRATION,
-            Oneclick::DEFAULT_COMMERCE_CODE,
-            Oneclick::DEFAULT_API_KEY
-        );
-        $this->childCommerceCode = Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
-
-        if ($environment == Options::ENVIRONMENT_PRODUCTION) {
-            $this->options = $this->createOptions(
-                $environment,
-                $config['commerce_code'],
-                $config['api_key']
-            );
-            $this->childCommerceCode = $config['child_commerce_code'];
-        }
-
+        $this->log = $log;
+        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
+        $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ?
+            $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
     }
@@ -80,7 +62,7 @@ class OneclickTransbankSdk extends TransbankSdk
     private function createOptions($environment, $commerceCode, $apiKey)
     {
         $options = \Transbank\Webpay\Oneclick\MallTransaction::getDefaultOptions();
-        if ($environment == 'LIVE') {
+        if ($environment == Options::ENVIRONMENT_PRODUCTION) {
             $options = Options::forProduction($commerceCode, $apiKey);
         }
         return $options;
@@ -159,6 +141,18 @@ class OneclickTransbankSdk extends TransbankSdk
         }
     }
 
+    /**
+     * @param string $orderId
+     * @param string   $userId
+     * @param string   $email
+     * @param string   $returnUrl
+     * @param string   $from
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
+     *
+     * @return Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse
+     */
     public function startInscription($orderId, $userId, $email, $returnUrl, $from)
     {
         global $wpdb;
@@ -222,14 +216,16 @@ class OneclickTransbankSdk extends TransbankSdk
         if ($tbkOrdenCompra && $tbkSessionId && !$tbkToken) {
             $errorMessage = 'La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.';
             $this->errorExecution(0, 'finish', $params1, 'TimeoutInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken, $errorMessage);
+            $inscription = $this->saveInscriptionWithError($tbkToken,
+                'TimeoutInscriptionOneclickException', $errorMessage);
             throw new TimeoutInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
 
         if (isset($tbkOrdenCompra)) {
             $errorMessage = 'La inscripción fue anulada por el usuario o hubo un error en el formulario de inscripción.';
             $this->errorExecution(0, 'finish', $params1, 'UserCancelInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken, $errorMessage);
+            $inscription = $this->saveInscriptionWithError($tbkToken,
+                'UserCancelInscriptionOneclickException', $errorMessage);
             throw new UserCancelInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
 
@@ -246,14 +242,20 @@ class OneclickTransbankSdk extends TransbankSdk
 
         if ($inscription->status !== Inscription::STATUS_INITIALIZED) {
             $errorMessage = 'La inscripción no se encuentra en estado inicializada: '.$tbkToken;
-            $this->errorExecution($inscription->order_id, 'finish', $params, 'InvalidStatusInscriptionOneclickException', $errorMessage, $errorMessage);
-            throw new InvalidStatusInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
+            $this->errorExecution($inscription->order_id, 'finish',
+                $params, 'InvalidStatusInscriptionOneclickException', $errorMessage, $errorMessage);
+            throw new InvalidStatusInscriptionOneclickException($errorMessage,
+                $tbkToken, $inscription);
         }
-        $finishInscriptionResponse = $this->finishInscription($inscription->order_id, $tbkToken, $inscription);
+        $finishInscriptionResponse = $this->finishInscription($inscription->order_id,
+            $tbkToken, $inscription);
         if (!$finishInscriptionResponse->isApproved()) {
-            $errorMessage = 'La inscripción de la tarjeta ha sido rechazada (código de respuesta: '.$finishInscriptionResponse->getResponseCode().')';
-            $this->errorExecution($inscription->order_id, 'finish', $params, 'RejectedInscriptionOneclickException', $errorMessage, $errorMessage);
-            throw new RejectedInscriptionOneclickException($errorMessage, $tbkToken, $inscription, $finishInscriptionResponse);
+            $errorMessage = 'La inscripción de la tarjeta ha sido rechazada (código de respuesta: '.
+                $finishInscriptionResponse->getResponseCode().')';
+            $this->errorExecution($inscription->order_id, 'finish', $params,
+                'RejectedInscriptionOneclickException', $errorMessage, $errorMessage);
+            throw new RejectedInscriptionOneclickException($errorMessage,
+                $tbkToken, $inscription, $finishInscriptionResponse);
         }
         return array(
             'inscription' => $inscription,
@@ -296,19 +298,21 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar la inscripción: '.$e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'finish', $params, 'FinishInscriptionOneclickException', $e->getMessage(), $errorMessage);
-            $ins = $this->saveInscriptionWithError($tbkToken, $errorMessage);
+            $ins = $this->saveInscriptionWithError($tbkToken, 'FinishInscriptionOneclickException', $errorMessage);
             throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins, $e);
         }
     }
 
-    public function saveInscriptionWithError($tbkToken, $error)
+    public function saveInscriptionWithError($tbkToken, $error, $detailError)
     {
         $inscription = Inscription::getByToken($tbkToken);
         if ($inscription == null) {
             return null;
         }
         Inscription::update($inscription->id, [
-            'status' => Inscription::STATUS_FAILED
+            'status' => Inscription::STATUS_FAILED,
+            'error' => $error,
+            'detail_error' => $detailError
         ]);
         return $inscription;
     }
