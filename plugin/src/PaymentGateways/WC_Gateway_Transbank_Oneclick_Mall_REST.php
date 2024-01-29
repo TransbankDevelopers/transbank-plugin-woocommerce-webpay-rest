@@ -5,7 +5,6 @@ namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 use Exception;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
@@ -32,7 +31,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
     /**
-     * @var Oneclick\MallInscription
+     * @var Transbank\Webpay\Oneclick\MallInscription
      */
     protected $oneclickInscription;
     protected $logger;
