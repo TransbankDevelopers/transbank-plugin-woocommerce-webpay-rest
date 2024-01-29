@@ -3,7 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\Plugin\Helpers\PluginLogger;
-use Transbank\Plugin\Helpers\StringUtils;
 use Transbank\Plugin\Model\LogConfig;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
@@ -23,28 +22,23 @@ class TbkFactory
 
     public static function createWebpayplusTransbankSdk()
     {
+        $config = get_option(WebpayplusTransbankSdk::OPTION_KEY);
         return new WebpayplusTransbankSdk(static::createLogger(),
-            static::getVar('webpay_rest_environment'),
-            static::getVar('webpay_rest_commerce_code'),
-            static::getVar('webpay_rest_api_key')
+            $config['webpay_rest_environment'],
+            $config['webpay_rest_commerce_code'],
+            $config['webpay_rest_api_key']
         );
     }
 
     public static function createOneclickTransbankSdk()
     {
+        $config = get_option(OneclickTransbankSdk::OPTION_KEY);
         return new OneclickTransbankSdk(static::createLogger(),
-            static::getVar('environment'),
-            static::getVar('commerce_code'),
-            static::getVar('api_key'),
-            static::getVar('child_commerce_code')
+            $config['environment'],
+            $config['commerce_code'],
+            $config['api_key'],
+            $config['child_commerce_code']
         );
     }
 
-    private static function getVar($name){
-        $value = get_option($name);
-        if (!StringUtils::isNotBlankOrNull($value)){
-            return '';
-        }
-        return $value;
-    }
 }
