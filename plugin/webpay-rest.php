@@ -247,14 +247,14 @@ function noticeMissingWoocommerce() {
             $actionButton = [];
 
             if ($isWooInstalled && $currentUserCanInstallPlugins) {
-                $actionButton['text'] = 'Activar Woocoomerce';
+                $actionButton['text'] = 'Activar Woocommerce';
                 $actionButton['action'] = esc_html($activateLink);
             } else {
                 if ($currentUserCanInstallPlugins) {
-                    $actionButton['text'] = 'Instalar Woocoomerce';
+                    $actionButton['text'] = 'Instalar Woocommerce';
                     $actionButton['action'] = esc_html($installLink);
                 } else {
-                    $actionButton['text'] = 'Revisar Woocoomerce';
+                    $actionButton['text'] = 'Revisar Woocommerce';
                     $actionButton['action'] = 'https://wordpress.org/plugins/woocommerce/';
                 }
             }
