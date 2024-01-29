@@ -62,12 +62,14 @@ class TransbankSdk
     protected function logErrorWithOrderId($orderId, $service, $input, $error, $originalError, $customError){
         $maskedInput = $this->dataMasker->maskData($input);
         $messageError = (isset($customError) ? $customError : $originalError);
-        $this->logError('ORDER_ID: '.$orderId.', SERVICE: '.$service.', INPUT: '.json_encode($maskedInput).' => EXCEPTION: '.$error.' , ERROR: '.$messageError);
+        $this->logError('ORDER_ID: '.$orderId.', SERVICE: '.$service);
+        $this->logError('INPUT: '.json_encode($maskedInput).' => EXCEPTION: '.$error.' , ERROR: '.$messageError);
     }
 
     protected function logInfoWithOrderId($orderId, $service, $message, $data){
         $maskedData = $this->dataMasker->maskData($data);
-        $this->logInfo('ORDER_ID: '.$orderId.', SERVICE: '.$service.', message: '.$message.', DATA: '.json_encode($maskedData));
+        $this->logInfo('ORDER_ID: '.$orderId.', SERVICE: '.$service);
+        $this->logInfo('message: '.$message.', DATA: '.json_encode($maskedData));
     }
 
     protected function createApiServiceLogBase($orderId, $service, $product, $input, $response)

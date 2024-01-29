@@ -58,7 +58,8 @@ class WebpayplusTransbankSdk extends TransbankSdk
     {
         $maskedInput = $this->dataMasker->maskData($input);
         $maskedResponse = $this->dataMasker->maskData($response);
-        $this->logInfo('ORDER_ID: '.$orderId.', INPUT: '.json_encode($maskedInput).' => RESPONSE: '.json_encode($maskedResponse));
+        $this->logInfo('ORDER_ID: '.$orderId);
+        $this->logInfo('INPUT: '.json_encode($maskedInput).' => RESPONSE: '.json_encode($maskedResponse));
         $this->createApiServiceLogBase($orderId, $service, 'webpay_plus', $input, $response);
     }
 
