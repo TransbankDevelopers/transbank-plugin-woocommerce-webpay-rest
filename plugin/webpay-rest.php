@@ -225,8 +225,11 @@ function noticeMissingWoocommerce() {
     add_action(
         'admin_notices',
         function () {
+            $actionButton = [];
             $isWooInstalled = false;
+            $isWooActivated = false;
             $currentUserCanInstallPlugins = current_user_can('install_plugins');
+            $currentUserCanActivatePlugins = current_user_can('activate_plugins');
 
             $tbkLogo = sprintf('%s%s', plugin_dir_url(__FILE__), './images/tbk-logo.png');
 
@@ -244,20 +247,24 @@ function noticeMissingWoocommerce() {
                 $allPlugins  = get_plugins();
                 $isWooInstalled = !empty($allPlugins['woocommerce/woocommerce.php']);
             }
-            $actionButton = [];
 
-            if ($isWooInstalled && $currentUserCanInstallPlugins) {
+            if(function_exists('is_plugin_active')) {
+                $isWooActivated = is_plugin_active('woocommerce/woocommerce.php');
+            }
+
+            $actionButton['text'] = 'Revisar Woocommerce';
+            $actionButton['action'] = 'https://wordpress.org/plugins/woocommerce/';
+
+            if (!$isWooInstalled && $currentUserCanInstallPlugins) {
+                $actionButton['text'] = 'Instalar Woocommerce';
+                $actionButton['action'] = esc_html($installLink);
+            }
+
+            if ($isWooInstalled && !$isWooActivated && $currentUserCanActivatePlugins) {
                 $actionButton['text'] = 'Activar Woocommerce';
                 $actionButton['action'] = esc_html($activateLink);
-            } else {
-                if ($currentUserCanInstallPlugins) {
-                    $actionButton['text'] = 'Instalar Woocommerce';
-                    $actionButton['action'] = esc_html($installLink);
-                } else {
-                    $actionButton['text'] = 'Revisar Woocommerce';
-                    $actionButton['action'] = 'https://wordpress.org/plugins/woocommerce/';
-                }
             }
+
             include_once(plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php');
         }
     );
