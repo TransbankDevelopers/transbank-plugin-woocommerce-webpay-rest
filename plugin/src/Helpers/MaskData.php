@@ -37,13 +37,9 @@ class MaskData
      * @return string a string with substrings masked.
      */
     private function maskWithFormat($input){
-        $exploded  = explode('-', $input);
-        $items = count($exploded);
-        for ($item = 1; $item < $items - 1; $item++){
-            $replaceString = str_repeat("x", strlen($exploded[$item]));
-            $exploded[$item] = $replaceString;
-        }
-        return implode("-", $exploded);
+        return preg_replace_callback('/(?<=-).+?(?=-)/', function ($matches) {
+            return str_repeat('x', strlen($matches[0]));
+        }, $input);
     }
 
     /**
