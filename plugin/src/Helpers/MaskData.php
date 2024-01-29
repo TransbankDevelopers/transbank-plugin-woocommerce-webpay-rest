@@ -243,4 +243,38 @@ class MaskData
         }
         return $object;
     }
+
+    /**
+     * Evaluate values of input array and mask this if necessary.
+     *
+     * @param array $array the array to mask.
+     * @return array the array with masked values.
+     */
+    private function maskAssociativeArray($array){
+        foreach($array as $detailKey => $detailValue) {
+            $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
+            $array[$detailKey] = $maskedValue;
+        }
+        return $array;
+    }
+
+    /**
+     * Evaluate each item of an indexed array, and mask this through necessary method.
+     *
+     * @param array $array the array to mask.
+     * @return array the array with masked values.
+     */
+    private function maskIndexedArray($array){
+        foreach($array as $detail) {
+            if(is_object($detail)) {
+                $detail = $this->maskObject($detail);
+            }
+            else {
+                $detail = $this->maskAssociativeArray($array);
+            }
+
+        }
+        return $array;
+    }
+
 }
