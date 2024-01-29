@@ -24,9 +24,11 @@ class MaskData
     ];
 
     protected $isIntegration;
+    protected $log;
 
     public function __construct($environment){
         $this->isIntegration = $environment == Options::ENVIRONMENT_INTEGRATION;
+        $this->log = TbkFactory::createLogger();
     }
 
     /**
@@ -132,6 +134,7 @@ class MaskData
      * @return array copy of input, with fields masked.
      */
     public function maskData($data){
+        try{
             if ($this->isIntegration){
                 return $data;
             }
@@ -154,6 +157,11 @@ class MaskData
                 }
             }
             return $newData;
+        }
+        catch (\Exception $e){
+            $this->log->logError('Error on Mask Data: ' . $e->getMessage());
+            return $data;
+        }
     }
 
     /**
