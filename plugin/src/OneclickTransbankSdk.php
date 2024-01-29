@@ -242,7 +242,7 @@ class OneclickTransbankSdk extends TransbankSdk
 
         if ($inscription->status !== Inscription::STATUS_INITIALIZED) {
             $errorMessage = 'La inscripción no se encuentra en estado inicializada: '.$tbkToken;
-            $this->errorExecution($inscription->order_id, 'finish', 
+            $this->errorExecution($inscription->order_id, 'finish',
                 $params, 'InvalidStatusInscriptionOneclickException', $errorMessage, $errorMessage);
             throw new InvalidStatusInscriptionOneclickException($errorMessage,
                 $tbkToken, $inscription);
