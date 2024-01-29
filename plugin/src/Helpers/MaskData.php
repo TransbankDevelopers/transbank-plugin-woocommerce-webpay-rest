@@ -204,7 +204,7 @@ class MaskData
         if($keyExists){
             return call_user_func([$this, $this->keysToMask[$key]], $value);
         }
-        return false;
+        return $value;
     }
 
 }
