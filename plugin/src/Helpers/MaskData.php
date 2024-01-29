@@ -229,4 +229,18 @@ class MaskData
 
         return $valueType;
     }
+
+    /**
+     * Evaluates object attributes and mask this if necessary
+     *
+     * @param object $object a reference to an object to mask
+     * @return object the object with masked attributes
+     */
+    private function maskObject($object){
+        foreach($object as $detailKey => $detailValue) {
+            $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
+            $object->$detailKey = $maskedValue;
+        }
+        return $object;
+    }
 }
