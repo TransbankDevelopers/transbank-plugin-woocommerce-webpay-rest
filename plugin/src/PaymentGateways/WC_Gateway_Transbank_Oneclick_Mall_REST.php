@@ -339,7 +339,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function save_payment_method_checkbox()
     {
-        echo '<p class="form-row woocommerce-SavedPaymentMethods-saveNew"><strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong></p>';
+        $html = '<p class="form-row woocommerce-SavedPaymentMethods-saveNew"><strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong></p>';
+        echo $html;
     }
 
     /**
