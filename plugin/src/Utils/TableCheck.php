@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Utils;
 
+use Throwable;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
