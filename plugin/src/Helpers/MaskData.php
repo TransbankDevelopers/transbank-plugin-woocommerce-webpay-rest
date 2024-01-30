@@ -107,10 +107,8 @@ class MaskData
     /**
      * Mask a string with buy order format.
      * If buy order starts with 'wc:child:', this will be maintained.
-     * Otherwise, it will keep 6 original chars at start and end.
-     * Returns buy order masked.
      *
-     * @param string $sessionId An string with buy order to mask.
+     * @param string $buyOrder An string with buy order to mask.
      * @return string buy order masked.
      */
     public function maskBuyOrder($buyOrder){
@@ -124,8 +122,6 @@ class MaskData
     /**
      * Mask a string with session id format.
      * If session id starts with 'wc:sessionId:', this will be maintained.
-     * Otherwise, it will keep 6 original chars at start and end.
-     * Returns session id masked.
      *
      * @param string $sessionId An string with session id to mask.
      * @return string session id masked.
@@ -189,7 +185,6 @@ class MaskData
     /**
      * Copy input to a new array.
      * If some element is an object, then it's cloned.
-     * Returns a copy of input array.
      *
      * @param array $array An array to be copied.
      * @return array copy of input array.
@@ -226,7 +221,7 @@ class MaskData
         return $value;
     }
 
-        /**
+    /**
      * Returns type of element to determine how iterate over this
      *
      * @param string $value to evaluate.
