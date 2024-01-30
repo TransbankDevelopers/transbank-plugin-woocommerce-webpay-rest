@@ -95,13 +95,13 @@ class MaskData
      * @return string input masked.
      */
     private function maskWithPattern($input, $pattern){
-        $regexPattern = "/(wc:($pattern:)?\d\w{2})\d\w*(:\d\w{2})/";
-        return preg_replace_callback($regexPattern, function($matches) {
-                $prefix = $matches[1];
-                $suffix = $matches[3];
-                $maskLength = strlen($matches[0]) - strlen($prefix) - strlen($suffix);
-                return $prefix . str_repeat('x', $maskLength) . $suffix;
-            }, $input);
+        $regexPattern = "/(wc:($pattern:)?\w{2})\w+:(\w{2})/";
+        return preg_replace_callback($regexPattern, function($matches) use ($input){
+                    $prefix = $matches[1];
+                    $suffix = $matches[3];
+                    $maskLength = strlen($input) - strlen($prefix) - strlen($suffix) - 1;
+                    return $prefix . str_repeat('x', $maskLength) . $suffix;
+                }, $input);
     }
 
     /**
