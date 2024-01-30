@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\WebpayPlus;
@@ -113,7 +114,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), null);
         }catch (RejectedRefundWebpayException $e) {
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), $e->getRefundResponse());
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
         }
     }
@@ -237,9 +238,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             BlocksHelper::addLegacyNotices($errorMessage, 'error');
             return;
         } catch (CreateTransactionWebpayException $e) {
-            throw new \Exception($e->getMessage());
-        } catch (Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new EcommerceException($e->getMessage(), $e);
+        } catch (Throwable $e) {
+            throw new EcommerceException($e->getMessage(), $e);
         }
     }
 

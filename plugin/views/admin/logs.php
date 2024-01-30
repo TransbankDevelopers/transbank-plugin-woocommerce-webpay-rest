@@ -71,7 +71,8 @@ $folderHasLogs = $resume['length'] > 0;
                         <span class="label">
                             <?php
                                 foreach ($resume['logs'] as $index) {
-                                    echo '<li>'.$index['filename'].'</li>';
+                                    $str = '<li>'.$index['filename'].'</li>';
+                                    echo $str;
                                 }
                             ?>
                         </span>

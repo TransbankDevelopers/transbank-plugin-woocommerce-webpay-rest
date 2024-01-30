@@ -55,11 +55,15 @@ jQuery(function($) {
         post('check_exist_tables', {}, (resp) => {
             showElement("div_tables_status");
             if(!resp.error) {
-                $("#tbl_response_status_text").addClass("label-success").text("OK").show();
+                $("#tbl_response_status_text").addClass("label-success");
+                $("#tbl_response_status_text").text("OK");
                 $("#tbl_response_result_text").text(resp.msg);
+                $("#tbl_response_status_text").show();
                 showElement("div_tables_status_result");
             } else {
-                $("#tbl_response_status_text").addClass("label-danger").text("ERROR").show();
+                $("#tbl_response_status_text").addClass("label-danger");
+                $("#tbl_response_status_text").text("ERROR");
+                $("#tbl_response_status_text").show();
                 $("#tbl_error_message_text").html('<code style="display: block; padding: 10px">' + resp.error + ' Exception: ' + resp.exception +'</code>');
                 showElement("div_tables_error");
             }
@@ -84,9 +88,11 @@ jQuery(function($) {
             }else{
                 $("#tbk_wpoc_commerce_code").removeClass("tbk-hide");
             }
-            Object.keys(statusData).forEach(key => {
+            const statusDataKeys = Object.keys(statusData);
+            statusDataKeys.forEach(key => {
                 let value = statusData[key] ? statusData[key] : '-';
-                $table.find('.status-' + key).html(value);
+                const tableRow = $table.find('.status-' + key);
+                tableRow.html(value);
             });
             $table.find('.status-product').html(resp.product);
             let niceJson = JSON.stringify(resp.raw, null, 2)

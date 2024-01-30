@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
@@ -153,7 +154,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'transbankTransaction' => $e->getTransaction()
             ]);
             throw new EcommerceException($errorMessage, $e);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
             do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException('Anulación a través de Webpay fallida.', $e);
@@ -338,7 +339,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function save_payment_method_checkbox()
     {
-        echo '<p class="form-row woocommerce-SavedPaymentMethods-saveNew"><strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong></p>';
+        $html = '<p class="form-row woocommerce-SavedPaymentMethods-saveNew">
+            <strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong>
+            </p>';
+        echo $html;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Utils;
 
+use Throwable;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
@@ -24,7 +25,7 @@ class TableCheck
                 DatabaseTableInstaller::createTableTransaction();
             }
         }
-        catch(Exception $e) {
+        catch(Throwable $e) {
             $logger->logInfo("Error ejecutando comprobación. Exception "."{$e->getMessage()}");
             $resp = array('ok' => false, 'error' => "Error ejecutando comprobación.", 'exception' => "{$e->getMessage()}");
         }
