@@ -268,7 +268,7 @@ function noticeMissingWoocommerce() {
                 $noticeDescription = "Woocommerce no se encuentra activado.";
             }
 
-            include_once(plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php');
+            include_once plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php';
         }
     );
 }
