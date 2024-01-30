@@ -88,6 +88,23 @@ class MaskData
     }
 
     /**
+     * Mask an input string maintaining a start pattern like wc:`pattern`.
+     *
+     * @param string $input An string to be masked.
+     * @param string $pattern A pattern to maintain, like `child` or `sessionId`.
+     * @return string input masked.
+     */
+    private function maskWithPattern($input, $pattern){
+        $regexPattern = "/(wc:($pattern:)?\d\w{2})\d\w*(:\d\w{2})/";
+        return preg_replace_callback($regexPattern, function($matches) {
+                $prefix = $matches[1];
+                $suffix = $matches[3];
+                $maskLength = strlen($matches[0]) - strlen($prefix) - strlen($suffix);
+                return $prefix . str_repeat('x', $maskLength) . $suffix;
+            }, $input);
+    }
+
+    /**
      * Mask a string with buy order format.
      * If buy order starts with 'wc:child:', this will be maintained.
      * Otherwise, it will keep 6 original chars at start and end.
@@ -97,14 +114,11 @@ class MaskData
      * @return string buy order masked.
      */
     public function maskBuyOrder($buyOrder){
-        if($this->isIntegration){
+        if ($this->isIntegration) {
             return $buyOrder;
         }
-        $parsedBuyOrder = $buyOrder;
-        $charsToKeep = 6;
-        $childOrdersPattern = 'wc:child:';
-        $childPatternToKeep = str_contains($parsedBuyOrder, $childOrdersPattern) ? $childOrdersPattern : null;
-        return $this->mask($parsedBuyOrder, $childPatternToKeep, $charsToKeep);
+        $pattern = 'child';
+        return $this->maskWithPattern($buyOrder, $pattern);
     }
 
     /**
@@ -120,10 +134,8 @@ class MaskData
         if($this->isIntegration){
             return $sessionId;
         }
-        $charsToKeep = 6;
-        $sessionIdPattern = 'wc:sessionId:';
-        $sessionPatternToKeep = str_contains($sessionId, $sessionIdPattern) ? $sessionIdPattern : null;
-        return $this->mask($sessionId, $sessionPatternToKeep, $charsToKeep);
+        $sessionIdPattern = 'sessionId';
+        return $this->maskWithPattern($sessionId, $sessionIdPattern);
     }
 
     /**
