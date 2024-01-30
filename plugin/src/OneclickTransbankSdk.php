@@ -9,6 +9,7 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
 use Transbank\Plugin\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;
@@ -54,6 +55,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
+        $this->dataMasker = new MaskData($this->getEnviroment());
     }
 
     /**
@@ -75,7 +77,10 @@ class OneclickTransbankSdk extends TransbankSdk
 
     protected function afterExecutionTbkApi($orderId, $service, $input, $response)
     {
-        $this->logInfo('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => RESPONSE: '.json_encode($response));
+        $maskedInput = $this->dataMasker->maskData($input);
+        $maskedResponse = $this->dataMasker->maskData($response);
+        $this->logInfo('ORDER_ID: '.$orderId);
+        $this->logInfo('INPUT: '.json_encode($maskedInput).' => RESPONSE: '.json_encode($maskedResponse));
         $this->createApiServiceLogBase($orderId, $service, 'webpay_oneclick', $input, $response);
     }
 
@@ -116,8 +121,14 @@ class OneclickTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'status', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al tratar de obtener el status ( buyOrder: '.$buyOrder.') de la transacción Oneclick en Transbank: '.$e->getMessage();
-            $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusOneclickException', $e->getMessage(), $errorMessage);
+            $maskedBuyOrder = $this->dataMasker->maskBuyOrder($buyOrder);
+            $errorMessage = 'Oneclick: Error al obtener el status ( buyOrder: '.$maskedBuyOrder.') '.$e->getMessage();
+            $this->errorExecutionTbkApi($orderId,
+                                        'status',
+                                        $params,
+                                        'StatusOneclickException',
+                                        $e->getMessage(),
+                                        $errorMessage);
             throw new StatusOneclickException($errorMessage, $buyOrder, $e);
         }
     }
@@ -265,8 +276,9 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function logOneclickInscriptionRetornandoDesdeTbk($method, $params)
     {
+        $maskedParams = $this->dataMasker->maskData($params);
         $this->logInfo('Iniciando validación luego de redirección desde tbk => method: '.$method);
-        $this->logInfo(json_encode($params));
+        $this->logInfo(json_encode($maskedParams));
     }
 
     public function getInscriptionByToken($tbkToken)

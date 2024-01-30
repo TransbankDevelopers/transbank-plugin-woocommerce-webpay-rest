@@ -6,6 +6,7 @@ use \Exception;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
+use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
@@ -38,6 +39,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
         $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
+        $this->dataMasker = new MaskData($this->getEnviroment());
     }
 
     /**
@@ -54,7 +56,10 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     protected function afterExecutionTbkApi($orderId, $service, $input, $response)
     {
-        $this->logInfo('ORDER_ID: '.$orderId.', INPUT: '.json_encode($input).' => RESPONSE: '.json_encode($response));
+        $maskedInput = $this->dataMasker->maskData($input);
+        $maskedResponse = $this->dataMasker->maskData($response);
+        $this->logInfo('ORDER_ID: '.$orderId);
+        $this->logInfo('INPUT: '.json_encode($maskedInput).' => RESPONSE: '.json_encode($maskedResponse));
         $this->createApiServiceLogBase($orderId, $service, 'webpay_plus', $input, $response);
     }
 

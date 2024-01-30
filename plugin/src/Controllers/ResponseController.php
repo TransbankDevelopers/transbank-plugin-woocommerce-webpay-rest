@@ -232,8 +232,10 @@ class ResponseController
             $wooCommerceOrder
         );
 
+        $maskedBuyOrder = $this->webpayplusTransbankSdk->dataMasker->maskBuyOrder($result->buyOrder);
         $this->logger->logInfo(
-            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$result->buyOrder);
+            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$maskedBuyOrder);
+
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
 
