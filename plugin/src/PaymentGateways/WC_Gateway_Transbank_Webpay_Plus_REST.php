@@ -238,9 +238,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             BlocksHelper::addLegacyNotices($errorMessage, 'error');
             return;
         } catch (CreateTransactionWebpayException $e) {
-            throw new \Exception($e->getMessage());
-        } catch (Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new EcommerceException($e->getMessage(), $e);
+        } catch (Throwable $e) {
+            throw new EcommerceException($e->getMessage(), $e);
         }
     }
 
