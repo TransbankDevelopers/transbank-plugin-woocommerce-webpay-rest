@@ -1,9 +1,9 @@
 === Transbank Webpay REST ===
 Contributors: TransbankDevelopers
 Tags: transbank, webpay, oneclick, webpay plus, rest, chile
-Requires at least: 4.0
-Tested up to: 5.8
-Requires PHP: 7.0
+Requires at least: 5.3
+Tested up to: 6.4
+Requires PHP: 7.4
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
 License URI: https://opensource.org/licenses/BSD-3-Clause
@@ -14,6 +14,19 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.7.0 =
+* Se corrige el funcionamiento de los webhooks implementados para desarrollo de terceros.
+* Se ofuscan datos sensibles en el log cuando el entorno es producción.
+* Se implementan mejoras en el manejo de logs.
+* Se agrega compatibilidad con el checkout por bloques.
+* Se agrega compatibilidad con HPOS.
+* Se remueve el servicio para recolectar datos del plugin.
+* Se corrige la consulta de status a través de Oneclick.
+* se registran estados de operaciones en base de datos.
+* Se agregan columnas de error en la vista de transacciones.
+* Se agregan mejoras en seguridad.
+* Corrección de bugs menores.
+
 = 1.6.8 =
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
@@ -131,6 +144,19 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.7.0 =
+* Se corrige el funcionamiento de los webhooks implementados para desarrollo de terceros.
+* Se ofuscan datos sensibles en el log cuando el entorno es producción.
+* Se implementan mejoras en el manejo de logs.
+* Se agrega compatibilidad con el checkout por bloques.
+* Se agrega compatibilidad con HPOS.
+* Se remueve el servicio para recolectar datos del plugin.
+* Se corrige la consulta de status a través de Oneclick.
+* se registran estados de operaciones en base de datos.
+* Se agregan columnas de error en la vista de transacciones.
+* Se agregan mejoras en seguridad.
+* Corrección de bugs menores.
+
 = 1.6.8 =
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
