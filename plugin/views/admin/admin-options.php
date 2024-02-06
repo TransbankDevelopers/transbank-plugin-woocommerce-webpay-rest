@@ -51,7 +51,6 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 
     <h3>¿Que hago ahora?</h3>
     <p>Verifica que todo funcione correctamente. Realiza algunas compras con tarjetas de crédito y de débito, además de probar con transacciones aprobadas y rechazadas.
-        <br>Si todo funciona correctamente, solicita tu llave secreta (Api Key Secret). A continuación te explicamos como.
     </p>
 
     <h3>Documentación</h3>
