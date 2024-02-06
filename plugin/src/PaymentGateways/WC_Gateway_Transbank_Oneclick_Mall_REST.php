@@ -121,7 +121,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $refundResponse = $resp['refundResponse'];
             $transaction = $resp['transaction'];
             $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
-            $this->addRefundOrderNote($refundResponse, $order, $amount, $jsonResponse);
+            $this->addRefundOrderNote($refundResponse, $order, $amount);
             do_action('transbank_oneclick_refund_finished', $order, $transaction, $jsonResponse);
             do_action('wc_transbank_oneclick_refund_approved', [
                 'order' => $order->get_data(),

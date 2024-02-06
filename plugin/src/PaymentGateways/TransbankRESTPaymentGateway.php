@@ -12,7 +12,7 @@ trait TransbankRESTPaymentGateway
      * @param $amount
      * @param $jsonResponse
      */
-    public function addRefundOrderNote($response, WC_Order $order, $amount, $jsonResponse)
+    public function addRefundOrderNote($response, WC_Order $order, $amount)
     {
         $type = $response->getType() === 'REVERSED' ? 'Reversa' : 'Anulación';
         $amountFormatted = '$'.number_format($amount, 0, ',', '.');
@@ -24,10 +24,7 @@ trait TransbankRESTPaymentGateway
           <strong>Tipo:</strong> {$type}<br />
           <strong>Monto devuelto:</strong> {$amountFormatted}<br />
           <strong>Balance:</strong> {$balanceFormatted}<br /><br /><br />
-
-          <strong>Respuesta de anulación:</strong> <br />
-          <pre style='overflow-x: scroll'>".$jsonResponse.'</pre>
-        </div>';
+        </div>";
 
         $order->add_order_note($note);
     }
