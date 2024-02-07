@@ -88,5 +88,11 @@ class TransbankSdk
         TransbankExecutionErrorLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($data), $error, $originalError, $customError);
     }
 
-}
+    protected function generateBuyOrder($prefix, $orderId, $maxLength = 25){
+        $randomComponentLength = $maxLength - (strlen($prefix) + strlen((string)$orderId));
+        $randomComponent = openssl_random_pseudo_bytes(floor($randomComponentLength / 2));
+        $randToHexValue = bin2hex($randomComponent);
+        return $prefix . $randToHexValue . ":" . $orderId;
+    }
 
+}

@@ -139,7 +139,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     {
         global $wpdb;
         $randomNumber = uniqid();
-        $buyOrder = 'wc:'.$randomNumber.':'.$orderId;
+        $buyOrder = $this->generateBuyOrder('wc:', $orderId);
         $sessionId = 'wc:sessionId:'.$randomNumber.':'.$orderId;
         $params = [
             'sessionId'  => $sessionId,
