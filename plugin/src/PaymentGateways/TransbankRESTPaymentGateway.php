@@ -34,7 +34,7 @@ trait TransbankRESTPaymentGateway
             $formattedDate = $utcDate->format('d-m-Y / H:i:s');
 
             $note = "{$commonFields}
-                <strong>Balance:</strong> {$balanceFormatted}
+                <strong>Saldo:</strong> {$balanceFormatted}
                 <strong>Fecha:</strong> {$formattedDate}
                 <strong>Código autorización:</strong> {$response->getAuthorizationCode()}
                 <strong>Código de respuesta:</strong> {$response->getResponseCode()}
