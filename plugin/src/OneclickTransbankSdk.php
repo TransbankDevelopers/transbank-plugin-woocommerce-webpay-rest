@@ -370,9 +370,8 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function authorize($orderId, $amount, $username, $token) {
         global $wpdb;
-        $randomNumber = uniqid();
-        $parentBuyOrder = 'wc:'.$randomNumber.':'.$orderId;
-        $childBuyOrder = 'wc:child:'.$randomNumber.':'.$orderId;
+        $parentBuyOrder = $this->generateBuyOrder('wc:', $orderId);
+        $childBuyOrder = $this->generateBuyOrder('wc:child:', $orderId);
         $params = [
             'orderId'           => $orderId,
             'buyOrder'          => $parentBuyOrder,

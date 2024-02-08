@@ -103,7 +103,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             $refundResponse = $resp['refundResponse'];
             $transaction = $resp['transaction'];
             $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
-            $this->addRefundOrderNote($refundResponse, $order, $amount, $jsonResponse);
+            $this->addRefundOrderNote($refundResponse, $order, $amount);
             do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $jsonResponse);
             return true;
         } catch (GetTransactionWebpayException $e) {

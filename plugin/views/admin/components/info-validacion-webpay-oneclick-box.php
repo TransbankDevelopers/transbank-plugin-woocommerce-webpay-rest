@@ -2,8 +2,8 @@
     <h3>¿Quieres operar en producción?</h3>
     Para operar en el ambiente productivo, con dinero real, debes tener tu <strong>código de comercio Mall</strong>, <strong>código de comercio Tienda</strong> y tu <strong>Api Key (llave secreta)</strong>.
 
-    <h4>Código de comercio</h4>
-    Si no lo tienes, puedes solicitarlo en <a target="_blank" href="https://contrata-oneclick.continuumhq.dev/Oneclick">usando este formulario</a>.
+    <h4>Código de comercio Mall y código de comercio Tienda</h4>
+    Los obtendrás al contratar el producto Oneclick.
 
     <h4>Tu Api Key: Proceso de validación</h4>
     Si ya tienes tus códigos de comercio, lo único que te faltaría es tu Api Key. Para obtenerla, debes completar el siguiente formulario:
