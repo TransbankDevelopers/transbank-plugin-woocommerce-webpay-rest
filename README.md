@@ -26,8 +26,8 @@ Para poder operar con dinero real (ambiente de **producción**), debes completar
 A continuación, encontrarás información necesaria para el desarrollo de este plugin. 
 
 ## Requisitos 
-* PHP 7.0 o superior
-* Woocommerce 3.4 o superior
+* PHP 7.4 o superior
+* Woocommerce 7.0 o superior
 
 ## Dependencias
 
