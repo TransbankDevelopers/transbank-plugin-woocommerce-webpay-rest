@@ -195,44 +195,41 @@ class ResponseController
      * @param array    $result
      * @param $webpayTransaction
      */
-    protected function completeWooCommerceOrder(WC_Order $wooCommerceOrder, TransactionCommitResponse $result, $webpayTransaction)
+    protected function completeWooCommerceOrder(
+        WC_Order $wooCommerceOrder,
+        TransactionCommitResponse $commitResponse,
+        $webpayTransaction
+    )
     {
-        list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
-        $cardNumber = $result->cardDetail['card_number'];
+        $transactionResponse = $commitResponse->getResponseCode() == 0 ? 'Aprobada' : 'Rechazada';
+        $cardNumber = $commitResponse->getCardNumber();
+        $date_accepted = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
+        $date_accepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
         $date = $date_accepted->format('d-m-Y / H:i:s');
-        $hPosHelper = new HposHelper();
 
+        $hPosHelper = new HposHelper();
         $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', $transactionResponse);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'buyOrder', $result->buyOrder);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'authorizationCode', $authorizationCode);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'buyOrder', $commitResponse->buyOrder);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'authorizationCode', $commitResponse->getAuthorizationCode());
         $hPosHelper->updateMeta($wooCommerceOrder, 'cardNumber', $cardNumber);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'paymentCodeResult', $paymentCodeResult);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'amount', $amount);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsNumber', $sharesNumber ? $sharesNumber : '0');
-        $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsAmount', $sharesAmount ? $sharesAmount : '0');
+        $hPosHelper->updateMeta($wooCommerceOrder, 'paymentCodeResult', $commitResponse->getPaymentTypeCode());
+        $hPosHelper->updateMeta($wooCommerceOrder, 'amount', $commitResponse->getAmount());
+        $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsNumber', $commitResponse->getInstallmentsNumber());
+        $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsAmount', $commitResponse->getInstallmentsAmount());
         $hPosHelper->updateMeta($wooCommerceOrder, 'transactionDate', $date);
         $hPosHelper->updateMeta($wooCommerceOrder, 'webpay_transaction_id', $webpayTransaction->id);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', json_encode($result));
+        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', json_encode($commitResponse));
 
         $message = 'Webpay Plus: Pago exitoso';
 
         $this->addOrderDetailsOnNotes(
-            $amount,
-            $result,
-            $sharesAmount,
+            $wooCommerceOrder,
+            $commitResponse,
             $message,
-            $transactionResponse,
-            $authorizationCode,
-            $cardNumber,
-            $sharesNumber,
-            $paymentType,
-            $paymentCodeResult,
-            $webpayTransaction->token,
-            $date,
-            $wooCommerceOrder
+            $webpayTransaction->token
         );
 
-        $maskedBuyOrder = $this->webpayplusTransbankSdk->dataMasker->maskBuyOrder($result->buyOrder);
+        $maskedBuyOrder = $this->webpayplusTransbankSdk->dataMasker->maskBuyOrder($commitResponse->getBuyOrder());
         $this->logger->logInfo(
             'C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$maskedBuyOrder);
 
@@ -244,41 +241,33 @@ class ResponseController
      * @param array    $result
      * @param $webpayTransaction
      */
-    protected function setWooCommerceOrderAsFailed(WC_Order $wooCommerceOrder, $webpayTransaction, $result, $token)
+    protected function setWooCommerceOrderAsFailed(
+        WC_Order $wooCommerceOrder, $webpayTransaction,
+        TransactionCommitResponse $commitResponse,
+        string $token
+    )
     {
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');
-        if ($result !== null) {
+        if ($commitResponse !== null) {
             $message = 'Webpay Plus: Pago rechazado';
-            list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
-            $cardNumber = isset($result->cardDetail['card_number']) ? $result->cardDetail['card_number'] : '-';
 
-            $date = $date_accepted->format('d-m-Y / H:i:s');
             $this->addOrderDetailsOnNotes(
-                $amount,
-                $result,
-                $sharesAmount,
+                $wooCommerceOrder,
+                $commitResponse,
                 $message,
-                $transactionResponse,
-                $authorizationCode,
-                $cardNumber,
-                $sharesNumber,
-                $paymentType,
-                $paymentCodeResult,
-                $webpayTransaction->token,
-                $date,
-                $wooCommerceOrder
+                $token
             );
 
             $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$token);
-            $this->logger->logError(json_encode($result));
+            $this->logger->logError(json_encode($commitResponse));
         }
 
         Transaction::update(
             $webpayTransaction->id,
             [
                 'status'             => Transaction::STATUS_FAILED,
-                'transbank_response' => json_encode($result),
+                'transbank_response' => json_encode($commitResponse),
             ]
         );
     }
@@ -341,39 +330,28 @@ class ResponseController
      * @param WC_Order $wooCommerceOrder
      */
     protected function addOrderDetailsOnNotes(
-        $amount,
-        $result,
-        $sharesAmount,
-        string $message,
-        $transactionResponse,
-        $authorizationCode,
-        $cardNumber,
-        $sharesNumber,
-        $paymentType,
-        $paymentCodeResult,
-        $token,
-        $date,
-        WC_Order $wooCommerceOrder
+        WC_Order $wooCommerceOrder,
+        TransactionCommitResponse $commitResponse,
+        string $titleMessage,
+        string $tbkToken
     ) {
-        $amountFormatted = number_format($amount, 0, ',', '.');
-        $responseCode = isset($result->responseCode) ? $result->responseCode : '-';
-        $sharesAmount = $sharesAmount ? $sharesAmount : '-';
+        $amountFormatted = number_format($commitResponse->getAmount(), 0, ',', '.');
         $transactionDetails = "
             <div class='transbank_response_note'>
-                <p><h3>{$message}</h3></p>
+                <p><h3>{$titleMessage}</h3></p>
 
-                <strong>Estado: </strong>{$transactionResponse} <br />
-                <strong>Orden de compra: </strong>{$result->buyOrder} <br />
-                <strong>Código de autorización: </strong>{$authorizationCode} <br />
-                <strong>Últimos dígitos tarjeta: </strong>{$cardNumber} <br />
+                <strong>Estado: </strong>{$commitResponse->getStatus()} <br />
+                <strong>Orden de compra: </strong>{$commitResponse->getBuyOrder()} <br />
+                <strong>Código de autorización: </strong>{$commitResponse->getAuthorizationCode()} <br />
+                <strong>Últimos dígitos tarjeta: </strong>{$commitResponse->getCardNumber()} <br />
                 <strong>Monto: </strong>$ {$amountFormatted} <br />
-                <strong>Código de respuesta: </strong>{$responseCode} <br />
-                <strong>Tipo de pago: </strong>{$paymentType} <br />
-                <strong>Tipo de cuota: </strong>{$paymentCodeResult} <br />
-                <strong>Número de cuotas: </strong>{$sharesNumber} <br />
-                <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
-                <strong>Token:</strong> {$token} <br />
-                <strong>Fecha:</strong> {$date} <br />
+                <strong>Código de respuesta: </strong>{$commitResponse->getResponseCode()} <br />
+                <strong>Tipo de pago: </strong>{$commitResponse->getPaymentTypeCode()} <br />
+                <strong>Tipo de cuota: </strong>{$commitResponse->getPaymentTypeCode()} <br />
+                <strong>Número de cuotas: </strong>{$commitResponse->getInstallmentsNumber()} <br />
+                <strong>Monto de cada cuota: </strong>{$commitResponse->getInstallmentsAmount()} <br />
+                <strong>Token:</strong> {$tbkToken} <br />
+                <strong>Fecha:</strong> {$commitResponse->getTransactionDate()} <br />
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
