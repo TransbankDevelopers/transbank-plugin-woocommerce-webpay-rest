@@ -17,6 +17,11 @@ class TbkResponseUtil {
 
     public static function getAccountingDate(string $accountingDate) {
         $date = DateTime::createFromFormat('md', $accountingDate);
+
+        if(!$date) {
+            return $accountingDate;
+        }
+
         return $date->format('m-d');
     }
 }
