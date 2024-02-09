@@ -78,7 +78,17 @@ class TbkConstants
         "S2" => "2 cuotas sin interés",
         "NC" => "N cuotas sin interés"
     ];
-    
+
+    const STATUS_DESCRIPTION =  [
+        'INITIALIZED' => 'Inicializada',
+        'AUTHORIZED' => 'Autorizada',
+        'REVERSED' => 'Reversada',
+        'FAILED' => 'Fallida',
+        'NULLIFIED' => 'Anulada',
+        'PARTIALLY_NULLIFIED' => 'Parcialmente anulada',
+        'CAPTURED' => 'Capturada',
+    ];
+
     const ECOMMERCE_WOOCOMMERCE = 'woocommerce';
 
     const REPO_WOOCOMMERCE = 'TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest';
