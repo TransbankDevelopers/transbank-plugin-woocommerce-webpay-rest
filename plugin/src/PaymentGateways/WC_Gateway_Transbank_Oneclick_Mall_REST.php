@@ -518,7 +518,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             if (wc()->cart) {
                 wc()->cart->empty_cart();
             }
-            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Transacción Aprobada');
+            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Pago exitoso');
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
             return [
                 'result'   => 'success',
@@ -533,11 +533,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->add_order_note('Transacción con problemas de autorización');
         } catch (RejectedAuthorizeOneclickException $e) {
             $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
+            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
             $order->add_order_note('Transacción rechazada');
         } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
             $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
+            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
             $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
         }
 

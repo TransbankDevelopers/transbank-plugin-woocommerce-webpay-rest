@@ -214,7 +214,7 @@ class ResponseController
         $hPosHelper->updateMeta($wooCommerceOrder, 'webpay_transaction_id', $webpayTransaction->id);
         $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', json_encode($result));
 
-        $message = 'Pago exitoso con Webpay Plus';
+        $message = 'Webpay Plus: Pago exitoso';
 
         $this->addOrderDetailsOnNotes(
             $amount,
@@ -249,7 +249,7 @@ class ResponseController
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');
         if ($result !== null) {
-            $message = 'Pago rechazado';
+            $message = 'Webpay Plus: Pago rechazado';
             list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType) = $this->getTransactionDetails($result);
             $cardNumber = isset($result->cardDetail['card_number']) ? $result->cardDetail['card_number'] : '-';
 
