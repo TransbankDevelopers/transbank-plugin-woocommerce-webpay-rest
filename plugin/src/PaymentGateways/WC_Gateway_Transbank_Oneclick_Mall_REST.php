@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Exception;
+use TbkResponseUtil;
 use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
@@ -422,22 +423,26 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $firstDetail = $response->getDetails()[0];
         $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
         $sharesAmount = $firstDetail->getInstallmentsAmount() ?? '-';
+        $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
+        $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
+        $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
+
         $transactionDetails = "
             <div class='transbank_response_note'>
                 <p><h3>{$message}</h3></p>
 
-                <strong>Estado: </strong>{$firstDetail->getStatus()} <br />
+                <strong>Estado: </strong>{$status} <br />
                 <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
                 <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
                 <strong>Monto: </strong>$ {$amountFormatted} <br />
                 <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
-                <strong>Tipo de pago: </strong>{$firstDetail->getPaymentTypeCode()} <br />
+                <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
                 <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
                 <strong>Fecha:</strong> {$response->getTransactionDate()} <br />
-                <strong>Fecha contable:</strong> {$response->getAccountingDate()} <br />
+                <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
