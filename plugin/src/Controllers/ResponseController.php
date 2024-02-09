@@ -340,6 +340,8 @@ class ResponseController
         $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($commitResponse->getPaymentTypeCode());
+        $formattedAccountingDate = TbkResponseUtil::getAccountingDate($commitResponse->getAccountingDate());
+
         $transactionDate = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
         $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
         $formattedDate = $transactionDate->format('d-m-Y / H:i:s');
@@ -359,6 +361,7 @@ class ResponseController
                 <strong>Número de cuotas: </strong>{$commitResponse->getInstallmentsNumber()} <br />
                 <strong>Monto de cada cuota: </strong>{$commitResponse->getInstallmentsAmount()} <br />
                 <strong>Fecha:</strong> {$formattedDate} <br />
+                <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
                 <strong>Token:</strong> {$tbkToken} <br />
             </div>
         ";
