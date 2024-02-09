@@ -58,15 +58,15 @@ class TbkConstants
         "VP" => "Venta Prepago"
     ];
 
-    const PAYMENT_TYPE_CREDITO = "Crédito";
+    const PAYMENT_TYPE_CREDIT = "Crédito";
 
     const PAYMENT_TYPE = [
         "VD" => "Débito",
-        "VN" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "VC" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "SI" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "S2" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "NC" => TbkConstants::PAYMENT_TYPE_CREDITO,
+        "VN" => self::PAYMENT_TYPE_CREDIT,
+        "VC" => self::PAYMENT_TYPE_CREDIT,
+        "SI" => self::PAYMENT_TYPE_CREDIT,
+        "S2" => self::PAYMENT_TYPE_CREDIT,
+        "NC" => self::PAYMENT_TYPE_CREDIT,
         "VP" => "Prepago"
     ];
 
