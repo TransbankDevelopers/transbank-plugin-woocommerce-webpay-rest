@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use TbkResponseUtil;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
@@ -201,18 +202,18 @@ class ResponseController
         $webpayTransaction
     )
     {
-        $transactionResponse = $commitResponse->getResponseCode() == 0 ? 'Aprobada' : 'Rechazada';
-        $cardNumber = $commitResponse->getCardNumber();
+        $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
+        $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $date_accepted = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
         $date_accepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
         $date = $date_accepted->format('d-m-Y / H:i:s');
 
         $hPosHelper = new HposHelper();
-        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionResponse', $transactionResponse);
+        $hPosHelper->updateMeta($wooCommerceOrder, 'transactionStatus', $status);
         $hPosHelper->updateMeta($wooCommerceOrder, 'buyOrder', $commitResponse->buyOrder);
         $hPosHelper->updateMeta($wooCommerceOrder, 'authorizationCode', $commitResponse->getAuthorizationCode());
-        $hPosHelper->updateMeta($wooCommerceOrder, 'cardNumber', $cardNumber);
-        $hPosHelper->updateMeta($wooCommerceOrder, 'paymentCodeResult', $commitResponse->getPaymentTypeCode());
+        $hPosHelper->updateMeta($wooCommerceOrder, 'cardNumber', $commitResponse->getCardNumber());
+        $hPosHelper->updateMeta($wooCommerceOrder, 'paymentType', $paymentType);
         $hPosHelper->updateMeta($wooCommerceOrder, 'amount', $commitResponse->getAmount());
         $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsNumber', $commitResponse->getInstallmentsNumber());
         $hPosHelper->updateMeta($wooCommerceOrder, 'installmentsAmount', $commitResponse->getInstallmentsAmount());
@@ -336,21 +337,25 @@ class ResponseController
         string $tbkToken
     ) {
         $amountFormatted = number_format($commitResponse->getAmount(), 0, ',', '.');
+        $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
+        $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
+        $installmentType = TbkResponseUtil::getInstallmentType($commitResponse->getPaymentTypeCode());
         $transactionDate = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
         $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
         $formattedDate = $transactionDate->format('d-m-Y / H:i:s');
+
         $transactionDetails = "
             <div class='transbank_response_note'>
                 <p><h3>{$titleMessage}</h3></p>
 
-                <strong>Estado: </strong>{$commitResponse->getStatus()} <br />
+                <strong>Estado: </strong>{$status} <br />
                 <strong>Orden de compra: </strong>{$commitResponse->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$commitResponse->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$commitResponse->getCardNumber()} <br />
                 <strong>Monto: </strong>$ {$amountFormatted} <br />
                 <strong>Código de respuesta: </strong>{$commitResponse->getResponseCode()} <br />
-                <strong>Tipo de pago: </strong>{$commitResponse->getPaymentTypeCode()} <br />
-                <strong>Tipo de cuota: </strong>{$commitResponse->getPaymentTypeCode()} <br />
+                <strong>Tipo de pago: </strong>{$paymentType} <br />
+                <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$commitResponse->getInstallmentsNumber()} <br />
                 <strong>Monto de cada cuota: </strong>{$commitResponse->getInstallmentsAmount()} <br />
                 <strong>Fecha:</strong> {$formattedDate} <br />
