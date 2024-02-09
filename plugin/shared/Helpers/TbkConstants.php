@@ -60,6 +60,7 @@ class TbkConstants
 
     const PAYMENT_TYPE_CREDIT = "Crédito";
     const PAYMENT_TYPE_DEBIT = "Débito";
+    const PAYMENT_TYPE_PREPAID = "Prepago";
 
     const PAYMENT_TYPE = [
         "VD" => self::PAYMENT_TYPE_DEBIT,
@@ -68,7 +69,7 @@ class TbkConstants
         "SI" => self::PAYMENT_TYPE_CREDIT,
         "S2" => self::PAYMENT_TYPE_CREDIT,
         "NC" => self::PAYMENT_TYPE_CREDIT,
-        "VP" => "Prepago"
+        "VP" => self::PAYMENT_TYPE_PREPAID
     ];
 
     const INSTALLMENT_TYPE = [
