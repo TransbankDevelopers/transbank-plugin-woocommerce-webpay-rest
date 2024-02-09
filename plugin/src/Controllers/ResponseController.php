@@ -336,6 +336,9 @@ class ResponseController
         string $tbkToken
     ) {
         $amountFormatted = number_format($commitResponse->getAmount(), 0, ',', '.');
+        $transactionDate = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
+        $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+        $formattedDate = $transactionDate->format('d-m-Y / H:i:s');
         $transactionDetails = "
             <div class='transbank_response_note'>
                 <p><h3>{$titleMessage}</h3></p>
@@ -350,8 +353,8 @@ class ResponseController
                 <strong>Tipo de cuota: </strong>{$commitResponse->getPaymentTypeCode()} <br />
                 <strong>Número de cuotas: </strong>{$commitResponse->getInstallmentsNumber()} <br />
                 <strong>Monto de cada cuota: </strong>{$commitResponse->getInstallmentsAmount()} <br />
+                <strong>Fecha:</strong> {$formattedDate} <br />
                 <strong>Token:</strong> {$tbkToken} <br />
-                <strong>Fecha:</strong> {$commitResponse->getTransactionDate()} <br />
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
