@@ -374,7 +374,6 @@ class ResponseController
                 <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
                 <strong>Token:</strong> {$webpayTransaction->token} <br />
                 <strong>Fecha:</strong> {$date} <br />
-                <strong>ID interno: </strong>{$webpayTransaction->id} <br />
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
