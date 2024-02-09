@@ -427,8 +427,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <p><h3>{$message}</h3></p>
 
                 <strong>Estado: </strong>{$firstDetail->getStatus()} <br />
-                <strong>Orden de compra principal: </strong>{$response->getBuyOrder()} <br />
-                <strong>Orden de compra: </strong>{$firstDetail->getBuyOrder()} <br />
+                <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
+                <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
                 <strong>Monto: </strong>$ {$amountFormatted} <br />
