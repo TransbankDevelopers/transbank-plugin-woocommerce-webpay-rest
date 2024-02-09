@@ -419,12 +419,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
-        /** @var Transbank\Webpay\Oneclick\Responses\TransactionDetail $firstDetail */
         $firstDetail = $response->getDetails()[0];
         $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
         $sharesAmount = $firstDetail->getInstallmentsAmount() ?? '-';
         $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
+        $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
 
         $transactionDetails = "
@@ -439,6 +439,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Monto: </strong>$ {$amountFormatted} <br />
                 <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
+                <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
                 <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
                 <strong>Fecha:</strong> {$response->getTransactionDate()} <br />
