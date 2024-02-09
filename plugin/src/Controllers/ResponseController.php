@@ -227,7 +227,7 @@ class ResponseController
             $sharesNumber,
             $paymentType,
             $paymentCodeResult,
-            $webpayTransaction,
+            $webpayTransaction->token,
             $date,
             $wooCommerceOrder
         );
@@ -265,7 +265,7 @@ class ResponseController
                 $sharesNumber,
                 $paymentType,
                 $paymentCodeResult,
-                $webpayTransaction,
+                $webpayTransaction->token,
                 $date,
                 $wooCommerceOrder
             );
@@ -351,7 +351,7 @@ class ResponseController
         $sharesNumber,
         $paymentType,
         $paymentCodeResult,
-        $webpayTransaction,
+        $token,
         $date,
         WC_Order $wooCommerceOrder
     ) {
@@ -372,7 +372,7 @@ class ResponseController
                 <strong>Tipo de cuota: </strong>{$paymentCodeResult} <br />
                 <strong>Número de cuotas: </strong>{$sharesNumber} <br />
                 <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
-                <strong>Token:</strong> {$webpayTransaction->token} <br />
+                <strong>Token:</strong> {$token} <br />
                 <strong>Fecha:</strong> {$date} <br />
             </div>
         ";
