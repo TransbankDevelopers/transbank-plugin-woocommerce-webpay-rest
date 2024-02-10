@@ -16,6 +16,7 @@ use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WC_Order;
 
 class ResponseController

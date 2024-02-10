@@ -19,6 +19,7 @@ use Transbank\Plugin\Exceptions\Oneclick\RejectedRefundOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\RefundOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\NotFoundTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Order;
 use WC_Payment_Gateway_CC;
