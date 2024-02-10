@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use DateTime;
 use Transbank\Plugin\Helpers\TbkConstants;
 
 /**
