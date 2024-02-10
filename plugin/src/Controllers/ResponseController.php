@@ -45,26 +45,6 @@ class ResponseController
     }
 
     /**
-     * @param $paymentTypeCode
-     *
-     * @return string
-     */
-    public static function getHumanReadableInstallmentsType($paymentTypeCode): string
-    {
-        $installmentTypes = [
-            'VD' => 'Venta Débito',
-            'VN' => 'Venta Normal',
-            'VC' => 'Venta en cuotas',
-            'SI' => '3 cuotas sin interés',
-            'S2' => '2 cuotas sin interés',
-            'NC' => 'N cuotas sin interés',
-        ];
-        $paymentCodeResult = isset($installmentTypes[$paymentTypeCode]) ? $installmentTypes[$paymentTypeCode] : 'Sin cuotas';
-
-        return $paymentCodeResult;
-    }
-
-    /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException
      */
@@ -299,7 +279,7 @@ class ResponseController
         } else {
             $transactionResponse = 'Transacción Rechazada';
         }
-        $paymentCodeResult = self::getHumanReadableInstallmentsType($paymentTypeCode);
+        $paymentCodeResult = TbkResponseUtil::getInstallmentType($paymentTypeCode);
 
         $paymentType = TbkResponseUtil::getPaymentType($paymentTypeCode);
 
