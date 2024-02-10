@@ -5,7 +5,6 @@ namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use TbkResponseUtil;
 use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
