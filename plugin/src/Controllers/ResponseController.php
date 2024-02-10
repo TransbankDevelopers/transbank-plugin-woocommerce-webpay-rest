@@ -322,19 +322,11 @@ class ResponseController
     }
 
     /**
-     * @param $amount
-     * @param array $result
-     * @param $sharesAmount
-     * @param string $message
-     * @param $transactionResponse
-     * @param $authorizationCode
-     * @param $cardNumber
-     * @param $sharesNumber
-     * @param $paymentType
-     * @param $paymentCodeResult
-     * @param $webpayTransaction
-     * @param $date
      * @param WC_Order $wooCommerceOrder
+     * @param TransactionCommitResponse $commitResponse
+     * @param string $titleMessage
+     * @param string $tbkToken
+     * @return void
      */
     protected function addOrderDetailsOnNotes(
         WC_Order $wooCommerceOrder,
