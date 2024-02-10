@@ -301,7 +301,7 @@ class ResponseController
         }
         $paymentCodeResult = self::getHumanReadableInstallmentsType($paymentTypeCode);
 
-        $paymentType = $this->getHumanReadablePaymentType($paymentTypeCode);
+        $paymentType = TbkResponseUtil::getPaymentType($paymentTypeCode);
 
         $transactionDate = isset($result->transactionDate) ? $result->transactionDate : null;
         $date_accepted = new DateTime($transactionDate, new DateTimeZone('UTC'));
@@ -364,27 +364,6 @@ class ResponseController
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
-    }
-
-    /**
-     * @param $paymentTypeCode
-     *
-     * @return string|void
-     */
-    public static function getHumanReadablePaymentType($paymentTypeCode)
-    {
-        if ($paymentTypeCode != null) {
-            $paymentType = __('Crédito', 'transbank_wc_plugin');
-        } else {
-            $paymentType = '';
-        }
-        if ($paymentTypeCode == 'VD') {
-            $paymentType = __('Débito', 'transbank_wc_plugin');
-        } elseif ($paymentTypeCode == 'VP') {
-            $paymentType = __('Prepago', 'transbank_wc_plugin');
-        }
-
-        return $paymentType;
     }
 
     /**
