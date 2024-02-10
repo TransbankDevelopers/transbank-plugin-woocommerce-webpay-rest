@@ -246,7 +246,7 @@ class ResponseController
                 $webpayTransaction->token
             );
 
-            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$token);
+            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$webpayTransaction->token);
             $this->logger->logError(json_encode($commitResponse));
         }
 
