@@ -128,12 +128,13 @@ class ResponseController
             $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_DOUBLE_TOKEN);
             wp_redirect($urlWithErrorCode);
         } catch (InvalidStatusWebpayException $e) {
-            $transaction = $e->getTransaction();
+            $errorMessage = 'No se puede confirmar la transacción, estado de transacción invalido.';
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
-            $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, null, $transaction->token);
+            $wooCommerceOrder->add_order_note($errorMessage);
+
             do_action('wc_transbank_webpay_plus_transaction_failed', [
                 'order' => $wooCommerceOrder->get_data(),
-                'transbankTransaction' => $transaction
+                'transbankTransaction' => $e->getTransaction()
             ]);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (RejectedCommitWebpayException $e) {
@@ -147,13 +148,15 @@ class ResponseController
             ]);
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (CommitWebpayException $e) {
-            $transaction = $e->getTransaction();
+            $errorMessage = 'Error al confirmar la transacción de Transbank';
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
-            $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, null, $transaction->token);
+            $wooCommerceOrder->add_order_note($errorMessage);
+
             do_action('wc_transbank_webpay_plus_transaction_failed', [
                 'order' => $wooCommerceOrder->get_data(),
-                'transbankTransaction' => $transaction
+                'transbankTransaction' => $e->getTransaction()
             ]);
+
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (\Exception $e) {
             $this->throwError($e->getMessage());
