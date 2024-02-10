@@ -2,6 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
+use DateTime;
+use DateTimeZone;
 use Exception;
 use TbkResponseUtil;
 use Throwable;
@@ -428,6 +430,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
 
+        $transactionDate = new DateTime($response->getTransactionDate(), new DateTimeZone('UTC'));
+        $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+        $formattedDate = $transactionDate->format('d-m-Y H:i:s P');
+
         $transactionDetails = "
             <div class='transbank_response_note'>
                 <p><h3>{$message}</h3></p>
@@ -443,7 +449,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
                 <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
-                <strong>Fecha:</strong> {$response->getTransactionDate()} <br />
+                <strong>Fecha:</strong> {$formattedDate} <br />
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>
         ";

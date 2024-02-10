@@ -213,7 +213,7 @@ class ResponseController
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $date_accepted = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
         $date_accepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
-        $date = $date_accepted->format('d-m-Y / H:i:s');
+        $date = $date_accepted->format('d-m-Y H:i:s P');
 
         $hPosHelper = new HposHelper();
         $hPosHelper->updateMeta($wooCommerceOrder, 'transactionStatus', $status);
@@ -351,7 +351,7 @@ class ResponseController
 
         $transactionDate = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
         $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
-        $formattedDate = $transactionDate->format('d-m-Y / H:i:s');
+        $formattedDate = $transactionDate->format('d-m-Y H:i:s P');
 
         $transactionDetails = "
             <div class='transbank_response_note'>
