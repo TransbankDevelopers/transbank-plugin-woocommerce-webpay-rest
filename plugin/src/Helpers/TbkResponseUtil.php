@@ -1,5 +1,7 @@
 <?php
 
+namespace Transbank\WooCommerce\WebpayRest\Helpers;
+
 use Transbank\Plugin\Helpers\TbkConstants;
 
 /**
