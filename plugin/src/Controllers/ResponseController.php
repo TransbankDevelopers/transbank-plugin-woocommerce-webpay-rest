@@ -139,13 +139,16 @@ class ResponseController
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (RejectedCommitWebpayException $e) {
             $transaction = $e->getTransaction();
+            $commitResponse = $e->getCommitResponse();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
-            $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, $e->getCommitResponse(), $transaction->token);
+            $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, $commitResponse);
+
             do_action('wc_transbank_webpay_plus_transaction_failed', [
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $transaction,
-                'transbankResponse' => $e->getCommitResponse()
+                'transbankResponse' => $commitResponse
             ]);
+
             return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
         } catch (CommitWebpayException $e) {
             $errorMessage = 'Error al confirmar la transacción de Transbank';
@@ -247,9 +250,9 @@ class ResponseController
      * @param $webpayTransaction
      */
     protected function setWooCommerceOrderAsFailed(
-        WC_Order $wooCommerceOrder, $webpayTransaction,
-        TransactionCommitResponse $commitResponse,
-        string $token
+        WC_Order $wooCommerceOrder,
+        $webpayTransaction,
+        TransactionCommitResponse $commitResponse
     )
     {
         $_SESSION['woocommerce_order_failed'] = true;
@@ -261,7 +264,7 @@ class ResponseController
                 $wooCommerceOrder,
                 $commitResponse,
                 $message,
-                $token
+                $webpayTransaction->token
             );
 
             $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$token);
