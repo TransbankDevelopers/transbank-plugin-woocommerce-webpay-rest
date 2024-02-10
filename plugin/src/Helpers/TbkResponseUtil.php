@@ -29,7 +29,7 @@ class TbkResponseUtil
      */
     public static function getInstallmentType(string $paymentType)
     {
-        return TbkConstants::INSTALLMENT_TYPE[$paymentType] ?? $paymentType;
+        return TbkConstants::PAYMENT_TYPE_CODE[$paymentType] ?? $paymentType;
     }
 
     /**
