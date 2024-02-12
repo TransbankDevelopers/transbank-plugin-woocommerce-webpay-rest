@@ -2,6 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
+use DateTime;
+use DateTimeZone;
 use Exception;
 use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;
@@ -18,6 +20,7 @@ use Transbank\Plugin\Exceptions\Oneclick\RejectedRefundOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\RefundOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\NotFoundTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Order;
 use WC_Payment_Gateway_CC;
@@ -418,26 +421,34 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
-        /** @var Transbank\Webpay\Oneclick\Responses\TransactionDetail $firstDetail */
         $firstDetail = $response->getDetails()[0];
         $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
-        $sharesAmount = $firstDetail->getInstallmentsAmount() ?? '-';
+        $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
+        $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
+        $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
+        $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
+
+        $transactionDate = new DateTime($response->getTransactionDate(), new DateTimeZone('UTC'));
+        $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+        $formattedDate = $transactionDate->format('d-m-Y H:i:s P');
+
         $transactionDetails = "
             <div class='transbank_response_note'>
                 <p><h3>{$message}</h3></p>
 
-                <strong>Estado: </strong>{$firstDetail->getStatus()} <br />
-                <strong>Orden de compra principal: </strong>{$response->getBuyOrder()} <br />
-                <strong>Orden de compra: </strong>{$firstDetail->getBuyOrder()} <br />
+                <strong>Estado: </strong>{$status} <br />
+                <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
+                <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
                 <strong>Monto: </strong>$ {$amountFormatted} <br />
                 <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
-                <strong>Tipo de pago: </strong>{$firstDetail->getPaymentTypeCode()} <br />
+                <strong>Tipo de pago: </strong>{$paymentType} <br />
+                <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
-                <strong>Monto de cada cuota: </strong>{$sharesAmount} <br />
-                <strong>Fecha:</strong> {$response->getTransactionDate()} <br />
-                <strong>Fecha contable:</strong> {$response->getAccountingDate()} <br />
+                <strong>Monto de cada cuota: </strong>{$firstDetail->getInstallmentsAmount()} <br />
+                <strong>Fecha:</strong> {$formattedDate} <br />
+                <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>
         ";
         $wooCommerceOrder->add_order_note($transactionDetails);
@@ -512,7 +523,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             if (wc()->cart) {
                 wc()->cart->empty_cart();
             }
-            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Transacción Aprobada');
+            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Pago exitoso');
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
             return [
                 'result'   => 'success',
@@ -527,11 +538,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->add_order_note('Transacción con problemas de autorización');
         } catch (RejectedAuthorizeOneclickException $e) {
             $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
+            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
             $order->add_order_note('Transacción rechazada');
         } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
             $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Transacción Rechazada');
+            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
             $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
         }
 
