@@ -141,7 +141,8 @@ class ResponseController
                 'transbankTransaction' => $e->getTransaction()
             ]);
 
-            return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
+            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_COMMIT_ERROR);
+            return wp_redirect($urlWithErrorCode);
         } catch (\Exception $e) {
             $this->throwError($e->getMessage());
             do_action('transbank_webpay_plus_unexpected_error');
