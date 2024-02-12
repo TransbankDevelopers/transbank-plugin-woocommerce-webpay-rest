@@ -115,7 +115,9 @@ class ResponseController
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $e->getTransaction()
             ]);
-            return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
+
+            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_INVALID_STATUS);
+            return wp_redirect($urlWithErrorCode);
         } catch (RejectedCommitWebpayException $e) {
             $transaction = $e->getTransaction();
             $commitResponse = $e->getCommitResponse();
