@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use DateTime;
-use DateTimeZone;
 use Exception;
 use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;

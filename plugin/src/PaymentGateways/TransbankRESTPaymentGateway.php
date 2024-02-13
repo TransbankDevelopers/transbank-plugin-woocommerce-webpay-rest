@@ -4,8 +4,6 @@ namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WC_Order;
-use DateTime;
-use DateTimeZone;
 
 trait TransbankRESTPaymentGateway
 {
@@ -22,7 +20,7 @@ trait TransbankRESTPaymentGateway
             <h3>Reembolso exitoso</h3>
             <strong>Tipo:</strong> {$type}
             <strong>Monto reembolso:</strong> {$amountFormatted}";
-        
+
         if($type === 'Reversa') {
             $note = "{$commonFields}
             </div>";
