@@ -322,10 +322,7 @@ class ResponseController
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($commitResponse->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($commitResponse->getAccountingDate());
-
-        $transactionDate = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
-        $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
-        $formattedDate = $transactionDate->format('d-m-Y H:i:s P');
+        $formattedDate = TbkResponseUtil::transactionDateToLocalDate($commitResponse->getTransactionDate());
 
         $transactionDetails = "
             <div class='transbank_response_note'>

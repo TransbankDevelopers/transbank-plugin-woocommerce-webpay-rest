@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WC_Order;
 use DateTime;
 use DateTimeZone;
@@ -29,9 +30,7 @@ trait TransbankRESTPaymentGateway
         else {
             $balanceFormatted = '$'.number_format($response->getBalance(), 0, ',', '.');
             $transactionDate = $response->getAuthorizationDate();
-            $utcDate = new DateTime($transactionDate, new DateTimeZone('UTC'));
-            $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
-            $formattedDate = $utcDate->format('d-m-Y / H:i:s');
+            $formattedDate = TbkResponseUtil::transactionDateToLocalDate($transactionDate);
 
             $note = "{$commonFields}
                 <strong>Saldo:</strong> {$balanceFormatted}
