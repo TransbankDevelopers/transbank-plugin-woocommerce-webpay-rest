@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use DateTime;
+use DateTimeZone;
 use Transbank\Plugin\Helpers\TbkConstants;
 
 /**
@@ -58,5 +59,16 @@ class TbkResponseUtil
         }
 
         return $date->format('m-d');
+    }
+
+    /**
+     * Converts a string of transaction UTC date to local date with time difference.
+     * @param string $date an date/time string in UTC.
+     * @return string the string of local date with time difference.
+     */
+    public static function transactionDateToLocalDate(string $date){
+        $utcDate = new DateTime($date, new DateTimeZone('UTC'));
+        $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+        return $utcDate->format('d-m-Y H:i:s P');
     }
 }

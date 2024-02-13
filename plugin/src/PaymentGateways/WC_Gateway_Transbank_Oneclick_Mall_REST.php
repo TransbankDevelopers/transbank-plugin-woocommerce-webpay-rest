@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use DateTime;
-use DateTimeZone;
 use Exception;
 use Throwable;
 use Transbank\Plugin\Exceptions\EcommerceException;
@@ -427,10 +425,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
-
-        $transactionDate = new DateTime($response->getTransactionDate(), new DateTimeZone('UTC'));
-        $transactionDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
-        $formattedDate = $transactionDate->format('d-m-Y H:i:s P');
+        $formattedDate = TbkResponseUtil::transactionDateToLocalDate($response->getTransactionDate());
 
         $transactionDetails = "
             <div class='transbank_response_note'>
