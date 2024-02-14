@@ -74,4 +74,9 @@ class TbkResponseUtil
         return $utcDate->format('d-m-Y H:i:s P');
     }
 
+    public static function getAmountFormatted(int $amount): string
+    {
+        return '$'.number_format($amount, 0, ',', '.');
+    }
+
 }
