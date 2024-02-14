@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
@@ -12,6 +13,11 @@ use WC_Order;
 
 class ThankYouPageController
 {
+    private $logger;
+    public function __construct() {
+        $logger = TbkFactory::createLogger();
+        $this->logger = $logger;
+    }
     public function show($orderId)
     {
         $woocommerceOrder = new WC_Order($orderId);
