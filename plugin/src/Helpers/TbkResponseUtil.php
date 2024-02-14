@@ -67,9 +67,11 @@ class TbkResponseUtil
      * @param string $date an date/time string in UTC.
      * @return string the string of local date with time difference.
      */
-    public static function transactionDateToLocalDate(string $date){
+    public static function transactionDateToLocalDate(string $date)
+    {
         $utcDate = new DateTime($date, new DateTimeZone('UTC'));
         $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
         return $utcDate->format('d-m-Y H:i:s P');
     }
+
 }
