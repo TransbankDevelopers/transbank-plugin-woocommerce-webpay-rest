@@ -18,12 +18,15 @@ class ThankYouPageController
         $logger = TbkFactory::createLogger();
         $this->logger = $logger;
     }
+
     public function show($orderId)
     {
         $woocommerceOrder = new WC_Order($orderId);
-        $webpayPlusPaymentGateway = new WC_Gateway_Transbank_Webpay_Plus_REST();
-        $transbankOneclickPaymentGateway = new WC_Gateway_Transbank_Oneclick_Mall_REST();
-        if (!in_array($woocommerceOrder->get_payment_method(), [$webpayPlusPaymentGateway->id, $transbankOneclickPaymentGateway->id])) {
+
+        if(!$this->isValidPaymentGateway($woocommerceOrder->get_payment_method())) {
+            $this->logger->logDebug(
+                "La pasarela de pago no es valida, se ha pagado con {$woocommerceOrder->get_payment_method_title()}"
+            );
             return;
         }
 
@@ -64,5 +67,13 @@ class ThankYouPageController
         $data = (new ResponseController([]))->getTransactionDetails($finalResponse);
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = $data;
         require_once __DIR__.'/../../views/order-summary.php';
+    }
+
+    private function isValidPaymentGateway($paymentMethod): bool {
+        $paymentGateways = [
+            WC_Gateway_Transbank_Webpay_Plus_REST::ID,
+            WC_Gateway_Transbank_Oneclick_Mall_REST::ID
+        ];
+        return in_array($paymentMethod, $paymentGateways);
     }
 }
