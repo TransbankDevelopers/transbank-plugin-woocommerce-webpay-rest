@@ -31,19 +31,10 @@ class ThankYouPageController
         }
 
         $webpayTransaction = Transaction::getApprovedByOrderId($orderId);
-        if ($webpayTransaction === null) {
-            // TODO: Revisar porqué no se muestra el mensaje de abajo.
-            // if (SessionMessageHelper::exists()){
-            //     SessionMessageHelper::printMessage();
-            //     return;
-            // }
-            wc_print_notice('Transacción <strong>fallida</strong>. Puedes volver a intentar el pago', 'error');
 
+        if(is_null($webpayTransaction)) {
+            wc_print_notice('<strong>Transacción fallida</strong>. Puedes volver a intentar el pago', 'error');
             return;
-        }
-
-        if ($webpayTransaction->status !== Transaction::STATUS_APPROVED) {
-            return wp_redirect($woocommerceOrder->get_cancel_order_url());
         }
 
         // Transacción aprobada
