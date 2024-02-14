@@ -31,7 +31,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
     use TransbankRESTPaymentGateway;
 
+    const ID = 'transbank_oneclick_mall_rest';
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
+
     /**
      * @var Transbank\Webpay\Oneclick\MallInscription
      */
@@ -63,7 +65,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'multiple_subscriptions',
         ];
 
-        $this->id = 'transbank_oneclick_mall_rest';
+        $this->id = self::ID;
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
         $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
