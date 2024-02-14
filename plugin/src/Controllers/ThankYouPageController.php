@@ -51,13 +51,13 @@ class ThankYouPageController
             $dateAccepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
             $paymentType = TbkResponseUtil::getPaymentType($paymentTypeCode);
             $installmentType = TbkResponseUtil::getInstallmentType($paymentTypeCode);
-            require_once __DIR__.'/../../views/order-summary-oneclick.php';
+            require_once __DIR__.'/../../templates/public/order/order-summary-oneclick.php';
 
             return;
         }
         $data = (new ResponseController([]))->getTransactionDetails($finalResponse);
         list($authorizationCode, $amount, $sharesNumber, $transactionResponse, $installmentType, $date_accepted, $sharesAmount, $paymentType) = $data;
-        require_once __DIR__.'/../../views/order-summary.php';
+        require_once __DIR__.'/../../templates/public/order/order-summary.php';
     }
 
     private function isValidPaymentGateway($paymentMethod): bool {
