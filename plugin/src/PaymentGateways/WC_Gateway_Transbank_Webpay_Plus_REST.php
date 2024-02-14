@@ -32,8 +32,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
     use TransbankRESTPaymentGateway;
 
+    const ID= 'transbank_webpay_plus_rest';
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
-    
+
     protected $plugin_url;
     protected $log;
     protected $config;
@@ -46,7 +47,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function __construct()
     {
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
-        $this->id = 'transbank_webpay_plus_rest';
+        $this->id = self::ID;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Transbank Webpay Plus';
