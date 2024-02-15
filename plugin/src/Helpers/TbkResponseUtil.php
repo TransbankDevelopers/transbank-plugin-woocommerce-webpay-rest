@@ -109,6 +109,12 @@ class TbkResponseUtil
         ];
     }
 
+    /**
+     * Get the formatted response for Webpay transactions.
+     *
+     * @param object $commitResponse The response object for Webpay transactions.
+     * @return array The formatted response fields.
+     */
     public static function getWebpayFormattedResponse(object $commitResponse): array
     {
         $commonFields = self::getCommonFieldsFormatted($commitResponse);
