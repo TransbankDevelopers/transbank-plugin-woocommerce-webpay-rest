@@ -15,7 +15,8 @@ class ThankYouPageController
     private $logger;
     private Template $template;
 
-    public function __construct() {
+    public function __construct()
+    {
         $logger = TbkFactory::createLogger();
         $this->logger = $logger;
         $this->template = new Template();
@@ -25,7 +26,7 @@ class ThankYouPageController
     {
         $woocommerceOrder = new WC_Order($orderId);
 
-        if(!$this->isValidPaymentGateway($woocommerceOrder->get_payment_method())) {
+        if (!$this->isValidPaymentGateway($woocommerceOrder->get_payment_method())) {
             $this->logger->logDebug(
                 "La pasarela de pago no es válida, se ha pagado con {$woocommerceOrder->get_payment_method_title()}"
             );
@@ -34,7 +35,7 @@ class ThankYouPageController
 
         $webpayTransaction = Transaction::getApprovedByOrderId($orderId);
 
-        if(is_null($webpayTransaction)) {
+        if (is_null($webpayTransaction)) {
             wc_print_notice('<strong>Transacción fallida</strong>. Puedes volver a intentar el pago', 'error');
             return;
         }
@@ -43,17 +44,17 @@ class ThankYouPageController
         $transactionResponse = json_decode($webpayTransaction->transbank_response);
 
         $formattedResponse = [];
-        if($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
+        if ($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
             $formattedResponse = TbkResponseUtil::getOneclickFormattedResponse($transactionResponse);
-        }
-        else {
+        } else {
             $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($transactionResponse);
         }
 
         $this->template->render('public/order/order-summary.php', $formattedResponse);
     }
 
-    private function isValidPaymentGateway($paymentMethod): bool {
+    private function isValidPaymentGateway($paymentMethod): bool
+    {
         $paymentGateways = [
             WC_Gateway_Transbank_Webpay_Plus_REST::ID,
             WC_Gateway_Transbank_Oneclick_Mall_REST::ID
