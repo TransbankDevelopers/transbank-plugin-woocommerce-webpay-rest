@@ -40,15 +40,15 @@ class ThankYouPageController
         }
 
         wc_print_notice(__('Transacción aprobada', 'transbank_wc_plugin'), 'success');
-        $commitResponse = json_decode($webpayTransaction->transbank_response);
+        $transactionResponse = json_decode($webpayTransaction->transbank_response);
 
         if($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
-            $formattedResponse = TbkResponseUtil::getOneclickFormattedResponse($commitResponse);
+            $formattedResponse = TbkResponseUtil::getOneclickFormattedResponse($transactionResponse);
             $this->template->render('public/order/order-summary.php', $formattedResponse);
             return;
         }
 
-        $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($commitResponse);
+        $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($transactionResponse);
         $this->template->render('public/order/order-summary.php', $formattedResponse);
     }
 

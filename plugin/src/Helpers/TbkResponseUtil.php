@@ -88,16 +88,16 @@ class TbkResponseUtil
     /**
      * Get the common fields formatted for sale receipt.
      *
-     * @param object $commitResponse The transaction response.
+     * @param object $transactionResponse The transaction response.
      * @return array The formatted common fields.
      */
-    private static function getCommonFieldsFormatted(object $commitResponse): array
+    private static function getCommonFieldsFormatted(object $transactionResponse): array
     {
-        $utcDate = new DateTime($commitResponse->transactionDate, new DateTimeZone('UTC'));
+        $utcDate = new DateTime($transactionResponse->transactionDate, new DateTimeZone('UTC'));
         $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
 
-        $buyOrder = $commitResponse->buyOrder;
-        $cardNumber = "**** **** **** {$commitResponse->cardNumber}";
+        $buyOrder = $transactionResponse->buyOrder;
+        $cardNumber = "**** **** **** {$transactionResponse->cardNumber}";
         $transactionDate = $utcDate->format('d-m-Y');
         $transactionTime = $utcDate->format('H:i:s');
 
@@ -112,24 +112,24 @@ class TbkResponseUtil
     /**
      * Get the formatted response for Webpay transactions.
      *
-     * @param object $commitResponse The response object for Webpay transactions.
+     * @param object $transactionResponse The response object for Webpay transactions.
      * @return array The formatted response fields.
      */
-    public static function getWebpayFormattedResponse(object $commitResponse): array
+    public static function getWebpayFormattedResponse(object $transactionResponse): array
     {
-        $commonFields = self::getCommonFieldsFormatted($commitResponse);
+        $commonFields = self::getCommonFieldsFormatted($transactionResponse);
 
-        $amount = self::getAmountFormatted($commitResponse->amount);
-        $paymentType = self::getPaymentType($commitResponse->paymentTypeCode);
-        $installmentType = self::getInstallmentType($commitResponse->paymentTypeCode);
-        $installmentAmount = self::getAmountFormatted($commitResponse->installmentsAmount ?? 0);
+        $amount = self::getAmountFormatted($transactionResponse->amount);
+        $paymentType = self::getPaymentType($transactionResponse->paymentTypeCode);
+        $installmentType = self::getInstallmentType($transactionResponse->paymentTypeCode);
+        $installmentAmount = self::getAmountFormatted($transactionResponse->installmentsAmount ?? 0);
 
         $webpayFields = [
             'amount' => $amount,
-            'authorizationCode' => $commitResponse->authorizationCode,
+            'authorizationCode' => $transactionResponse->authorizationCode,
             'paymentType' => $paymentType,
             'installmentType' => $installmentType,
-            'installmentNumber' => $commitResponse->installmentsNumber,
+            'installmentNumber' => $transactionResponse->installmentsNumber,
             'installmentAmount' => $installmentAmount
         ];
 
@@ -139,13 +139,13 @@ class TbkResponseUtil
     /**
      * Get the formatted response for Oneclick transactions.
      *
-     * @param object $commitResponse The response object for Oneclick transactions.
+     * @param object $transactionResponse The response object for Oneclick transactions.
      * @return array The formatted response fields.
      */
-    public static function getOneclickFormattedResponse(object $commitResponse): array
+    public static function getOneclickFormattedResponse(object $transactionResponse): array
     {
-        $commonFields = self::getCommonFieldsFormatted($commitResponse);
-        $detail = $commitResponse->details[0];
+        $commonFields = self::getCommonFieldsFormatted($transactionResponse);
+        $detail = $transactionResponse->details[0];
 
         $amount = self::getAmountFormatted($detail->amount);
         $paymentType = self::getPaymentType($detail->paymentTypeCode);
