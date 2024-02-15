@@ -262,37 +262,6 @@ class ResponseController
         );
     }
 
-    /**
-     * @param array $result
-     *
-     * @throws \Exception
-     *
-     * @return array
-     */
-    public function getTransactionDetails($result)
-    {
-        $paymentTypeCode = isset($result->paymentTypeCode) ? $result->paymentTypeCode : null;
-        $authorizationCode = isset($result->authorizationCode) ? $result->authorizationCode : null;
-        $amount = isset($result->amount) ? $result->amount : null;
-        $sharesNumber = isset($result->installmentsNumber) ? $result->installmentsNumber : null;
-        $sharesAmount = isset($result->installmentsAmount) ? $result->installmentsAmount : null;
-        $responseCode = isset($result->responseCode) ? $result->responseCode : null;
-        if ($responseCode === 0) {
-            $transactionResponse = '¡Transacción Aprobada!';
-        } else {
-            $transactionResponse = 'Transacción Rechazada';
-        }
-        $paymentCodeResult = TbkResponseUtil::getInstallmentType($paymentTypeCode);
-
-        $paymentType = TbkResponseUtil::getPaymentType($paymentTypeCode);
-
-        $transactionDate = isset($result->transactionDate) ? $result->transactionDate : null;
-        $date_accepted = new DateTime($transactionDate, new DateTimeZone('UTC'));
-        $date_accepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
-
-        return [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType];
-    }
-
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)
     {
         // Transaction aborted by user
