@@ -118,4 +118,25 @@ class TbkResponseUtil
         return array_merge($commonFields, $webpayFields);
     }
 
+    public static function getOneclickFormattedResponse(object $commitResponse): array
+    {
+        $commonFields = self::getCommonFieldsFormatted($commitResponse);
+        $detail = $commitResponse->details[0];
+
+        $amount = self::getAmountFormatted($detail->amount);
+        $paymentType = self::getPaymentType($detail->paymentTypeCode);
+        $installmentType = self::getInstallmentType($detail->paymentTypeCode);
+        $installmentAmount = self::getAmountFormatted($detail->installmentsAmount ?? 0);
+
+        $oneclickFields = [
+            'amount' => $amount,
+            'authorizationCode' => $detail->authorizationCode,
+            'paymentType' => $paymentType,
+            'installmentType' => $installmentType,
+            'installmentNumber' => $detail->installmentsNumber,
+            'installmentAmount' => $installmentAmount
+        ];
+
+        return array_merge($commonFields, $oneclickFields);
+    }
 }
