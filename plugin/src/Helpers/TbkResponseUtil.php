@@ -76,7 +76,7 @@ class TbkResponseUtil
 
     public static function getAmountFormatted(int $amount): string
     {
-        return '$'.number_format($amount, 0, ',', '.');
+        return '$' . number_format($amount, 0, ',', '.');
     }
 
 }
