@@ -97,4 +97,25 @@ class TbkResponseUtil
         ];
     }
 
+    public static function getWebpayFormattedResponse(object $commitResponse): array
+    {
+        $commonFields = self::getCommonFieldsFormatted($commitResponse);
+
+        $amount = self::getAmountFormatted($commitResponse->amount);
+        $paymentType = self::getPaymentType($commitResponse->paymentTypeCode);
+        $installmentType = self::getInstallmentType($commitResponse->paymentTypeCode);
+        $installmentAmount = self::getAmountFormatted($commitResponse->installmentsAmount ?? 0);
+
+        $webpayFields = [
+            'amount' => $amount,
+            'authorizationCode' => $commitResponse->authorizationCode,
+            'paymentType' => $paymentType,
+            'installmentType' => $installmentType,
+            'installmentNumber' => $commitResponse->installmentsNumber,
+            'installmentAmount' => $installmentAmount
+        ];
+
+        return array_merge($commonFields, $webpayFields);
+    }
+
 }
