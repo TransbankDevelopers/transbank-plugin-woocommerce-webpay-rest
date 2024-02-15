@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use DateTime;
-use DateTimeZone;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
