@@ -79,4 +79,22 @@ class TbkResponseUtil
         return '$' . number_format($amount, 0, ',', '.');
     }
 
+    private static function getCommonFieldsFormatted(object $commitResponse): array
+    {
+        $utcDate = new DateTime($commitResponse->transactionDate, new DateTimeZone('UTC'));
+        $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+
+        $buyOrder = $commitResponse->buyOrder;
+        $cardNumber = "**** **** **** {$commitResponse->cardNumber}";
+        $transactionDate = $utcDate->format('d-m-Y');
+        $transactionTime = $utcDate->format('H:i:s');
+
+        return [
+            'buyOrder' => $buyOrder,
+            'cardNumber' => $cardNumber,
+            'transactionDate' => $transactionDate,
+            'transactionTime' => $transactionTime
+        ];
+    }
+
 }
