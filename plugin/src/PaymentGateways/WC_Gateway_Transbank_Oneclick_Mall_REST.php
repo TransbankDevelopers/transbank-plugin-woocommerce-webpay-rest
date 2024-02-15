@@ -31,7 +31,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
     use TransbankRESTPaymentGateway;
 
+    const ID = 'transbank_oneclick_mall_rest';
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
+
     /**
      * @var Transbank\Webpay\Oneclick\MallInscription
      */
@@ -63,7 +65,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'multiple_subscriptions',
         ];
 
-        $this->id = 'transbank_oneclick_mall_rest';
+        $this->id = self::ID;
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
         $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
@@ -420,12 +422,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
         $firstDetail = $response->getDetails()[0];
-        $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
+        $formattedAmount = TbkResponseUtil::getAmountFormatted($firstDetail->getAmount());
         $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
         $formattedDate = TbkResponseUtil::transactionDateToLocalDate($response->getTransactionDate());
+        $installmentAmount = $firstDetail->getInstallmentsAmount() ?? 0;
+        $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
 
         $transactionDetails = "
             <div class='transbank_response_note'>
@@ -436,12 +440,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
-                <strong>Monto: </strong>$ {$amountFormatted} <br />
+                <strong>Monto: </strong>{$formattedAmount} <br />
                 <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
-                <strong>Monto de cada cuota: </strong>{$firstDetail->getInstallmentsAmount()} <br />
+                <strong>Monto de cada cuota: </strong>{$formattedInstallmentAmount} <br />
                 <strong>Fecha:</strong> {$formattedDate} <br />
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>

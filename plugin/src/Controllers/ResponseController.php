@@ -262,37 +262,6 @@ class ResponseController
         );
     }
 
-    /**
-     * @param array $result
-     *
-     * @throws \Exception
-     *
-     * @return array
-     */
-    public function getTransactionDetails($result)
-    {
-        $paymentTypeCode = isset($result->paymentTypeCode) ? $result->paymentTypeCode : null;
-        $authorizationCode = isset($result->authorizationCode) ? $result->authorizationCode : null;
-        $amount = isset($result->amount) ? $result->amount : null;
-        $sharesNumber = isset($result->installmentsNumber) ? $result->installmentsNumber : null;
-        $sharesAmount = isset($result->installmentsAmount) ? $result->installmentsAmount : null;
-        $responseCode = isset($result->responseCode) ? $result->responseCode : null;
-        if ($responseCode === 0) {
-            $transactionResponse = '¡Transacción Aprobada!';
-        } else {
-            $transactionResponse = 'Transacción Rechazada';
-        }
-        $paymentCodeResult = TbkResponseUtil::getInstallmentType($paymentTypeCode);
-
-        $paymentType = TbkResponseUtil::getPaymentType($paymentTypeCode);
-
-        $transactionDate = isset($result->transactionDate) ? $result->transactionDate : null;
-        $date_accepted = new DateTime($transactionDate, new DateTimeZone('UTC'));
-        $date_accepted->setTimeZone(new DateTimeZone(wc_timezone_string()));
-
-        return [$authorizationCode, $amount, $sharesNumber, $transactionResponse, $paymentCodeResult, $date_accepted, $sharesAmount, $paymentType];
-    }
-
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)
     {
         // Transaction aborted by user
@@ -317,12 +286,14 @@ class ResponseController
         string $titleMessage,
         string $tbkToken
     ) {
-        $amountFormatted = number_format($commitResponse->getAmount(), 0, ',', '.');
+        $formattedAmount = TbkResponseUtil::getAmountFormatted($commitResponse->getAmount());
         $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($commitResponse->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($commitResponse->getAccountingDate());
         $formattedDate = TbkResponseUtil::transactionDateToLocalDate($commitResponse->getTransactionDate());
+        $installmentAmount = $commitResponse->getInstallmentsAmount() ?? 0;
+        $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
 
         $transactionDetails = "
             <div class='transbank_response_note'>
@@ -332,12 +303,12 @@ class ResponseController
                 <strong>Orden de compra: </strong>{$commitResponse->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$commitResponse->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$commitResponse->getCardNumber()} <br />
-                <strong>Monto: </strong>$ {$amountFormatted} <br />
+                <strong>Monto: </strong>{$formattedAmount} <br />
                 <strong>Código de respuesta: </strong>{$commitResponse->getResponseCode()} <br />
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$commitResponse->getInstallmentsNumber()} <br />
-                <strong>Monto de cada cuota: </strong>{$commitResponse->getInstallmentsAmount()} <br />
+                <strong>Monto de cada cuota: </strong>{$formattedInstallmentAmount} <br />
                 <strong>Fecha:</strong> {$formattedDate} <br />
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
                 <strong>Token:</strong> {$tbkToken} <br />
