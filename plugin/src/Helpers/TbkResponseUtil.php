@@ -17,7 +17,7 @@ class TbkResponseUtil
      * @param string $paymentType The code of the payment type.
      * @return string The corresponding payment type.
      */
-    public static function getPaymentType(string $paymentType)
+    public static function getPaymentType(string $paymentType): string
     {
         return TbkConstants::PAYMENT_TYPE[$paymentType] ?? $paymentType;
     }
@@ -28,7 +28,7 @@ class TbkResponseUtil
      * @param string $paymentType The code of the installment type.
      * @return string The corresponding installment type.
      */
-    public static function getInstallmentType(string $paymentType)
+    public static function getInstallmentType(string $paymentType): string
     {
         return TbkConstants::PAYMENT_TYPE_CODE[$paymentType] ?? $paymentType;
     }
@@ -39,7 +39,7 @@ class TbkResponseUtil
      * @param string $status The code of the transaction status.
      * @return string The description of the corresponding transaction status.
      */
-    public static function getStatus(string $status)
+    public static function getStatus(string $status): string
     {
         return TbkConstants::STATUS_DESCRIPTION[$status] ?? $status;
     }
@@ -50,7 +50,7 @@ class TbkResponseUtil
      * @param string $accountingDate The accounting date in 'md' format.
      * @return string The accounting date in 'mm-dd' format.
      */
-    public static function getAccountingDate(string $accountingDate)
+    public static function getAccountingDate(string $accountingDate): string
     {
         $date = DateTime::createFromFormat('md', $accountingDate);
 
@@ -67,7 +67,7 @@ class TbkResponseUtil
      * @param string $date an date/time string in UTC.
      * @return string the string of local date with time difference.
      */
-    public static function transactionDateToLocalDate(string $date)
+    public static function transactionDateToLocalDate(string $date): string
     {
         $utcDate = new DateTime($date, new DateTimeZone('UTC'));
         $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
