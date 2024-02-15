@@ -27,7 +27,7 @@ class ThankYouPageController
 
         if(!$this->isValidPaymentGateway($woocommerceOrder->get_payment_method())) {
             $this->logger->logDebug(
-                "La pasarela de pago no es valida, se ha pagado con {$woocommerceOrder->get_payment_method_title()}"
+                "La pasarela de pago no es válida, se ha pagado con {$woocommerceOrder->get_payment_method_title()}"
             );
             return;
         }
