@@ -422,7 +422,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
     {
         $firstDetail = $response->getDetails()[0];
-        $amountFormatted = number_format($firstDetail->getAmount(), 0, ',', '.');
+        $formattedAmount = TbkResponseUtil::getAmountFormatted($firstDetail->getAmount());
         $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
@@ -438,7 +438,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
-                <strong>Monto: </strong>$ {$amountFormatted} <br />
+                <strong>Monto: </strong>{$formattedAmount} <br />
                 <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />

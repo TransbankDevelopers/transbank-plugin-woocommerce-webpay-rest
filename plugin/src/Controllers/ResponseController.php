@@ -286,7 +286,7 @@ class ResponseController
         string $titleMessage,
         string $tbkToken
     ) {
-        $amountFormatted = number_format($commitResponse->getAmount(), 0, ',', '.');
+        $formattedAmount = TbkResponseUtil::getAmountFormatted($commitResponse->getAmount());
         $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $installmentType = TbkResponseUtil::getInstallmentType($commitResponse->getPaymentTypeCode());
@@ -301,7 +301,7 @@ class ResponseController
                 <strong>Orden de compra: </strong>{$commitResponse->getBuyOrder()} <br />
                 <strong>Código de autorización: </strong>{$commitResponse->getAuthorizationCode()} <br />
                 <strong>Últimos dígitos tarjeta: </strong>{$commitResponse->getCardNumber()} <br />
-                <strong>Monto: </strong>$ {$amountFormatted} <br />
+                <strong>Monto: </strong>{$formattedAmount} <br />
                 <strong>Código de respuesta: </strong>{$commitResponse->getResponseCode()} <br />
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />
