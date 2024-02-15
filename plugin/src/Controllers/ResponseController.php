@@ -292,6 +292,8 @@ class ResponseController
         $installmentType = TbkResponseUtil::getInstallmentType($commitResponse->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($commitResponse->getAccountingDate());
         $formattedDate = TbkResponseUtil::transactionDateToLocalDate($commitResponse->getTransactionDate());
+        $installmentAmount = $commitResponse->getInstallmentsAmount() ?? 0;
+        $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
 
         $transactionDetails = "
             <div class='transbank_response_note'>
@@ -306,7 +308,7 @@ class ResponseController
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$commitResponse->getInstallmentsNumber()} <br />
-                <strong>Monto de cada cuota: </strong>{$commitResponse->getInstallmentsAmount()} <br />
+                <strong>Monto de cada cuota: </strong>{$formattedInstallmentAmount} <br />
                 <strong>Fecha:</strong> {$formattedDate} <br />
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
                 <strong>Token:</strong> {$tbkToken} <br />

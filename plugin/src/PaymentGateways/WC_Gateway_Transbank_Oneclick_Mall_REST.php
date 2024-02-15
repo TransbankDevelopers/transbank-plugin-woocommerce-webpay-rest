@@ -428,6 +428,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
         $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
         $formattedDate = TbkResponseUtil::transactionDateToLocalDate($response->getTransactionDate());
+        $installmentAmount = $firstDetail->getInstallmentsAmount() ?? 0;
+        $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
 
         $transactionDetails = "
             <div class='transbank_response_note'>
@@ -443,7 +445,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Tipo de pago: </strong>{$paymentType} <br />
                 <strong>Tipo de cuota: </strong>{$installmentType} <br />
                 <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
-                <strong>Monto de cada cuota: </strong>{$firstDetail->getInstallmentsAmount()} <br />
+                <strong>Monto de cada cuota: </strong>{$formattedInstallmentAmount} <br />
                 <strong>Fecha:</strong> {$formattedDate} <br />
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>
