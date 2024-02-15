@@ -136,6 +136,12 @@ class TbkResponseUtil
         return array_merge($commonFields, $webpayFields);
     }
 
+    /**
+     * Get the formatted response for Oneclick transactions.
+     *
+     * @param object $commitResponse The response object for Oneclick transactions.
+     * @return array The formatted response fields.
+     */
     public static function getOneclickFormattedResponse(object $commitResponse): array
     {
         $commonFields = self::getCommonFieldsFormatted($commitResponse);
