@@ -74,6 +74,12 @@ class TbkResponseUtil
         return $utcDate->format('d-m-Y H:i:s P');
     }
 
+    /**
+     * Get the CLP formatted amount from an integer value.
+     *
+     * @param int $amount The integer amount to be formatted.
+     * @return string The formatted amount as a string.
+     */
     public static function getAmountFormatted(int $amount): string
     {
         return '$' . number_format($amount, 0, ',', '.');
