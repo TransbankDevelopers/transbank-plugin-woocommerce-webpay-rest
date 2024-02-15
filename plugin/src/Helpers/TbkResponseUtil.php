@@ -85,6 +85,12 @@ class TbkResponseUtil
         return '$' . number_format($amount, 0, ',', '.');
     }
 
+    /**
+     * Get the common fields formatted for sale receipt.
+     *
+     * @param object $commitResponse The transaction response.
+     * @return array The formatted common fields.
+     */
     private static function getCommonFieldsFormatted(object $commitResponse): array
     {
         $utcDate = new DateTime($commitResponse->transactionDate, new DateTimeZone('UTC'));
