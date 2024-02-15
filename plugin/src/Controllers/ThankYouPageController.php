@@ -42,13 +42,14 @@ class ThankYouPageController
         wc_print_notice(__('Transacción aprobada', 'transbank_wc_plugin'), 'success');
         $transactionResponse = json_decode($webpayTransaction->transbank_response);
 
+        $formattedResponse = [];
         if($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
             $formattedResponse = TbkResponseUtil::getOneclickFormattedResponse($transactionResponse);
-            $this->template->render('public/order/order-summary.php', $formattedResponse);
-            return;
+        }
+        else {
+            $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($transactionResponse);
         }
 
-        $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($transactionResponse);
         $this->template->render('public/order/order-summary.php', $formattedResponse);
     }
 
