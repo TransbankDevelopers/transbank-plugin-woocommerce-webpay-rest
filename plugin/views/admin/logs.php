@@ -125,13 +125,47 @@ $folderHasLogs = $resume['length'] > 0;
                 </div>
             </div>
 
-            <div id="tbk_last_log_content">
-                <pre>
-                    <span style="font-size: 10px; padding: 5px; font-family:monospace; display: block; background: white;">
-                        <?php echo $lastLog['content'] ?? '-'; ?>
-                    </span>
-                </pre>
-            </div>
+            <?php
+            if (!is_null($lastLog['content'])) {
+                $logContent = '';
+                $logContent .= '<div class="log-container">';
+
+                $lineas_logs = explode("\n", $lastLog['content']);
+
+                foreach ($lineas_logs as $linea) {
+                    $partes = explode(' > ', $linea);
+
+                    $fecha_hora = $partes[0];
+                    $nivel = $partes[1] ?? null;
+                    $mensaje = $partes[2] ?? null;
+
+                    switch ($nivel) {
+                        case 'INFO':
+                            $clase_nivel = 'log-info';
+                            break;
+                        case 'ERROR':
+                            $clase_nivel = 'log-error';
+                            break;
+                        case 'WARNING':
+                            $clase_nivel = 'log-warning';
+                            break;
+                        case 'DEBUG':
+                            $clase_nivel = 'log-debug';
+                            break;
+                        default:
+                            $clase_nivel = '';
+                    }
+
+                    if (!is_null($fecha_hora) && !is_null($nivel) && !is_null($mensaje)) {
+                        $logContent .= '<pre class="log-line">' . $fecha_hora . ' > ' .
+                            '<span class="log-' . strtolower($nivel) . '">' . $nivel . '</span> > ' . $mensaje .
+                            '</pre>';
+                    }
+                }
+                $logContent .= '</div>';
+                echo $logContent;
+            }
+            ?>
         <?php } ?>
     </div>
 </div>
