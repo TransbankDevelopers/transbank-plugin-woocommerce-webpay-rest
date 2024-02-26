@@ -15,7 +15,7 @@ $folderHasLogs = $resume['length'] > 0;
     <div id="logs" class="tab-pane">
         <h3 class="tbk_title_h3">Información de Registros</h3>
         <div id="tbk_information_logs" style="margin-bottom: 30px;">
-            <div class="tbk-plugin-info-container logs" id="div_status_logs">
+            <div class="tbk-plugin-info-container" id="div_status_logs">
                 <div class="info-column">
                     <div title="Informa si actualmente se guarda la información de cada compra mediante Webpay" class="label label-info">?
                     </div>
@@ -27,7 +27,7 @@ $folderHasLogs = $resume['length'] > 0;
                     <span id="action_txt" class="label label-success">Registro activado</span>
                 </div>
             </div>
-            <div class="tbk-plugin-info-container logs" id="div_logs_path">
+            <div class="tbk-plugin-info-container" id="div_logs_path">
                 <div class="info-column">
                     <div title="Carpeta en el servidor en donde se guardan los archivos con la informacón de cada compra mediante Webpay" class="label label-info">?
                     </div>
@@ -41,7 +41,7 @@ $folderHasLogs = $resume['length'] > 0;
                     </span>
                 </div>
             </div>
-            <div class="tbk-plugin-info-container logs" id="div_logs_number">
+            <div class="tbk-plugin-info-container" id="div_logs_number">
                 <div class="info-column">
                     <div title="Cantidad de archivos que guardan la información de cada compra mediante Webpay" class="label label-info">?
                     </div>
@@ -56,7 +56,7 @@ $folderHasLogs = $resume['length'] > 0;
                 </div>
             </div>
             <?php if ($folderHasLogs) { ?>
-                <div class="tbk-plugin-info-container logs" id="div_logs_list">
+                <div class="tbk-plugin-info-container" id="div_logs_list">
                     <div class="info-column">
                         <div title="Lista los archivos que guardan la información de cada compra mediante Webpay" class="label label-info">?
                         </div>
@@ -81,7 +81,7 @@ $folderHasLogs = $resume['length'] > 0;
         <?php if ($folderHasLogs) { ?>
             <h3 class="tbk_title_h3">Últimos Registros</h3>
             <div id="tbk-last-logs">
-                <div class="tbk-plugin-info-container logs" id="div_last_log">
+                <div class="tbk-plugin-info-container" id="div_last_log">
                     <div class="info-column">
                         <div title="Nombre del útimo archivo de registro creado" class="label label-info">?
                         </div>
@@ -95,7 +95,7 @@ $folderHasLogs = $resume['length'] > 0;
                         </span>
                     </div>
                 </div>
-                <div class="tbk-plugin-info-container logs" id="div_size_log">
+                <div class="tbk-plugin-info-container" id="div_size_log">
                     <div class="info-column">
                         <div title="Peso del último archivo de registro creado" class="label label-info">?
                         </div>
@@ -109,7 +109,7 @@ $folderHasLogs = $resume['length'] > 0;
                         </span>
                     </div>
                 </div>
-                <div class="tbk-plugin-info-container logs" id="div_lines_logs">
+                <div class="tbk-plugin-info-container" id="div_lines_logs">
                     <div class="info-column">
                         <div title="Cantidad de líneas que posee el último archivo de registro creado" class="label label-info">?
                         </div>
