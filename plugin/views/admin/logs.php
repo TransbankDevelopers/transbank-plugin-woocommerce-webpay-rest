@@ -130,35 +130,18 @@ $folderHasLogs = $resume['length'] > 0;
                 $logContent = '';
                 $logContent .= '<div class="log-container">';
 
-                $lineas_logs = explode("\n", $lastLog['content']);
+                $logLines = explode("\n", $lastLog['content']);
 
-                foreach ($lineas_logs as $linea) {
-                    $partes = explode(' > ', $linea);
+                foreach ($logLines as $line) {
+                    $chunks = explode(' > ', $line);
 
-                    $fecha_hora = $partes[0];
-                    $nivel = $partes[1] ?? null;
-                    $mensaje = $partes[2] ?? null;
+                    $date = $chunks[0];
+                    $level = $chunks[1] ?? null;
+                    $message = $chunks[2] ?? null;
 
-                    switch ($nivel) {
-                        case 'INFO':
-                            $clase_nivel = 'log-info';
-                            break;
-                        case 'ERROR':
-                            $clase_nivel = 'log-error';
-                            break;
-                        case 'WARNING':
-                            $clase_nivel = 'log-warning';
-                            break;
-                        case 'DEBUG':
-                            $clase_nivel = 'log-debug';
-                            break;
-                        default:
-                            $clase_nivel = '';
-                    }
-
-                    if (!is_null($fecha_hora) && !is_null($nivel) && !is_null($mensaje)) {
-                        $logContent .= '<pre class="log-line">' . $fecha_hora . ' > ' .
-                            '<span class="log-' . strtolower($nivel) . '">' . $nivel . '</span> > ' . $mensaje .
+                    if (!is_null($date) && !is_null($level) && !is_null($message)) {
+                        $logContent .= '<pre class="log-line">' . $date . ' > ' .
+                            '<span class="log-' . strtolower($level) . '">' . $level . '</span> > ' . $message .
                             '</pre>';
                     }
                 }
