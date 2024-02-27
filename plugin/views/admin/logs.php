@@ -29,7 +29,7 @@ $folderHasLogs = $resume['length'] > 0;
             </div>
             <div class="tbk-plugin-info-container" id="div_logs_path">
                 <div class="info-column">
-                    <div title="Carpeta en el servidor en donde se guardan los archivos con la informacón de cada compra mediante Webpay" class="label label-info">?
+                    <div title="Carpeta en el servidor en donde se guardan los archivos con la información de cada compra mediante Webpay" class="label label-info">?
                     </div>
                 </div>
                 <div class="info-column-plugin log">
