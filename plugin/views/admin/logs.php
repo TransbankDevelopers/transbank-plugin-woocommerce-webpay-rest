@@ -127,8 +127,7 @@ $folderHasLogs = $resume['length'] > 0;
 
             <?php
             if (!is_null($lastLog['content'])) {
-                $logContent = '';
-                $logContent .= '<div class="log-container">';
+                $logContent = '<div class="log-container">';
 
                 $logLines = explode("\n", $lastLog['content']);
 
