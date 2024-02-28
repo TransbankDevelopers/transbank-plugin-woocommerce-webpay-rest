@@ -70,7 +70,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->method_title = 'Webpay Oneclick';
         $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
         $this->method_description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/oneclick.png';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
 
         $this->init_form_fields();
         $this->init_settings();
@@ -81,20 +81,19 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
 
         add_action(
-            'woocommerce_scheduled_subscription_payment_'.$this->id,
+            'woocommerce_scheduled_subscription_payment_' . $this->id,
             [$this, 'scheduled_subscription_payment'],
             10,
             3
         );
-        add_action('woocommerce_api_'.strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
+        add_action('woocommerce_api_' . strtolower(static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT), [
             new OneclickInscriptionResponseController($this->id),
             'response',
         ]);
 
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
         add_filter('woocommerce_payment_token_class', [$this, 'set_payment_token_class']);
-        add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
-
+        add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
     }
 
     public function payment_fields()
@@ -142,15 +141,15 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException($errorMessage, $e);
         } catch (RefundOneclickException $e) {
-            $order->add_order_note('<strong>Error al anular:</strong><br />'.$e->getMessage());
+            $order->add_order_note('<strong>Error al anular:</strong><br />' . $e->getMessage());
             do_action('wc_transbank_oneclick_refund_failed',  [
                 'order' => $order->get_data(),
                 'transbankTransaction' => $e->getTransaction(),
                 'errorMessage' => $e->getMessage()
             ]);
-            throw new EcommerceException('Error al anular: '.$e->getMessage(), $e);
-        }catch (RejectedRefundOneclickException $e) {
-            $errorMessage = 'Anulación a través de Webpay FALLIDA. '."\n\n".json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
+            throw new EcommerceException('Error al anular: ' . $e->getMessage(), $e);
+        } catch (RejectedRefundOneclickException $e) {
+            $errorMessage = 'Anulación a través de Webpay FALLIDA. ' . "\n\n" . json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
             $order->add_order_note($errorMessage);
             do_action('wc_transbank_oneclick_refund_failed', [
                 'order' => $order->get_data(),
@@ -158,7 +157,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             ]);
             throw new EcommerceException($errorMessage, $e);
         } catch (Throwable $e) {
-            $order->add_order_note('Anulación a través de Webpay FALLIDA. '.$e->getMessage());
+            $order->add_order_note('Anulación a través de Webpay FALLIDA. ' . $e->getMessage());
             do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException('Anulación a través de Webpay fallida.', $e);
         }
@@ -171,21 +170,21 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $environment = $this->get_option('environment');
             $showedWelcome = get_site_option('transbank_webpay_oneclick_rest_showed_welcome_message');
             update_site_option('transbank_webpay_oneclick_rest_showed_welcome_message', true);
-            include_once __DIR__.'/../../views/admin/options-tabs.php';
+            include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
-            ?>
+?>
             <div class="inline error">
                 <p>
                     <strong><?php esc_html_e(
-                'Gateway disabled',
-                'woocommerce'
-            ); ?></strong>: <?php esc_html_e(
-                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
-                'transbank_wc_plugin'
-            ); ?>
+                                'Gateway disabled',
+                                'woocommerce'
+                            ); ?></strong>: <?php esc_html_e(
+                                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
+                                'transbank_wc_plugin'
+                            ); ?>
                 </p>
             </div>
-            <?php
+<?php
         }
     }
 
@@ -207,7 +206,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        $this->logger->logInfo('New scheduled_subscription_payment for Order #'.$renewalOrder->get_id());
+        $this->logger->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
         $customerId = $renewalOrder->get_customer_id();
         if (!$customerId) {
             $this->logger->logError('There is no costumer id on the renewal order');
@@ -218,7 +217,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         /** @var WC_Payment_Token_Oneclick $paymentToken */
         $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
         $response = $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
-        if ($response['result'] == 'error'){
+        if ($response['result'] == 'error') {
             throw new EcommerceException('Se produjo un error en la autorización');
         }
         $this->setAfterPaymentOrderStatus($renewalOrder);
@@ -240,7 +239,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         return $item;
     }
 
-    public function set_payment_token_class() {
+    public function set_payment_token_class()
+    {
         return WC_Payment_Token_Oneclick::class;
     }
 
@@ -255,8 +255,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
         $shouldThrowException = false;
 
-        try
-        {
+        try {
             $order = new WC_Order($order_id);
 
             if (!$order->needs_payment() && !wcs_is_subscription($order_id)) {
@@ -306,12 +305,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
                 $shouldThrowException = true;
                 return $this->authorizeTransaction($order);
-
             }
             $errorMessage = __('Error interno: no se pudo procesar el pago', 'transbank_wc_plugin');
             throw new EcommerceException($errorMessage);
-        }
-        catch (\Throwable $exception) {
+        } catch (\Throwable $exception) {
             $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
             do_action($errorHookName, $exception, $shouldThrowException);
             BlocksHelper::addLegacyNotices($errorMessage, 'error');
@@ -479,7 +476,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      *
      * @return WC_Payment_Token_Oneclick
      */
-    private function getWcPaymentToken(WC_Payment_Token_Oneclick $paymentToken = null){
+    private function getWcPaymentToken(WC_Payment_Token_Oneclick $paymentToken = null)
+    {
         if ($paymentToken) {
             return $paymentToken;
         } else {
@@ -489,7 +487,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         }
     }
 
-    private function getAmountForAuthorize($amount, $order) {
+    private function getAmountForAuthorize($amount, $order)
+    {
         if ($amount == null) {
             $amount = (int) number_format($order->get_total(), 0, ',', '');
         }
@@ -512,7 +511,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         try {
 
             $token = $this->getWcPaymentToken($paymentToken);
-            $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #'.$token->get_id());
+            $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #' . $token->get_id());
 
             $amount = $this->getAmountForAuthorize($amount, $order);
             $authorizeResponse = $this->oneclickTransbankSdk->authorize($order->get_id(), $amount, $token->get_username(), $token->get_token());
@@ -528,7 +527,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order),
             ];
-
         } catch (CreateTransactionOneclickException $e) {
             $order->update_status('failed');
             $order->add_order_note('Problemas al crear el registro de Transacción');
@@ -542,7 +540,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
             $order->update_status('failed');
             $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
-            $order->add_order_note('CONSTRAINTS_VIOLATED: '.$e->getMessage());
+            $order->add_order_note('CONSTRAINTS_VIOLATED: ' . $e->getMessage());
         }
 
         do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
@@ -565,15 +563,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     /**
      * @param WC_Order $order
      */
-    private function setAfterPaymentOrderStatus(WC_Order $order){
+    private function setAfterPaymentOrderStatus(WC_Order $order)
+    {
         $status = $this->get_option('oneclick_after_payment_order_status');
-        if ($status == ''){
+        if ($status == '') {
             $order->payment_complete();
-        }
-        else{
+        } else {
             $order->payment_complete();
             $order->update_status($status);
         }
     }
-
 }
