@@ -136,12 +136,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             ]);
             return true;
         } catch (GetTransactionOneclickException $e) {
-            $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniéndolo de la base de datos de transacciones de webpay plus. ';
+            $errorMessage =
+                'Se intentó anular transacción, pero hubo un problema obteniéndolo de la base de datos ' .
+                'de transacciones de webpay plus.';
+
             $order->add_order_note($errorMessage);
             do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException($errorMessage, $e);
         } catch (NotFoundTransactionOneclickException $e) {
-            $errorMessage = 'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones de webpay plus. ';
+            $errorMessage =
+                'Se intentó anular transacción, pero no se encontró en la base de datos de transacciones ' .
+                'de webpay plus. ';
+
             $order->add_order_note($errorMessage);
             do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException($errorMessage, $e);
@@ -154,7 +160,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             ]);
             throw new EcommerceException('Error al anular: ' . $e->getMessage(), $e);
         } catch (RejectedRefundOneclickException $e) {
-            $errorMessage = 'Anulación a través de Webpay FALLIDA. ' . "\n\n" . json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
+            $errorMessage = "Anulación a través de Webpay FALLIDA.\n\n" .
+                json_encode($e->getRefundResponse(), JSON_PRETTY_PRINT);
+
             $order->add_order_note($errorMessage);
             do_action('wc_transbank_oneclick_refund_failed', [
                 'order' => $order->get_data(),
@@ -184,7 +192,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                                 'Gateway disabled',
                                 'woocommerce'
                             ); ?></strong>: <?php esc_html_e(
-                                                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
+                                                'Oneclick no soporta la moneda configurada en tu tienda. ' .
+                                                    'Solo soporta CLP',
                                                 'transbank_wc_plugin'
                                             ); ?>
                 </p>
@@ -204,6 +213,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function form()
     {
+        // No render payment form.
     }
 
     /**
@@ -278,11 +288,15 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $payWithSavedToken = $paymentMethodOption !== null && !$addNewCard;
 
             if (!get_current_user_id()) {
-                $order->add_order_note('El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout) cuenta de usuario');
+                $order->add_order_note(
+                    'El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout)' .
+                        ' cuenta de usuario'
+                );
                 $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
 
                 $errorMessage = __(
-                    'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir tu tarjeta y usar este método de pago.',
+                    'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
+                        'tu tarjeta y usar este método de pago.',
                     'transbank_wc_plugin'
                 );
 
@@ -296,7 +310,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
                 $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
                 $this->logger->logInfo(json_encode($response));
-                $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick...');
+                $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a ' .
+                    'formulario OneClick...');
 
                 do_action('transbank_oneclick_adding_card_from_order', $order);
 
@@ -355,6 +370,31 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      **/
     public function init_form_fields()
     {
+        $environmentDescription = 'Define si el plugin operará en el ambiente de pruebas (integración) o en el ' .
+            'ambiente real (producción). <br/><br/>Si defines el ambiente como "Integración" <strong>no</strong> ' .
+            'se usarán el código de comercio y llave secreta que tengas configurado abajo, ya que se usará el código ' .
+            'de comercio especial del ambiente de pruebas.';
+
+        $commerceCodeDescription = 'Ingresa tu código de comercio Mall para el ambiente de producción. <br/><br/>' .
+            'Este se te entregará al completar el proceso de afiliación comercial. <br/><br/>' .
+            'Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ';
+
+        $childCommerceCodeDescription = 'Indica tu código de comercio Tienda para el ambiente de producción.' .
+            '<br/><br/>Este se te entregará al completar el proceso de afiliación comercial. <br /><br />' .
+            'Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970.';
+
+        $apiKeyDescription = 'Esta llave privada te la entregará Transbank luego de que completes el proceso ' .
+            'de validación (link más abajo).<br/><br/>No la compartas con nadie una vez que la tengas.';
+
+        $maxAmountDescription = 'Define el monto máximo que un cliente puede pagar con Oneclick.<br/><br/>' .
+            'Si un cliente va a realizar una compra superior a este monto, Oneclick no aparecerá como opción de ' .
+            'pago en el proceso de checkout. Dejar en 0 si no se desea tener un límite (no recomendado). <br/><br/>' .
+            'Recuerda que en Oneclick, al no contar con autentificación bancaria, es tu comercio el que asume el ' .
+            'riesgo en caso de fraude o contracargo. <br/><br />Independiente del monto que definas en esta ' .
+            'configuración, en tu contrato de Oneclick, existe un límite de cantidad de transacciones diarias, ' .
+            'un monto máximo por transacción y monto acumulado diario. Si un cliente supera ese límite, ' .
+            'su transacción será rechazada.';
+
         $this->form_fields = [
             'enabled' => [
                 'title'   => __('Activar/Desactivar', 'transbank_wc_plugin'),
@@ -364,9 +404,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'environment' => [
                 'title'       => __('Ambiente', 'transbank_wc_plugin'),
                 'type'        => 'select',
-                'desc_tip'    => 'Define si el plugin operará en el ambiente de pruebas (integración) o en el
-                    ambiente real (producción). <br /><br />Si defines el ambiente como "Integración" <strong>no</strong> se usarán el código de
-                    comercio y llave secreta que tengas configurado abajo, ya que se usará el código de comercio especial del ambiente de pruebas.',
+                'desc_tip'    => $environmentDescription,
                 'options' => [
                     Options::ENVIRONMENT_INTEGRATION => __('Integración', 'transbank_wc_plugin'),
                     Options::ENVIRONMENT_PRODUCTION  => __('Producción', 'transbank_wc_plugin'),
@@ -376,14 +414,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'commerce_code' => [
                 'title'       => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'desc_tip'    => 'Ingresa tu código de comercio Mall para el ambiente de producción. <br /><br />Este se te entregará al completar el proceso de afiliación comercial. <br /><br />Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                'desc_tip'    => $commerceCodeDescription,
                 'type'        => 'text',
                 'default'     => '',
             ],
             'child_commerce_code' => [
                 'title'       => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'desc_tip'    => 'Indica tu código de comercio Tienda para el ambiente de producción. <br /><br />Este se te entregará al completar el proceso de afiliación comercial. <br /><br />Siempre comienza con 5970 y debe tener 12 dígitos. Si el tuyo tiene 8, antepone 5970. ',
+                'desc_tip'    => $childCommerceCodeDescription,
                 'type'        => 'text',
                 'default'     => '',
             ],
@@ -391,7 +429,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'title'       => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
                 'type'        => 'text',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-                'desc_tip'    => 'Esta llave secreta te la entregará Transbank luego de que completes el proceso de validación (link más abajo). <br /><br />No la compartas con nadie una vez que la tengas. ',
+                'desc_tip'    => $apiKeyDescription,
                 'default'     => '',
             ],
             'max_amount' => [
@@ -399,13 +437,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'type'        => 'number',
                 'options'     => ['step' => 100],
                 'default'     => '0',
-                'desc_tip'    => 'Define el monto máximo que un cliente puede pagar con Oneclick.<br /><br />
-                Si un cliente va a realizar una compra superior a este monto, Oneclick no aparecerá como opción de
-                pago en el proceso de checkout. Dejar en 0 si no se desea tener un límite (no recomendado). <br /><br />Recuerda que en
-                Oneclick, al no contar con autentificación bancaria, es tu comercio el que asume el riesgo en caso d
-                e fraude o contracargo. <br /><br />Independiente del monto que definas en esta configuración, en tu
-                contrato de Oneclick, existe un límite de cantidad de transacciones diarias, un monto máximo por
-                transacción y monto acumulado diario. Si un cliente supera ese límite, su transacción será rechazada. ',
+                'desc_tip'    => $maxAmountDescription,
             ],
             'oneclick_after_payment_order_status' => [
                 'title'       => __('Order Status', 'transbank_wc_plugin'),
@@ -526,7 +558,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #' . $token->get_id());
 
             $amount = $this->getAmountForAuthorize($amount, $order);
-            $authorizeResponse = $this->oneclickTransbankSdk->authorize($order->get_id(), $amount, $token->get_username(), $token->get_token());
+            $authorizeResponse =
+            $this->oneclickTransbankSdk->authorize(
+                $order->get_id(),
+                $amount, $token->get_username(),
+                $token->get_token()
+            );
 
             $order->add_payment_token($token);
             $this->setAfterPaymentOrderStatus($order);
