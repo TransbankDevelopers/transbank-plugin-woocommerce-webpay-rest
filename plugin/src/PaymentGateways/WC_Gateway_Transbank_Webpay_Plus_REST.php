@@ -191,6 +191,12 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                     'completed'  => 'Completed',
                 ],
                 'default' => '',
+            ],
+            'webpay_rest_payment_gateway_description' => [
+                'title'       => __('Descripción', 'transbank_webpay_plus_rest'),
+                'type'        => 'textarea',
+                'desc_tip'    => 'Define la descripción del medio de pago.',
+                'default' => self::PAYMENT_GW_DESCRIPTION,
             ]
         ];
     }
