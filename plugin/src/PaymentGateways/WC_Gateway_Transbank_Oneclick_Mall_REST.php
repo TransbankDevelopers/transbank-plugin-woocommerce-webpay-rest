@@ -511,7 +511,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         // The user selected Oneclick, Pay with new card and choosed to save it in their account.
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
-        $email = $userInfo->user_email; // Todo: check if we had to generate a random email as well
+        $email = $userInfo->user_email;
         return $this->oneclickTransbankSdk->startInscription($orderId, $userInfo->ID, $email, $returnUrl, $from);
     }
 
