@@ -373,3 +373,13 @@
 .log-debug {
     color: #00f;
 }
+
+.input-text.wide-input.admin-textarea {
+    width: 400px !important;
+}
+
+@media only screen and (max-width: 782px) {
+    .input-text.wide-input.admin-textarea {
+        width: 100% !important;
+    }
+}
