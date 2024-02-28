@@ -28,8 +28,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     const ID = 'transbank_webpay_plus_rest';
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 
-    const PAYMENT_GW_DESCRIPTION =
-    'Permite el pago de productos y/o servicios, ' .
+    const PAYMENT_GW_DESCRIPTION = 'Permite el pago de productos y/o servicios, ' .
         'con tarjetas de crédito, débito y prepago a través de Webpay Plus';
 
     protected $plugin_url;
