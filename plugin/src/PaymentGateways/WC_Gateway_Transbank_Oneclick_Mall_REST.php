@@ -416,6 +416,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 ],
                 'default' => '',
             ],
+            'oneclick_payment_gateway_description' => [
+                'title'       => __('Descripción', 'transbank_wc_plugin'),
+                'type'        => 'textarea',
+                'desc_tip'    => 'Define la descripción del medio de pago.',
+                'default' => self::PAYMENT_GW_DESCRIPTION,
+            ]
         ];
     }
 
