@@ -136,7 +136,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             ]);
             return true;
         } catch (GetTransactionOneclickException $e) {
-            $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniendolo de la base de datos de transacciones de webpay plus. ';
+            $errorMessage = 'Se intentó anular transacción, pero hubo un problema obteniéndolo de la base de datos de transacciones de webpay plus. ';
             $order->add_order_note($errorMessage);
             do_action('wc_transbank_oneclick_refund_failed', ['order' => $order->get_data()]);
             throw new EcommerceException($errorMessage, $e);
