@@ -189,7 +189,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             ],
             'webpay_rest_api_key' => [
                 'title'       => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
-                'type'        => 'text',
+                'type'        => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip'    => $apiKeyDescription,
                 'default'     => '',

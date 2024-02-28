@@ -431,7 +431,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             ],
             'api_key' => [
                 'title'       => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
-                'type'        => 'text',
+                'type'        => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip'    => $apiKeyDescription,
                 'default'     => '',
