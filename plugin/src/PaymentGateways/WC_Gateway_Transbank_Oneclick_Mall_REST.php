@@ -34,6 +34,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     const ID = 'transbank_oneclick_mall_rest';
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
 
+    const PAYMENT_GW_DESCRIPTION = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga ' .
+        'con un solo click a través de Webpay Oneclick';
+
     /**
      * @var Transbank\Webpay\Oneclick\MallInscription
      */
@@ -68,8 +71,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->id = self::ID;
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
-        $this->description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
-        $this->method_description = 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga con un solo click a través de Webpay Oneclick';
+        $this->description = self::PAYMENT_GW_DESCRIPTION;
+        $this->method_description = self::PAYMENT_GW_DESCRIPTION;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
 
         $this->init_form_fields();
@@ -179,9 +182,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                                 'Gateway disabled',
                                 'woocommerce'
                             ); ?></strong>: <?php esc_html_e(
-                                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
-                                'transbank_wc_plugin'
-                            ); ?>
+                                                'Oneclick no soporta la moneda configurada en tu tienda. Solo soporta CLP',
+                                                'transbank_wc_plugin'
+                                            ); ?>
                 </p>
             </div>
 <?php
