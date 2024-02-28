@@ -76,7 +76,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $this->init_form_fields();
         $this->init_settings();
 
-        add_action('woocommerce_thankyou', [new ThankYouPageController($this->config), 'show'], 1);
+        add_action('woocommerce_thankyou', [new ThankYouPageController(), 'show'], 1);
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
         add_action('woocommerce_api_wc_gateway_' . $this->id, [$this, 'check_ipn_response']);
 
