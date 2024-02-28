@@ -20,6 +20,10 @@ use Transbank\Plugin\Exceptions\Oneclick\NotFoundTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
+use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
+use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
+use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
+use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Tokens;
@@ -43,7 +47,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     protected $oneclickInscription;
     protected $logger;
     /**
-     * @var Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk
+     * @var OneclickTransbankSdk
      */
     protected $oneclickTransbankSdk;
 
@@ -217,7 +221,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws MallTransactionAuthorizeException
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
@@ -263,7 +267,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * Procesar pago y retornar resultado.
      **
      *
-     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws MallTransactionAuthorizeException
      */
     public function process_payment($order_id)
     {
@@ -342,7 +346,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
+     * @throws InscriptionStartException
      */
     public function add_payment_method()
     {
@@ -500,9 +504,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * @param string   $from
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException
+     * @throws InscriptionStartException
      *
-     * @return Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse
+     * @return InscriptionStartResponse
      */
     public function start(
         int $orderId = null,
