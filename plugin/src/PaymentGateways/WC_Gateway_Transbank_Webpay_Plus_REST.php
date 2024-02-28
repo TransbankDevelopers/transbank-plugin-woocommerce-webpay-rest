@@ -55,8 +55,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Transbank Webpay Plus';
-        $this->description = self::PAYMENT_GW_DESCRIPTION;
-        $this->method_description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
+        $this->description = $this->get_option('webpay_rest_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
+        $this->method_description =
+            $this->get_option('webpay_rest_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
+            
         $this->plugin_url = plugins_url('/', __FILE__);
         $this->log = TbkFactory::createLogger();
 
