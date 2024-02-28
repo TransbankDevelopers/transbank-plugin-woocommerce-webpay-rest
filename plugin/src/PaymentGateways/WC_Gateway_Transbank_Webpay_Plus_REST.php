@@ -125,6 +125,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         } catch (Throwable $e) {
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
         }
+        return false;
     }
 
     private function processRefundError($order, $exception, $action, $tx, $response)
