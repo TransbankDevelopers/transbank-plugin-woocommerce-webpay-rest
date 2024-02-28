@@ -32,7 +32,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
     use TransbankRESTPaymentGateway;
 
-    const ID= 'transbank_webpay_plus_rest';
+    const ID = 'transbank_webpay_plus_rest';
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 
     protected $plugin_url;
@@ -48,7 +48,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
         $this->id = self::ID;
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))).'images/webpay.png';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Transbank Webpay Plus';
         $this->description = 'Permite el pago de productos y/o servicios, con tarjetas de crédito, débito y prepago a través de Webpay Plus';
@@ -76,8 +76,8 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $this->init_settings();
 
         add_action('woocommerce_thankyou', [new ThankYouPageController($this->config), 'show'], 1);
-        add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
-        add_action('woocommerce_api_wc_gateway_'.$this->id, [$this, 'check_ipn_response']);
+        add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
+        add_action('woocommerce_api_wc_gateway_' . $this->id, [$this, 'check_ipn_response']);
 
         if (!$this->is_valid_for_use()) {
             $this->enabled = false;
@@ -85,16 +85,16 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     }
 
     /**
-	 * Process refund.
-	 *
-	 * If the gateway declares 'refunds' support, this will allow it to refund.
-	 * a passed in amount.
-	 *
-	 * @param  int        $order_id Order ID.
-	 * @param  float|null $amount Refund amount.
-	 * @param  string     $reason Refund reason.
-	 * @return boolean True or false based on success, or a WP_Error object.
-	 */
+     * Process refund.
+     *
+     * If the gateway declares 'refunds' support, this will allow it to refund.
+     * a passed in amount.
+     *
+     * @param  int        $order_id Order ID.
+     * @param  float|null $amount Refund amount.
+     * @param  string     $reason Refund reason.
+     * @return boolean True or false based on success, or a WP_Error object.
+     */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
         $order = null;
@@ -113,19 +113,19 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_transaction_not_found', null, null);
         } catch (RefundWebpayException $e) {
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), null);
-        }catch (RejectedRefundWebpayException $e) {
+        } catch (RejectedRefundWebpayException $e) {
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), $e->getRefundResponse());
         } catch (Throwable $e) {
             $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
         }
     }
 
-    private function processRefundError($order, $exception, $action, $tx, $response){
+    private function processRefundError($order, $exception, $action, $tx, $response)
+    {
         $messageError = '<strong>Error en el reembolso:</strong><br />';
-        $messageError = $messageError.$exception->getMessage();
-        if (isset($response))
-        {
-            $messageError = $messageError."\n\n".json_encode($exception->getRefundResponse(), JSON_PRETTY_PRINT);
+        $messageError = $messageError . $exception->getMessage();
+        if (isset($response)) {
+            $messageError = $messageError . "\n\n" . json_encode($exception->getRefundResponse(), JSON_PRETTY_PRINT);
         }
         $order->add_order_note($messageError);
         do_action($action, $order, $tx, $exception->getMessage());
@@ -225,10 +225,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->token);
             return [
                 'result'   => 'success',
-                'redirect' => $createResponse->url.'?token_ws='.$createResponse->token,
+                'redirect' => $createResponse->url . '?token_ws=' . $createResponse->token,
             ];
         } catch (CreateWebpayException $e) {
-            if (ErrorHelper::isGuzzleError($e)){
+            if (ErrorHelper::isGuzzleError($e)) {
                 $errorMessage = ErrorHelper::getGuzzleError();
                 do_action($errorHookName, new Exception($errorMessage), true);
                 BlocksHelper::addLegacyNotices(ErrorHelper::getGuzzleError(), 'error');
@@ -254,7 +254,6 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         update_site_option('transbank_webpay_rest_showed_welcome_message', true);
         $tab = 'options';
         $environment = $this->config['MODO'];
-        include_once __DIR__.'/../../views/admin/options-tabs.php';
+        include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }
-
 }
