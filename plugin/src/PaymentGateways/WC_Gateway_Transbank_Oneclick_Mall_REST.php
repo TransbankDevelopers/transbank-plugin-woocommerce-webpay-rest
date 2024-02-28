@@ -71,8 +71,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->id = self::ID;
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
-        $this->description = self::PAYMENT_GW_DESCRIPTION;
-        $this->method_description = self::PAYMENT_GW_DESCRIPTION;
+        $this->description = $this->get_option('oneclick_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
+        $this->method_description =
+            $this->get_option('oneclick_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
+
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
 
         $this->init_form_fields();
