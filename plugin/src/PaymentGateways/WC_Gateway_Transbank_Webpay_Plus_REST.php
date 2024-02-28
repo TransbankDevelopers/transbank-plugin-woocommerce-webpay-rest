@@ -21,13 +21,6 @@ use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
 use WC_Order;
 use WC_Payment_Gateway;
 
-/**
- * @property string icon
- * @property string  method_title
- * @property string title
- * @property string description
- * @property string id
- */
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
     use TransbankRESTPaymentGateway;
