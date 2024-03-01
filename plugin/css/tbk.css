@@ -383,3 +383,33 @@
         width: 100% !important;
     }
 }
+
+.tbk-review-container {
+    display:flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-left: 8px;
+}
+
+.tbk-review-text {
+    max-width: 65%;
+}
+
+.tbk-review-btn {
+    display: flex;
+}
+
+.tbk-review-title {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.tbk-review-btn-link {
+    color: white;
+    background: #6B1A6B;
+    border-radius: 4px;
+    width: 150px;
+    text-align: center;
+    line-height: 30px;
+    text-decoration: none;
+}
