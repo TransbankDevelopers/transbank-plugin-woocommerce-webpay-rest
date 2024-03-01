@@ -10,7 +10,7 @@
     </div>
     <div class="tbk-review-btn">
     <a href="https://wordpress.org/support/plugin/transbank-webpay-plus-rest/reviews/#new-post"
-        target="_blank" class="tbk-review-btn-link">Dejar reseña</a>
+        target="_blank" class="tbk-review-btn-link" rel="noopener">Dejar reseña</a>
     </div>
 
 </div>
