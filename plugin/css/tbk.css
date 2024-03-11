@@ -311,7 +311,7 @@
 }
 
 .tbk-notice {
-    display: inline-flex;
+    display: flex;
     align-items: center;
 }
 
@@ -382,4 +382,17 @@
     .input-text.wide-input.admin-textarea {
         width: 100% !important;
     }
+}
+
+.tbk-notice .tbk-review-text {
+    max-width: 65%;
+}
+
+.tbk-notice .tbk-button-primary {
+    margin-left: auto;
+}
+
+.tbk-notice .tbk-review-title {
+    font-size: 18px;
+    font-weight: 500;
 }

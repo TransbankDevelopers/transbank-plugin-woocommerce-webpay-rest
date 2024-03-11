@@ -105,4 +105,12 @@ jQuery(function($) {
             releaseButton('get-transaction-status','Consultar estado de la transacción');
         });
     });
+
+    $('#mainform').on('click', '.notice-dismiss', function() {
+        let noticeId = $(this).closest('.notice').attr('id');
+
+        post('dismiss_notice', {
+            notice_id: noticeId
+        });
+    });
 })
