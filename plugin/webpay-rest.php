@@ -108,9 +108,10 @@ function woocommerceTransbankInit() {
         noticeMissingWoocommerce();
         return;
     }
-    NoticeHelper::handleReviewNotice();
     registerAdminMenu();
     registerPluginActionLinks();
+    NoticeHelper::registerNoticesDismissHook();
+    NoticeHelper::handleReviewNotice();
 }
 
 function registerPaymentGateways() {

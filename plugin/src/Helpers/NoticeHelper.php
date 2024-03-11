@@ -6,6 +6,7 @@ use Transbank\WooCommerce\WebpayRest\Utils\Template;
 
 class NoticeHelper
 {
+    const NOTICE_REVIEW_ID = "tbk-review-notice";
     /**
      * display review notice if is necessary
      * @return void
@@ -15,7 +16,7 @@ class NoticeHelper
         if (!self::shouldShowReviewNotice()) {
             return;
         }
-        update_site_option('tbk_review_notice_showed', true);
+
         add_action(
             'admin_notices',
             function () {
@@ -26,6 +27,20 @@ class NoticeHelper
                 ]);
             }
         );
+    }
+
+    public static function dismissNoticesHandler()
+    {
+        $noticeId = $_POST['notice_id'] ?? '';
+
+        if ($noticeId == self::NOTICE_REVIEW_ID) {
+            $success = update_site_option('tbk_review_notice_showed', true);
+        }
+    }
+
+    public static function registerNoticesDismissHook()
+    {
+        add_action('wp_ajax_dismiss_notice', NoticeHelper::class.'::dismissNoticesHandler');
     }
 
     /**

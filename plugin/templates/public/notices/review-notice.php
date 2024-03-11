@@ -1,5 +1,5 @@
-<div class="notice notice-info is-dismissible tbk-review-container">
-    <div>
+<div class="notice notice-info is-dismissible tbk-review-container" id="tbk-review-notice">
+<div>
         <img src="<?= $tbkLogo ?>" height="70px" alt="Transbank logo" />
     </div>
     <div class="tbk-review-text">
