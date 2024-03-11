@@ -10,8 +10,9 @@ class NoticeHelper
      * display review notice if is necessary
      * @return void
      */
-    public static function handleReviewNotice(): void {
-        if(!self::shouldShowReviewNotice()){
+    public static function handleReviewNotice(): void
+    {
+        if (!self::shouldShowReviewNotice()) {
             return;
         }
         update_site_option('tbk_review_notice_showed', true);
@@ -31,9 +32,10 @@ class NoticeHelper
      * determines if the review notice should be displayed
      * @return boolean `true` when notice need to be showed, `false` otherwise
      */
-    private static function shouldShowReviewNotice(): bool{
+    private static function shouldShowReviewNotice(): bool
+    {
         $reviewNoticeShowed = get_site_option('tbk_review_notice_showed');
-        if($reviewNoticeShowed){
+        if ($reviewNoticeShowed) {
             return false;
         }
 
@@ -42,6 +44,5 @@ class NoticeHelper
         }
 
         return false;
-
     }
 }
