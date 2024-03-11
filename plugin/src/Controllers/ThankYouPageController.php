@@ -12,22 +12,12 @@ use WC_Order;
 
 class ThankYouPageController
 {
-    private $logger;
-    private Template $template;
-
-    public function __construct()
-    {
-        $logger = TbkFactory::createLogger();
-        $this->logger = $logger;
-        $this->template = new Template();
-    }
-
     public function show($orderId)
     {
         $woocommerceOrder = new WC_Order($orderId);
 
         if (!$this->isValidPaymentGateway($woocommerceOrder->get_payment_method())) {
-            $this->logger->logDebug(
+            TbkFactory::createLogger()->logDebug(
                 "La pasarela de pago no es válida, se ha pagado con {$woocommerceOrder->get_payment_method_title()}"
             );
             return;
@@ -50,7 +40,7 @@ class ThankYouPageController
             $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($transactionResponse);
         }
 
-        $this->template->render('public/order/order-summary.php', $formattedResponse);
+        (new Template())->render('public/order/order-summary.php', $formattedResponse);
     }
 
     private function isValidPaymentGateway($paymentMethod): bool
