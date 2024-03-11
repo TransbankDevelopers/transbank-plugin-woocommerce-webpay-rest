@@ -311,7 +311,7 @@
 }
 
 .tbk-notice {
-    display: inline-flex;
+    display: flex;
     align-items: center;
 }
 
@@ -384,32 +384,15 @@
     }
 }
 
-.tbk-review-container {
-    display:flex;
-    justify-content: space-around;
-    align-items: center;
-    padding-left: 8px;
-}
-
-.tbk-review-text {
+.tbk-notice .tbk-review-text {
     max-width: 65%;
 }
 
-.tbk-review-btn {
-    display: flex;
+.tbk-notice .tbk-button-primary {
+    margin-left: auto;
 }
 
-.tbk-review-title {
+.tbk-notice .tbk-review-title {
     font-size: 18px;
     font-weight: 500;
-}
-
-.tbk-review-btn-link {
-    color: white;
-    background: #6B1A6B;
-    border-radius: 4px;
-    width: 150px;
-    text-align: center;
-    line-height: 30px;
-    text-decoration: none;
 }
