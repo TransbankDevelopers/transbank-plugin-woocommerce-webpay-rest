@@ -14,6 +14,12 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.8.0 =
+* Se corrige un problema con el contenido del archivo log que provocaba que se desborde.
+* Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
+* Se cambia el capo API Key para que sea de tipo password.
+* Se agrega un notice invitando a los usuarios a dejar su review del plugin.
+
 = 1.7.1 =
 * Se corrige el formato de la nota de reembolso de pedidos.
 * Se corrige un bug en la generación de la orden de compra.
@@ -148,6 +154,12 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.8.0 =
+* Se corrige un problema con el contenido del archivo log que provocaba que se desborde.
+* Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
+* Se cambia el capo API Key para que sea de tipo password.
+* Se agrega un notice invitando a los usuarios a dejar su review del plugin.
+
 = 1.7.1 =
 * Se corrige el formato de la nota de reembolso de pedidos.
 * Se corrige un bug en la generación de la orden de compra.
