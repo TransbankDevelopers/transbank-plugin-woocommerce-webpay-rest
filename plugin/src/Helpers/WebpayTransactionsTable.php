@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WP_List_Table;
 
 class WebpayTransactionsTable extends WP_List_Table
@@ -107,18 +108,14 @@ class WebpayTransactionsTable extends WP_List_Table
         }
         $tbkResponse = json_decode($item->transbank_response);
 
-        $utcDate = new DateTime($tbkResponse->transactionDate, new DateTimeZone('UTC'));
-        $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
-
-        return $utcDate->format('d-m-Y H:i:s');
+        return TbkResponseUtil::transactionDateToLocalDate($tbkResponse->transactionDate);
     }
 
     public function column_created_at($item)
     {
-        $utcDate = new DateTime($item->created_at, new DateTimeZone('UTC'));
-        $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+        $utcDate = new DateTime($item->created_at, new DateTimeZone(wc_timezone_string()));
 
-        return $utcDate->format('d-m-Y H:i:s');
+        return $utcDate->format('d-m-Y H:i:s P');
     }
 
     public function column_environment($item)

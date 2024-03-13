@@ -286,10 +286,6 @@
     overflow: hidden;
 }
 
-.tbk-plugin-info-container.logs {
-    max-width: 40%;
-}
-
 .info-column-plugin {
     padding: 4px 0px;
     text-align: left;
@@ -315,7 +311,7 @@
 }
 
 .tbk-notice {
-    display: inline-flex;
+    display: flex;
     align-items: center;
 }
 
@@ -332,4 +328,71 @@
     border-color: #C00063;
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.log-container {
+    width: calc(100vw - 480px);
+    max-height: 600px;
+    margin-top: 20px;
+    overflow: auto;
+    background-color: #272822;
+    border: 10px solid #272822;
+    border-radius: 5px;
+}
+
+@media only screen and (max-width: 960px) {
+    .log-container {
+        width: calc(100vw - 340px);
+    }
+}
+
+@media only screen and (max-width: 782px) {
+    .log-container {
+        width: calc(100vw - 300px);
+    }
+}
+
+.log-line {
+    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    color: #ccc;
+    max-width: 100%;
+}
+
+.log-info {
+    color: #0f0;
+}
+
+.log-error {
+    color: #f00;
+}
+
+.log-warning {
+    color: #ff0;
+}
+
+.log-debug {
+    color: #00f;
+}
+
+.input-text.wide-input.admin-textarea {
+    width: 400px !important;
+}
+
+@media only screen and (max-width: 782px) {
+    .input-text.wide-input.admin-textarea {
+        width: 100% !important;
+    }
+}
+
+.tbk-notice .tbk-review-text {
+    max-width: 65%;
+}
+
+.tbk-notice .tbk-button-primary {
+    margin-left: auto;
+}
+
+.tbk-notice .tbk-review-title {
+    font-size: 18px;
+    font-weight: 500;
 }

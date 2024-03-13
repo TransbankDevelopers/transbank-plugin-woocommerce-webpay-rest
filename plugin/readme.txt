@@ -14,6 +14,12 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.8.0 =
+* Se corrige un problema con el contenido del archivo log que provocaba que se desborde.
+* Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
+* Se cambia el capo API Key para que sea de tipo password.
+* Se agrega un notice invitando a los usuarios a dejar su review del plugin.
+
 = 1.7.1 =
 * Se corrige el formato de la nota de reembolso de pedidos.
 * Se corrige un bug en la generación de la orden de compra.
@@ -53,7 +59,7 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 * Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
 
 = 1.6.1 =
-* Se corrije error con librería "monolog/monolog"
+* Se corrige error con librería "monolog/monolog"
 
 = 1.6.0 =
 * Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
@@ -79,7 +85,7 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 = 1.5.0 =
 * Se añade soporte para Oneclick Mall REST
 * Soporte para Refunds en Oneclick Mall
-* Soporte para subscripciones con OneClick Mall REST (WooCommerce Subscriptions)
+* Soporte para suscripciones con OneClick Mall REST (WooCommerce Subscriptions)
 * Soporte para agregar múltiples tarjetas en cada usuario
 * La redirección de Webpay Plus ahora pasa directamente desde el checkout al formulario de pago (sin pasar por una pantalla intermedia como antes)
 * El resultado de los reembolsos ahora tiene mejor formato en las de notas del pedido.
@@ -148,6 +154,12 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.8.0 =
+* Se corrige un problema con el contenido del archivo log que provocaba que se desborde.
+* Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
+* Se cambia el capo API Key para que sea de tipo password.
+* Se agrega un notice invitando a los usuarios a dejar su review del plugin.
+
 = 1.7.1 =
 * Se corrige el formato de la nota de reembolso de pedidos.
 * Se corrige un bug en la generación de la orden de compra.
@@ -187,7 +199,7 @@ Arreglado:
 * Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
 
 = 1.6.1 =
-* Se corrije error con librería "monolog/monolog"
+* Se corrige error con librería "monolog/monolog"
 
 = 1.6.0 =
 * Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
@@ -198,10 +210,10 @@ Arreglado:
 * Se agrega una validación que confirma la inserción en la tabla de inscripción del plugin antes de seguir proceso de inscripción en Oneclick.
 
 = 1.5.4
-* Se agrega la posibilidad de seleccionar el estado de la orden despues de un pago exitoso para Webpay Plus y Webpay Oneclick
+* Se agrega la posibilidad de seleccionar el estado de la orden después de un pago exitoso para Webpay Plus y Webpay Oneclick
 
 = 1.5.3
-* Se corrige reconocimiento de tipo de pago y si la transaccion fue exitosa
+* Se corrige reconocimiento de tipo de pago y si la transacción fue exitosa
 
 = 1.4.1 =
 * Se utiliza el nuevo SDk de PHP versión 2.0

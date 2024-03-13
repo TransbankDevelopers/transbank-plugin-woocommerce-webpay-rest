@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 
 class TransactionStatusController
 {
@@ -41,6 +42,8 @@ class TransactionStatusController
             $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
 
             $response = array_merge($statusArray, $firstDetail);
+            $formattedDate = TbkResponseUtil::transactionDateToLocalDate($status->getTransactionDate());
+            $response['transactionDate'] = $formattedDate;
             unset($response['details']);
             wp_send_json([
                 'product' => $transaction->product,
@@ -60,9 +63,12 @@ class TransactionStatusController
         try {
             $webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
             $resp = $webpayplusTransbankSdk->status($transaction->order_id, $transaction->token);
+            $formattedDate = TbkResponseUtil::transactionDateToLocalDate($resp->getTransactionDate());
+            $modifiedResponse = clone $resp;
+            $modifiedResponse->setTransactionDate($formattedDate);
             wp_send_json([
                 'product' => $transaction->product,
-                'status'  => $resp,
+                'status'  => $modifiedResponse,
                 'raw'     => $resp,
             ]);
         } catch (\Exception $e) {

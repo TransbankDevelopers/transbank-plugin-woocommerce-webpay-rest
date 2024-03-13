@@ -58,16 +58,18 @@ class TbkConstants
         "VP" => "Venta Prepago"
     ];
 
-    const PAYMENT_TYPE_CREDITO = "Crédito";
+    const PAYMENT_TYPE_CREDIT = "Crédito";
+    const PAYMENT_TYPE_DEBIT = "Débito";
+    const PAYMENT_TYPE_PREPAID = "Prepago";
 
     const PAYMENT_TYPE = [
-        "VD" => "Débito",
-        "VN" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "VC" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "SI" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "S2" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "NC" => TbkConstants::PAYMENT_TYPE_CREDITO,
-        "VP" => "Prepago"
+        "VD" => self::PAYMENT_TYPE_DEBIT,
+        "VN" => self::PAYMENT_TYPE_CREDIT,
+        "VC" => self::PAYMENT_TYPE_CREDIT,
+        "SI" => self::PAYMENT_TYPE_CREDIT,
+        "S2" => self::PAYMENT_TYPE_CREDIT,
+        "NC" => self::PAYMENT_TYPE_CREDIT,
+        "VP" => self::PAYMENT_TYPE_PREPAID
     ];
 
     const INSTALLMENT_TYPE = [
@@ -76,7 +78,17 @@ class TbkConstants
         "S2" => "2 cuotas sin interés",
         "NC" => "N cuotas sin interés"
     ];
-    
+
+    const STATUS_DESCRIPTION =  [
+        'INITIALIZED' => 'Inicializada',
+        'AUTHORIZED' => 'Autorizada',
+        'REVERSED' => 'Reversada',
+        'FAILED' => 'Fallida',
+        'NULLIFIED' => 'Anulada',
+        'PARTIALLY_NULLIFIED' => 'Parcialmente anulada',
+        'CAPTURED' => 'Capturada',
+    ];
+
     const ECOMMERCE_WOOCOMMERCE = 'woocommerce';
 
     const REPO_WOOCOMMERCE = 'TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest';
