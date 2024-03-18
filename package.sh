@@ -1,11 +1,11 @@
 #!/bin/sh
 
 #Script for create the plugin artifact
-echo "Travis tag: $TRAVIS_TAG"
+echo "Tag: $TAG"
 
-if [ "$TRAVIS_TAG" = "" ]
+if [ "$TAG" = "" ]
 then
-   TRAVIS_TAG='1.0.0'
+   TAG='1.0.0'
 fi
 
 SRC_DIR="plugin"
@@ -29,8 +29,8 @@ else
 fi
 cd ..
 
-sed -i.bkp "s/Version: VERSION_REPLACE_HERE/Version: ${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$MAIN_FILE"
-sed -i.bkp "s/VERSION_REPLACE_HERE/${TRAVIS_TAG#"v"}/g" "$SRC_DIR/$README_FILE"
+sed -i.bkp "s/Version: VERSION_REPLACE_HERE/Version: ${TAG#"v"}/g" "$SRC_DIR/$MAIN_FILE"
+sed -i.bkp "s/VERSION_REPLACE_HERE/${TAG#"v"}/g" "$SRC_DIR/$README_FILE"
 cp "$SRC_DIR/$COMPOSER_LOCK_FILE" "$SRC_DIR/$COMPOSER_LOCK_FILE.bkp"
 
 PLUGIN_FILE="transbank-webpay-plus-rest.zip"
@@ -58,6 +58,6 @@ rm "$SRC_DIR/$MAIN_FILE.bkp"
 cp "$SRC_DIR/$README_FILE.bkp" "$SRC_DIR/$README_FILE"
 rm "$SRC_DIR/$README_FILE.bkp"
 
-echo "Plugin version: $TRAVIS_TAG"
+echo "Plugin version: $TAG"
 echo "Plugin file: $PLUGIN_FILE"
 echo "Plugin file Guzzle 7: $PLUGIN_FILE_GUZZLE"
