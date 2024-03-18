@@ -1,0 +1,44 @@
+name: Release
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+      - name: Release
+        run: |
+          chmod +x package.sh
+          chmod +x scripts/deploy.sh
+          ./package.sh
+          ./scripts/deploy.sh
+        env:
+          WP_ORG_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
+          TAG: ${{ github.event.release.tag_name }}
+      - name: Upload assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: |
+            transbank-webpay-plus-rest.zip
+            transbank-webpay-plus-rest-guzzle7.zip
+          asset_name: |
+            transbank-webpay-plus-rest.zip
+            transbank-webpay-plus-rest-guzzle7.zip
+          asset_content_type: application/zip

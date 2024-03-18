@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [[ -z "$TRAVIS" ]]; then
-	echo "Script is only to be run by Travis CI" 1>&2
+if [[ -z "$GITHUB_ACTIONS" ]]; then
+	echo "Script is only to be run by GitHub Actions" 1>&2
 	exit 1
 fi
 
@@ -10,7 +10,7 @@ if [[ -z "$WP_ORG_PASSWORD" ]]; then
 	exit 1
 fi
 
-if [[ -z "$TRAVIS_TAG" ]]; then
+if [[ -z "$TAG" ]]; then
 	echo "Build branch is required and must be a tag" 1>&2
 	exit 0
 fi
@@ -20,7 +20,7 @@ PLUGIN="transbank-webpay-plus-rest"
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 PLUGIN_BUILDS_PATH="$PROJECT_ROOT/builds"
 PLUGIN_BUILD_CONFIG_PATH="$PROJECT_ROOT/build-cfg"
-VERSION=$TRAVIS_TAG
+VERSION=$TAG
 ZIP_FILE="$PROJECT_ROOT/$PLUGIN.zip"
 
 # Ensure the zip file for the current version has been built
