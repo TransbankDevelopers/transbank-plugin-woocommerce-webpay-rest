@@ -18,7 +18,7 @@ COMPOSER_LOCK_FILE="composer.lock"
 cd $SRC_DIR
 composer update
 composer install --no-dev
-npm install
+npm install --no-audit --no-fund --no-optional
 npm run build
 if [ $? -eq 0 ]; then
     rm -rf node_modules/
