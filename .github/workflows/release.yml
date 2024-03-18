@@ -28,6 +28,9 @@ jobs:
           chmod +x scripts/deploy.sh
           ./package.sh
           ./scripts/deploy.sh
+        env:
+          WP_ORG_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
+          TAG: ${{ github.event.release.tag_name }}
       - name: Upload assets
         uses: actions/upload-release-asset@v1
         env:
