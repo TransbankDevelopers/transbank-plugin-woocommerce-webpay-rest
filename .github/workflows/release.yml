@@ -20,8 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '16'
-      - name: Before Deploy
-        run: echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
       - name: Release
         run: |
           chmod +x package.sh
