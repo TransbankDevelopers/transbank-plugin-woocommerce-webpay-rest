@@ -45,7 +45,7 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 
 Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
 
-Para testear los ejemplos estos están disponibles en:
+Para probar el plugin, ponemos a disposición los siguientes contenedores:
 - [WooCommerce 6.0 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.0.0)
 - [WooCommerce 6.5 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.5.0)
 - [WooCommerce 8.1 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.1.0)
