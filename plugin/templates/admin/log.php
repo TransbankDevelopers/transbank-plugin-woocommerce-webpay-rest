@@ -114,6 +114,21 @@ if (!defined('ABSPATH')) {
                 </div>
             </div>
 
+            <form action="/wp-admin/admin.php" method="get">
+                <input type="hidden" name="page" value="transbank_webpay_plus_rest">
+                <input type="hidden" name="tbk_tab" value="logs">
+
+                <select class="select" name="log_file" id="log_file">
+                    <?php
+                    foreach ($resume['logs'] as $index) {
+                        $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
+                        echo $str;
+                    }
+                    ?>
+                </select>
+                <input type="submit" class="button button-primary tbk-button-primary" value="Ver">
+            </form>
+
             <?php
             if (!is_null($lastLog['content'])) {
                 $logContent = '<div class="log-container">';

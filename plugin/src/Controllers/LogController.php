@@ -20,13 +20,31 @@ class LogController
     public function show()
     {
         $summary = $this->log->getInfo();
-        $lastLog = $this->log->getLogDetail(basename($summary['last']));
+        $logFile = basename($summary['last']);
+
+        if (isset($_GET['log_file']) && !is_null($_GET['log_file'])) {
+            if ($this->validateLogFileName($_GET['log_file'], $summary['logs'])) {
+                $logFile = $_GET['log_file'];
+            }
+        }
+
+        $logDetail = $this->log->getLogDetail($logFile);
         $folderHasLogs = $summary['length'] > 0;
 
         $this->template->render('admin/log.php', [
             'resume' => $summary,
-            'lastLog' => $lastLog,
+            'lastLog' => $logDetail,
             'folderHasLogs' => $folderHasLogs
         ]);
+    }
+
+    private function validateLogFileName(String $logFileName, array $logFiles): bool
+    {
+        foreach ($logFiles as $logData) {
+            if (in_array($logFileName, $logData)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
