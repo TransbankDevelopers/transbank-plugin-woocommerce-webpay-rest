@@ -2,16 +2,16 @@
 if (!defined('ABSPATH')) {
     return;
 }
+$logDirectoryTitle = "Carpeta en el servidor en donde se guardan los archivos" .
+    " con la información de cada compra mediante Webpay";
+$lineCountTitle = "Cantidad de líneas que posee el último archivo de registro creado";
 ?>
 
 <div class="tbk-box">
     <h3 class="tbk_title_h3">Información de Registros</h3>
     <div class="tbk-plugin-info-container">
         <div class="info-column">
-            <div
-                title="Carpeta en el servidor en donde se guardan los archivos con la información de cada compra mediante Webpay"
-                class="label label-info"
-            >?</div>
+            <div title="<?php echo $logDirectoryTitle; ?>" class="label label-info">?</div>
         </div>
         <div class="info-column">
             <span class="highlight-text"> Directorio de registros: </span>
@@ -37,7 +37,7 @@ if (!defined('ABSPATH')) {
 
                 <select class="select label" name="log_file">
                     <?php
-                    if(empty($resume['logs'])) {
+                    if (empty($resume['logs'])) {
                         echo "<option value=''>No hay archivos log</option>";
                     }
                     foreach ($resume['logs'] as $index) {
@@ -69,10 +69,7 @@ if (!defined('ABSPATH')) {
         </div>
         <div class="tbk-plugin-info-container">
             <div class="info-column">
-                <div
-                    title="Cantidad de líneas que posee el último archivo de registro creado"
-                    class="label label-info"
-                >?</div>
+                <div title="<?php echo $lineCountTitle; ?>" class="label label-info">?</div>
             </div>
             <div class="info-column-plugin">
                 <span class="highlight-text"> Cantidad de Líneas: </span>
