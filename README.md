@@ -1,7 +1,7 @@
-[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/transbankdevelopers/transbank-plugin-woocommerce-webpay)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay/releases/latest)
-[![GitHub](https://img.shields.io/github/license/transbankdevelopers/transbank-plugin-woocommerce-webpay)](LICENSE)
-[![GitHub contributors](https://img.shields.io/github/contributors/transbankdevelopers/transbank-plugin-woocommerce-webpay)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay/graphs/contributors)
-[![Build Status](https://travis-ci.org/TransbankDevelopers/transbank-plugin-woocommerce-webpay.svg?branch=master)](https://travis-ci.org/TransbankDevelopers/transbank-plugin-woocommerce-webpay)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/transbankdevelopers/transbank-plugin-woocommerce-webpay-rest)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest)
+[![GitHub](https://img.shields.io/github/license/transbankdevelopers/transbank-plugin-woocommerce-webpay-rest)](LICENSE)
+[![GitHub contributors](https://img.shields.io/github/contributors/transbankdevelopers/transbank-plugin-woocommerce-webpay-rest)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/graphs/contributors)
+[![Release](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/actions/workflows/release.yml/badge.svg)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/actions/workflows/release.yml)
 
 # Transbank Woocommerce Webpay Plugin
 Plugin oficial de Webpay para WooCommerce
@@ -45,11 +45,13 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 
 Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
 
-Para testear los ejemplos estos estan disponibles en:
-- [WooCommerce 3.4.0 con php 7.1](./docker-woocommerce-php7.1)
-- [WooCommerce 3.6.3 con php 7.2](./docker-woocommerce-php7.2)
-- [WooCommerce 3.9.1 con php 7.3](./docker-woocommerce-php7.3)
-- [WooCommerce 3.9.1 con php 7.4](./docker-woocommerce-php7.4)
+Para probar el plugin, ponemos a disposición los siguientes contenedores:
+- [WooCommerce 6.0 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.0.0)
+- [WooCommerce 6.5 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.5.0)
+- [WooCommerce 8.1 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.1.0)
+- [WooCommerce 8.2 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.2.0)
+- [WooCommerce 8.3 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.3.0)
+- [WooCommerce 8.5 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.5.0)
 
 Si necesitas subir el plugin a Woocommerce y obtienes un error por que no se puede mover el archivo a `wp-contentent` entonces ejecuta
 
@@ -116,7 +118,7 @@ Con eso Travis CI generará automáticamente una nueva versión del plugin y act
 
 2️⃣ -  El pr debe tener 2 o mas aprobaciones para hacer el merge
 
-3️⃣ - si un commit revierte  un commit anterior debera comenzar con "revert:" seguido con texto del commit anterior
+3️⃣ - si un commit revierte  un commit anterior deberá comenzar con "revert:" seguido con texto del commit anterior
 
 ## Pull Request
 
