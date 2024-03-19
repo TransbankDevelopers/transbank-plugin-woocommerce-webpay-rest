@@ -1,7 +1,7 @@
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/transbankdevelopers/transbank-plugin-woocommerce-webpay-rest)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest)
 [![GitHub](https://img.shields.io/github/license/transbankdevelopers/transbank-plugin-woocommerce-webpay-rest)](LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/transbankdevelopers/transbank-plugin-woocommerce-webpay-rest)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/graphs/contributors)
-[![Build Status](https://travis-ci.org/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest.svg?branch=master)](https://travis-ci.org/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest)
+[![Release](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/actions/workflows/release.yml/badge.svg)](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/actions/workflows/release.yml)
 
 # Transbank Woocommerce Webpay Plugin
 Plugin oficial de Webpay para WooCommerce
