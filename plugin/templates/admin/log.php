@@ -10,8 +10,7 @@ if (!defined('ABSPATH')) {
         <div id="tbk_information_logs" style="margin-bottom: 30px;">
             <div class="tbk-plugin-info-container" id="div_status_logs">
                 <div class="info-column">
-                    <div title="Informa si actualmente se guarda la información de cada compra mediante Webpay"
-                        class="label label-info">?</div>
+                    <div title="Informa si actualmente se guarda la información de cada compra mediante Webpay" class="label label-info">?</div>
                 </div>
                 <div class="info-column">
                     <span class="highlight-text"> Estado de Registros: </span>
@@ -36,8 +35,7 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="tbk-plugin-info-container" id="div_logs_number">
                 <div class="info-column">
-                    <div title="Cantidad de archivos que guardan la información de cada compra mediante Webpay"
-                        class="label label-info">?</div>
+                    <div title="Cantidad de archivos que guardan la información de cada compra mediante Webpay" class="label label-info">?</div>
                 </div>
                 <div class="info-column-plugin log">
                     <span class="highlight-text"> Cantidad de Registros en Directorio: </span>
@@ -51,8 +49,7 @@ if (!defined('ABSPATH')) {
             <?php if ($folderHasLogs) { ?>
                 <div class="tbk-plugin-info-container" id="div_logs_list">
                     <div class="info-column">
-                        <div title="Lista los archivos que guardan la información de cada compra mediante Webpay"
-                        class="label label-info">?</div>
+                        <div title="Lista los archivos que guardan la información de cada compra mediante Webpay" class="label label-info">?</div>
                     </div>
                     <div class="info-column-plugin log">
                         <span class="highlight-text"> Listado de Registros Disponibles: </span>
@@ -104,8 +101,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="tbk-plugin-info-container" id="div_lines_logs">
                     <div class="info-column">
-                        <div title="Cantidad de líneas que posee el último archivo de registro creado"
-                        class="label label-info">?</div>
+                        <div title="Cantidad de líneas que posee el último archivo de registro creado" class="label label-info">?</div>
                     </div>
                     <div class="info-column-plugin">
                         <span class="highlight-text"> Cantidad de Líneas: </span>
