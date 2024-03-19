@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
         </div>
     </div>
 
-    <h3 class="tbk_title_h3">Últimos Registros</h3>
+    <h3 class="tbk_title_h3">Información del archivo</h3>
     <div id="tbk-last-logs">
         <div class="tbk-plugin-info-container" id="div_size_log">
             <div class="info-column">
