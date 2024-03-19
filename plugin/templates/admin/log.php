@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 
 <div class="tbk-box">
     <h3 class="tbk_title_h3">Información de Registros</h3>
-    <div class="tbk-plugin-info-container" id="div_logs_path">
+    <div class="tbk-plugin-info-container">
         <div class="info-column">
             <div title="Carpeta en el servidor en donde se guardan los archivos con la información de cada compra mediante Webpay" class="label label-info">?
             </div>
@@ -33,7 +33,7 @@ if (!defined('ABSPATH')) {
                 <input type="hidden" name="page" value="transbank_webpay_plus_rest">
                 <input type="hidden" name="tbk_tab" value="logs">
 
-                <select class="select label" name="log_file" id="log_file">
+                <select class="select label" name="log_file">
                     <?php
                     if(empty($resume['logs'])) {
                         echo "<option value=''>No hay archivos log</option>";
@@ -51,7 +51,7 @@ if (!defined('ABSPATH')) {
 
     <h3 class="tbk_title_h3">Información del archivo</h3>
     <div id="tbk-last-logs">
-        <div class="tbk-plugin-info-container" id="div_size_log">
+        <div class="tbk-plugin-info-container">
             <div class="info-column">
                 <div title="Peso del último archivo de registro creado" class="label label-info">?
                 </div>
@@ -65,7 +65,7 @@ if (!defined('ABSPATH')) {
                 </span>
             </div>
         </div>
-        <div class="tbk-plugin-info-container" id="div_lines_logs">
+        <div class="tbk-plugin-info-container">
             <div class="info-column">
                 <div title="Cantidad de líneas que posee el último archivo de registro creado" class="label label-info">?</div>
             </div>
