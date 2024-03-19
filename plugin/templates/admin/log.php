@@ -35,6 +35,9 @@ if (!defined('ABSPATH')) {
 
                 <select class="select label" name="log_file" id="log_file">
                     <?php
+                    if(empty($resume['logs'])) {
+                        echo "<option value=''>No hay archivos log</option>";
+                    }
                     foreach ($resume['logs'] as $index) {
                         $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
                         echo $str;
@@ -78,7 +81,7 @@ if (!defined('ABSPATH')) {
     </div>
 
     <?php
-    if (!is_null($lastLog['content'])) {
+    if (isset($lastLog['content']) && !is_null($lastLog['content'])) {
         $logContent = '<div class="log-container">';
 
         $logLines = explode("\n", $lastLog['content']);
