@@ -21,26 +21,6 @@ if (!defined('ABSPATH')) {
                 </span>
             </div>
         </div>
-        <?php if ($folderHasLogs) { ?>
-            <div class="tbk-plugin-info-container" id="div_logs_list">
-                <div class="info-column">
-                    <div title="Lista los archivos que guardan la información de cada compra mediante Webpay" class="label label-info">?</div>
-                </div>
-                <div class="info-column-plugin log">
-                    <span class="highlight-text"> Listado de Registros Disponibles: </span>
-                </div>
-                <div class="info-column-plugin log">
-                    <span class="label">
-                        <?php
-                        foreach ($resume['logs'] as $index) {
-                            $str = '<li>' . $index['filename'] . '</li>';
-                            echo $str;
-                        }
-                        ?>
-                    </span>
-                </div>
-            </div>
-        <?php } ?>
     </div>
 
     <?php if ($folderHasLogs) { ?>
