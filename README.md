@@ -45,7 +45,7 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 
 Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
 
-Para testear los ejemplos estos estan disponibles en:
+Para testear los ejemplos estos están disponibles en:
 - [WooCommerce 6.0 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.0.0)
 - [WooCommerce 6.5 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.5.0)
 - [WooCommerce 8.1 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.1.0)
@@ -118,7 +118,7 @@ Con eso Travis CI generará automáticamente una nueva versión del plugin y act
 
 2️⃣ -  El pr debe tener 2 o mas aprobaciones para hacer el merge
 
-3️⃣ - si un commit revierte  un commit anterior debera comenzar con "revert:" seguido con texto del commit anterior
+3️⃣ - si un commit revierte  un commit anterior deberá comenzar con "revert:" seguido con texto del commit anterior
 
 ## Pull Request
 
