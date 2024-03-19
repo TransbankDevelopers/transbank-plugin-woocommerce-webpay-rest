@@ -20,6 +20,31 @@ if (!defined('ABSPATH')) {
             </span>
         </div>
     </div>
+    <div class="tbk-plugin-info-container">
+        <div class="info-column">
+            <div title="Lista de archivos logs disponibles" class="label label-info">?
+            </div>
+        </div>
+        <div class="info-column">
+            <span class="highlight-text"> Lista de logs: </span>
+        </div>
+        <div class="info-column">
+            <form action="/wp-admin/admin.php" method="get">
+                <input type="hidden" name="page" value="transbank_webpay_plus_rest">
+                <input type="hidden" name="tbk_tab" value="logs">
+
+                <select class="select label" name="log_file" id="log_file">
+                    <?php
+                    foreach ($resume['logs'] as $index) {
+                        $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
+                        echo $str;
+                    }
+                    ?>
+                </select>
+                <input type="submit" class="button button-primary tbk-button-primary" value="Ver">
+            </form>
+        </div>
+    </div>
 
     <h3 class="tbk_title_h3">Últimos Registros</h3>
     <div id="tbk-last-logs">
@@ -51,21 +76,6 @@ if (!defined('ABSPATH')) {
             </div>
         </div>
     </div>
-
-    <form action="/wp-admin/admin.php" method="get">
-        <input type="hidden" name="page" value="transbank_webpay_plus_rest">
-        <input type="hidden" name="tbk_tab" value="logs">
-
-        <select class="select" name="log_file" id="log_file">
-            <?php
-            foreach ($resume['logs'] as $index) {
-                $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
-                echo $str;
-            }
-            ?>
-        </select>
-        <input type="submit" class="button button-primary tbk-button-primary" value="Ver">
-    </form>
 
     <?php
     if (!is_null($lastLog['content'])) {
