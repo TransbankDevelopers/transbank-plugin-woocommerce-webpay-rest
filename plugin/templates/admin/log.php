@@ -26,20 +26,6 @@ if (!defined('ABSPATH')) {
     <?php if ($folderHasLogs) { ?>
         <h3 class="tbk_title_h3">Últimos Registros</h3>
         <div id="tbk-last-logs">
-            <div class="tbk-plugin-info-container" id="div_last_log">
-                <div class="info-column">
-                    <div title="Nombre del útimo archivo de registro creado" class="label label-info">?
-                    </div>
-                </div>
-                <div class="info-column-plugin">
-                    <span class="highlight-text"> Último Documento: </span>
-                </div>
-                <div class="info-column-plugin">
-                    <span class="label">
-                        <?php echo $lastLog['filename'] ?? '-'; ?>
-                    </span>
-                </div>
-            </div>
             <div class="tbk-plugin-info-container" id="div_size_log">
                 <div class="info-column">
                     <div title="Peso del último archivo de registro creado" class="label label-info">?
