@@ -1,16 +1,9 @@
 <?php
-
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-
 if (!defined('ABSPATH')) {
     return;
 }
-
-$log = TbkFactory::createLogger();
-$resume = $log->getInfo();
-$lastLog = $log->getLogDetail(basename($resume['last']));
-$folderHasLogs = $resume['length'] > 0;
 ?>
+
 <div class="tbk-box">
     <div id="logs" class="tab-pane">
         <h3 class="tbk_title_h3">Información de Registros</h3>

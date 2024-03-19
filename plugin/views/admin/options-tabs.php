@@ -4,6 +4,7 @@ if (!defined('ABSPATH')) {
     return;
 }
 
+use Transbank\WooCommerce\WebpayRest\Controllers\LogController;
 function tbk_is_nav_active($tab, $val)
 {
     if ($tab === $val) {
@@ -45,7 +46,7 @@ function tbk_is_nav_active($tab, $val)
             } elseif ($tab === 'options_oneclick') {
                 include_once __DIR__.'/oneclick-admin-options.php';
             } elseif ($tab === 'logs') {
-                include_once __DIR__.'/logs.php';
+                (new LogController)->show();
             } elseif ($tab === 'transactions') {
                 include_once __DIR__.'/transactions.php';
             } else {
