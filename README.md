@@ -46,10 +46,12 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
 
 Para testear los ejemplos estos estan disponibles en:
-- [WooCommerce 3.4.0 con php 7.1](./docker-woocommerce-php7.1)
-- [WooCommerce 3.6.3 con php 7.2](./docker-woocommerce-php7.2)
-- [WooCommerce 3.9.1 con php 7.3](./docker-woocommerce-php7.3)
-- [WooCommerce 3.9.1 con php 7.4](./docker-woocommerce-php7.4)
+- [WooCommerce 6.0 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.0.0)
+- [WooCommerce 6.5 con php 7.4](./docker-woocommerce-php7.4-wp6.0.0-wc2.6.0-woo6.5.0)
+- [WooCommerce 8.1 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.1.0)
+- [WooCommerce 8.2 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.2.0)
+- [WooCommerce 8.3 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.3.0)
+- [WooCommerce 8.5 con php 8.2](./docker-woocommerce-php8.2-wp6.4.1-wc2.9.0-woo8.5.0)
 
 Si necesitas subir el plugin a Woocommerce y obtienes un error por que no se puede mover el archivo a `wp-contentent` entonces ejecuta
 
