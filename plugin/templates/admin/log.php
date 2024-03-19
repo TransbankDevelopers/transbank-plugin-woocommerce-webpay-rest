@@ -7,26 +7,15 @@ if (!defined('ABSPATH')) {
 <div class="tbk-box">
     <h3 class="tbk_title_h3">Información de Registros</h3>
     <div id="tbk_information_logs" style="margin-bottom: 30px;">
-        <div class="tbk-plugin-info-container" id="div_status_logs">
-            <div class="info-column">
-                <div title="Informa si actualmente se guarda la información de cada compra mediante Webpay" class="label label-info">?</div>
-            </div>
-            <div class="info-column">
-                <span class="highlight-text"> Estado de Registros: </span>
-            </div>
-            <div class="info-column">
-                <span id="action_txt" class="label label-success">Registro activado</span>
-            </div>
-        </div>
         <div class="tbk-plugin-info-container" id="div_logs_path">
             <div class="info-column">
                 <div title="Carpeta en el servidor en donde se guardan los archivos con la información de cada compra mediante Webpay" class="label label-info">?
                 </div>
             </div>
-            <div class="info-column-plugin log">
+            <div class="info-column">
                 <span class="highlight-text"> Directorio de registros: </span>
             </div>
-            <div class="info-column-plugin log">
+            <div class="info-column">
                 <span class="label">
                     <?php echo $resume['dir']; ?>
                 </span>
