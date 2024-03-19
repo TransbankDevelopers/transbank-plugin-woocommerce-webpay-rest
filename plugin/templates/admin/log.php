@@ -6,20 +6,18 @@ if (!defined('ABSPATH')) {
 
 <div class="tbk-box">
     <h3 class="tbk_title_h3">Información de Registros</h3>
-    <div id="tbk_information_logs" style="margin-bottom: 30px;">
-        <div class="tbk-plugin-info-container" id="div_logs_path">
-            <div class="info-column">
-                <div title="Carpeta en el servidor en donde se guardan los archivos con la información de cada compra mediante Webpay" class="label label-info">?
-                </div>
+    <div class="tbk-plugin-info-container" id="div_logs_path">
+        <div class="info-column">
+            <div title="Carpeta en el servidor en donde se guardan los archivos con la información de cada compra mediante Webpay" class="label label-info">?
             </div>
-            <div class="info-column">
-                <span class="highlight-text"> Directorio de registros: </span>
-            </div>
-            <div class="info-column">
-                <span class="label">
-                    <?php echo $resume['dir']; ?>
-                </span>
-            </div>
+        </div>
+        <div class="info-column">
+            <span class="highlight-text"> Directorio de registros: </span>
+        </div>
+        <div class="info-column">
+            <span class="label">
+                <?php echo $resume['dir']; ?>
+            </span>
         </div>
     </div>
 
