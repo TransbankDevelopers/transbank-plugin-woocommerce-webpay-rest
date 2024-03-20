@@ -42,6 +42,10 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                     }
                     foreach ($resume['logs'] as $index) {
                         $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
+
+                        if($index['filename'] == basename($lastLog['filename'])) {
+                            $str = "<option value='{$index['filename']}' selected>{$index['filename']}</option>";
+                        }
                         echo $str;
                     }
                     ?>
