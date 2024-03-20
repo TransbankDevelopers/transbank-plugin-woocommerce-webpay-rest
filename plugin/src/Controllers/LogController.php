@@ -22,7 +22,7 @@ class LogController
         $summary = $this->log->getInfo();
         $logFile = basename($summary['last']);
 
-        if (isset($_GET['log_file']) && !is_null($_GET['log_file'])) {
+        if (isset($_GET['log_file'])) {
             $isLogFileNameValid = $this->validateLogFileName($_GET['log_file'], $summary['logs']);
 
             if ($isLogFileNameValid) {

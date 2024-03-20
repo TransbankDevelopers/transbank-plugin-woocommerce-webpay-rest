@@ -85,7 +85,7 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
     </div>
 
     <?php
-    if (isset($lastLog['content']) && !is_null($lastLog['content'])) {
+    if (isset($lastLog['content'])) {
         $logContent = '<div class="log-container">';
 
         $logLines = explode("\n", $lastLog['content']);
