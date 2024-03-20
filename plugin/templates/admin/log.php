@@ -35,10 +35,10 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                 <input type="hidden" name="page" value="transbank_webpay_plus_rest">
                 <input type="hidden" name="tbk_tab" value="logs">
 
-                <select class="select label" name="log_file">
+                <select class="select label" name="log_file" <?php if (!$folderHasLogs) { echo "disabled"; } ?>>
                     <?php
-                    if (empty($resume['logs'])) {
-                        echo "<option value=''>No hay archivos log</option>";
+                    if (!$folderHasLogs) {
+                        echo "<option value='' selected>No hay archivos log</option>";
                     }
                     foreach ($resume['logs'] as $index) {
                         $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
@@ -46,7 +46,9 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                     }
                     ?>
                 </select>
-                <input type="submit" class="button button-primary tbk-button-primary" value="Ver">
+                <input type="submit" class="button button-primary tbk-button-primary"
+                    <?php if (!$folderHasLogs) { echo "disabled"; } ?>
+                    value="Ver">
             </form>
         </div>
     </div>
