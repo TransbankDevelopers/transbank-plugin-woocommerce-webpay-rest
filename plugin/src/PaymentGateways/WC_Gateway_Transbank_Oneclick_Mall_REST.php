@@ -252,7 +252,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         if ('oneclick' !== strtolower($payment_token->get_type())) {
             return $item;
         }
-        $item['method']['last4'] = $payment_token->get_last4();
+        $cardEnvironment = $payment_token->get_environment();
+        $environmentSuffix = $cardEnvironment === Options::ENVIRONMENT_INTEGRATION ? ' [Test]' : '';
+
+        $item['method']['last4'] = $payment_token->get_last4().$environmentSuffix;
         $item['method']['brand'] = $payment_token->get_card_type();
 
         return $item;
