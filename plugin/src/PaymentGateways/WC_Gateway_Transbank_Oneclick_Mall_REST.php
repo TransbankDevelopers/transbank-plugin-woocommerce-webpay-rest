@@ -237,10 +237,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
             /** @var WC_Payment_Token_Oneclick $paymentToken */
             $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-            $response = $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
-            if ($response['result'] == 'error') {
-                throw new EcommerceException('Se produjo un error en la autorización');
-            }
+            $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
+
             $this->setAfterPaymentOrderStatus($renewalOrder);
         } catch (Exception $ex) {
             $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
