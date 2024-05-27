@@ -226,21 +226,23 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        $this->logger->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
-        $customerId = $renewalOrder->get_customer_id();
-        if (!$customerId) {
-            $this->logger->logError('There is no costumer id on the renewal order');
+        try {
+            $this->logger->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
+            $customerId = $renewalOrder->get_customer_id();
+            if (!$customerId) {
+                $this->logger->logError('There is no costumer id on the renewal order');
 
-            throw new EcommerceException('There is no costumer id on the renewal order');
-        }
+                throw new EcommerceException('There is no costumer id on the renewal order');
+            }
 
-        /** @var WC_Payment_Token_Oneclick $paymentToken */
-        $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-        $response = $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
-        if ($response['result'] == 'error') {
-            throw new EcommerceException('Se produjo un error en la autorización');
+            /** @var WC_Payment_Token_Oneclick $paymentToken */
+            $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
+            $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
+
+            $this->setAfterPaymentOrderStatus($renewalOrder);
+        } catch (Exception $ex) {
+            $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
         }
-        $this->setAfterPaymentOrderStatus($renewalOrder);
     }
 
     public static function subscription_payment_method_updated()
