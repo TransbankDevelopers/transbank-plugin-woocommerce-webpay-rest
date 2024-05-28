@@ -45,8 +45,6 @@ add_action('wp_ajax_check_exist_tables', TableCheck::class.'::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
-add_action('woocommerce_subscription_failing_payment_method_updated_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'subscription_payment_method_updated'], 10, 3);
-
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
 add_action('admin_enqueue_scripts', function () {
     wp_enqueue_style('tbk-styles', plugins_url('/css/tbk.css', __FILE__), [], '1.1');

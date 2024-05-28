@@ -245,11 +245,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         }
     }
 
-    public static function subscription_payment_method_updated()
-    {
-        // Todo: check if we need something here.
-    }
-
     public function get_saved_payment_methods_list($saved_methods)
     {
         $pluginEnvironment = $this->get_option('environment');
