@@ -37,17 +37,20 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
 
                 <select class="select label" name="log_file" <?= !$folderHasLogs ? "disabled" : '' ?>>
                     <?php
+                    $options = '';
+
                     if (!$folderHasLogs) {
-                        echo "<option value='' selected>No hay archivos log</option>";
+                        $options = "<option value='' selected>No hay archivos log</option>";
                     }
                     foreach ($resume['logs'] as $index) {
-                        $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
+                        $options .= "<option value='{$index['filename']}'>{$index['filename']}</option>";
 
                         if($index['filename'] == basename($lastLog['filename'])) {
-                            $str = "<option value='{$index['filename']}' selected>{$index['filename']}</option>";
+                            $options .= "<option value='{$index['filename']}' selected>{$index['filename']}</option>";
                         }
-                        echo $str;
                     }
+
+                    echo $options;
                     ?>
                 </select>
                 <input type="submit" class="button button-primary tbk-button-primary"
