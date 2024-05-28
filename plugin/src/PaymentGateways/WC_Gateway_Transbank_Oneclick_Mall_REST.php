@@ -120,15 +120,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         try {
             $order = new WC_Order($order_id);
 
-            if (!$order->needs_payment() && !wcs_is_subscription($order_id)) {
-                $this->logger->logError('This order was already paid or does not need payment');
-                $errorMessage = __(
-                    'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
-                    'transbank_wc_plugin'
-                );
-
-                throw new EcommerceException($errorMessage);
-            }
+            $this->checkOrderCanBePaid($order);
 
             $paymentMethodOption = $_POST["wc-{$this->id}-payment-token"] ?? null;
             $addNewCard = 'new' === $paymentMethodOption || $paymentMethodOption === null;
@@ -583,6 +575,28 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
         $email = $userInfo->user_email;
         return $this->oneclickTransbankSdk->startInscription($orderId, $userInfo->ID, $email, $returnUrl, $from);
+    }
+
+    /**
+     * Checks if the order can be paid.
+     *
+     * This method verifies whether an order requires payment or if it's already paid.
+     * It logs an error and throws an EcommerceException if the order does not need payment or if it cannot be paid again.
+     *
+     * @param int $order_id The ID of the order to check.
+     * @throws EcommerceException If the order does not need payment or is in a state that does not allow a new payment.
+     */
+    private function checkOrderCanBePaid(WC_Order $order)
+    {
+        if (!$order->needs_payment() && !wcs_is_subscription($order->get_id())) {
+            $this->logger->logError('This order was already paid or does not need payment');
+            $errorMessage = __(
+                'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
+                'transbank_wc_plugin'
+            );
+
+            throw new EcommerceException($errorMessage);
+        }
     }
 
     /**
