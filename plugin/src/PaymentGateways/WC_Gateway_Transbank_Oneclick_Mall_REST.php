@@ -121,6 +121,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order = new WC_Order($order_id);
 
             $this->checkOrderCanBePaid($order);
+            $this->checkUserIsLoggedIn();
 
             $paymentMethodOption = $_POST["wc-{$this->id}-payment-token"] ?? null;
             $addNewCard = 'new' === $paymentMethodOption || $paymentMethodOption === null;
@@ -592,6 +593,29 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->logger->logError('This order was already paid or does not need payment');
             $errorMessage = __(
                 'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
+                'transbank_wc_plugin'
+            );
+
+            throw new EcommerceException($errorMessage);
+        }
+    }
+
+    /**
+     * Checks if the user is logged in before allowing card registration.
+     *
+     * This method verifies whether the user is logged in before allowing them to add a new card.
+     * It logs an informational message and throws an EcommerceException if the user is not logged in.
+     *
+     * @throws EcommerceException If the user is not logged in.
+     */
+    private function checkUserIsLoggedIn()
+    {
+        // Check if the user is logged in
+        if (!is_user_logged_in()) {
+            $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
+            $errorMessage = __(
+                'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
+                    'tu tarjeta y usar este método de pago.',
                 'transbank_wc_plugin'
             );
 
