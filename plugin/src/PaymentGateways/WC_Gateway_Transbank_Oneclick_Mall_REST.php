@@ -24,6 +24,7 @@ use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Tokens;
@@ -523,7 +524,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ];
     }
 
-    protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
+    protected function getOrderNotesFromAuthorizeResponse(MallTransactionAuthorizeResponse $response, string $orderNotesTitle)
     {
         $firstDetail = $response->getDetails()[0];
         $formattedAmount = TbkResponseUtil::getAmountFormatted($firstDetail->getAmount());
@@ -535,9 +536,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $installmentAmount = $firstDetail->getInstallmentsAmount() ?? 0;
         $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
 
-        $transactionDetails = "
+        return "
             <div class='transbank_response_note'>
-                <p><h3>{$message}</h3></p>
+                <p><h3>{$orderNotesTitle}</h3></p>
 
                 <strong>Estado: </strong>{$status} <br />
                 <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
@@ -554,8 +555,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>
         ";
-        $wooCommerceOrder->add_order_note($transactionDetails);
-        $wooCommerceOrder->add_meta_data('transbank_response', json_encode($response));
     }
 
     /**
