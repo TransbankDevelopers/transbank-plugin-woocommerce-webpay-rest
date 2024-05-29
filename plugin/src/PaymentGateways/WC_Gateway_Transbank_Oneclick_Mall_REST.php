@@ -696,4 +696,17 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->update_status($status);
         }
     }
+
+    /**
+     * Empties the WooCommerce cart.
+     *
+     * This method checks if the WooCommerce cart exists and then empties it.
+     * If the cart exists, all items in the cart are removed.
+     */
+    private function emptyCart()
+    {
+        if (wc()->cart) {
+            wc()->cart->empty_cart();
+        }
+    }
 }
