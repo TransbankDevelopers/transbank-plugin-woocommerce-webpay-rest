@@ -309,6 +309,15 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         return $this->handleAuthorization($order, $paymentTokenId);
     }
 
+    /**
+     * Handles the inscription process for adding a new card.
+     *
+     * This method initiates the inscription process for adding a new card to the OneClick payment method.
+     *
+     * @param WC_Order $order The WooCommerce order object.
+     *
+     * @return array The result of the inscription process, including a success message and redirect URL.
+     */
     private function handleInscription(WC_Order $order)
     {
         $this->logger->logInfo('[Oneclick] Checkout: start inscription');
