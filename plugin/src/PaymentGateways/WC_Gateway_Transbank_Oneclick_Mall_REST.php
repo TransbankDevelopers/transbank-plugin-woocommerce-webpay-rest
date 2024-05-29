@@ -361,6 +361,60 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ];
     }
 
+    private function handleAuthorization(WC_Order $order, string $paymentTokenId)
+    {
+        try {
+            $orderNotes = '';
+            $this->logger->logInfo('[Oneclick] Checkout: pagando con el token ID #' . $paymentTokenId);
+            $paymentToken = $this->getWcPaymentToken($paymentTokenId);
+            $amount = $this->getTotalAmountFromOrder($order);
+
+            $authorizeResponse = $this->oneclickTransbankSdk->authorize(
+                $order->get_id(),
+                $amount,
+                $paymentToken->get_username(),
+                $paymentToken->get_token()
+            );
+
+            $order->add_payment_token($paymentToken);
+            $this->setOrderAsComplete($order);
+            $this->emptyCart();
+
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago exitoso');
+            $order->add_order_note($orderNotes);
+
+            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
+            return [
+                'result'   => 'success',
+                'redirect' => $this->get_return_url($order),
+            ];
+        } catch (CreateTransactionOneclickException $e) {
+            $orderNotes = 'Transacción con problemas de autorización';
+        } catch (AuthorizeOneclickException $e) {
+            $orderNotes = 'Problemas al crear el registro de Transacción';
+        } catch (RejectedAuthorizeOneclickException $e) {
+            $response = $e->getAuthorizeResponse();
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse(
+                $response,
+                'Oneclick: Pago rechazado'
+            );
+            $order->add_meta_data('transbank_response', json_encode($response));
+        } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
+            $response = $e->getAuthorizeResponse();
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse(
+                $response,
+                'Oneclick: Pago rechazado'
+            );
+            $order->add_order_note($e->getMessage());
+            $order->add_meta_data('transbank_response', json_encode($response));
+        } finally {
+            $this->shouldThrowException = true;
+            $this->setOrderAsFailed($order, $orderNotes);
+            do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
+            throw $e;
+        }
+    }
+
     /**
      * @param WC_Order $order
      *
