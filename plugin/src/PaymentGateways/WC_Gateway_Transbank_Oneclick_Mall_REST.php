@@ -335,6 +335,23 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         // No render payment form.
     }
+    private function handleInscription(WC_Order $order)
+    {
+        $this->logger->logInfo('[Oneclick] Checkout: start inscription');
+
+        $response = $this->start($order->get_id());
+
+        $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
+        $this->logger->logInfo(json_encode($response));
+        $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick.');
+
+        do_action('transbank_oneclick_adding_card_from_order', $order);
+
+        return [
+            'result'   => 'success',
+            'redirect' => $response->getRedirectUrl(),
+        ];
+    }
 
     /**
      * @param WC_Order $order
