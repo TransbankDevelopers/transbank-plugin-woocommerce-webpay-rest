@@ -357,11 +357,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     private function handleInscription(WC_Order $order)
     {
-        $this->logger->logInfo('[Oneclick] Checkout: start inscription');
+        $this->logger->logInfo('[Oneclick] Inicio de inscripción');
 
         $response = $this->start($order->get_id());
 
-        $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
+        $this->logger->logInfo('[Oneclick] Respuesta de inscripción: ');
         $this->logger->logInfo(json_encode($response));
         $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick.');
 
@@ -643,7 +643,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     private function checkOrderCanBePaid(WC_Order $order)
     {
         if (!$order->needs_payment() && !wcs_is_subscription($order->get_id())) {
-            $this->logger->logError('This order was already paid or does not need payment');
+            $this->logger->logError('La orden se encuentra en un estado en la que no puede ser pagada.');
             $errorMessage = __(
                 'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
                 'transbank_wc_plugin'
@@ -665,7 +665,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         // Check if the user is logged in
         if (!is_user_logged_in()) {
-            $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
+            $this->logger->logInfo('El usuario debe tener una cuenta creada para poder inscribir una tarjeta.');
             $errorMessage = __(
                 'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
                     'tu tarjeta y usar este método de pago.',
