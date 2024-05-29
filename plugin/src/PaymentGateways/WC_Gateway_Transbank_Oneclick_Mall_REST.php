@@ -636,12 +636,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         return WC_Payment_Tokens::get($paymentTokenId);
     }
 
-    private function getAmountForAuthorize($amount, $order)
+    private function getTotalAmountFromOrder($order)
     {
-        if ($amount == null) {
-            $amount = (int) number_format($order->get_total(), 0, ',', '');
-        }
-        return $amount;
+        return (int) number_format($order->get_total(), 0, ',', '');
     }
 
     public function set_payment_token_class()
