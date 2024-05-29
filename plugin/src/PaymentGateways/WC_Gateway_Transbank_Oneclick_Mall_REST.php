@@ -183,6 +183,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $renewalOrder->get_data()]);
 
             $this->setOrderAsComplete($renewalOrder);
+
+            $this->logger->logInfo('Suscripción autorizada correctamente para la orden #' . $renewalOrder->get_id());
         } catch (Throwable $ex) {
             $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
             $renewalOrder->add_order_note('Error al procesar suscripción, para más detalles revisar el archivo log.');
