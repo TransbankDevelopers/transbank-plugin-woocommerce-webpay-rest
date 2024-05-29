@@ -698,6 +698,20 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
+     * Sets the given order as failed and adds a note to the order.
+     *
+     * This method updates the status of the provided WC_Order object to 'failed' and adds a custom note to the order.
+     *
+     * @param WC_Order $order The order object to update.
+     * @param string $orderNotes The custom note to add to the order.
+     */
+    private function setOrderAsFailed(WC_Order $order, string $orderNotes)
+    {
+        $order->update_status('failed');
+        $order->add_order_note($orderNotes);
+    }
+
+    /**
      * Empties the WooCommerce cart.
      *
      * This method checks if the WooCommerce cart exists and then empties it.
