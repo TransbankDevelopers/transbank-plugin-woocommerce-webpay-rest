@@ -124,13 +124,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function process_payment($order_id)
     {
         try {
-            $request = $_POST;
             $order = new WC_Order($order_id);
 
             $this->checkOrderCanBePaid($order);
             $this->checkUserIsLoggedIn();
 
-            return $this->handleRequest($request, $order);
+            return $this->handleOneclickPayment($_POST, $order);
         } catch (Throwable $exception) {
             $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
             $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
@@ -336,7 +335,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      *
      * @return array The result of the processing, including a success message and redirect URL.
      */
-    private function handleRequest(array $request, WC_Order $order)
+    private function handleOneclickPayment(array $request, WC_Order $order)
     {
         $paymentTokenId = wc_clean($request["wc-{$this->id}-payment-token"]) ?? null;
 
