@@ -338,7 +338,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     private function handleRequest(array $request, WC_Order $order)
     {
-        $paymentTokenId = $request["wc-{$this->id}-payment-token"] ?? null;
+        $paymentTokenId = wc_clean($request["wc-{$this->id}-payment-token"]) ?? null;
 
         if ($paymentTokenId === 'new' || is_null($paymentTokenId)) {
             return $this->handleInscription($order);
