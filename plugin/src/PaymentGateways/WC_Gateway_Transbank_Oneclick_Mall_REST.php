@@ -24,6 +24,7 @@ use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use WC_Order;
 use WC_Payment_Gateway_CC;
 use WC_Payment_Tokens;
@@ -50,6 +51,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      * @var OneclickTransbankSdk
      */
     protected $oneclickTransbankSdk;
+
+    /**
+     * Indicates if the exception message should be displayed in the notice when checkout block is enabled.
+     *
+     * @var bool
+     */
+    private $shouldThrowException;
 
     /**
      * WC_Gateway_Transbank_Oneclick_Mall_REST constructor.
@@ -80,6 +88,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->get_option('oneclick_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
 
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
+        $this->shouldThrowException = false;
 
         $this->init_form_fields();
         $this->init_settings();
@@ -103,25 +112,83 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
         add_filter('woocommerce_payment_token_class', [$this, 'set_payment_token_class']);
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
-        add_filter('woocommerce_saved_payment_methods_list', [$this, 'get_saved_payment_methods_list'], 10, 2);
+        add_filter('woocommerce_saved_payment_methods_list', [$this, 'getOneclickPaymentTokenClass'], 10, 2);
     }
 
-    public function payment_fields()
+    /**
+     * Procesar pago y retornar resultado.
+     **
+     *
+     * @throws MallTransactionAuthorizeException
+     */
+    public function process_payment($order_id)
     {
-        $description = $this->get_description();
-        if ($description) {
-            echo wpautop(wptexturize($description)); // @codingStandardsIgnoreLine.
+        try {
+            $order = new WC_Order($order_id);
+
+            $this->checkOrderCanBePaid($order);
+            $this->checkUserIsLoggedIn();
+
+            return $this->handleRequest($_POST, $order);
+        } catch (Throwable $exception) {
+            $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
+            $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
+            do_action($errorHookName, $exception, true);
+            BlocksHelper::addLegacyNotices($errorMessage, 'error');
+
+            return [
+                'result' => 'error',
+                'redirect' => ''
+            ];
         }
-        parent::payment_fields();
     }
 
-    public function is_valid_for_use()
+    /**
+     * Processes a scheduled subscription payment.
+     *
+     * This method authorizes a scheduled subscription payment for the given renewal order. It retrieves the customer ID
+     * from the renewal order, obtains the customer's default payment token and authorizes the payment with Oneclick.
+     *
+     * @param float $amount_to_charge The amount to charge for the subscription payment.
+     * @param WC_Order $renewalOrder The renewal order object for the subscription.
+     *
+     * @throws EcommerceException If there is no customer ID on the renewal order.
+     */
+    public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        return in_array(
-            get_woocommerce_currency(),
-            apply_filters('woocommerce_transbank_webpay_oneclick_supported_currencies', ['CLP']),
-            true
-        );
+        try {
+            $this->logger->logInfo('Autorizando suscripción para la orden #' . $renewalOrder->get_id());
+            $customerId = $renewalOrder->get_customer_id();
+
+            if (!$customerId) {
+                $this->logger->logError('No existe el ID de usuario en la suscripción.');
+                throw new EcommerceException('There is no costumer id on the renewal order');
+            }
+
+            /** @var WC_Payment_Token_Oneclick $paymentToken */
+            $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
+
+            $authorizeResponse = $this->oneclickTransbankSdk->authorize(
+                $renewalOrder->get_id(),
+                $amount_to_charge,
+                $paymentToken->get_username(),
+                $paymentToken->get_token()
+            );
+
+            $renewalOrder->add_payment_token($paymentToken);
+
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago de suscripción exitoso');
+            $renewalOrder->add_order_note($orderNotes);
+
+            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $renewalOrder->get_data()]);
+
+            $this->setOrderAsComplete($renewalOrder);
+
+            $this->logger->logInfo('Suscripción autorizada correctamente para la orden #' . $renewalOrder->get_id());
+        } catch (Throwable $ex) {
+            $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
+            $renewalOrder->add_order_note('Error al procesar suscripción, para más detalles revisar el archivo log.');
+        }
     }
 
     public function process_refund($order_id, $amount = null, $reason = '')
@@ -181,6 +248,15 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         }
     }
 
+    public function payment_fields()
+    {
+        $description = $this->get_description();
+        if ($description) {
+            echo wpautop(wptexturize($description)); // @codingStandardsIgnoreLine.
+        }
+        parent::payment_fields();
+    }
+
     public function admin_options()
     {
         if ($this->is_valid_for_use()) {
@@ -207,6 +283,31 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         }
     }
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws InscriptionStartException
+     */
+    public function add_payment_method()
+    {
+        $response = $this->start(null, 'my_account');
+        $redirectUrl = $response->getRedirectUrl();
+
+        return wp_redirect($redirectUrl);
+    }
+
+    /**
+     * Outputs a checkbox for saving a new payment method to the database.
+     *
+     * @since 2.6.0
+     */
+    public function save_payment_method_checkbox()
+    {
+        $html = '<p class="form-row woocommerce-SavedPaymentMethods-saveNew">
+            <strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong>
+            </p>';
+        echo $html;
+    }
+
     public function is_available()
     {
         if (!$this->is_valid_for_use()) {
@@ -222,26 +323,128 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @throws MallTransactionAuthorizeException
+     * Handles the request for processing a payment or initiating a new card inscription.
+     *
+     * This method determines whether to process a payment authorization or initiate a new card inscription
+     * based on the provided request data. If a new payment token ID is provided or if no token ID is provided,
+     * it initiates the inscription process. Otherwise, it handles the authorization process for the provided
+     * payment token ID.
+     *
+     * @param array $request The request data containing payment token information.
+     * @param WC_Order $order The WooCommerce order object associated with the request.
+     *
+     * @return array The result of the processing, including a success message and redirect URL.
      */
-    public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
+    private function handleRequest(array $request, WC_Order $order)
+    {
+        $paymentTokenId = $request["wc-{$this->id}-payment-token"] ?? null;
+
+        if ($paymentTokenId === 'new' || is_null($paymentTokenId)) {
+            return $this->handleInscription($order);
+        }
+
+        return $this->handleAuthorization($order, $paymentTokenId);
+    }
+
+    /**
+     * Handles the inscription process for adding a new card.
+     *
+     * This method initiates the inscription process for adding a new card to the OneClick payment method.
+     *
+     * @param WC_Order $order The WooCommerce order object.
+     *
+     * @return array The result of the inscription process, including a success message and redirect URL.
+     */
+    private function handleInscription(WC_Order $order)
+    {
+        $this->logger->logInfo('[Oneclick] Inicio de inscripción');
+
+        $response = $this->start($order->get_id());
+
+        $this->logger->logInfo('[Oneclick] Respuesta de inscripción: ');
+        $this->logger->logInfo(json_encode($response));
+        $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a formulario OneClick.');
+
+        do_action('transbank_oneclick_adding_card_from_order', $order);
+
+        return [
+            'result'   => 'success',
+            'redirect' => $response->getRedirectUrl(),
+        ];
+    }
+
+    /**
+     * Handles the authorization process for a OneClick payment.
+     *
+     * This method performs the authorization process for a OneClick payment.
+     *
+     * @param WC_Order $order The WooCommerce order object.
+     * @param string $paymentTokenId The ID of the payment token associated with the order.
+     *
+     * @return array The result of the authorization process, including a success message and redirect URL.
+     *
+     * @throws CreateTransactionOneclickException If there are issues creating the transaction.
+     * @throws AuthorizeOneclickException If there are problems with authorization.
+     * @throws RejectedAuthorizeOneclickException If the authorization is rejected.
+     * @throws ConstraintsViolatedAuthorizeOneclickException If constraints are violated during authorization.
+     */
+    private function handleAuthorization(WC_Order $order, string $paymentTokenId)
     {
         try {
-            $this->logger->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
-            $customerId = $renewalOrder->get_customer_id();
-            if (!$customerId) {
-                $this->logger->logError('There is no costumer id on the renewal order');
+            $orderNotes = '';
+            $this->logger->logInfo('[Oneclick] Checkout: pagando con el token ID #' . $paymentTokenId);
+            $paymentToken = $this->getWcPaymentToken($paymentTokenId);
+            $amount = $this->getTotalAmountFromOrder($order);
 
-                throw new EcommerceException('There is no costumer id on the renewal order');
+            $authorizeResponse = $this->oneclickTransbankSdk->authorize(
+                $order->get_id(),
+                $amount,
+                $paymentToken->get_username(),
+                $paymentToken->get_token()
+            );
+
+            $order->add_payment_token($paymentToken);
+            $this->setOrderAsComplete($order);
+            $this->emptyCart();
+
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago exitoso');
+            $order->add_order_note($orderNotes);
+
+            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
+
+            $this->logger->logInfo('Se ha autorizado el pago correctamente para la orden #' . $order->get_id());
+
+            return [
+                'result'   => 'success',
+                'redirect' => $this->get_return_url($order),
+            ];
+        } catch (CreateTransactionOneclickException $e) {
+            $orderNotes = 'Transacción con problemas de autorización';
+        } catch (AuthorizeOneclickException $e) {
+            $orderNotes = 'Problemas al crear el registro de Transacción';
+        } catch (RejectedAuthorizeOneclickException $e) {
+            $response = $e->getAuthorizeResponse();
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse(
+                $response,
+                'Oneclick: Pago rechazado'
+            );
+            $order->add_meta_data('transbank_response', json_encode($response));
+        } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
+            $response = $e->getAuthorizeResponse();
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse(
+                $response,
+                'Oneclick: Pago rechazado'
+            );
+            $order->add_order_note($e->getMessage());
+            $order->add_meta_data('transbank_response', json_encode($response));
+        } finally {
+            if (isset($e)) {
+                $this->shouldThrowException = true;
+                $this->setOrderAsFailed($order, $orderNotes);
+                do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
+                $this->logger->logError('Error al autorizar: ' . $e->getMessage());
+                throw $e;
             }
-
-            /** @var WC_Payment_Token_Oneclick $paymentToken */
-            $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-            $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
-
-            $this->setAfterPaymentOrderStatus($renewalOrder);
-        } catch (Exception $ex) {
-            $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
         }
     }
 
@@ -278,117 +481,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $item['method']['environment'] = $cardEnvironment;
 
         return $item;
-    }
-
-    public function set_payment_token_class()
-    {
-        return WC_Payment_Token_Oneclick::class;
-    }
-
-    /**
-     * Procesar pago y retornar resultado.
-     **
-     *
-     * @throws MallTransactionAuthorizeException
-     */
-    public function process_payment($order_id)
-    {
-        $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
-        $shouldThrowException = false;
-
-        try {
-            $order = new WC_Order($order_id);
-
-            if (!$order->needs_payment() && !wcs_is_subscription($order_id)) {
-                $this->logger->logError('This order was already paid or does not need payment');
-                $errorMessage = __(
-                    'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
-                    'transbank_wc_plugin'
-                );
-
-                throw new EcommerceException($errorMessage);
-            }
-
-            $paymentMethodOption = $_POST["wc-{$this->id}-payment-token"] ?? null;
-            $addNewCard = 'new' === $paymentMethodOption || $paymentMethodOption === null;
-            $payWithSavedToken = $paymentMethodOption !== null && !$addNewCard;
-
-            if (!get_current_user_id()) {
-                $order->add_order_note(
-                    'El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout)' .
-                        ' cuenta de usuario'
-                );
-                $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
-
-                $errorMessage = __(
-                    'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
-                        'tu tarjeta y usar este método de pago.',
-                    'transbank_wc_plugin'
-                );
-
-                throw new EcommerceException($errorMessage);
-            }
-
-            if ($addNewCard) {
-                $this->logger->logInfo('[Oneclick] Checkout: start inscription');
-
-                $response = $this->start($order_id);
-
-                $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
-                $this->logger->logInfo(json_encode($response));
-                $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a ' .
-                    'formulario OneClick...');
-
-                do_action('transbank_oneclick_adding_card_from_order', $order);
-
-                return [
-                    'result'   => 'success',
-                    'redirect' => $response->getRedirectUrl(),
-                ];
-            }
-
-            if ($payWithSavedToken) {
-
-                $shouldThrowException = true;
-                return $this->authorizeTransaction($order);
-            }
-            $errorMessage = __('Error interno: no se pudo procesar el pago', 'transbank_wc_plugin');
-            throw new EcommerceException($errorMessage);
-        } catch (\Throwable $exception) {
-            $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
-            do_action($errorHookName, $exception, $shouldThrowException);
-            BlocksHelper::addLegacyNotices($errorMessage, 'error');
-
-            return [
-                'result' => 'error',
-                'redirect' => ''
-            ];
-        }
-    }
-
-    /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws InscriptionStartException
-     */
-    public function add_payment_method()
-    {
-        $response = $this->start(null, 'my_account');
-        $redirectUrl = $response->getRedirectUrl();
-
-        return wp_redirect($redirectUrl);
-    }
-
-    /**
-     * Outputs a checkbox for saving a new payment method to the database.
-     *
-     * @since 2.6.0
-     */
-    public function save_payment_method_checkbox()
-    {
-        $html = '<p class="form-row woocommerce-SavedPaymentMethods-saveNew">
-            <strong>Esta tarjeta se guardará en tu cuenta para que puedas volver a usarla.</strong>
-            </p>';
-        echo $html;
     }
 
     /**
@@ -486,7 +578,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ];
     }
 
-    protected function add_order_notes(WC_Order $wooCommerceOrder, $response, $message)
+    protected function getOrderNotesFromAuthorizeResponse(MallTransactionAuthorizeResponse $response, string $orderNotesTitle)
     {
         $firstDetail = $response->getDetails()[0];
         $formattedAmount = TbkResponseUtil::getAmountFormatted($firstDetail->getAmount());
@@ -498,9 +590,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $installmentAmount = $firstDetail->getInstallmentsAmount() ?? 0;
         $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
 
-        $transactionDetails = "
+        return "
             <div class='transbank_response_note'>
-                <p><h3>{$message}</h3></p>
+                <p><h3>{$orderNotesTitle}</h3></p>
 
                 <strong>Estado: </strong>{$status} <br />
                 <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
@@ -517,8 +609,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
             </div>
         ";
-        $wooCommerceOrder->add_order_note($transactionDetails);
-        $wooCommerceOrder->add_meta_data('transbank_response', json_encode($response));
     }
 
     /**
@@ -542,84 +632,89 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @param WC_Payment_Token_Oneclick $paymentToken
+     * Checks if the order can be paid.
      *
-     * @return WC_Payment_Token_Oneclick
+     * This method verifies whether an order requires payment or if it's already paid.
+     * It logs an error and throws an EcommerceException if the order does not need payment or if it cannot be paid again.
+     *
+     * @param int $order_id The ID of the order to check.
+     * @throws EcommerceException If the order does not need payment or is in a state that does not allow a new payment.
      */
-    private function getWcPaymentToken(WC_Payment_Token_Oneclick $paymentToken = null)
+    private function checkOrderCanBePaid(WC_Order $order)
     {
-        if ($paymentToken) {
-            return $paymentToken;
-        } else {
-            $tokenId = wc_clean($_POST["wc-{$this->id}-payment-token"]);
-            /** @var WC_Payment_Token_Oneclick $token */
-            return \WC_Payment_Tokens::get($tokenId);
-        }
-    }
+        if (!$order->needs_payment() && !wcs_is_subscription($order->get_id())) {
+            $this->logger->logError('La orden se encuentra en un estado en la que no puede ser pagada.');
+            $errorMessage = __(
+                'Esta transacción puede ya estar pagada o encontrarse en un estado que no permite un nuevo pago. ',
+                'transbank_wc_plugin'
+            );
 
-    private function getAmountForAuthorize($amount, $order)
-    {
-        if ($amount == null) {
-            $amount = (int) number_format($order->get_total(), 0, ',', '');
+            throw new EcommerceException($errorMessage);
         }
-        return $amount;
     }
 
     /**
-     * @param WC_Order $order
+     * Checks if the user is logged in before allowing card registration.
      *
-     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
+     * This method verifies whether the user is logged in before allowing them to add a new card.
+     * It logs an informational message and throws an EcommerceException if the user is not logged in.
      *
-     * @return array
+     * @throws EcommerceException If the user is not logged in.
      */
-    public function authorizeTransaction(
-        WC_Order $order,
-        WC_Payment_Token_Oneclick $paymentToken = null,
-        $amount = null
-    ): array {
-
-        try {
-
-            $token = $this->getWcPaymentToken($paymentToken);
-            $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #' . $token->get_id());
-
-            $amount = $this->getAmountForAuthorize($amount, $order);
-            $authorizeResponse =
-            $this->oneclickTransbankSdk->authorize(
-                $order->get_id(),
-                $amount, $token->get_username(),
-                $token->get_token()
+    private function checkUserIsLoggedIn()
+    {
+        // Check if the user is logged in
+        if (!is_user_logged_in()) {
+            $this->logger->logInfo('El usuario debe tener una cuenta creada para poder inscribir una tarjeta.');
+            $errorMessage = __(
+                'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
+                    'tu tarjeta y usar este método de pago.',
+                'transbank_wc_plugin'
             );
 
-            $order->add_payment_token($token);
-            $this->setAfterPaymentOrderStatus($order);
-            if (wc()->cart) {
-                wc()->cart->empty_cart();
-            }
-            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Pago exitoso');
-            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
-            return [
-                'result'   => 'success',
-                'redirect' => $this->get_return_url($order),
-            ];
-        } catch (CreateTransactionOneclickException $e) {
-            $order->update_status('failed');
-            $order->add_order_note('Problemas al crear el registro de Transacción');
-        } catch (AuthorizeOneclickException $e) {
-            $order->update_status('failed');
-            $order->add_order_note('Transacción con problemas de autorización');
-        } catch (RejectedAuthorizeOneclickException $e) {
-            $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
-            $order->add_order_note('Transacción rechazada');
-        } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
-            $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
-            $order->add_order_note('CONSTRAINTS_VIOLATED: ' . $e->getMessage());
+            throw new EcommerceException($errorMessage);
         }
+    }
 
-        do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
-        throw $e;
+    /**
+     * Retrieves a WC_Payment_Token_Oneclick object by its token ID.
+     *
+     * This method retrieves a payment token of type WC_Payment_Token_Oneclick using its ID.
+     *
+     * @param string $paymentTokenId The ID of the payment token to retrieve.
+     * @return WC_Payment_Token_Oneclick Returns the payment token object.
+     */
+    private function getWcPaymentToken(string $paymentTokenId): WC_Payment_Token_Oneclick
+    {
+        return WC_Payment_Tokens::get($paymentTokenId);
+    }
+
+    /**
+     * Retrieves the total amount from an order as an integer.
+     *
+     * This method takes a WC_Order object, gets its total amount, formats it to remove any decimal places,
+     * and then converts it to an integer.
+     *
+     * @param WC_Order $order The order object from which to retrieve the total amount.
+     * @return int The total amount of the order as an integer.
+     */
+    private function getTotalAmountFromOrder(WC_Order $order): int
+    {
+        return (int) number_format($order->get_total(), 0, ',', '');
+    }
+
+    public function getOneclickPaymentTokenClass()
+    {
+        return WC_Payment_Token_Oneclick::class;
+    }
+
+    public function is_valid_for_use()
+    {
+        return in_array(
+            get_woocommerce_currency(),
+            apply_filters('woocommerce_transbank_webpay_oneclick_supported_currencies', ['CLP']),
+            true
+        );
     }
 
     /**
@@ -636,16 +731,49 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @param WC_Order $order
+     * Marks the given order as complete and updates its status if specified.
+     *
+     * This method sets the order's payment status to complete and then updates
+     * the order status based on the configured option 'oneclick_after_payment_order_status'.
+     * If no status is specified, the order is marked as complete without changing the status.
+     *
+     * @param WC_Order $order The order object to update.
      */
-    private function setAfterPaymentOrderStatus(WC_Order $order)
+    private function setOrderAsComplete(WC_Order $order)
     {
         $status = $this->get_option('oneclick_after_payment_order_status');
-        if ($status == '') {
+        if (empty($status)) {
             $order->payment_complete();
         } else {
             $order->payment_complete();
             $order->update_status($status);
+        }
+    }
+
+    /**
+     * Sets the given order as failed and adds a note to the order.
+     *
+     * This method updates the status of the provided WC_Order object to 'failed' and adds a custom note to the order.
+     *
+     * @param WC_Order $order The order object to update.
+     * @param string $orderNotes The custom note to add to the order.
+     */
+    private function setOrderAsFailed(WC_Order $order, string $orderNotes)
+    {
+        $order->update_status('failed');
+        $order->add_order_note($orderNotes);
+    }
+
+    /**
+     * Empties the WooCommerce cart.
+     *
+     * This method checks if the WooCommerce cart exists and then empties it.
+     * If the cart exists, all items in the cart are removed.
+     */
+    private function emptyCart()
+    {
+        if (wc()->cart) {
+            wc()->cart->empty_cart();
         }
     }
 }
