@@ -123,63 +123,17 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function process_payment($order_id)
     {
-        $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
-        $shouldThrowException = false;
-
         try {
             $order = new WC_Order($order_id);
 
             $this->checkOrderCanBePaid($order);
             $this->checkUserIsLoggedIn();
 
-            $paymentMethodOption = $_POST["wc-{$this->id}-payment-token"] ?? null;
-            $addNewCard = 'new' === $paymentMethodOption || $paymentMethodOption === null;
-            $payWithSavedToken = $paymentMethodOption !== null && !$addNewCard;
-
-            if (!get_current_user_id()) {
-                $order->add_order_note(
-                    'El usuario intentó pagar con oneclick pero no tiene (y no creó durante el checkout)' .
-                        ' cuenta de usuario'
-                );
-                $this->logger->logInfo('Checkout: The user should have an account to add a new card. ');
-
-                $errorMessage = __(
-                    'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
-                        'tu tarjeta y usar este método de pago.',
-                    'transbank_wc_plugin'
-                );
-
-                throw new EcommerceException($errorMessage);
-            }
-
-            if ($addNewCard) {
-                $this->logger->logInfo('[Oneclick] Checkout: start inscription');
-
-                $response = $this->start($order_id);
-
-                $this->logger->logInfo('[Oneclick] Checkout: inscription response: ');
-                $this->logger->logInfo(json_encode($response));
-                $order->add_order_note('El usuario inició inscripción de nueva tarjeta. Redirigiendo a ' .
-                    'formulario OneClick...');
-
-                do_action('transbank_oneclick_adding_card_from_order', $order);
-
-                return [
-                    'result'   => 'success',
-                    'redirect' => $response->getRedirectUrl(),
-                ];
-            }
-
-            if ($payWithSavedToken) {
-
-                $shouldThrowException = true;
-                return $this->authorizeTransaction($order);
-            }
-            $errorMessage = __('Error interno: no se pudo procesar el pago', 'transbank_wc_plugin');
-            throw new EcommerceException($errorMessage);
+            return $this->handleRequest($_POST, $order);
         } catch (\Throwable $exception) {
+            $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
             $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
-            do_action($errorHookName, $exception, $shouldThrowException);
+            do_action($errorHookName, $exception, true);
             BlocksHelper::addLegacyNotices($errorMessage, 'error');
 
             return [
