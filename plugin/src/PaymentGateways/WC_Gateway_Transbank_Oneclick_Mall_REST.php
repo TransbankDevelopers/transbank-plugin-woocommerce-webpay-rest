@@ -433,10 +433,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->add_order_note($e->getMessage());
             $order->add_meta_data('transbank_response', json_encode($response));
         } finally {
-            $this->shouldThrowException = true;
-            $this->setOrderAsFailed($order, $orderNotes);
-            do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
-            throw $e;
+            if (isset($e)) {
+                $this->shouldThrowException = true;
+                $this->setOrderAsFailed($order, $orderNotes);
+                do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
+                throw $e;
+            }
         }
     }
 
