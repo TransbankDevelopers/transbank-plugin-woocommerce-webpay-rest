@@ -110,9 +110,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ]);
 
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
-        add_filter('woocommerce_payment_token_class', [$this, 'set_payment_token_class']);
+        add_filter('woocommerce_payment_token_class', [$this, 'getOneclickPaymentTokenClass']);
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
-        add_filter('woocommerce_saved_payment_methods_list', [$this, 'getOneclickPaymentTokenClass'], 10, 2);
+        add_filter('woocommerce_saved_payment_methods_list', [$this, 'get_saved_payment_methods_list'], 10, 2);
     }
 
     /**
