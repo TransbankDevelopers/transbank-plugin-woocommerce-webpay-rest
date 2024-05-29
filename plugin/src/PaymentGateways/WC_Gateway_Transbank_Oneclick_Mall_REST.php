@@ -636,7 +636,16 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         return WC_Payment_Tokens::get($paymentTokenId);
     }
 
-    private function getTotalAmountFromOrder($order)
+    /**
+     * Retrieves the total amount from an order as an integer.
+     *
+     * This method takes a WC_Order object, gets its total amount, formats it to remove any decimal places,
+     * and then converts it to an integer.
+     *
+     * @param WC_Order $order The order object from which to retrieve the total amount.
+     * @return int The total amount of the order as an integer.
+     */
+    private function getTotalAmountFromOrder(WC_Order $order): int
     {
         return (int) number_format($order->get_total(), 0, ',', '');
     }
