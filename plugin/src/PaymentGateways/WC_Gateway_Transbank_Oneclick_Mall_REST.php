@@ -411,6 +411,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $order->add_order_note($orderNotes);
 
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
+
+            $this->logger->logInfo('Se ha autorizado el pago correctamente para la orden #' . $order->get_id());
+
             return [
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order),
