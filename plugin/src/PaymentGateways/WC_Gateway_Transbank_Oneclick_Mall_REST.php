@@ -343,6 +343,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         // No render payment form.
     }
+
+    private function handleRequest(array $request, WC_Order $order)
+    {
+        $paymentTokenId = $request["wc-{$this->id}-payment-token"] ?? null;
+
+        if ($paymentTokenId === 'new' || is_null($paymentTokenId)) {
+            return $this->handleInscription($order);
+        }
+
+        return $this->handleAuthorization($order, $paymentTokenId);
+    }
+
     private function handleInscription(WC_Order $order)
     {
         $this->logger->logInfo('[Oneclick] Checkout: start inscription');
