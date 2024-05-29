@@ -669,12 +669,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @param WC_Order $order
+     * Marks the given order as complete and updates its status if specified.
+     *
+     * This method sets the order's payment status to complete and then updates
+     * the order status based on the configured option 'oneclick_after_payment_order_status'.
+     * If no status is specified, the order is marked as complete without changing the status.
+     *
+     * @param WC_Order $order The order object to update.
      */
-    private function setAfterPaymentOrderStatus(WC_Order $order)
+    private function setOrderAsComplete(WC_Order $order)
     {
         $status = $this->get_option('oneclick_after_payment_order_status');
-        if ($status == '') {
+        if (empty($status)) {
             $order->payment_complete();
         } else {
             $order->payment_complete();
