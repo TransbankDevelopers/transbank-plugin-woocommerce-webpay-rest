@@ -327,6 +327,21 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         ];
     }
 
+    /**
+     * Handles the authorization process for a OneClick payment.
+     *
+     * This method performs the authorization process for a OneClick payment.
+     *
+     * @param WC_Order $order The WooCommerce order object.
+     * @param string $paymentTokenId The ID of the payment token associated with the order.
+     *
+     * @return array The result of the authorization process, including a success message and redirect URL.
+     *
+     * @throws CreateTransactionOneclickException If there are issues creating the transaction.
+     * @throws AuthorizeOneclickException If there are problems with authorization.
+     * @throws RejectedAuthorizeOneclickException If the authorization is rejected.
+     * @throws ConstraintsViolatedAuthorizeOneclickException If constraints are violated during authorization.
+     */
     private function handleAuthorization(WC_Order $order, string $paymentTokenId)
     {
         try {
