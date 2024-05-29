@@ -53,6 +53,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     protected $oneclickTransbankSdk;
 
     /**
+     * Indicates if the exception message should be displayed in the notice when checkout block is enabled.
+     *
+     * @var bool
+     */
+    private $shouldThrowException;
+
+    /**
      * WC_Gateway_Transbank_Oneclick_Mall_REST constructor.
      */
     public function __construct()
@@ -81,6 +88,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->get_option('oneclick_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
 
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
+        $this->shouldThrowException = false;
 
         $this->init_form_fields();
         $this->init_settings();
