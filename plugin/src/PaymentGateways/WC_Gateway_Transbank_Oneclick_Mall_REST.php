@@ -624,19 +624,16 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @param WC_Payment_Token_Oneclick $paymentToken
+     * Retrieves a WC_Payment_Token_Oneclick object by its token ID.
      *
-     * @return WC_Payment_Token_Oneclick
+     * This method retrieves a payment token of type WC_Payment_Token_Oneclick using its ID.
+     *
+     * @param string $paymentTokenId The ID of the payment token to retrieve.
+     * @return WC_Payment_Token_Oneclick Returns the payment token object.
      */
-    private function getWcPaymentToken(WC_Payment_Token_Oneclick $paymentToken = null)
+    private function getWcPaymentToken(string $paymentTokenId): WC_Payment_Token_Oneclick
     {
-        if ($paymentToken) {
-            return $paymentToken;
-        } else {
-            $tokenId = wc_clean($_POST["wc-{$this->id}-payment-token"]);
-            /** @var WC_Payment_Token_Oneclick $token */
-            return \WC_Payment_Tokens::get($tokenId);
-        }
+        return WC_Payment_Tokens::get($paymentTokenId);
     }
 
     private function getAmountForAuthorize($amount, $order)
