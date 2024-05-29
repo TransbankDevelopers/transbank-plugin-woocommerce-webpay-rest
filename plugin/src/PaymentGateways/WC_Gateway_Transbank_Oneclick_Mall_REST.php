@@ -442,6 +442,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 $this->shouldThrowException = true;
                 $this->setOrderAsFailed($order, $orderNotes);
                 do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
+                $this->logger->logError('Error al autorizar: ' . $e->getMessage());
                 throw $e;
             }
         }
