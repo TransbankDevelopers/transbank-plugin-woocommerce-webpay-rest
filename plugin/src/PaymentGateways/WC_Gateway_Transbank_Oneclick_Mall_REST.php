@@ -298,6 +298,19 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         // No render payment form.
     }
 
+    /**
+     * Handles the request for processing a payment or initiating a new card inscription.
+     *
+     * This method determines whether to process a payment authorization or initiate a new card inscription
+     * based on the provided request data. If a new payment token ID is provided or if no token ID is provided,
+     * it initiates the inscription process. Otherwise, it handles the authorization process for the provided
+     * payment token ID.
+     *
+     * @param array $request The request data containing payment token information.
+     * @param WC_Order $order The WooCommerce order object associated with the request.
+     *
+     * @return array The result of the processing, including a success message and redirect URL.
+     */
     private function handleRequest(array $request, WC_Order $order)
     {
         $paymentTokenId = $request["wc-{$this->id}-payment-token"] ?? null;
