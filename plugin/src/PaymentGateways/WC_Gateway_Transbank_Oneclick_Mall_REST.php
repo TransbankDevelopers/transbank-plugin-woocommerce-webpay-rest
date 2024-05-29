@@ -172,7 +172,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 $renewalOrder->get_id(),
                 $amount_to_charge,
                 $paymentToken->get_username(),
-                $paymentToken
+                $paymentToken->get_token()
             );
 
             $renewalOrder->add_payment_token($paymentToken);
