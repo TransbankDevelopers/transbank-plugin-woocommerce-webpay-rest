@@ -130,7 +130,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->checkUserIsLoggedIn();
 
             return $this->handleRequest($_POST, $order);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
             $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
             do_action($errorHookName, $exception, true);
@@ -144,26 +144,48 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     /**
-     * @throws MallTransactionAuthorizeException
+     * Processes a scheduled subscription payment.
+     *
+     * This method authorizes a scheduled subscription payment for the given renewal order. It retrieves the customer ID
+     * from the renewal order, obtains the customer's default payment token and authorizes the payment with Oneclick.
+     *
+     * @param float $amount_to_charge The amount to charge for the subscription payment.
+     * @param WC_Order $renewalOrder The renewal order object for the subscription.
+     *
+     * @throws EcommerceException If there is no customer ID on the renewal order.
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
         try {
-            $this->logger->logInfo('New scheduled_subscription_payment for Order #' . $renewalOrder->get_id());
+            $this->logger->logInfo('Autorizando suscripción para la orden #' . $renewalOrder->get_id());
             $customerId = $renewalOrder->get_customer_id();
-            if (!$customerId) {
-                $this->logger->logError('There is no costumer id on the renewal order');
 
+            if (!$customerId) {
+                $this->logger->logError('No existe el ID de usuario en la suscripción.');
                 throw new EcommerceException('There is no costumer id on the renewal order');
             }
 
             /** @var WC_Payment_Token_Oneclick $paymentToken */
             $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-            $this->authorizeTransaction($renewalOrder, $paymentToken, $amount_to_charge);
+            
+            $authorizeResponse = $this->oneclickTransbankSdk->authorize(
+                $renewalOrder->get_id(),
+                $amount_to_charge,
+                $paymentToken->get_username(),
+                $paymentToken
+            );
 
-            $this->setAfterPaymentOrderStatus($renewalOrder);
-        } catch (Exception $ex) {
+            $renewalOrder->add_payment_token($paymentToken);
+
+            $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago de suscripción exitoso');
+            $renewalOrder->add_order_note($orderNotes);
+
+            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $renewalOrder->get_data()]);
+
+            $this->setOrderAsComplete($renewalOrder);
+        } catch (Throwable $ex) {
             $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
+            $renewalOrder->add_order_note('Error al procesar suscripción, para más detalles revisar el archivo log.');
         }
     }
 
