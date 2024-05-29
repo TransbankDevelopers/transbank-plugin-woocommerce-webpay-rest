@@ -167,7 +167,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
             /** @var WC_Payment_Token_Oneclick $paymentToken */
             $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-            
+
             $authorizeResponse = $this->oneclickTransbankSdk->authorize(
                 $renewalOrder->get_id(),
                 $amount_to_charge,
@@ -438,64 +438,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
             throw $e;
         }
-    }
-
-    /**
-     * @param WC_Order $order
-     *
-     * @throws Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
-     *
-     * @return array
-     */
-    public function authorizeTransaction(
-        WC_Order $order,
-        WC_Payment_Token_Oneclick $paymentToken = null,
-        $amount = null
-    ): array {
-
-        try {
-
-            $token = $this->getWcPaymentToken($paymentToken);
-            $this->logger->logInfo('[Oneclick] Checkout: paying with token ID #' . $token->get_id());
-
-            $amount = $this->getAmountForAuthorize($amount, $order);
-            $authorizeResponse =
-                $this->oneclickTransbankSdk->authorize(
-                    $order->get_id(),
-                    $amount,
-                    $token->get_username(),
-                    $token->get_token()
-                );
-
-            $order->add_payment_token($token);
-            $this->setAfterPaymentOrderStatus($order);
-            if (wc()->cart) {
-                wc()->cart->empty_cart();
-            }
-            $this->add_order_notes($order, $authorizeResponse, 'Oneclick: Pago exitoso');
-            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
-            return [
-                'result'   => 'success',
-                'redirect' => $this->get_return_url($order),
-            ];
-        } catch (CreateTransactionOneclickException $e) {
-            $order->update_status('failed');
-            $order->add_order_note('Problemas al crear el registro de Transacción');
-        } catch (AuthorizeOneclickException $e) {
-            $order->update_status('failed');
-            $order->add_order_note('Transacción con problemas de autorización');
-        } catch (RejectedAuthorizeOneclickException $e) {
-            $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
-            $order->add_order_note('Transacción rechazada');
-        } catch (ConstraintsViolatedAuthorizeOneclickException $e) {
-            $order->update_status('failed');
-            $this->add_order_notes($order, $e->getAuthorizeResponse(), 'Oneclick: Pago rechazado');
-            $order->add_order_note('CONSTRAINTS_VIOLATED: ' . $e->getMessage());
-        }
-
-        do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
-        throw $e;
     }
 
     public function get_saved_payment_methods_list($saved_methods)
