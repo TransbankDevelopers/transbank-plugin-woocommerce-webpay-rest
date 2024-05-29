@@ -124,12 +124,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function process_payment($order_id)
     {
         try {
+            $request = $_POST;
             $order = new WC_Order($order_id);
 
             $this->checkOrderCanBePaid($order);
             $this->checkUserIsLoggedIn();
 
-            return $this->handleRequest($_POST, $order);
+            return $this->handleRequest($request, $order);
         } catch (Throwable $exception) {
             $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
             $errorMessage = ErrorHelper::getErrorMessageBasedOnTransbankSdkException($exception);
