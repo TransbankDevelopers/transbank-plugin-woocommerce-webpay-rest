@@ -11,14 +11,14 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
     <h3 class="tbk_title_h3">Información de Registros</h3>
     <div class="tbk-plugin-info-container">
         <div class="info-column">
-            <div title="<?php echo $logDirectoryTitle; ?>" class="label label-info">?</div>
+            <div title="<?= $logDirectoryTitle ?>" class="label label-info">?</div>
         </div>
         <div class="info-column">
             <span class="highlight-text"> Directorio de registros: </span>
         </div>
         <div class="info-column">
             <span class="label">
-                <?php echo $resume['dir']; ?>
+                <?= $resume['dir'] ?>
             </span>
         </div>
     </div>
@@ -35,23 +35,26 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                 <input type="hidden" name="page" value="transbank_webpay_plus_rest">
                 <input type="hidden" name="tbk_tab" value="logs">
 
-                <select class="select label" name="log_file" <?php if (!$folderHasLogs) { echo "disabled"; } ?>>
+                <select class="select label" name="log_file" <?= !$folderHasLogs ? "disabled" : '' ?>>
                     <?php
+                    $options = '';
+
                     if (!$folderHasLogs) {
-                        echo "<option value='' selected>No hay archivos log</option>";
+                        $options = "<option value='' selected>No hay archivos log</option>";
                     }
                     foreach ($resume['logs'] as $index) {
-                        $str = "<option value='{$index['filename']}'>{$index['filename']}</option>";
+                        $options .= "<option value='{$index['filename']}'>{$index['filename']}</option>";
 
                         if($index['filename'] == basename($lastLog['filename'])) {
-                            $str = "<option value='{$index['filename']}' selected>{$index['filename']}</option>";
+                            $options .= "<option value='{$index['filename']}' selected>{$index['filename']}</option>";
                         }
-                        echo $str;
                     }
+
+                    echo $options;
                     ?>
                 </select>
                 <input type="submit" class="button button-primary tbk-button-primary"
-                    <?php if (!$folderHasLogs) { echo "disabled"; } ?>
+                    <?= !$folderHasLogs ? 'disabled' : '' ?>
                     value="Ver">
             </form>
         </div>
@@ -69,20 +72,20 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
             </div>
             <div class="info-column-plugin">
                 <span class="label">
-                    <?php echo $lastLog['size'] ?? '-'; ?>
+                    <?= $lastLog['size'] ?? '-'; ?>
                 </span>
             </div>
         </div>
         <div class="tbk-plugin-info-container">
             <div class="info-column">
-                <div title="<?php echo $lineCountTitle; ?>" class="label label-info">?</div>
+                <div title="<?= $lineCountTitle ?>" class="label label-info">?</div>
             </div>
             <div class="info-column-plugin">
                 <span class="highlight-text"> Cantidad de Líneas: </span>
             </div>
             <div class="info-column-plugin">
                 <span class="label">
-                    <?php echo $lastLog['lines'] ?? '-'; ?>
+                    <?= $lastLog['lines'] ?? '-'; ?>
                 </span>
             </div>
         </div>
