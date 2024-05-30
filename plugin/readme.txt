@@ -2,7 +2,7 @@
 Contributors: TransbankDevelopers
 Tags: transbank, webpay, oneclick, webpay plus, rest, chile
 Requires at least: 5.3
-Tested up to: 6.4
+Tested up to: 6.5.3
 Requires PHP: 7.4
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
