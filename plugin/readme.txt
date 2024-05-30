@@ -20,7 +20,7 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 * Se agrega el sufijo [Test] a las tarjetas registradas con Oneclick en entorno de integración.
 * Se agrega como dependencia el plugin de WooCommerce.
 * Se actualiza el título del producto Webpay pasando de Transbank Webpay Plus a Webpay Plus.
-* Se arregla un problema que impedía capturar las excepciones cunado se autorizaba una suscripción.
+* Se arregla un problema que impedía capturar las excepciones cuando se autorizaba una suscripción.
 * Se elimina un hook deprecado que provocaba errores de instalación en algunos entornos.
 
 = 1.8.0 =
@@ -169,7 +169,7 @@ Arreglado:
 * Se agrega el sufijo [Test] a las tarjetas registradas con Oneclick en entorno de integración.
 * Se agrega como dependencia el plugin de WooCommerce.
 * Se actualiza el título del producto Webpay pasando de Transbank Webpay Plus a Webpay Plus.
-* Se arregla un problema que impedía capturar las excepciones cunado se autorizaba una suscripción.
+* Se arregla un problema que impedía capturar las excepciones cuando se autorizaba una suscripción.
 * Se elimina un hook deprecado que provocaba errores de instalación en algunos entornos.
 
 = 1.8.0 =
