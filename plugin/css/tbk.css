@@ -282,7 +282,7 @@
     display: grid;
     grid-template-columns: 20px 200px 1fr;
     grid-gap: 5px;
-    align-items: flex-start;
+    align-items: center;
     overflow: hidden;
 }
 

@@ -28,10 +28,11 @@ if (!defined('ABSPATH')) {
  * Plugin URI: https://www.transbankdevelopers.cl/plugin/woocommerce/webpay
  * Description: Recibe pagos en línea con Tarjetas de Crédito y Redcompra en tu WooCommerce a través de Webpay Plus y Webpay Oneclick.
  * Version: VERSION_REPLACE_HERE
+ * Requires Plugins: woocommerce
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
  * WC requires at least: 7.0
- * WC tested up to: 8.5.1
+ * WC tested up to: 8.9.1
  */
 
 require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
@@ -44,8 +45,6 @@ add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
 add_action('wp_ajax_check_exist_tables', TableCheck::class.'::check');
 add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
-
-add_action('woocommerce_subscription_failing_payment_method_updated_transbank_oneclick_mall_rest', [WC_Gateway_Transbank_Oneclick_Mall_REST::class, 'subscription_payment_method_updated'], 10, 3);
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
 add_action('admin_enqueue_scripts', function () {
