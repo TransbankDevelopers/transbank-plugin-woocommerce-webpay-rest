@@ -163,6 +163,15 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.9.0 =
+* Se agrega la opción de poder seleccionar el archivo log en la sección de registros del menú de configuración.
+* Se agrega la funcionalidad para que se muestren las tarjetas registradas de Oneclick dependiendo del entorno.
+* Se agrega el sufijo [Test] a las tarjetas registradas con Oneclick en entorno de integración.
+* Se agrega como dependencia el plugin de WooCommerce.
+* Se actualiza el título del producto Webpay pasando de Transbank Webpay Plus a Webpay Plus.
+* Se arregla un problema que impedía capturar las excepciones cunado se autorizaba una suscripción.
+* Se elimina un hook deprecado que provocaba errores de instalación en algunos entornos.
+
 = 1.8.0 =
 * Se corrige un problema con el contenido del archivo log que provocaba que se desborde.
 * Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
