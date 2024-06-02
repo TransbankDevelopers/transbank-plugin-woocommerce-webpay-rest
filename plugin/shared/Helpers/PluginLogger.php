@@ -126,7 +126,14 @@ final class PluginLogger implements ILogger {
         return $bytes;
     }
 
-    private function getLogFileName(): string {
+    private function getLogDir(): string
+    {
+        $logDir = $this->config->getLogDir();
+        return trailingslashit($logDir);
+    }
+
+    private function getLogFileName(): string
+    {
         $uniqueId = uniqid('', true);
         return 'log_transbank_' . $uniqueId . 'log';
     }
