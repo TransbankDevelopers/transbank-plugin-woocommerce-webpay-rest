@@ -23,16 +23,8 @@ final class PluginLogger implements ILogger {
      */
     public function __construct(LogConfig $config) {
         $this->config = $config;
-        $logFileName = $this->getLogFileNameFromCache();
 
-        if (!$logFileName) {
-            $logFileName = $this->getLogFileName();
-            $expireTime = strtotime('tomorrow') - time();
-            $this->saveLogFileNameInCache($logFileName, $expireTime);
-        }
-
-        $logDir = $this->getLogDir();
-        $logFilePath = $logDir . $logFileName;
+        $logFilePath = $this->getLogFilePath();
 
         $dateFormat = "Y-m-d H:i:s";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
