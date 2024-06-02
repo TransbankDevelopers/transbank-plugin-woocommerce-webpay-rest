@@ -140,7 +140,7 @@ final class PluginLogger implements ILogger {
         return 'log_transbank_' . $uniqueId . 'log';
     }
 
-    private function getLogFileNameFromCache(): string | bool
+    private function getLogFileNameFromCache()
     {
         return get_transient(self::CACHE_LOG_NAME);
     }
