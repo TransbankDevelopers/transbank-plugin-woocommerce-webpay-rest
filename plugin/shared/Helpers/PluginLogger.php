@@ -35,6 +35,21 @@ final class PluginLogger implements ILogger {
         $this->logger = new Logger('transbank');
         $this->logger->pushHandler($stream);
     }
+
+    private function initializeLogger(string $logFilePath)
+    {
+        $dateFormat = "Y-m-d H:i:s";
+        $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
+        $formatter = new LineFormatter($output, $dateFormat);
+
+        $stream = new RotatingFileHandler($logFilePath,
+            100, Logger::DEBUG);
+        $stream->setFormatter($formatter);
+
+        $this->logger = new Logger('transbank');
+        $this->logger->pushHandler($stream);
+    }
+
     private function getLogFilePath(): string
     {
         $logFileName = $this->getLogFileNameFromCache();
