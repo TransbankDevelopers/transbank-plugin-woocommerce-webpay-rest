@@ -8,9 +8,9 @@ use Monolog\Formatter\LineFormatter;
 use Transbank\Plugin\Model\LogConfig;
 
 final class PluginLogger implements ILogger {
-    
+
     const CACHE_LOG_NAME = 'transbank_log_name';
-    
+
     private $logger;
     private $config;
 
@@ -23,19 +23,21 @@ final class PluginLogger implements ILogger {
      */
     public function __construct(LogConfig $config) {
         $this->config = $config;
-        $logDir = $this->config->getLogDir();
-        $cacheLogName = 'transbank_log_name';
-        $logFile = get_transient(self::CACHE_LOG_NAME);
-        if (!$logFile) {
-            $uniqueId = uniqid('', true);
-            $logFile = "{$logDir}/log_transbank_{$uniqueId}.log";
+        $logFileName = $this->getLogFileNameFromCache();
+
+        if (!$logFileName) {
+            $logFileName = $this->getLogFileName();
             $expireTime = strtotime('tomorrow') - time();
-            set_transient($cacheLogName, $logFile, $expireTime);
+            $this->saveLogFileNameInCache($logFileName, $expireTime);
         }
+
+        $logDir = $this->getLogDir();
+        $logFilePath = $logDir . $logFileName;
+
         $dateFormat = "Y-m-d H:i:s";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
-        $stream = new RotatingFileHandler($logFile,
+        $stream = new RotatingFileHandler($logFilePath,
             100, Logger::DEBUG);
         $stream->setFormatter($formatter);
         $this->logger = new Logger('transbank');
