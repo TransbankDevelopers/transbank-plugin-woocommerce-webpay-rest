@@ -43,6 +43,19 @@ final class PluginLogger implements ILogger {
         $this->logger = new Logger('transbank');
         $this->logger->pushHandler($stream);
     }
+    private function getLogFilePath(): string
+    {
+        $logFileName = $this->getLogFileNameFromCache();
+
+        if (!$logFileName) {
+            $logFileName = $this->getLogFileName();
+            $expireTime = strtotime('tomorrow') - time();
+            $this->saveLogFileNameInCache($logFileName, $expireTime);
+        }
+
+        $logDir = $this->getLogDir();
+        return $logDir . $logFileName;
+    }
 
     public function getLogger(){
         return $this->logger;
