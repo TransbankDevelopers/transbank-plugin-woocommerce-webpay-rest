@@ -9,7 +9,7 @@ use Transbank\Plugin\Model\LogConfig;
 
 final class PluginLogger implements ILogger {
 
-    const CACHE_LOG_NAME = 'transbank_log_name';
+    const CACHE_LOG_NAME = 'transbank_log_file_name';
 
     private $logger;
     private $config;
