@@ -8,6 +8,9 @@ use Monolog\Formatter\LineFormatter;
 use Transbank\Plugin\Model\LogConfig;
 
 final class PluginLogger implements ILogger {
+    
+    const CACHE_LOG_NAME = 'transbank_log_name';
+    
     private $logger;
     private $config;
 
@@ -22,7 +25,7 @@ final class PluginLogger implements ILogger {
         $this->config = $config;
         $logDir = $this->config->getLogDir();
         $cacheLogName = 'transbank_log_name';
-        $logFile = get_transient($cacheLogName);
+        $logFile = get_transient(self::CACHE_LOG_NAME);
         if (!$logFile) {
             $uniqueId = uniqid('', true);
             $logFile = "{$logDir}/log_transbank_{$uniqueId}.log";
