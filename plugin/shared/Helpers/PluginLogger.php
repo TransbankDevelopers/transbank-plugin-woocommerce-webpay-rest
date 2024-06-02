@@ -130,4 +130,9 @@ final class PluginLogger implements ILogger {
         $uniqueId = uniqid('', true);
         return 'log_transbank_' . $uniqueId . 'log';
     }
+
+    private function saveLogFileNameInCache(string $logFileName, int $expireTime)
+    {
+        set_transient(self::CACHE_LOG_NAME, $logFileName, $expireTime);
+    }
 }
