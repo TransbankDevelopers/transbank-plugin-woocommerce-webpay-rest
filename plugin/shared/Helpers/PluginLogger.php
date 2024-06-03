@@ -34,7 +34,7 @@ final class PluginLogger implements ILogger
     private function initializeLogger(string $logFilePath)
     {
         $ecommerceTz = new DateTimeZone(wc_timezone_string());
-        $dateFormat = "Y-m-d H:i:s";
+        $dateFormat = "Y-m-d H:i:s P";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
 
