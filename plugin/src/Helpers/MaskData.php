@@ -62,11 +62,14 @@ class MaskData
      */
     private function mask($input, $pattern = null, $charsToKeep = 4)
     {
-        $cleanInput = $input ?? '';
-        $len = strlen($cleanInput);
+        if(is_null($input)) {
+            return '';
+        }
+
+        $len = strlen($input);
 
         if ($pattern != null) {
-            $patternPos = strpos($cleanInput, $pattern);
+            $patternPos = strpos($input, $pattern);
             if ($patternPos === 0) {
                 $startString = $pattern;
             } else {
@@ -74,8 +77,8 @@ class MaskData
             }
         }
 
-        $startString = $startString ?? substr($cleanInput, 0, $charsToKeep);
-        $endString = $endString ?? substr($cleanInput, -$charsToKeep, $charsToKeep);
+        $startString = $startString ?? substr($input, 0, $charsToKeep);
+        $endString = $endString ?? substr($input, -$charsToKeep, $charsToKeep);
         $charsToReplace = $len - (strlen($startString) + strlen($endString));
         $replaceString = str_repeat("x", $charsToReplace);
         return $startString . $replaceString . $endString;
