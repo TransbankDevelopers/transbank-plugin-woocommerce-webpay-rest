@@ -1,7 +1,9 @@
 <?php
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
+
 use Transbank\Webpay\Options;
+
 class MaskData
 {
 
@@ -30,7 +32,8 @@ class MaskData
     protected $isIntegration;
     protected $log;
 
-    public function __construct($environment){
+    public function __construct($environment)
+    {
         $this->isIntegration = $environment == Options::ENVIRONMENT_INTEGRATION;
         $this->log = TbkFactory::createLogger();
     }
@@ -42,7 +45,8 @@ class MaskData
      * @param string $input a string to be masked.
      * @return string a string with substrings masked.
      */
-    private function maskWithFormat($input){
+    private function maskWithFormat($input)
+    {
         return preg_replace_callback('/(?<=-).+?(?=-)/', function ($matches) {
             return str_repeat('x', strlen($matches[0]));
         }, $input);
@@ -56,19 +60,20 @@ class MaskData
      * @param int $charsToKeep number of original chars to keep at start and end.
      * @return string a string masked.
      */
-    private function mask($input, $pattern = null, $charsToKeep = 4 ){
+    private function mask($input, $pattern = null, $charsToKeep = 4)
+    {
         $cleanInput = $input ?? '';
         $len = strlen($cleanInput);
 
-        if ( $pattern != null ) {
-           $patternPos = strpos($cleanInput, $pattern);
-           if ( $patternPos === 0 ) {
+        if ($pattern != null) {
+            $patternPos = strpos($cleanInput, $pattern);
+            if ($patternPos === 0) {
                 $startString = $pattern;
-            }
-            else {
+            } else {
                 $endString = $pattern;
             }
         }
+
         $startString = $startString ?? substr($cleanInput, 0, $charsToKeep);
         $endString = $endString ?? substr($cleanInput, -$charsToKeep, $charsToKeep);
         $charsToReplace = $len - (strlen($startString) + strlen($endString));
@@ -82,7 +87,8 @@ class MaskData
      * @param string $email An email to be masked.
      * @return string email masked.
      */
-    private function maskEmail($email){
+    private function maskEmail($email)
+    {
         return preg_replace_callback('/^(.{1,4})[^@]*(@.*)$/', function ($match) {
             return $match[1] . str_repeat('x', strlen($match[0]) - strlen($match[1]) - strlen($match[2])) . $match[2];
         }, $email);
@@ -95,14 +101,16 @@ class MaskData
      * @param string $pattern A pattern to maintain, like `child` or `sessionId`.
      * @return string input masked.
      */
-    private function maskWithPattern($input, $pattern){
+    private function maskWithPattern($input, $pattern)
+    {
         $regexPattern = "/(wc:($pattern:)?\w{2})\w+:(\w{2})/";
-        return preg_replace_callback($regexPattern, function($matches) use ($input){
-                    $prefix = $matches[1];
-                    $suffix = $matches[3];
-                    $maskLength = strlen($input) - strlen($prefix) - strlen($suffix) - 1;
-                    return $prefix . str_repeat('x', $maskLength) . $suffix;
-                }, $input);
+
+        return preg_replace_callback($regexPattern, function ($matches) use ($input) {
+            $prefix = $matches[1];
+            $suffix = $matches[3];
+            $maskLength = strlen($input) - strlen($prefix) - strlen($suffix) - 1;
+            return $prefix . str_repeat('x', $maskLength) . $suffix;
+        }, $input);
     }
 
     /**
@@ -112,10 +120,12 @@ class MaskData
      * @param string $buyOrder An string with buy order to mask.
      * @return string buy order masked.
      */
-    public function maskBuyOrder($buyOrder){
+    public function maskBuyOrder($buyOrder)
+    {
         if ($this->isIntegration) {
             return $buyOrder;
         }
+
         $pattern = 'child';
         return $this->maskWithPattern($buyOrder, $pattern);
     }
@@ -127,10 +137,12 @@ class MaskData
      * @param string $sessionId An string with session id to mask.
      * @return string session id masked.
      */
-    public function maskSessionId($sessionId){
-        if($this->isIntegration){
+    public function maskSessionId($sessionId)
+    {
+        if ($this->isIntegration) {
             return $sessionId;
         }
+
         $sessionIdPattern = 'sessionId';
         return $this->maskWithPattern($sessionId, $sessionIdPattern);
     }
@@ -141,7 +153,8 @@ class MaskData
      * @param array $array an array to evaluate
      * @return boolean `true` if is associative, `false` otherwise
      */
-    private function isAssociative($array) {
+    private function isAssociative($array)
+    {
         return (bool)count(array_filter(array_keys($array), 'is_string'));
     }
 
@@ -152,14 +165,15 @@ class MaskData
      * @param array $data An array containing data to mask.
      * @return array copy of input, with fields masked.
      */
-    public function maskData($data){
-        try{
-            if ($this->isIntegration){
+    public function maskData($data)
+    {
+        try {
+            if ($this->isIntegration) {
                 return $data;
             }
             $newData = $this->copyWithSubArray($data);
             foreach ($newData as $key => $value) {
-                switch($this->getValueType($value)){
+                switch ($this->getValueType($value)) {
                     case $this::OBJECT:
                         $newData[$key] = $this->maskObject($value);
                         break;
@@ -176,8 +190,7 @@ class MaskData
                 }
             }
             return $newData;
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
             $this->log->logError('Error on Mask Data: ' . $e->getMessage());
             return $data;
         }
@@ -190,17 +203,19 @@ class MaskData
      * @param array $array An array to be copied.
      * @return array copy of input array.
      */
-    private function copyWithSubArray($array){
+    private function copyWithSubArray($array)
+    {
         $newArray = null;
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $clonedValue = array_map(function ($item) {
-                                            return is_object($item) ? clone $item : $item;
-                                        },
-                                        $value);
+                $clonedValue = array_map(
+                    function ($item) {
+                        return is_object($item) ? clone $item : $item;
+                    },
+                    $value
+                );
                 $newArray[$key] = $clonedValue;
-            }
-            else {
+            } else {
                 $newArray[$key] = is_object($value) ? clone $value : $value;
             }
         }
@@ -214,11 +229,14 @@ class MaskData
      * @param mixed $value the value to be masked.
      * @return mixed masked value if key exists, `false` otherwise.
      */
-    private function getMaskedValue($key, $value){
+    private function getMaskedValue($key, $value)
+    {
         $keyExists = array_key_exists($key, $this->keysToMask);
-        if($keyExists){
+
+        if ($keyExists) {
             return call_user_func([$this, $this->keysToMask[$key]], $value);
         }
+
         return $value;
     }
 
@@ -228,16 +246,18 @@ class MaskData
      * @param string $value to evaluate.
      * @return int a constant representing the type of element
      */
-    private function getValueType($value){
+    private function getValueType($value)
+    {
         $valueType = $this::NO_ITERABLE;
-        if(is_object($value)){
+
+        if (is_object($value)) {
             $valueType = $this::OBJECT;
         }
-        if (is_array($value)){
-            if ($this->isAssociative($value)){
+
+        if (is_array($value)) {
+            if ($this->isAssociative($value)) {
                 $valueType = $this::ASSOCIATIVE_ARRAY;
-            }
-            else {
+            } else {
                 $valueType = $this::INDEXED_ARRAY;
             }
         }
@@ -251,8 +271,9 @@ class MaskData
      * @param object $object a reference to an object to mask
      * @return object the object with masked attributes
      */
-    private function maskObject($object){
-        foreach($object as $detailKey => $detailValue) {
+    private function maskObject($object)
+    {
+        foreach ($object as $detailKey => $detailValue) {
             $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
             $object->$detailKey = $maskedValue;
         }
@@ -265,8 +286,9 @@ class MaskData
      * @param array $array the array to mask.
      * @return array the array with masked values.
      */
-    private function maskAssociativeArray($array){
-        foreach($array as $detailKey => $detailValue) {
+    private function maskAssociativeArray($array)
+    {
+        foreach ($array as $detailKey => $detailValue) {
             $maskedValue = $this->getMaskedValue($detailKey, $detailValue);
             $array[$detailKey] = $maskedValue;
         }
@@ -279,17 +301,15 @@ class MaskData
      * @param array $array the array to mask.
      * @return array the array with masked values.
      */
-    private function maskIndexedArray($array){
-        foreach($array as $detail) {
-            if(is_object($detail)) {
+    private function maskIndexedArray($array)
+    {
+        foreach ($array as $detail) {
+            if (is_object($detail)) {
                 $detail = $this->maskObject($detail);
-            }
-            else {
+            } else {
                 $detail = $this->maskAssociativeArray($array);
             }
-
         }
         return $array;
     }
-
 }
