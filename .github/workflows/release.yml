@@ -29,16 +29,21 @@ jobs:
         env:
           WP_ORG_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
           TAG: ${{ github.event.release.tag_name }}
-      - name: Upload assets
+      - name: Upload transbank-webpay-plus-rest.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: |
-            transbank-webpay-plus-rest.zip
-            transbank-webpay-plus-rest-guzzle7.zip
-          asset_name: |
-            transbank-webpay-plus-rest.zip
-            transbank-webpay-plus-rest-guzzle7.zip
+          asset_path: transbank-webpay-plus-rest.zip
+          asset_name: transbank-webpay-plus-rest.zip
+          asset_content_type: application/zip
+      - name: Upload transbank-webpay-plus-rest-guzzle7.zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: transbank-webpay-plus-rest-guzzle7.zip
+          asset_name: transbank-webpay-plus-rest-guzzle7.zip
           asset_content_type: application/zip
