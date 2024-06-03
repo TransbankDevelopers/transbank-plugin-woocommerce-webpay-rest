@@ -14,6 +14,12 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
 
 == Changelog ==
+= 1.9.1 =
+* Se arregla un mensaje de warning provocado por la función maskData en PHP mayor o igual a 8.x.
+* Se arregla un problema que impedía encontrar el archivo de log al migrar el sitio de un servidor a otro.
+* Se arregla la zona horaria de los logs. Se usa la que este configurada en el ecommerce del comercio.
+* Se arregla un problema que provocaba registros duplicados en el selector de archivos logs de la vista registros.
+
 = 1.9.0 =
 * Se agrega la opción de poder seleccionar el archivo log en la sección de registros del menú de configuración.
 * Se agrega la funcionalidad para que se muestren las tarjetas registradas de Oneclick dependiendo del entorno.
@@ -163,6 +169,12 @@ Arreglado:
 * Initial release.
 
 == Upgrade Notice ==
+= 1.9.1 =
+* Se arregla un mensaje de warning provocado por la función maskData en PHP mayor o igual a 8.x.
+* Se arregla un problema que impedía encontrar el archivo de log al migrar el sitio de un servidor a otro.
+* Se arregla la zona horaria de los logs. Se usa la que este configurada en el ecommerce del comercio.
+* Se arregla un problema que provocaba registros duplicados en el selector de archivos logs de la vista registros.
+
 = 1.9.0 =
 * Se agrega la opción de poder seleccionar el archivo log en la sección de registros del menú de configuración.
 * Se agrega la funcionalidad para que se muestren las tarjetas registradas de Oneclick dependiendo del entorno.
