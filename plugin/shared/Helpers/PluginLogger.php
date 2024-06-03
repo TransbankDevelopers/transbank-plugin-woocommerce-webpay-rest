@@ -7,7 +7,11 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
 use Transbank\Plugin\Model\LogConfig;
 
-final class PluginLogger implements ILogger {
+final class PluginLogger implements ILogger
+{
+
+    const CACHE_LOG_NAME = 'transbank_log_file_name';
+
     private $logger;
     private $config;
 
@@ -18,32 +22,52 @@ final class PluginLogger implements ILogger {
      * output format : "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
      * @param Throwable $e
      */
-    public function __construct(LogConfig $config) {
+    public function __construct(LogConfig $config)
+    {
         $this->config = $config;
-        $logDir = $this->config->getLogDir();
-        $cacheLogName = 'transbank_log_name';
-        $logFile = get_transient($cacheLogName);
-        if (!$logFile) {
-            $uniqueId = uniqid('', true);
-            $logFile = "{$logDir}/log_transbank_{$uniqueId}.log";
-            $expireTime = strtotime('tomorrow') - time();
-            set_transient($cacheLogName, $logFile, $expireTime);
-        }
+
+        $logFilePath = $this->getLogFilePath();
+        $this->initializeLogger($logFilePath);
+    }
+
+    private function initializeLogger(string $logFilePath)
+    {
         $dateFormat = "Y-m-d H:i:s";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
-        $stream = new RotatingFileHandler($logFile,
-            100, Logger::DEBUG);
+
+        $stream = new RotatingFileHandler(
+            $logFilePath,
+            100,
+            Logger::DEBUG
+        );
         $stream->setFormatter($formatter);
+
         $this->logger = new Logger('transbank');
         $this->logger->pushHandler($stream);
     }
 
-    public function getLogger(){
+    private function getLogFilePath(): string
+    {
+        $logFileName = $this->getLogFileNameFromCache();
+
+        if (!$logFileName) {
+            $logFileName = $this->getLogFileName();
+            $expireTime = strtotime('tomorrow') - time();
+            $this->saveLogFileNameInCache($logFileName, $expireTime);
+        }
+
+        $logDir = $this->getLogDir();
+        return $logDir . $logFileName;
+    }
+
+    public function getLogger()
+    {
         return $this->logger;
     }
 
-    public function getConfig(){
+    public function getConfig()
+    {
         return $this->config;
     }
 
@@ -64,7 +88,7 @@ final class PluginLogger implements ILogger {
 
     public function getInfo()
     {
-        $files = glob($this->config->getLogDir().'/*.log');
+        $files = glob($this->config->getLogDir() . '/*.log');
         if (!$files) {
             return [
                 'dir'      => $this->config->getLogDir(),
@@ -77,7 +101,7 @@ final class PluginLogger implements ILogger {
         arsort($files);
 
         $logs = [];
-        foreach($files as $key=>$value) {
+        foreach ($files as $key => $value) {
             $logs[] = [
                 "filename" => basename($key),
                 "modified" => $value
@@ -97,7 +121,7 @@ final class PluginLogger implements ILogger {
         if ($filename == '') {
             return [];
         }
-        $fle = $this->config->getLogDir().'/'.$filename;
+        $fle = $this->config->getLogDir() . '/' . $filename;
         $content = file_get_contents($fle);
         if ($replaceNewline && $content !== false) {
             $content = str_replace("\n", '#@#', $content);
@@ -121,5 +145,27 @@ final class PluginLogger implements ILogger {
             }
         }
         return $bytes;
+    }
+
+    private function getLogDir(): string
+    {
+        $logDir = $this->config->getLogDir();
+        return trailingslashit($logDir);
+    }
+
+    private function getLogFileName(): string
+    {
+        $uniqueId = uniqid('', true);
+        return 'log_transbank_' . $uniqueId . '.log';
+    }
+
+    private function getLogFileNameFromCache()
+    {
+        return get_transient(self::CACHE_LOG_NAME);
+    }
+
+    private function saveLogFileNameInCache(string $logFileName, int $expireTime)
+    {
+        set_transient(self::CACHE_LOG_NAME, $logFileName, $expireTime);
     }
 }
