@@ -2,6 +2,7 @@
 
 namespace Transbank\Plugin\Helpers;
 
+use DateTimeZone;
 use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
@@ -32,7 +33,8 @@ final class PluginLogger implements ILogger
 
     private function initializeLogger(string $logFilePath)
     {
-        $dateFormat = "Y-m-d H:i:s";
+        $ecommerceTz = new DateTimeZone(wc_timezone_string());
+        $dateFormat = "Y-m-d H:i:s P";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
         $formatter = new LineFormatter($output, $dateFormat);
 
@@ -44,6 +46,7 @@ final class PluginLogger implements ILogger
         $stream->setFormatter($formatter);
 
         $this->logger = new Logger('transbank');
+        $this->logger->setTimezone($ecommerceTz);
         $this->logger->pushHandler($stream);
     }
 
