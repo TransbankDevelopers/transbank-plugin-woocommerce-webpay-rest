@@ -396,6 +396,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $paymentToken = $this->getWcPaymentToken($paymentTokenId);
             $amount = $this->getTotalAmountFromOrder($order);
 
+            if (!$this->validatePayerMatchesCardInscription($paymentToken)) {
+                throw new EcommerceException("Datos incorrectos para autorizar la transacción.");
+            }
+
             $authorizeResponse = $this->oneclickTransbankSdk->authorize(
                 $order->get_id(),
                 $amount,
@@ -701,6 +705,22 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     private function getTotalAmountFromOrder(WC_Order $order): int
     {
         return (int) number_format($order->get_total(), 0, ',', '');
+    }
+
+    /**
+     * Validate that the user paying for the order is the same as the one who registered the card.
+     *
+     * @param WC_Payment_Token_Oneclick $inscriptionData The card inscription data.
+     *
+     * @return bool True if the payer matches the card inscription, false otherwise.
+     */
+    private function validatePayerMatchesCardInscription(WC_Payment_Token_Oneclick $paymentToken): bool
+    {
+        $currentUser = wp_get_current_user();
+        $userEmail = $currentUser->user_email;
+        $inscriptionEmail = $paymentToken->get_email();
+
+        return $userEmail == $inscriptionEmail;
     }
 
     public function getOneclickPaymentTokenClass()
