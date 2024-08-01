@@ -717,8 +717,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     private function validatePayerMatchesCardInscription(WC_Payment_Token_Oneclick $paymentToken): bool
     {
         $currentUser = wp_get_current_user();
-        $userEmail = $currentUser->user_email;
-        $inscriptionEmail = $paymentToken->get_email();
+        $userEmail = $currentUser->id;
+        $inscriptionEmail = $paymentToken->get_userId();
 
         return $userEmail == $inscriptionEmail;
     }
