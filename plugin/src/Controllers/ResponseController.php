@@ -25,11 +25,10 @@ class ResponseController
      * @var array
      */
     protected $pluginConfig;
-
     protected $logger;
 
     /**
-     * @var Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
+     * @var \Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
      */
     protected $webpayplusTransbankSdk;
 
