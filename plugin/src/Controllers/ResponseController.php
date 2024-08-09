@@ -181,8 +181,7 @@ class ResponseController
         WC_Order $wooCommerceOrder,
         TransactionCommitResponse $commitResponse,
         $webpayTransaction
-    )
-    {
+    ) {
         $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $date_accepted = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
@@ -213,7 +212,8 @@ class ResponseController
 
         $maskedBuyOrder = $this->webpayplusTransbankSdk->dataMasker->maskBuyOrder($commitResponse->getBuyOrder());
         $this->logger->logInfo(
-            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$maskedBuyOrder);
+            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: ' . $maskedBuyOrder
+        );
 
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
@@ -227,8 +227,7 @@ class ResponseController
         WC_Order $wooCommerceOrder,
         $webpayTransaction,
         TransactionCommitResponse $commitResponse
-    )
-    {
+    ) {
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');
         if ($commitResponse !== null) {
@@ -241,14 +240,14 @@ class ResponseController
                 $webpayTransaction->token
             );
 
-            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$webpayTransaction->token);
+            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: ' . $webpayTransaction->token);
             $this->logger->logError(json_encode($commitResponse));
         }
 
         Transaction::update(
             $webpayTransaction->id,
             [
-                'status'             => Transaction::STATUS_FAILED,
+                'status' => Transaction::STATUS_FAILED,
                 'transbank_response' => json_encode($commitResponse),
             ]
         );
@@ -321,18 +320,19 @@ class ResponseController
     /**
      * @param WC_Order $order
      */
-    private function setAfterPaymentOrderStatus(WC_Order $order){
+    private function setAfterPaymentOrderStatus(WC_Order $order)
+    {
         $status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
-        if ($status == ''){
+        if ($status == '') {
             $order->payment_complete();
-        }
-        else{
+        } else {
             $order->payment_complete();
             $order->update_status($status);
         }
     }
 
-    protected function addErrorQueryParams($url, $errorCode) {
+    protected function addErrorQueryParams($url, $errorCode)
+    {
         $params = ['transbank_status' => $errorCode];
         return add_query_arg($params, $url);
     }
