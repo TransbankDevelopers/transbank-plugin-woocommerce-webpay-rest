@@ -7,6 +7,7 @@ use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
+use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
@@ -30,7 +31,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
 
     /**
-     * @var \Transbank\Webpay\WebpayPlus\Transaction
+     * @var WebpayPlusTransaction
      */
     protected $webpayplusTransaction;
 
@@ -38,7 +39,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     {
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
-        $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
+        $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
     }
 
@@ -47,7 +48,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     */
     private function createOptions($environment, $commerceCode, $apiKey)
     {
-        $options = \Transbank\Webpay\WebpayPlus\Transaction::getDefaultOptions();
+        $options = WebpayPlusTransaction::getDefaultOptions();
         if ($environment == Options::ENVIRONMENT_PRODUCTION) {
             $options = Options::forProduction($commerceCode, $apiKey);
         }
