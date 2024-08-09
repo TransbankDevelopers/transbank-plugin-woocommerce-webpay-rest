@@ -4,13 +4,13 @@ const params = new URLSearchParams(url.search);
 const hasTbkData = params.has('transbank_status');
 
 const noticeTypes = {
-    SUCESS: 'success',
+    SUCCESS: 'success',
     ERROR: 'error'
 }
 
 const oneClickNoticeData = {
     0: { message: 'La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.',
-        type: noticeTypes.SUCESS },
+        type: noticeTypes.SUCCESS },
     1: { message: 'La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.',
         type: noticeTypes.ERROR },
     2: { message: 'No se recibió el token de la inscripción.',
@@ -27,7 +27,7 @@ const oneClickNoticeData = {
 
 const webPayNoticeNoticeData  = {
     7: { message: 'Transacción aprobada',
-    type: noticeTypes.SUCESS },
+    type: noticeTypes.SUCCESS },
     8: { message: 'El usuario intentó pagar esta orden nuevamente, cuando esta ya estaba pagada.',
     type: noticeTypes.ERROR },
     9: { message: 'El usuario intentó pagar una orden con estado inválido.',
@@ -60,7 +60,7 @@ export const noticeHandler = ( productId ) => {
         const noticeMessage = productNoticeData[statusCode]['message'];
         const notificationType = productNoticeData[statusCode]['type'];
         switch (notificationType){
-            case noticeTypes.SUCESS:
+            case noticeTypes.SUCCESS:
                 wp.data.dispatch('core/notices').createSuccessNotice( noticeMessage, { context: 'wc/checkout' } );
                 break;
             case noticeTypes.ERROR:
