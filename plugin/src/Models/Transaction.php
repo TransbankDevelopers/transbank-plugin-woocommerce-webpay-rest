@@ -10,9 +10,10 @@ class Transaction extends BaseModel
 
     const STATUS_PREPARED = 'prepared';
     const STATUS_INITIALIZED = 'initialized';
-    const STATUS_FAILED = 'failed';
-    const STATUS_ABORTED_BY_USER = 'aborted_by_user';
     const STATUS_APPROVED = 'approved';
+    const STATUS_TIMEOUT = 'timeout';
+    const STATUS_ABORTED_BY_USER = 'aborted_by_user';
+    const STATUS_FAILED = 'failed';
 
     const PRODUCT_WEBPAY_PLUS = 'webpay_plus';
     const PRODUCT_WEBPAY_ONECLICK = 'webpay_oneclick';
