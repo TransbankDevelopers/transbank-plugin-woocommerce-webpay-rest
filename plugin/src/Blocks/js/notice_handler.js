@@ -28,11 +28,11 @@ const oneClickNoticeData = {
 const webPayNoticeNoticeData  = {
     7: { message: 'Transacción aprobada',
     type: noticeTypes.SUCCESS },
-    8: { message: 'El usuario intentó pagar esta orden nuevamente, cuando esta ya estaba pagada.',
+    8: { message: 'Ocurrió un error al confirmar la transacción, ya se encontraba procesada.',
     type: noticeTypes.ERROR },
     9: { message: 'El usuario intentó pagar una orden con estado inválido.',
     type: noticeTypes.ERROR },
-    10: { message: 'La transacción fue cancelada automáticamente por estar inactiva mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago',
+    10: { message: 'La transacción fue cancelada por exceder el tiempo en el formulario de Webpay.',
     type: noticeTypes.ERROR },
     11: { message: 'El usuario canceló la transacción en el formulario de pago, pero esta orden ya estaba pagada o en un estado diferente a INICIALIZADO',
     type: noticeTypes.ERROR },
@@ -44,7 +44,7 @@ const webPayNoticeNoticeData  = {
     type: noticeTypes.ERROR },
     15: { message: 'El commit de la transacción ha sido rechazada en Transbank',
     type: noticeTypes.ERROR },
-    16: { message: 'Ocurrió un error al ejecutar el commit de la transacción.',
+    16: { message: 'Ocurrió un error al confirmar la transacción, favor intente nuevamente.',
     type: noticeTypes.ERROR },
     17: { message: 'Ocurrió un error inesperado.',
     type: noticeTypes.ERROR }
