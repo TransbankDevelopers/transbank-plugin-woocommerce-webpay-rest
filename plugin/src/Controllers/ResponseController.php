@@ -145,22 +145,6 @@ class ResponseController
     }
 
     /**
-     * @param $data
-     *
-     * @return |null
-     */
-    protected function getTokenWs($data)
-    {
-        $token_ws = isset($data['token_ws']) ? $data['token_ws'] : (isset($data['TBK_TOKEN']) ? $data['TBK_TOKEN'] : null);
-        if (!isset($token_ws)) {
-            $this->throwError('No se encontró el token');
-            wp_redirect(wc_get_checkout_url());
-        }
-
-        return $token_ws;
-    }
-
-    /**
      * @param $orderId
      *
      * @return WC_Order
