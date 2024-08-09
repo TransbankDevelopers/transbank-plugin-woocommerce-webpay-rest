@@ -223,9 +223,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         ob_clean();
         if (isset($_POST)) {
             header('HTTP/1.1 200 OK');
-            $data = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $_GET : $_POST;
+            $requestMethod = $_SERVER['REQUEST_METHOD'];
+            $params = ($requestMethod === 'GET') ? $_GET : $_POST;
 
-            return (new ResponseController($this->config))->response($data);
+            return (new ResponseController($this->config))->response($requestMethod, $params);
         } else {
             echo 'Ocurrió un error al procesar su compra';
         }
