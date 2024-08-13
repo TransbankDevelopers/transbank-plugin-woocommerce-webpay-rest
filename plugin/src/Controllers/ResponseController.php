@@ -55,13 +55,8 @@ class ResponseController
         $this->logger->logInfo("Request: method -> $requestMethod");
         $this->logger->logInfo('Request: payload -> ' . json_encode($params));
 
-        $requestData = [
-            'method' => $requestMethod,
-            'params' => $params
-        ];
-
         try {
-            $transaction = $this->webpayplusTransbankSdk->handleRequestFromTbkReturn($requestData);
+            $transaction = $this->webpayplusTransbankSdk->handleRequestFromTbkReturn($params);
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $commitResponse = $this->webpayplusTransbankSdk->commitTransaction($transaction->order_id, $transaction->token);
             $this->completeWooCommerceOrder($wooCommerceOrder, $commitResponse, $transaction);
