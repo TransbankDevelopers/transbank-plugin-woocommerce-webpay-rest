@@ -51,6 +51,10 @@ class ResponseController
 
     public function response($requestMethod, $params)
     {
+        $this->logger->logInfo('Procesando retorno desde formulario de Webpay.');
+        $this->logger->logInfo("Request: method -> $requestMethod");
+        $this->logger->logInfo('Request: payload -> ' . json_encode($params));
+
         $requestData = [
             'method' => $requestMethod,
             'params' => $params
