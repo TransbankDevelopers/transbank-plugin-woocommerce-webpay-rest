@@ -224,9 +224,6 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         header('HTTP/1.1 200 OK');
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $params = ($requestMethod === 'GET') ? $_GET : $_POST;
-        $this->log->logInfo('Procesando retorno desde formulario de Webpay.');
-        $this->log->logInfo("Request: method -> $requestMethod");
-        $this->log->logInfo('Request: payload -> ' . json_encode($params));
 
         return (new ResponseController($this->config))->response($requestMethod, $params);
     }
