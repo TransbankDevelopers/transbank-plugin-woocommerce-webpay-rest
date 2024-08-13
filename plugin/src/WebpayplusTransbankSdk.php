@@ -438,9 +438,8 @@ class WebpayplusTransbankSdk extends TransbankSdk
         return self::WEBPAY_ERROR_FLOW;
     }
 
-    public function handleRequestFromTbkReturn(array $requestData)
+    public function handleRequestFromTbkReturn(array $params)
     {
-        $params = $requestData['params'] ?? null;
         $tokenWs = $params['token_ws'] ?? null;
         $tbkToken = $params['TBK_TOKEN'] ?? null;
         $sessionId = $params['TBK_ID_SESION'] ?? null;
