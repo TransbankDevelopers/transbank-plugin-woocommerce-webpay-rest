@@ -126,8 +126,8 @@ class ResponseController
         } catch (AlreadyProcessedException $e) {
             $errorMessage = 'Error al confirmar la transacción, ya fue procesada anteriormente';
             $transaction = $e->getTransaction();
-            $order_id = $transaction['order_id'];
-            $wooCommerceOrder = $this->getWooCommerceOrderById($order_id);
+            $orderId = $transaction['order_id'];
+            $wooCommerceOrder = $this->getWooCommerceOrderById($orderId);
             $wooCommerceOrder->add_order_note($errorMessage);
 
             if ($e->getFlow() == WebpayplusTransbankSdk::WEBPAY_NORMAL_FLOW) {
