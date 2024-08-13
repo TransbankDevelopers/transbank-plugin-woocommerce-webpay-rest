@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
@@ -28,7 +29,7 @@ class ResponseController
     protected $logger;
 
     /**
-     * @var \Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
+     * @var WebpayplusTransbankSdk
      */
     protected $webpayplusTransbankSdk;
 
@@ -129,7 +130,7 @@ class ResponseController
             $wooCommerceOrder = $this->getWooCommerceOrderById($order_id);
             $wooCommerceOrder->add_order_note($errorMessage);
 
-            if ($e->getFlow() == 'Normal') {
+            if ($e->getFlow() == WebpayplusTransbankSdk::WEBPAY_NORMAL_FLOW) {
                 return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
             }
 
