@@ -5,6 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use DateTime;
 use DateTimeZone;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\WooCommerce\WebpayRest\Helpers\TransactionResponseHandler;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
@@ -30,8 +31,9 @@ class ResponseController
 
     /**
      * @var WebpayplusTransbankSdk
+     * @var TransactionResponseHandler
      */
-    protected $webpayplusTransbankSdk;
+    protected TransactionResponseHandler $transactionResponseHandler;
 
     /**
      * ResponseController constructor.
@@ -43,6 +45,7 @@ class ResponseController
         $this->logger = TbkFactory::createLogger();
         $this->pluginConfig = $pluginConfig;
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
+        $this->transactionResponseHandler = new TransactionResponseHandler();
     }
 
     /**
@@ -57,7 +60,7 @@ class ResponseController
         $this->logger->logInfo('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = $this->webpayplusTransbankSdk->handleRequestFromTbkReturn($params);
+            $transaction = $this->transactionResponseHandler->handleRequestFromTbkReturn($params);
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $commitResponse = $this->webpayplusTransbankSdk->commitTransaction($transaction->order_id, $transaction->token);
             $this->completeWooCommerceOrder($wooCommerceOrder, $commitResponse, $transaction);
