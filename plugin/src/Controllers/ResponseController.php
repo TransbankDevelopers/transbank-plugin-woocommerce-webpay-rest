@@ -4,7 +4,9 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\WooCommerce\WebpayRest\Helpers\TransactionResponseHandler;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
@@ -24,14 +26,14 @@ class ResponseController
 {
     /**
      * @var array
-     */
-    protected $pluginConfig;
-    protected $logger;
-
-    /**
+     * @var PluginLogger
      * @var WebpayplusTransbankSdk
+     * @var TransactionResponseHandler
      */
-    protected $webpayplusTransbankSdk;
+    protected array $pluginConfig;
+    protected PluginLogger $logger;
+    protected WebpayplusTransbankSdk $webpayplusTransbankSdk;
+    protected TransactionResponseHandler $transactionResponseHandler;
 
     /**
      * ResponseController constructor.
@@ -43,6 +45,7 @@ class ResponseController
         $this->logger = TbkFactory::createLogger();
         $this->pluginConfig = $pluginConfig;
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
+        $this->transactionResponseHandler = new TransactionResponseHandler();
     }
 
     /**
@@ -57,7 +60,7 @@ class ResponseController
         $this->logger->logInfo('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = $this->webpayplusTransbankSdk->handleRequestFromTbkReturn($params);
+            $transaction = $this->transactionResponseHandler->handleRequestFromTbkReturn($params);
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
             $commitResponse = $this->webpayplusTransbankSdk->commitTransaction($transaction->order_id, $transaction->token);
             $this->completeWooCommerceOrder($wooCommerceOrder, $commitResponse, $transaction);
@@ -66,13 +69,12 @@ class ResponseController
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $transaction
             ]);
-            return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
+            $redirectUrl = $wooCommerceOrder->get_checkout_order_received_url();
         } catch (TimeoutWebpayException $e) {
             $this->throwError($e->getMessage());
 
             do_action('transbank_webpay_plus_timeout_on_form');
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_TIMEOUT);
-            return wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_TIMEOUT);
         } catch (UserCancelWebpayException $e) {
             $params = ['transbank_webpayplus_cancelled_order' => 1];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
@@ -81,14 +83,12 @@ class ResponseController
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $transaction);
 
             do_action('transbank_webpay_plus_transaction_cancelled_by_user', $wooCommerceOrder, $transaction);
-            $urlWithErrorCode = $this->addErrorQueryParams($redirectUrl, BlocksHelper::WEBPAY_USER_CANCELED);
-            return wp_safe_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams($redirectUrl, BlocksHelper::WEBPAY_USER_CANCELED);
         } catch (DoubleTokenWebpayException $e) {
             $this->throwError($e->getMessage());
 
             do_action('transbank_webpay_plus_unexpected_error');
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_DOUBLE_TOKEN);
-            return wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_DOUBLE_TOKEN);
         } catch (InvalidStatusWebpayException $e) {
             $errorMessage = 'No se puede confirmar la transacción, estado de transacción invalido.';
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
@@ -98,8 +98,7 @@ class ResponseController
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $e->getTransaction()
             ]);
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_INVALID_STATUS);
-            return wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_INVALID_STATUS);
         } catch (RejectedCommitWebpayException $e) {
             $transaction = $e->getTransaction();
             $commitResponse = $e->getCommitResponse();
@@ -111,7 +110,7 @@ class ResponseController
                 'transbankTransaction' => $transaction,
                 'transbankResponse' => $commitResponse
             ]);
-            return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
+            $redirectUrl = $wooCommerceOrder->get_checkout_order_received_url();
         } catch (CommitWebpayException $e) {
             $errorMessage = 'Error al confirmar la transacción de Transbank';
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
@@ -121,8 +120,7 @@ class ResponseController
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $e->getTransaction()
             ]);
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_COMMIT_ERROR);
-            return wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_COMMIT_ERROR);
         } catch (AlreadyProcessedException $e) {
             $errorMessage = 'Error al confirmar la transacción, ya fue procesada anteriormente';
             $transaction = $e->getTransaction();
@@ -130,34 +128,16 @@ class ResponseController
             $wooCommerceOrder = $this->getWooCommerceOrderById($orderId);
             $wooCommerceOrder->add_order_note($errorMessage);
 
-            if ($e->getFlow() == WebpayplusTransbankSdk::WEBPAY_NORMAL_FLOW) {
-                return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
-            }
-
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_ALREADY_PROCESSED);
-            return wp_redirect($urlWithErrorCode);
+            $e->getFlow() == TransactionResponseHandler::WEBPAY_NORMAL_FLOW
+                ? $redirectUrl = $wooCommerceOrder->get_checkout_order_received_url()
+                : $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_ALREADY_PROCESSED);
         } catch (\Exception $e) {
             $this->throwError($e->getMessage());
             do_action('transbank_webpay_plus_unexpected_error');
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_EXCEPTION);
-            wp_redirect($urlWithErrorCode);
-        }
-    }
-
-    /**
-     * @param $data
-     *
-     * @return |null
-     */
-    protected function getTokenWs($data)
-    {
-        $token_ws = isset($data['token_ws']) ? $data['token_ws'] : (isset($data['TBK_TOKEN']) ? $data['TBK_TOKEN'] : null);
-        if (!isset($token_ws)) {
-            $this->throwError('No se encontró el token');
-            wp_redirect(wc_get_checkout_url());
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_EXCEPTION);
         }
 
-        return $token_ws;
+        return wp_redirect($redirectUrl);
     }
 
     /**
