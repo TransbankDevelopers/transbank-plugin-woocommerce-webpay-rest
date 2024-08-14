@@ -60,12 +60,12 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         ];
 
         $this->config = [
-            'MODO'                 => trim($this->get_option('webpay_rest_environment', 'TEST')),
-            'COMMERCE_CODE'        => trim(
+            'MODO' => trim($this->get_option('webpay_rest_environment', 'TEST')),
+            'COMMERCE_CODE' => trim(
                 $this->get_option('webpay_rest_commerce_code', WebpayPlus::DEFAULT_COMMERCE_CODE)
             ),
-            'API_KEY'              => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
-            'ECOMMERCE'            => 'woocommerce',
+            'API_KEY' => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
+            'ECOMMERCE' => 'woocommerce',
             'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', ''),
         ];
 
@@ -166,14 +166,14 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         $this->form_fields = [
             'enabled' => [
-                'title'   => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
-                'type'    => 'checkbox',
+                'title' => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
+                'type' => 'checkbox',
                 'default' => 'yes',
             ],
             'webpay_rest_environment' => [
-                'title'       => __('Ambiente', 'transbank_webpay_plus_rest'),
-                'type'        => 'select',
-                'desc_tip'    => $environmentDescription,
+                'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
+                'type' => 'select',
+                'desc_tip' => $environmentDescription,
                 'options' => [
                     'TEST' => __('Integración', 'transbank_webpay_plus_rest'),
                     'LIVE' => __('Producción', 'transbank_webpay_plus_rest'),
@@ -181,34 +181,34 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 'default' => 'TEST',
             ],
             'webpay_rest_commerce_code' => [
-                'title'       => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
+                'title' => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
-                'desc_tip'    => $commerceCodeDescription,
-                'type'        => 'text',
-                'default'     => '',
+                'desc_tip' => $commerceCodeDescription,
+                'type' => 'text',
+                'default' => '',
             ],
             'webpay_rest_api_key' => [
-                'title'       => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
-                'type'        => 'password',
+                'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
+                'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-                'desc_tip'    => $apiKeyDescription,
-                'default'     => '',
+                'desc_tip' => $apiKeyDescription,
+                'default' => '',
             ],
             'webpay_rest_after_payment_order_status' => [
-                'title'       => __('Order Status', 'transbank_webpay_plus_rest'),
-                'type'        => 'select',
-                'desc_tip'    => 'Define el estado de la orden luego del pago exitoso.',
+                'title' => __('Order Status', 'transbank_webpay_plus_rest'),
+                'type' => 'select',
+                'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
                 'options' => [
                     '' => 'Default',
                     'processing' => 'Processing',
-                    'completed'  => 'Completed',
+                    'completed' => 'Completed',
                 ],
                 'default' => '',
             ],
             'webpay_rest_payment_gateway_description' => [
-                'title'       => __('Descripción', 'transbank_webpay_plus_rest'),
-                'type'        => 'textarea',
-                'desc_tip'    => 'Define la descripción del medio de pago.',
+                'title' => __('Descripción', 'transbank_webpay_plus_rest'),
+                'type' => 'textarea',
+                'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ]
@@ -221,14 +221,11 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function check_ipn_response()
     {
         ob_clean();
-        if (isset($_POST)) {
-            header('HTTP/1.1 200 OK');
-            $data = ($_SERVER['REQUEST_METHOD'] === 'GET') ? $_GET : $_POST;
+        header('HTTP/1.1 200 OK');
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        $params = ($requestMethod === 'GET') ? $_GET : $_POST;
 
-            return (new ResponseController($this->config))->response($data);
-        } else {
-            echo 'Ocurrió un error al procesar su compra';
-        }
+        return (new ResponseController($this->config))->response($requestMethod, $params);
     }
 
 
@@ -248,7 +245,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             $createResponse = $this->webpayplusTransbankSdk->createTransaction($order->get_id(), $amount, $returnUrl);
             do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->token);
             return [
-                'result'   => 'success',
+                'result' => 'success',
                 'redirect' => $createResponse->url . '?token_ws=' . $createResponse->token,
             ];
         } catch (CreateWebpayException $e) {

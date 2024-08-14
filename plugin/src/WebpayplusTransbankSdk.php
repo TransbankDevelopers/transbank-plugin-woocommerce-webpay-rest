@@ -7,6 +7,8 @@ use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
+use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
+use Transbank\Plugin\Exceptions\Webpay\AlreadyProcessedException;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
@@ -29,8 +31,19 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
 
+    const WEBPAY_NORMAL_FLOW = 'Normal';
+    const WEBPAY_TIMEOUT_FLOW = 'Timeout';
+    const WEBPAY_ABORTED_FLOW = 'Aborted';
+    const WEBPAY_ERROR_FLOW = 'Error';
+
+    const WEBPAY_ALREADY_PROCESSED_MESSAGE = 'La transacción fue procesada anteriormente.';
+    const WEBPAY_FAILED_FLOW_MESSAGE = 'Transacción no autorizada.';
+    const WEBPAY_TIMEOUT_FLOW_MESSAGE = 'Tiempo excedido en el formulario de Webpay.';
+    const WEBPAY_ABORTED_FLOW_MESSAGE = 'Orden anulada por el usuario.';
+    const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago.';
+
     /**
-     * @var \Transbank\Webpay\WebpayPlus\Transaction
+     * @var WebpayPlusTransaction
      */
     protected $webpayplusTransaction;
 
@@ -38,7 +51,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     {
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
-        $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
+        $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
     }
 
@@ -47,7 +60,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     */
     private function createOptions($environment, $commerceCode, $apiKey)
     {
-        $options = \Transbank\Webpay\WebpayPlus\Transaction::getDefaultOptions();
+        $options = WebpayPlusTransaction::getDefaultOptions();
         if ($environment == Options::ENVIRONMENT_PRODUCTION) {
             $options = Options::forProduction($commerceCode, $apiKey);
         }
@@ -286,53 +299,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
 
     /* Metodo COMMIT  */
-
-    public function processRequestFromTbkReturn($server, $get, $post)
-    {
-        $method = $server['REQUEST_METHOD'];
-        $params = $method === 'GET' ? $get : $post;
-        $tbkToken = isset($params["TBK_TOKEN"]) ? $params['TBK_TOKEN'] : null;
-        $tbkSessionId = isset($params["TBK_ID_SESION"]) ? $params['TBK_ID_SESION'] : null;
-        $tbkOrdenCompra = isset($params["TBK_ORDEN_COMPRA"]) ? $params['TBK_ORDEN_COMPRA'] : null;
-        $tokenWs = isset($params["token_ws"]) ? $params['token_ws'] : null;
-
-        $params1 = [
-            'method' => $method,
-            'params' => $params
-        ];
-
-        $this->logInfoData('', 'Retornando desde el sitio de Transbank para realizar el commit', $params1);
-
-        if (!isset($tokenWs) && !isset($tbkToken)) {
-            $errorMessage = 'La transacción fue cancelada automáticamente por estar inactiva mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago';
-            $transaction = null;
-            if (isset($tbkOrdenCompra) && isset($tbkSessionId)) {
-                $transaction = Transaction::getByBuyOrderAndSessionId($tbkOrdenCompra, $tbkSessionId);
-                $this->errorExecution(isset($transaction) ? $transaction->order_id : 0, 'commit', $params1, 'TimeoutWebpayException', $errorMessage, $errorMessage);
-                $this->saveTransactionWithErrorByTransaction($transaction, 'TimeoutWebpayException', $errorMessage);
-            } else {
-                $this->errorExecution(0, 'commit', $params1, 'TimeoutWebpayException', $errorMessage, $errorMessage);
-            }
-            throw new TimeoutWebpayException($errorMessage, $tbkOrdenCompra, $tbkSessionId, $transaction);
-        }
-
-        if (!isset($tokenWs) && isset($tbkToken)) {
-            $errorMessage = 'La transacción fue anulada por el usuario.';
-            $transaction = $this->saveTransactionWithErrorByToken($tbkToken, 'UserCancelWebpayException', $errorMessage);
-            $this->errorExecution($transaction->order_id, 'commit', $params1, 'UserCancelWebpayException', $errorMessage, $errorMessage);
-            throw new UserCancelWebpayException($errorMessage, $tbkToken, $transaction);
-        }
-
-        if (isset($tbkToken) && isset($tokenWs)) {
-            $errorMessage = 'El pago es inválido.';
-            $transaction = $this->saveTransactionWithErrorByToken($tbkToken, 'DoubleTokenWebpayException', $errorMessage);
-            $this->errorExecution($transaction->order_id, 'commit', $params1, 'DoubleTokenWebpayException', $errorMessage, $errorMessage);
-            throw new DoubleTokenWebpayException($errorMessage, $tbkToken, $tokenWs, $transaction);
-        }
-
-        return Transaction::getByToken($tokenWs);
-    }
-
     public function commitInner($orderId, $token, $transaction)
     {
         $params = ['token'  => $token];
@@ -414,6 +380,144 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $this->saveTransactionWithErrorByTransaction($transaction, $error, $detailError);
         return $transaction;
     }
+
+    private function isTransactionProcessed(string $token): bool
+    {
+        $transaction = Transaction::getByToken($token);
+        $status = $transaction->status;
+
+        return $status != Transaction::STATUS_INITIALIZED;
+    }
+
+    private function handleProcessedTransaction(string $token)
+    {
+        $transaction = get_object_vars(Transaction::getByToken($token)) ?? null;
+        $buyOrder = $transaction['buy_order'] ?? null;
+        $status = $transaction['status'] ?? null;
+        $logMessage = self::WEBPAY_ALREADY_PROCESSED_MESSAGE;
+
+        if ($status == Transaction::STATUS_APPROVED) {
+            $this->logInfoData($buyOrder, $logMessage, $transaction);
+            throw new AlreadyProcessedException($logMessage, $transaction, self::WEBPAY_NORMAL_FLOW);
+        }
+
+        if ($status == Transaction::STATUS_TIMEOUT) {
+            $logMessage = self::WEBPAY_TIMEOUT_FLOW_MESSAGE;
+            $this->logInfoData($buyOrder, $logMessage, $transaction);
+            throw new AlreadyProcessedException($logMessage, $transaction, self::WEBPAY_TIMEOUT_FLOW);
+        }
+
+        if ($status == Transaction::STATUS_ABORTED_BY_USER) {
+            $logMessage = self::WEBPAY_ABORTED_FLOW_MESSAGE;
+            $this->logInfoData($buyOrder, $logMessage, $transaction);
+            throw new AlreadyProcessedException($logMessage, $transaction, self::WEBPAY_ABORTED_FLOW);
+        }
+
+        if ($status == Transaction::STATUS_FAILED) {
+            $logMessage = self::WEBPAY_FAILED_FLOW_MESSAGE;
+            $this->logInfoData($buyOrder, $logMessage, $transaction);
+            throw new AlreadyProcessedException($logMessage, $transaction, self::WEBPAY_ERROR_FLOW);
+        }
+    }
+
+    private function detectFlow(array $params): string
+    {
+        $tokenWs = $params['token_ws'] ?? null;
+        $tbkToken = $params['TBK_TOKEN'] ?? null;
+        $tbkSessionId = $params['TBK_ID_SESION'] ?? null;
+
+        if ($tokenWs && !$tbkToken && !$tbkSessionId) {
+            return self::WEBPAY_NORMAL_FLOW;
+        }
+        if ($tbkSessionId && !$tbkToken && !$tokenWs) {
+            return self::WEBPAY_TIMEOUT_FLOW;
+        }
+        if ($tbkToken && $tbkSessionId && !$tokenWs) {
+            return self::WEBPAY_ABORTED_FLOW;
+        }
+        return self::WEBPAY_ERROR_FLOW;
+    }
+
+    public function handleRequestFromTbkReturn(array $params)
+    {
+        $tokenWs = $params['token_ws'] ?? null;
+        $tbkToken = $params['TBK_TOKEN'] ?? null;
+        $sessionId = $params['TBK_ID_SESION'] ?? null;
+        $buyOrder = $params['TBK_ORDEN_COMPRA'] ?? null;
+        $flow = $this->detectFlow($params);
+
+        if ($flow == self::WEBPAY_NORMAL_FLOW) {
+            return $this->handleNormalFlow($tokenWs);
+        }
+        if ($flow == self::WEBPAY_TIMEOUT_FLOW) {
+            return $this->handleTimeoutFlow($sessionId, $buyOrder);
+        }
+        if ($flow == self::WEBPAY_ABORTED_FLOW) {
+            return $this->handleAbortedFlow($tbkToken);
+        }
+        return $this->handleErrorFlow($tokenWs, $tbkToken);
+    }
+
+    private function handleNormalFlow(string $token)
+    {
+        $this->logInfo("Flujo normal detectado, token: $token");
+
+        if ($this->isTransactionProcessed($token)) {
+            return $this->handleProcessedTransaction($token);
+        }
+
+        return Transaction::getByToken($token);
+    }
+
+    private function handleTimeoutFlow(string $sessionId, string $buyOrder)
+    {
+        $this->logInfo("Flujo de timeout detectado, sessionId: $sessionId, buyOrder: $buyOrder");
+        $transaction = Transaction::getByBuyOrderAndSessionId($buyOrder, $sessionId) ?? null;
+        $token = $transaction->token ?? null;
+
+        if ($this->isTransactionProcessed($token)) {
+            return $this->handleProcessedTransaction($token);
+        }
+
+        $errorMessage = self::WEBPAY_TIMEOUT_FLOW_MESSAGE;
+        $orderId = $transaction->order_id ?? 0;
+        $data = [
+            'TBK_ID_SESION' => $sessionId,
+            'TBK_ORDEN_COMPRA' => $buyOrder
+        ];
+        $this->errorExecution($orderId, 'commit', $data, 'TimeoutWebpayException', $errorMessage, $errorMessage);
+        $this->saveTransactionWithErrorByTransaction($transaction, 'TimeoutWebpayException', $errorMessage);
+        throw new TimeoutWebpayException($errorMessage, $buyOrder, $sessionId, $transaction);
+    }
+
+    private function handleAbortedFlow(string $token)
+    {
+        $this->logInfo("Flujo de pago abortado detectado, token: $token");
+
+        if ($this->isTransactionProcessed($token)) {
+            return $this->handleProcessedTransaction($token);
+        }
+
+        $errorMessage = self::WEBPAY_ABORTED_FLOW_MESSAGE;
+        $transaction = $this->saveTransactionWithErrorByToken($token, 'UserCancelWebpayException', $errorMessage);
+        $this->errorExecution($transaction->order_id, 'commit', $token, 'UserCancelWebpayException', $errorMessage, $errorMessage);
+        throw new UserCancelWebpayException($errorMessage, $token, $transaction);
+    }
+
+    private function handleErrorFlow(string $token, string $tbkToken)
+    {
+        $this->logInfo("Flujo con error en el formulario detectado, token: $token");
+
+        if ($this->isTransactionProcessed($token)) {
+            return $this->handleProcessedTransaction($token);
+        }
+
+        $errorMessage = self::WEBPAY_ERROR_FLOW_MESSAGE;
+        $transaction = $this->saveTransactionWithErrorByToken($tbkToken, 'DoubleTokenWebpayException', $errorMessage);
+        $this->errorExecution($transaction->order_id, 'commit', $token, 'DoubleTokenWebpayException', $errorMessage, $errorMessage);
+        throw new DoubleTokenWebpayException($errorMessage, $tbkToken, $token, $transaction);
+    }
+
 
 }
 
