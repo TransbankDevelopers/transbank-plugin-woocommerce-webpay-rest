@@ -75,7 +75,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         );
     }
 
-    protected function errorExecution($orderId, $service, $data, $error, $originalError, $customError)
+    public function errorExecution($orderId, $service, $data, $error, $originalError, $customError)
     {
         $this->logErrorWithOrderId($orderId, $service, $data, $error, $originalError, $customError);
         $this->createTransbankExecutionErrorLogBase(
