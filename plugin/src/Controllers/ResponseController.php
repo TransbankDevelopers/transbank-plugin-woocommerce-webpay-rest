@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\Helpers\TransactionResponseHandler;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
@@ -25,14 +26,13 @@ class ResponseController
 {
     /**
      * @var array
-     */
-    protected $pluginConfig;
-    protected $logger;
-
-    /**
+     * @var PluginLogger
      * @var WebpayplusTransbankSdk
      * @var TransactionResponseHandler
      */
+    protected array $pluginConfig;
+    protected PluginLogger $logger;
+    protected WebpayplusTransbankSdk $webpayplusTransbankSdk;
     protected TransactionResponseHandler $transactionResponseHandler;
 
     /**
