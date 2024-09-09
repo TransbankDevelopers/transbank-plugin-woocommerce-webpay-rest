@@ -66,7 +66,7 @@ class WebpayTransactionsTable extends WP_List_Table
         global $wpdb;
 
         $orderByColumns = $this->get_sortable_columns();
-        $orderby = isset($_GET['orderby']) && in_array($_GET['orderby'], $orderByColumns)
+        $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
             ? esc_sql($_GET['orderby'])
             : 'ID';
 
