@@ -65,21 +65,29 @@ class WebpayTransactionsTable extends WP_List_Table
     {
         global $wpdb;
 
-        $orderby = isset($_GET['orderby']) ? sanitize_sql_orderby($_GET['orderby']) : 'ID';
-        $order = isset($_GET['order']) ? sanitize_sql_orderby($_GET['order']) : 'DESC';
+        $orderByColumns = $this->get_sortable_columns();
+        $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
+            ? esc_sql($_GET['orderby'])
+            : 'ID';
 
-        $paged = (empty($_GET['paged']) ||
-            !is_numeric($_GET['paged']) ||
-            $_GET['paged'] <= 0) ? 1 :  esc_sql($_GET['paged']);
+        $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC'])
+            ? esc_sql(strtoupper($_GET['order']))
+            : 'DESC';
+
+        $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
+        $paged = $paged > 0 ? $paged : 1;
 
         $perPage = 20;
         $offset = ($paged - 1) * $perPage;
 
-        $totalItemsQuery = 'SELECT COUNT(*) FROM '.Transaction::getTableName();
-        $itemsQuery = 'SELECT * FROM '.Transaction::getTableName().' ORDER BY %i '.$order.' LIMIT %d, %d';
-
+        $totalItemsQuery = 'SELECT COUNT(*) FROM ' . esc_sql(Transaction::getTableName());
         $totalItems = $wpdb->get_var($totalItemsQuery);
+
         $totalPages = ceil($totalItems / $perPage);
+
+        $itemsQuery = "SELECT * FROM " . esc_sql(Transaction::getTableName()) . "
+                   ORDER BY %i {$order}
+                   LIMIT %d, %d";
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $itemsQuery,
@@ -98,7 +106,7 @@ class WebpayTransactionsTable extends WP_List_Table
 
     public function column_amount($item)
     {
-        return '$'.number_format($item->amount, 0, ',', '.');
+        return '$' . number_format($item->amount, 0, ',', '.');
     }
 
     public function column_transaction_date($item)
@@ -142,7 +150,7 @@ class WebpayTransactionsTable extends WP_List_Table
             return '-';
         }
 
-        return '<a href="" onclick="this.innerHTML=\''.$item->token.'\';return false; " title="Haz click para ver el token completo">...'.substr($item->token, -5).'</a>';
+        return '<a href="" onclick="this.innerHTML=\'' . $item->token . '\';return false; " title="Haz click para ver el token completo">...' . substr($item->token, -5) . '</a>';
     }
 
     public function column_default($item, $column_name)
