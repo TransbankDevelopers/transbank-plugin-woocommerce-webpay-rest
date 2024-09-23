@@ -43,7 +43,7 @@ add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 
 add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
 add_action('wp_ajax_check_exist_tables', TableCheck::class.'::check');
-add_action('wp_ajax_get_transaction_status', TransactionStatusController::class.'::getStatus');
+add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');

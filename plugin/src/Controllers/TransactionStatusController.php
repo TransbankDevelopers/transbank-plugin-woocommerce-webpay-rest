@@ -8,9 +8,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 
 class TransactionStatusController
 {
-
-
-    public static function getStatus()
+    public function getStatus()
     {
         // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
