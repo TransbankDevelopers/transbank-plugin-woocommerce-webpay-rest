@@ -19,9 +19,12 @@ class TransactionStatusController
             return;
         }
 
-        $orderId = filter_input(INPUT_POST, 'order_id', FILTER_SANITIZE_NUMBER_INT);
-        $buyOrder = filter_input(INPUT_POST, 'buy_order', FILTER_SANITIZE_STRING);
-        $token = filter_input(INPUT_POST, 'token', FILTER_SANITIZE_STRING);
+        $orderId = filter_input(INPUT_POST, 'order_id', FILTER_DEFAULT);
+        $orderId = htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8');
+        $buyOrder = filter_input(INPUT_POST, 'buy_order', FILTER_DEFAULT);
+        $buyOrder = htmlspecialchars($buyOrder, ENT_QUOTES, 'UTF-8');
+        $token = filter_input(INPUT_POST, 'token', FILTER_DEFAULT);
+        $token = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
 
         $transaction = Transaction::getApprovedByOrderId($orderId);
         if (!$transaction) {

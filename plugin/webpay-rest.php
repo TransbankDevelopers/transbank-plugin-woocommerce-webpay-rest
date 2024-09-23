@@ -124,7 +124,8 @@ function registerPaymentGateways() {
 function registerAdminMenu() {
     add_action('admin_menu', function () {
         add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
-            $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_STRING);
+            $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_DEFAULT);
+            $tab = htmlspecialchars($tab, ENT_QUOTES, 'UTF-8');
             if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
                 wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
             }
