@@ -8,12 +8,21 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 
 class TransactionStatusController
 {
+    const HTTP_OK = 200;
+    const HTTP_UNPROCESSABLE_ENTITY = 422;
     public function getStatus()
     {
+        $response = [
+            'body' => [
+                'message' => 'No se pudo obtener el estado de la transacción'
+            ],
+            'code' => self::HTTP_UNPROCESSABLE_ENTITY
+        ];
         // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
 
         if (!wp_verify_nonce($nonce, 'my-ajax-nonce')) {
+            wp_send_json($response['body'], $response['code']);
             return;
         }
 
@@ -27,28 +36,45 @@ class TransactionStatusController
         try {
             $transaction = Transaction::getApprovedByOrderId($orderId);
             if (!$transaction) {
-                wp_send_json([
-                    'message' => 'No hay transacciones webpay aprobadas para esta orden',
-                ], 401);
+                $response = [
+                    'body' => [
+                        'message' => 'No hay transacciones webpay aprobadas para esta orden'
+                    ],
+                    'code' => self::HTTP_UNPROCESSABLE_ENTITY
+                ];
             }
 
             if ($transaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
                 if ($transaction->buy_order !== $buyOrder) {
-                    wp_send_json([
-                        'message' => 'El buy_order enviado y el buy_order de la transacción no coinciden',
-                    ], 401);
+                    $response = [
+                        'body' => [
+                            'message' => 'El buy_order enviado y el buy_order de la transacción no coinciden'
+                        ],
+                        'code' => self::HTTP_UNPROCESSABLE_ENTITY
+                    ];
                 }
 
-                return wp_send_json($this->getStatusForOneclickTransaction($orderId, $buyOrder));
+                $response = [
+                    'body' => $this->getStatusForOneclickTransaction($orderId, $buyOrder),
+                    'code' => self::HTTP_OK
+                ];
             }
 
             if ($transaction->token !== $token) {
-                wp_send_json([
-                    'message' => 'El token enviado y el token de la transacción no coinciden',
-                ], 401);
+                $response = [
+                    'body' => [
+                        'message' => 'El token enviado y el token de la transacción no coinciden'
+                    ],
+                    'code' => self::HTTP_UNPROCESSABLE_ENTITY
+                ];
             }
 
-            return wp_send_json($this->getStatusForWebpayTransaction($orderId, $token));
+            $response = [
+                'body' => $this->getStatusForWebpayTransaction($orderId, $token),
+                'code' => self::HTTP_OK
+            ];
+
+            wp_send_json($response['body'], $response['code']);
         } catch (\Exception $e) {
             wp_send_json([
                 'message' => $e->getMessage(),
