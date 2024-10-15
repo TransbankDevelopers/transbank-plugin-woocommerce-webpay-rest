@@ -197,4 +197,16 @@ class WC_Payment_Token_Oneclick extends \WC_Payment_Token
     {
         $this->set_prop('email', $email);
     }
+
+    /**
+     * Returns the user id  of the inscriptions.
+     *
+     * @param string $context What the value is for. Valid values are view and edit.
+     *
+     * @return int The user id.
+     */
+    public function get_userId($context = 'view')
+    {
+        return $this->get_prop('user_id', $context);
+    }
 }

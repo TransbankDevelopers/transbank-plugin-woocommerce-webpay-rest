@@ -7,9 +7,7 @@ use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
-use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
+use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
 use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
@@ -30,7 +28,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
 
     /**
-     * @var \Transbank\Webpay\WebpayPlus\Transaction
+     * @var WebpayPlusTransaction
      */
     protected $webpayplusTransaction;
 
@@ -38,7 +36,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     {
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
-        $this->webpayplusTransaction = new \Transbank\Webpay\WebpayPlus\Transaction($this->options);
+        $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
     }
 
@@ -47,7 +45,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     */
     private function createOptions($environment, $commerceCode, $apiKey)
     {
-        $options = \Transbank\Webpay\WebpayPlus\Transaction::getDefaultOptions();
+        $options = WebpayPlusTransaction::getDefaultOptions();
         if ($environment == Options::ENVIRONMENT_PRODUCTION) {
             $options = Options::forProduction($commerceCode, $apiKey);
         }
@@ -77,7 +75,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         );
     }
 
-    protected function errorExecution($orderId, $service, $data, $error, $originalError, $customError)
+    public function errorExecution($orderId, $service, $data, $error, $originalError, $customError)
     {
         $this->logErrorWithOrderId($orderId, $service, $data, $error, $originalError, $customError);
         $this->createTransbankExecutionErrorLogBase(
@@ -286,53 +284,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
 
     /* Metodo COMMIT  */
-
-    public function processRequestFromTbkReturn($server, $get, $post)
-    {
-        $method = $server['REQUEST_METHOD'];
-        $params = $method === 'GET' ? $get : $post;
-        $tbkToken = isset($params["TBK_TOKEN"]) ? $params['TBK_TOKEN'] : null;
-        $tbkSessionId = isset($params["TBK_ID_SESION"]) ? $params['TBK_ID_SESION'] : null;
-        $tbkOrdenCompra = isset($params["TBK_ORDEN_COMPRA"]) ? $params['TBK_ORDEN_COMPRA'] : null;
-        $tokenWs = isset($params["token_ws"]) ? $params['token_ws'] : null;
-
-        $params1 = [
-            'method' => $method,
-            'params' => $params
-        ];
-
-        $this->logInfoData('', 'Retornando desde el sitio de Transbank para realizar el commit', $params1);
-
-        if (!isset($tokenWs) && !isset($tbkToken)) {
-            $errorMessage = 'La transacción fue cancelada automáticamente por estar inactiva mucho tiempo en el formulario de pago de Webpay. Puede reintentar el pago';
-            $transaction = null;
-            if (isset($tbkOrdenCompra) && isset($tbkSessionId)) {
-                $transaction = Transaction::getByBuyOrderAndSessionId($tbkOrdenCompra, $tbkSessionId);
-                $this->errorExecution(isset($transaction) ? $transaction->order_id : 0, 'commit', $params1, 'TimeoutWebpayException', $errorMessage, $errorMessage);
-                $this->saveTransactionWithErrorByTransaction($transaction, 'TimeoutWebpayException', $errorMessage);
-            } else {
-                $this->errorExecution(0, 'commit', $params1, 'TimeoutWebpayException', $errorMessage, $errorMessage);
-            }
-            throw new TimeoutWebpayException($errorMessage, $tbkOrdenCompra, $tbkSessionId, $transaction);
-        }
-
-        if (!isset($tokenWs) && isset($tbkToken)) {
-            $errorMessage = 'La transacción fue anulada por el usuario.';
-            $transaction = $this->saveTransactionWithErrorByToken($tbkToken, 'UserCancelWebpayException', $errorMessage);
-            $this->errorExecution($transaction->order_id, 'commit', $params1, 'UserCancelWebpayException', $errorMessage, $errorMessage);
-            throw new UserCancelWebpayException($errorMessage, $tbkToken, $transaction);
-        }
-
-        if (isset($tbkToken) && isset($tokenWs)) {
-            $errorMessage = 'El pago es inválido.';
-            $transaction = $this->saveTransactionWithErrorByToken($tbkToken, 'DoubleTokenWebpayException', $errorMessage);
-            $this->errorExecution($transaction->order_id, 'commit', $params1, 'DoubleTokenWebpayException', $errorMessage, $errorMessage);
-            throw new DoubleTokenWebpayException($errorMessage, $tbkToken, $tokenWs, $transaction);
-        }
-
-        return Transaction::getByToken($tokenWs);
-    }
-
     public function commitInner($orderId, $token, $transaction)
     {
         $params = ['token'  => $token];
@@ -414,6 +365,5 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $this->saveTransactionWithErrorByTransaction($transaction, $error, $detailError);
         return $transaction;
     }
-
 }
 

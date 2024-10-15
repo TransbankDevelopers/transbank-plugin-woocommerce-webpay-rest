@@ -4,10 +4,14 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use Transbank\Plugin\Helpers\PluginLogger;
+use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\WooCommerce\WebpayRest\Helpers\TransactionResponseHandler;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
+use Transbank\Plugin\Exceptions\Webpay\AlreadyProcessedException;
 use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
@@ -22,15 +26,14 @@ class ResponseController
 {
     /**
      * @var array
+     * @var PluginLogger
+     * @var WebpayplusTransbankSdk
+     * @var TransactionResponseHandler
      */
-    protected $pluginConfig;
-
-    protected $logger;
-
-    /**
-     * @var Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
-     */
-    protected $webpayplusTransbankSdk;
+    protected array $pluginConfig;
+    protected PluginLogger $logger;
+    protected WebpayplusTransbankSdk $webpayplusTransbankSdk;
+    protected TransactionResponseHandler $transactionResponseHandler;
 
     /**
      * ResponseController constructor.
@@ -42,70 +45,50 @@ class ResponseController
         $this->logger = TbkFactory::createLogger();
         $this->pluginConfig = $pluginConfig;
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
+        $this->transactionResponseHandler = new TransactionResponseHandler();
     }
 
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException
      */
-    public function response($postData)
+
+    public function response($requestMethod, $params)
     {
+        $this->logger->logInfo('Procesando retorno desde formulario de Webpay.');
+        $this->logger->logInfo("Request: method -> $requestMethod");
+        $this->logger->logInfo('Request: payload -> ' . json_encode($params));
+
         try {
-            $transaction = $this->webpayplusTransbankSdk->processRequestFromTbkReturn($_SERVER, $_GET, $_POST);
+            $transaction = $this->transactionResponseHandler->handleRequestFromTbkReturn($params);
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
-            if ($wooCommerceOrder->is_paid()) {
-                // TODO: Revisar porqué no se muestra el mensaje de abajo. H4x
-                //SessionMessageHelper::set('Orden <strong>ya ha sido pagada</strong>.', 'notice');
-                $errorMessage = 'El usuario intentó pagar esta orden nuevamente, cuando esta ya estaba pagada.';
-                $this->webpayplusTransbankSdk->logError($errorMessage);
-                $this->webpayplusTransbankSdk->saveTransactionWithErrorByTransaction($transaction, 'transbank_webpay_plus_already_paid_transaction', $errorMessage);
-                $wooCommerceOrder->add_order_note($errorMessage);
-                do_action('transbank_webpay_plus_already_paid_transaction', $wooCommerceOrder);
-                return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
-            }
-            if (!$wooCommerceOrder->needs_payment()) {
-                // TODO: Revisar porqué no se muestra el mensaje de abajo.
-                //SessionMessageHelper::set('El estado de la orden no permite que sea pagada. Comuníquese con la tienda.', 'error');
-                $errorMessage = 'El usuario intentó pagar la orden cuando estaba en estado: '.$wooCommerceOrder->get_status().".\n".'No se ejecutó captura del pago de esta solicitud.';
-                $this->webpayplusTransbankSdk->logError($errorMessage);
-                $this->webpayplusTransbankSdk->saveTransactionWithErrorByTransaction($transaction, 'transbank_webpay_plus_paying_transaction_that_does_not_needs_payment', $errorMessage);
-                $wooCommerceOrder->add_order_note($errorMessage);
-                do_action('transbank_webpay_plus_paying_transaction_that_does_not_needs_payment', $wooCommerceOrder);
-                return wp_safe_redirect($wooCommerceOrder->get_checkout_order_received_url());
-            }
             $commitResponse = $this->webpayplusTransbankSdk->commitTransaction($transaction->order_id, $transaction->token);
             $this->completeWooCommerceOrder($wooCommerceOrder, $commitResponse, $transaction);
+
             do_action('wc_transbank_webpay_plus_transaction_approved', [
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $transaction
             ]);
-            return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
-
+            $redirectUrl = $wooCommerceOrder->get_checkout_order_received_url();
         } catch (TimeoutWebpayException $e) {
             $this->throwError($e->getMessage());
+
             do_action('transbank_webpay_plus_timeout_on_form');
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_TIMEOUT);
-            wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_TIMEOUT);
         } catch (UserCancelWebpayException $e) {
             $params = ['transbank_webpayplus_cancelled_order' => 1];
             $redirectUrl = add_query_arg($params, wc_get_checkout_url());
             $transaction = $e->getTransaction();
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
-            if ($transaction->status !== Transaction::STATUS_INITIALIZED || $wooCommerceOrder->is_paid()) {
-                $wooCommerceOrder->add_order_note('El usuario canceló la transacción en el formulario de pago, pero esta orden ya estaba pagada o en un estado diferente a INICIALIZADO');
-                wp_safe_redirect($redirectUrl);
-                return;
-            }
             $this->setOrderAsCancelledByUser($wooCommerceOrder, $transaction);
+
             do_action('transbank_webpay_plus_transaction_cancelled_by_user', $wooCommerceOrder, $transaction);
-            $urlWithErrorCode = $this->addErrorQueryParams($redirectUrl, BlocksHelper::WEBPAY_USER_CANCELED);
-            wp_safe_redirect($urlWithErrorCode);
-            return;
+            $redirectUrl = $this->addErrorQueryParams($redirectUrl, BlocksHelper::WEBPAY_USER_CANCELED);
         } catch (DoubleTokenWebpayException $e) {
             $this->throwError($e->getMessage());
+
             do_action('transbank_webpay_plus_unexpected_error');
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_DOUBLE_TOKEN);
-            wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_DOUBLE_TOKEN);
         } catch (InvalidStatusWebpayException $e) {
             $errorMessage = 'No se puede confirmar la transacción, estado de transacción invalido.';
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
@@ -115,9 +98,7 @@ class ResponseController
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $e->getTransaction()
             ]);
-
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_INVALID_STATUS);
-            return wp_redirect($urlWithErrorCode);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_INVALID_STATUS);
         } catch (RejectedCommitWebpayException $e) {
             $transaction = $e->getTransaction();
             $commitResponse = $e->getCommitResponse();
@@ -129,8 +110,7 @@ class ResponseController
                 'transbankTransaction' => $transaction,
                 'transbankResponse' => $commitResponse
             ]);
-
-            return wp_redirect($wooCommerceOrder->get_checkout_order_received_url());
+            $redirectUrl = $wooCommerceOrder->get_checkout_order_received_url();
         } catch (CommitWebpayException $e) {
             $errorMessage = 'Error al confirmar la transacción de Transbank';
             $wooCommerceOrder = $this->getWooCommerceOrderById($transaction->order_id);
@@ -140,32 +120,24 @@ class ResponseController
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $e->getTransaction()
             ]);
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_COMMIT_ERROR);
+        } catch (AlreadyProcessedException $e) {
+            $errorMessage = 'Error al confirmar la transacción, ya fue procesada anteriormente';
+            $transaction = $e->getTransaction();
+            $orderId = $transaction['order_id'];
+            $wooCommerceOrder = $this->getWooCommerceOrderById($orderId);
+            $wooCommerceOrder->add_order_note($errorMessage);
 
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_COMMIT_ERROR);
-            return wp_redirect($urlWithErrorCode);
+            $e->getFlow() == TransactionResponseHandler::WEBPAY_NORMAL_FLOW
+                ? $redirectUrl = $wooCommerceOrder->get_checkout_order_received_url()
+                : $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_ALREADY_PROCESSED);
         } catch (\Exception $e) {
             $this->throwError($e->getMessage());
             do_action('transbank_webpay_plus_unexpected_error');
-            $urlWithErrorCode = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_EXCEPTION);
-            wp_redirect($urlWithErrorCode);
-        }
-        return "";
-    }
-
-    /**
-     * @param $data
-     *
-     * @return |null
-     */
-    protected function getTokenWs($data)
-    {
-        $token_ws = isset($data['token_ws']) ? $data['token_ws'] : (isset($data['TBK_TOKEN']) ? $data['TBK_TOKEN'] : null);
-        if (!isset($token_ws)) {
-            $this->throwError('No se encontró el token');
-            wp_redirect(wc_get_checkout_url());
+            $redirectUrl = $this->addErrorQueryParams(wc_get_checkout_url(), BlocksHelper::WEBPAY_EXCEPTION);
         }
 
-        return $token_ws;
+        return wp_redirect($redirectUrl);
     }
 
     /**
@@ -189,8 +161,7 @@ class ResponseController
         WC_Order $wooCommerceOrder,
         TransactionCommitResponse $commitResponse,
         $webpayTransaction
-    )
-    {
+    ) {
         $status = TbkResponseUtil::getStatus($commitResponse->getStatus());
         $paymentType = TbkResponseUtil::getPaymentType($commitResponse->getPaymentTypeCode());
         $date_accepted = new DateTime($commitResponse->getTransactionDate(), new DateTimeZone('UTC'));
@@ -221,7 +192,8 @@ class ResponseController
 
         $maskedBuyOrder = $this->webpayplusTransbankSdk->dataMasker->maskBuyOrder($commitResponse->getBuyOrder());
         $this->logger->logInfo(
-            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: '.$maskedBuyOrder);
+            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: ' . $maskedBuyOrder
+        );
 
         $this->setAfterPaymentOrderStatus($wooCommerceOrder);
     }
@@ -235,8 +207,7 @@ class ResponseController
         WC_Order $wooCommerceOrder,
         $webpayTransaction,
         TransactionCommitResponse $commitResponse
-    )
-    {
+    ) {
         $_SESSION['woocommerce_order_failed'] = true;
         $wooCommerceOrder->update_status('failed');
         if ($commitResponse !== null) {
@@ -249,14 +220,14 @@ class ResponseController
                 $webpayTransaction->token
             );
 
-            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: '.$webpayTransaction->token);
+            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: ' . $webpayTransaction->token);
             $this->logger->logError(json_encode($commitResponse));
         }
 
         Transaction::update(
             $webpayTransaction->id,
             [
-                'status'             => Transaction::STATUS_FAILED,
+                'status' => Transaction::STATUS_FAILED,
                 'transbank_response' => json_encode($commitResponse),
             ]
         );
@@ -329,18 +300,19 @@ class ResponseController
     /**
      * @param WC_Order $order
      */
-    private function setAfterPaymentOrderStatus(WC_Order $order){
+    private function setAfterPaymentOrderStatus(WC_Order $order)
+    {
         $status = $this->pluginConfig['STATUS_AFTER_PAYMENT'];
-        if ($status == ''){
+        if ($status == '') {
             $order->payment_complete();
-        }
-        else{
+        } else {
             $order->payment_complete();
             $order->update_status($status);
         }
     }
 
-    protected function addErrorQueryParams($url, $errorCode) {
+    protected function addErrorQueryParams($url, $errorCode)
+    {
         $params = ['transbank_status' => $errorCode];
         return add_query_arg($params, $url);
     }
