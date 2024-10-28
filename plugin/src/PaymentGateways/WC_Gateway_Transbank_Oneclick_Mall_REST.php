@@ -187,7 +187,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             $this->logger->logInfo('Suscripción autorizada correctamente para la orden #' . $renewalOrder->get_id());
         } catch (Throwable $ex) {
             $this->logger->logError("Error al procesar suscripción: " . $ex->getMessage());
-            $renewalOrder->add_order_note('Error al procesar suscripción, para más detalles revisar el archivo log.');
+            $logsUrl = admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs');
+            $this->setOrderAsFailed($renewalOrder, 'Error al procesar suscripción, para más detalles revisar el archivo de <a href=" ' . $logsUrl . '">logs</a>.');
         }
     }
 
