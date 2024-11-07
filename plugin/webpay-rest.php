@@ -41,8 +41,7 @@ add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 
-add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
-add_action('wp_ajax_check_exist_tables', TableCheck::class.'::check');
+add_action('wp_ajax_checkCanDownloadLogFile', 'checkCanDownloadLogFile');
 add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
@@ -273,4 +272,48 @@ function noticeMissingWoocommerce() {
             include_once plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php';
         }
     );
+}
+
+function fileExistsInFolder($fileName, $folderPath)
+{
+    $filesInFolder = array_filter(scandir($folderPath), function ($file) use ($folderPath) {
+        return is_file($folderPath . '/' . $file);
+    });
+
+    return in_array($fileName, array_values($filesInFolder));
+}
+
+function checkCanDownloadLogFile()
+{
+    $response = [
+        'canDownload' => false,
+        'downloadUrl' => '',
+        'error' => ''
+    ];
+
+    if (!is_user_logged_in()) {
+        $response['error'] = 'Debes iniciar sesión para poder descargar';
+        wp_send_json_error($response);
+    }
+
+    if (!current_user_can('manage_options')) {
+        $response['error'] = 'No tienes permisos para descargar';
+        wp_send_json_error($response);
+    }
+
+    $baseUploadDir = wp_upload_dir();
+    $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
+    $logName = sanitize_text_field($_POST['file']);
+    $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
+    $fileExists = fileExistsInFolder($logName, $folderPath);
+
+    if (!$fileExists) {
+        $response['error'] = 'No existe el archivo solicitado';
+        wp_send_json_error($response);
+    }
+
+    $response['canDownload'] = true;
+    $response['downloadUrl'] = $baseUploadDir['baseurl'] . $tbkLogsFolder . $logName;
+
+    wp_send_json_success($response);
 }
