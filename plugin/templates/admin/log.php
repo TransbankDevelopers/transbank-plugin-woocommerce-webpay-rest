@@ -7,7 +7,7 @@ $logDirectoryTitle = "Carpeta en el servidor en donde se guardan los archivos" .
 $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro creado";
 ?>
 
-<div class="tbk-box">
+<div class="tbk-box" id="logs-container">
     <h3 class="tbk_title_h3">Información de Registros</h3>
     <div class="tbk-plugin-info-container">
         <div class="info-column">
@@ -35,7 +35,7 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                 <input type="hidden" name="page" value="transbank_webpay_plus_rest">
                 <input type="hidden" name="tbk_tab" value="logs">
 
-                <select class="select label" name="log_file" <?= !$folderHasLogs ? "disabled" : '' ?>>
+                <select class="select label" name="log_file" id="log_file" <?= !$folderHasLogs ? "disabled" : '' ?>>
                     <?php
                     $options = '';
 
