@@ -58,6 +58,7 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                 <input type="submit" class="button button-primary tbk-button-primary"
                     <?= !$folderHasLogs ? 'disabled' : '' ?>
                     value="Ver">
+                <button class="button button-secondary tbk-button-secondary" id="btnDownload">Descargar</button>
             </form>
         </div>
     </div>
