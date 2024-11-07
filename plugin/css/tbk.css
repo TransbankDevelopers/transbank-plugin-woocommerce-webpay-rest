@@ -330,6 +330,21 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.button.tbk-button-secondary {
+    background: white;
+    border-color: #D5006C;
+    color: #D5006C;
+    transition: background-color 0.3s ease;
+}
+
+.button.tbk-button-secondary:hover,
+.button.tbk-button-secondary:focus {
+    background: white;
+    border-color: #D5006C;
+    color: #D5006C;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .log-container {
     width: calc(100vw - 480px);
     max-height: 600px;
