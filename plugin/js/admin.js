@@ -123,7 +123,6 @@ jQuery(function($) {
                 file: fileToDownload
             }
         }).then(function (response) {
-            console.log(response);
             return response.data;
         }).catch(function () {
             return false;
@@ -160,7 +159,6 @@ jQuery(function($) {
         }
 
         checkPermission(logFileSelected).then(function (checkResponse) {
-            console.log(checkResponse);
             if (!checkResponse) {
                 showNotice('Error en la descarga', 'No es posible descargar el archivo', 'error');
                 return;
