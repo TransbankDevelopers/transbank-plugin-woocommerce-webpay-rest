@@ -221,6 +221,8 @@
 }
 
 .tbk-box {
+    --tbk-red: #D5006C;
+    --tbk-red-2: #C00063;
     background: #fff;
     border-radius: 10px;
     padding: 15px;
@@ -316,32 +318,32 @@
 }
 
 .button.tbk-button-primary {
-    background: #D5006C;
-    border-color: #D5006C;
+    background: var(--tbk-red);
+    border-color: var(--tbk-red);
     color: white;
     transition: background-color 0.3s ease;
 }
 
 .button.tbk-button-primary:hover,
 .button.tbk-button-primary:focus {
-    background: #C00063;
-    border-color: #C00063;
+    background: var(--tbk-red-2);
+    border-color: var(--tbk-red-2);
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .button.tbk-button-secondary {
     background: white;
-    border-color: #D5006C;
-    color: #D5006C;
+    border-color: var(--tbk-red);
+    color: var(--tbk-red);
     transition: background-color 0.3s ease;
 }
 
 .button.tbk-button-secondary:hover,
 .button.tbk-button-secondary:focus {
     background: white;
-    border-color: #D5006C;
-    color: #D5006C;
+    border-color: var(--tbk-red-2);
+    color: var(--tbk-red-2);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
