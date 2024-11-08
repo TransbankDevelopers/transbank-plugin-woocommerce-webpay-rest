@@ -113,4 +113,63 @@ jQuery(function($) {
             notice_id: noticeId
         });
     });
+
+    function checkPermission(fileToDownload) {
+        return $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'check_can_download_file',
+                file: fileToDownload
+            }
+        }).then(function (response) {
+            return response;
+        }).catch(function (error) {
+            return { success: false, data: {
+                error: error.message || "Error en la solicitud de descarga"
+            } };
+        });
+    }
+
+    function showNotice(title, message, type = 'success') {
+        const notice = $('<div>')
+            .addClass(`is-dismissible notice notice-${type}`)
+            .prepend(`<p><strong>${title}</strong><br>${message}</p>`);
+
+        const dismissButton = $('<button>')
+            .addClass('notice-dismiss');
+
+        notice.append(dismissButton);
+
+
+        notice.find('.notice-dismiss').on('click', function () {
+            notice.fadeOut(300, function () {
+                notice.remove();
+            });
+        });
+
+        $('#logs-container').prepend(notice);
+    }
+
+    $('#btnDownload').on('click', function (e) {
+        e.preventDefault();
+        const logFileSelected = $('#log_file').val();
+
+        if (!logFileSelected) {
+            showNotice('Error en la descarga', 'Debes seleccionar un archivo', 'error');
+            return;
+        }
+
+        checkPermission(logFileSelected).then(function (checkResponse) {
+            if (checkResponse.success) {
+                window.location.href = checkResponse.data.downloadUrl;
+                return;
+            }
+            showNotice('Error en la descarga', checkResponse.data.error, 'error');
+
+        });
+    });
+
+
+
 })

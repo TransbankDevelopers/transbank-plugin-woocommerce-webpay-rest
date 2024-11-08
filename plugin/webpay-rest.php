@@ -11,6 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
 use Transbank\WooCommerce\WebpayRest\Utils\ConnectionCheck;
 use Transbank\WooCommerce\WebpayRest\Utils\TableCheck;
+use Transbank\Plugin\Helpers\PluginLogger;
 
 if (!defined('ABSPATH')) {
     return;
@@ -41,8 +42,9 @@ add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
 
-add_action('wp_ajax_check_connection', ConnectionCheck::class.'::check');
-add_action('wp_ajax_check_exist_tables', TableCheck::class.'::check');
+add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
+add_action('wp_ajax_check_exist_tables', TableCheck::class . '::check');
+add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
 add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
