@@ -119,7 +119,7 @@ jQuery(function($) {
             url: ajaxurl,
             type: 'POST',
             data: {
-                action: 'checkCanDownloadLogFile',
+                action: 'check_can_download_file',
                 file: fileToDownload
             }
         }).then(function (response) {
