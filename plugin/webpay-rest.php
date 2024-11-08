@@ -287,21 +287,14 @@ function fileExistsInFolder($fileName, $folderPath)
 
 function checkCanDownloadLogFile()
 {
-    $response = [
-        'canDownload' => false,
-        'downloadUrl' => '',
-        'error' => ''
-    ];
-
     if (!is_user_logged_in()) {
-        $response['error'] = 'Debes iniciar sesión para poder descargar';
-        wp_send_json_error($response);
+        wp_send_json_error(['error' => 'Debes iniciar sesión para poder descargar']);
     }
 
     if (!current_user_can('manage_options')) {
-        $response['error'] = 'No tienes permisos para descargar';
-        wp_send_json_error($response);
+        wp_send_json_error(['error' => 'No tienes permisos para descargar']);
     }
+    wp_send_json_error(['error' => 'No tienes permisos para descargar']);
 
     $baseUploadDir = wp_upload_dir();
     $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
@@ -310,12 +303,8 @@ function checkCanDownloadLogFile()
     $fileExists = fileExistsInFolder($logName, $folderPath);
 
     if (!$fileExists) {
-        $response['error'] = 'No existe el archivo solicitado';
-        wp_send_json_error($response);
+        wp_send_json_error(['error' => 'No existe el archivo solicitado']);
     }
 
-    $response['canDownload'] = true;
-    $response['downloadUrl'] = $baseUploadDir['baseurl'] . $tbkLogsFolder . $logName;
-
-    wp_send_json_success($response);
+    wp_send_json_success(['downloadUrl' => $baseUploadDir['baseurl'] . $tbkLogsFolder . $logName]);
 }

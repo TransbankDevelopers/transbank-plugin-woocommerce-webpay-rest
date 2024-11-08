@@ -123,9 +123,11 @@ jQuery(function($) {
                 file: fileToDownload
             }
         }).then(function (response) {
-            return response.data;
-        }).catch(function () {
-            return false;
+            return response;
+        }).catch(function (error) {
+            return { success: false, data: {
+                error: error.message || "Error en la solicitud de descarga"
+            } };
         });
     }
 
@@ -159,15 +161,11 @@ jQuery(function($) {
         }
 
         checkPermission(logFileSelected).then(function (checkResponse) {
-            if (!checkResponse) {
-                showNotice('Error en la descarga', 'No es posible descargar el archivo', 'error');
+            if (checkResponse.success) {
+                window.location.href = checkResponse.data.downloadUrl;
                 return;
             }
-            if (checkResponse?.canDownload) {
-                window.location.href = checkResponse.downloadUrl;
-                return;
-            }
-            showNotice('Error en la descarga', checkResponse.error, 'error');
+            showNotice('Error en la descarga', checkResponse.data.error, 'error');
 
         });
     });
