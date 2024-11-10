@@ -10,69 +10,39 @@ class TransactionStatusController
 {
     const HTTP_OK = 200;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
-    public function getStatus()
+    const DEFAULT_ERROR_MESSAGE = 'No se pudo obtener el estado de la transacción';
+    const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta orden';
+    const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden';
+    const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden';
+    public function getStatus(): void
     {
         $response = [
             'body' => [
-                'message' => 'No se pudo obtener el estado de la transacción'
-            ],
-            'code' => self::HTTP_UNPROCESSABLE_ENTITY
+                'message' => self::DEFAULT_ERROR_MESSAGE
+            ]
         ];
         // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
 
         if (!wp_verify_nonce($nonce, 'my-ajax-nonce')) {
-            wp_send_json($response['body'], $response['code']);
+            wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
             return;
         }
 
-        $orderId = filter_input(INPUT_POST, 'order_id', FILTER_DEFAULT);
-        $orderId = htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8');
-        $buyOrder = filter_input(INPUT_POST, 'buy_order', FILTER_DEFAULT);
-        $buyOrder = htmlspecialchars($buyOrder, ENT_QUOTES, 'UTF-8');
-        $token = filter_input(INPUT_POST, 'token', FILTER_DEFAULT);
-        $token = htmlspecialchars($token, ENT_QUOTES, 'UTF-8');
+        $orderId = $this->getSecureInputValue('order_id');
+        $buyOrder = $this->getSecureInputValue('buy_order');
+        $token = $this->getSecureInputValue('token');
 
         try {
             $transaction = Transaction::getApprovedByOrderId($orderId);
+
             if (!$transaction) {
-                $response = [
-                    'body' => [
-                        'message' => 'No hay transacciones webpay aprobadas para esta orden'
-                    ],
-                    'code' => self::HTTP_UNPROCESSABLE_ENTITY
-                ];
+                $response['body'] = self::NO_TRANSACTION_ERROR_MESSAGE;
+                wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
+                return;
             }
 
-            if ($transaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
-                if ($transaction->buy_order !== $buyOrder) {
-                    $response = [
-                        'body' => [
-                            'message' => 'El buy_order enviado y el buy_order de la transacción no coinciden'
-                        ],
-                        'code' => self::HTTP_UNPROCESSABLE_ENTITY
-                    ];
-                }
-
-                $response = [
-                    'body' => $this->getStatusForOneclickTransaction($orderId, $buyOrder),
-                    'code' => self::HTTP_OK
-                ];
-            }
-
-            if ($transaction->token !== $token) {
-                $response = [
-                    'body' => [
-                        'message' => 'El token enviado y el token de la transacción no coinciden'
-                    ],
-                    'code' => self::HTTP_UNPROCESSABLE_ENTITY
-                ];
-            }
-
-            $response = [
-                'body' => $this->getStatusForWebpayTransaction($orderId, $token),
-                'code' => self::HTTP_OK
-            ];
+            $response = $this->handleGetStatus($transaction, $orderId, $buyOrder, $token);
 
             wp_send_json($response['body'], $response['code']);
         } catch (\Exception $e) {
@@ -82,10 +52,59 @@ class TransactionStatusController
         }
     }
 
+    private function handleGetStatus(object $transaction, string $orderId, string $buyOrder, string $token): array
+    {
+        if ($transaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
+            return $this->handleOneclickStatus($orderId, $buyOrder, $transaction->buy_order);
+        }
+
+        return $this->handleWebpayStatus($orderId, $token, $transaction->token);
+    }
+
+    private function handleOneclickStatus(
+        string $orderId,
+        string $requestBuyOrder,
+        string $transactionBuyOrder
+    ): array {
+        if ($transactionBuyOrder !== $requestBuyOrder) {
+            return [
+                'body' => [
+                    'message' => self::BUY_ORDER_MISMATCH_ERROR_MESSAGE
+                ],
+                'code' => self::HTTP_UNPROCESSABLE_ENTITY
+            ];
+        }
+
+        return [
+            'body' => $this->getStatusForOneclickTransaction($orderId, $transactionBuyOrder),
+            'code' => self::HTTP_OK
+        ];
+    }
+
+    private function handleWebpayStatus(
+        string $orderId,
+        string $requestToken,
+        string $transactionToken
+    ): array {
+        if ($transactionToken !== $requestToken) {
+            return [
+                'body' => [
+                    'message' => self::TOKEN_MISMATCH_ERROR_MESSAGE
+                ],
+                'code' => self::HTTP_UNPROCESSABLE_ENTITY
+            ];
+        }
+
+        return [
+            'body' => $this->getStatusForWebpayTransaction($orderId, $transactionToken),
+            'code' => self::HTTP_OK
+        ];
+    }
+
     private function getStatusForWebpayTransaction(string $orderId, string $token)
     {
-        $webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
-        $resp = $webpayplusTransbankSdk->status($orderId, $token);
+        $webpayTransbankSDK = TbkFactory::createWebpayplusTransbankSdk();
+        $resp = $webpayTransbankSDK->status($orderId, $token);
         $formattedDate = TbkResponseUtil::transactionDateToLocalDate($resp->getTransactionDate());
         $modifiedResponse = clone $resp;
         $modifiedResponse->setTransactionDate($formattedDate);
@@ -99,8 +118,8 @@ class TransactionStatusController
 
     private function getStatusForOneclickTransaction(string $orderId, string $buyOrder)
     {
-        $oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
-        $status = $oneclickTransbankSdk->status($orderId, $buyOrder);
+        $oneclickTransbankSDK = TbkFactory::createOneclickTransbankSdk();
+        $status = $oneclickTransbankSDK->status($orderId, $buyOrder);
         $statusArray = json_decode(json_encode($status), true);
         $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
 
@@ -114,5 +133,11 @@ class TransactionStatusController
             'status'  => $response,
             'raw'     => $status,
         ];
+    }
+
+    private function getSecureInputValue(string $varName): string
+    {
+        $tmpValue = filter_input(INPUT_POST, $varName, FILTER_DEFAULT);
+        return htmlspecialchars($tmpValue, ENT_QUOTES, 'UTF-8');
     }
 }
