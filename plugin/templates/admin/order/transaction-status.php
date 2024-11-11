@@ -2,14 +2,13 @@
 if (!defined('ABSPATH')) {
     return;
 }
-if (!$transaction) {
+if (empty($viewData)) {
     echo 'No hay transacciones webpay aprobadas para esta orden';
-
     return;
 }
 ?>
 
-<a class="button action get-transaction-status" data-order-id="<?php echo $order->get_id(); ?>" data-buy-order="<?php echo $transaction->buy_order; ?>" data-token="<?php echo $transaction->token; ?>" href="">Consultar estado de la transacción</a>
+<a class="button action get-transaction-status" data-order-id="<?php echo $viewData['orderId']; ?>" data-buy-order="<?php echo $viewData['buyOrder']; ?>" data-token="<?php echo $viewData['token']; ?>" href="">Consultar estado de la transacción</a>
 
 <p>Esta es la respuesta del API (solo disponible por 7 días desde la fecha de transacción)</p>
 
