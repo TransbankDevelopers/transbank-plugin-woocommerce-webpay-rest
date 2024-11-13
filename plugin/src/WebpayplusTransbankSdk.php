@@ -98,17 +98,24 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'status', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al tratar de obtener el status ( token: '.$token.') de la transacción Webpay en Transbank: '.$e->getMessage();
+            $errorMessage = 'Ocurrió un error al tratar de obtener el estado de la transacción.';
 
             if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = 'Esta utilizando una version de api distinta a la utilizada para crear la transacción';
+                $errorMessage = 'La version de API es distinta a la utilizada para crear la transacción.';
             }
 
             if (ErrorUtil::isMaxTimeError($e)) {
                 $errorMessage = 'La transacción supera los 7 días y ya no es posible consultarla por este medio.';
             }
 
-            $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
+            $this->errorExecutionTbkApi(
+                $orderId,
+                'status',
+                $params,
+                'StatusWebpayException',
+                $e->getMessage(),
+                $errorMessage
+            );
             throw new StatusWebpayException($errorMessage, $token, $e);
         }
     }
