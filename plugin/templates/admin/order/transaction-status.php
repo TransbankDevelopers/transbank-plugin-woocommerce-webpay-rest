@@ -2,84 +2,28 @@
 if (!defined('ABSPATH')) {
     return;
 }
+
+$infoMessage = "El estado de la transacción está disponible solo por 7 días desde su creación.";
+
 if (empty($viewData)) {
-    echo 'No hay transacciones webpay aprobadas para esta orden';
-    return;
+    $infoMessage = 'No hay transacciones Webpay asociadas a esta orden.';
 }
 ?>
 
-<a class="button action get-transaction-status" data-order-id="<?php echo $viewData['orderId']; ?>" data-buy-order="<?php echo $viewData['buyOrder']; ?>" data-token="<?php echo $viewData['token']; ?>" href="">Consultar estado de la transacción</a>
-
-<p>Esta es la respuesta del API (solo disponible por 7 días desde la fecha de transacción)</p>
-
-<div class="transaction-status-response" id="transaction_status_admin" style="display: none">
-    <dl class="transaction-status-response">
-        <dt>Producto:</dt>
-        <dd class="status-product"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Fecha contable:</dt>
-        <dd class="status-accountingDate"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Fecha de transacción:</dt>
-        <dd class="status-transactionDate"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Estado:</dt>
-        <dd class="status-status"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Monto de la transacción:</dt>
-        <dd class="status-amount"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Balance:</dt>
-        <dd class="status-balance"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Código de autorización:</dt>
-        <dd class="status-authorizationCode"></dd>
-    </dl>
-    <dl class="transaction-status-response tbk-hide" id="tbk_wpp_vci">
-        <dt>VCI:</dt>
-        <dd class="status-vci"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Orden de compra:</dt>
-        <dd class="status-buyOrder"></dd>
-    </dl>
-    <dl class="transaction-status-response tbk-hide" id="tbk_wpoc_commerce_code">
-        <dt>Código de comercio:</dt>
-        <dd class="status-commerceCode"></dd>
-    </dl>
-    <dl class="transaction-status-response tbk-hide" id="tbk_wpp_session_id">
-        <dt>ID Sesión:</dt>
-        <dd class="status-sessionId"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Tipo de pago:</dt>
-        <dd class="status-paymentTypeCode"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Código de respuesta:</dt>
-        <dd class="status-responseCode"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Número de cuotas:</dt>
-        <dd class="status-installmentsNumber"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt>Monto de cada cuota:</dt>
-        <dd class="status-installmentsAmount"></dd>
-    </dl>
-    <dl class="transaction-status-response">
-        <dt >Respuesta Completa:</dt>
-        <dd class="status-raw"></dd>
-    </dl>
+<div class="tbk-status-button">
+    <a class="button tbk-button-primary get-transaction-status"
+    data-order-id="<?php echo $viewData['orderId']; ?>"
+    data-buy-order="<?php echo $viewData['buyOrder']; ?>"
+    data-token="<?php echo $viewData['token']; ?>"
+    href="#">
+        Consultar Estado
+    </a>
 </div>
 
-<div class="error-transaction-status-response" style="display: none">
-    <div>Error consultando estado de la transacción</div>
-    <div class="error-status-raw"></div>
+<div class="tbk-status tbk-status-info">
+    <i class="fa fa-info-circle"></i>
+    <p><?= $infoMessage ?></p>
+</div>
+
+<div id="transaction_status_admin">
 </div>

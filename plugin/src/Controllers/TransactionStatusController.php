@@ -75,8 +75,10 @@ class TransactionStatusController
             ];
         }
 
+        $statusResponse = $this->getStatusForOneclickTransaction($orderId, $transactionBuyOrder);
+
         return [
-            'body' => $this->getStatusForOneclickTransaction($orderId, $transactionBuyOrder),
+            'body' => TbkResponseUtil::getOneclickStatusFormattedResponse($statusResponse),
             'code' => self::HTTP_OK
         ];
     }
@@ -95,8 +97,10 @@ class TransactionStatusController
             ];
         }
 
+        $statusResponse = $this->getStatusForWebpayTransaction($orderId, $transactionToken);
+
         return [
-            'body' => $this->getStatusForWebpayTransaction($orderId, $transactionToken),
+            'body' => TbkResponseUtil::getWebpayStatusFormattedResponse($statusResponse),
             'code' => self::HTTP_OK
         ];
     }
@@ -104,35 +108,13 @@ class TransactionStatusController
     private function getStatusForWebpayTransaction(string $orderId, string $token)
     {
         $webpayTransbankSDK = TbkFactory::createWebpayplusTransbankSdk();
-        $resp = $webpayTransbankSDK->status($orderId, $token);
-        $formattedDate = TbkResponseUtil::transactionDateToLocalDate($resp->getTransactionDate());
-        $modifiedResponse = clone $resp;
-        $modifiedResponse->setTransactionDate($formattedDate);
-
-        return [
-            'product' => Transaction::PRODUCT_WEBPAY_PLUS,
-            'status'  => $modifiedResponse,
-            'raw'     => $resp,
-        ];
+        return $webpayTransbankSDK->status($orderId, $token);
     }
 
     private function getStatusForOneclickTransaction(string $orderId, string $buyOrder)
     {
         $oneclickTransbankSDK = TbkFactory::createOneclickTransbankSdk();
-        $status = $oneclickTransbankSDK->status($orderId, $buyOrder);
-        $statusArray = json_decode(json_encode($status), true);
-        $firstDetail = json_decode(json_encode($status->getDetails()[0]), true);
-
-        $response = array_merge($statusArray, $firstDetail);
-        $formattedDate = TbkResponseUtil::transactionDateToLocalDate($status->getTransactionDate());
-        $response['transactionDate'] = $formattedDate;
-        unset($response['details']);
-
-        return [
-            'product' => Transaction::PRODUCT_WEBPAY_ONECLICK,
-            'status'  => $response,
-            'raw'     => $status,
-        ];
+        return $oneclickTransbankSDK->status($orderId, $buyOrder);
     }
 
     private function getSecureInputValue(string $varName): string
