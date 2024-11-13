@@ -26,36 +26,6 @@
     font-size: 12px;
 }
 
-.transaction-status-response {
-    width: 100%;
-    max-width: 100%;
-    margin-top: 10px;
-}
-.transaction-status-response pre {
-    width: 250px;
-    overflow: scroll;
-}
-
-.transaction-status-response dt {
-    padding: 5px;
-    background: #d7cad2;
-    text-align: left;
-    font-weight: bold;
-
-}
-.transaction-status-response dd {
-    padding: 5px 5px 10px 5px;
-    text-align: left;
-    margin-left: 0;
-}
-
-.error-transaction-status-response {
-    width: 100%;
-    max-width: 100%;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
 .error-status-raw {
     color: red;
     width: 250px;
