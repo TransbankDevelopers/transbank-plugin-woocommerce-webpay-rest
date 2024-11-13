@@ -103,7 +103,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
                 $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
                 throw new StatusWebpayException($errorMessage, $token, $e);
             } elseif (ErrorUtil::isMaxTimeError($e)) {
-                $errorMessage = 'Ya pasaron mas de 7 dias desde la creacion de la transacción, ya no es posible consultarla por este medio';
+                $errorMessage = 'La transacción supera los 7 días y ya no es posible consultarla por este medio.';
                 $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
                 throw new StatusWebpayException($errorMessage, $token, $e);
             }
