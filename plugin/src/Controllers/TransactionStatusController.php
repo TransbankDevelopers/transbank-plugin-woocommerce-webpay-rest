@@ -53,7 +53,7 @@ class TransactionStatusController
         $token = $this->getSecureInputValue('token');
 
         $requestMethod = $_SERVER['REQUEST_METHOD'];
-        $params = [$orderId, $buyOrder, $token];
+        $params = ['orderId' => $orderId, 'buyOrder' => $buyOrder, 'token' => $token];
 
         $this->logger->logDebug("Request: method -> $requestMethod");
         $this->logger->logDebug('Request: payload -> ' . json_encode($params));
