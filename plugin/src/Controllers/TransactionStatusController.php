@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
+use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
@@ -10,7 +11,6 @@ class TransactionStatusController
 {
     const HTTP_OK = 200;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
-    const DEFAULT_ERROR_MESSAGE = 'No se pudo obtener el estado de la transacción';
     const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta orden';
     const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden';
     const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden';
@@ -18,7 +18,7 @@ class TransactionStatusController
     {
         $response = [
             'body' => [
-                'message' => self::DEFAULT_ERROR_MESSAGE
+                'message' => ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE
             ]
         ];
         // Check for nonce security
