@@ -14,6 +14,21 @@ class TransactionStatusController
     const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta orden';
     const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden';
     const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden';
+
+    /**
+     * Log instance.
+     * @var \Transbank\Plugin\Helpers\PluginLogger
+     */
+    private $logger;
+
+    /**
+     * Controller for status requests.
+     */
+    public function __construct()
+    {
+        $this->logger = TbkFactory::createLogger();
+    }
+
     public function getStatus(): void
     {
         $response = [
@@ -21,10 +36,14 @@ class TransactionStatusController
                 'message' => ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE
             ]
         ];
+
+        $this->logger->logInfo('Obteniendo estado de la transacción.');
+
         // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
 
         if (!wp_verify_nonce($nonce, 'my-ajax-nonce')) {
+            $this->logger->logError($response['body']['message']);
             wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
             return;
         }
@@ -32,6 +51,12 @@ class TransactionStatusController
         $orderId = $this->getSecureInputValue('order_id');
         $buyOrder = $this->getSecureInputValue('buy_order');
         $token = $this->getSecureInputValue('token');
+
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        $params = [$orderId, $buyOrder, $token];
+
+        $this->logger->logDebug("Request: method -> $requestMethod");
+        $this->logger->logDebug('Request: payload -> ' . json_encode($params));
 
         try {
             $transaction = Transaction::getApprovedByOrderId($orderId);
