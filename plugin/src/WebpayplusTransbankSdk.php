@@ -98,14 +98,14 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'status', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al tratar de obtener el estado de la transacción.';
+            $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
 
-            if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = 'La version de API es distinta a la utilizada para crear la transacción.';
+            if(ErrorUtil::isMaxTimeError($e)) {
+                $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
             }
 
-            if (ErrorUtil::isMaxTimeError($e)) {
-                $errorMessage = 'La transacción supera los 7 días y ya no es posible consultarla por este medio.';
+            if (ErrorUtil::isApiMismatchError($e)) {
+                $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
             }
 
             $this->errorExecutionTbkApi(

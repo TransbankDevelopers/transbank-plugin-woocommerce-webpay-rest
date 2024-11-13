@@ -12,6 +12,10 @@ class ErrorUtil {
     status 422 => "error_message": "Invalid value for parameter: transaction not found"
     */
 
+    const DEFAULT_STATUS_ERROR_MESSAGE = 'Ocurrió un error al tratar de obtener el estado de la transacción.';
+    const EXPIRED_TRANSACTION_ERROR_MESSAGE = 'La transacción supera los 7 días y ya no es posible consultarla por este medio.';
+    const API_MISMATCH_ERROR_MESSAGE = 'La version de API es distinta a la utilizada para crear la transacción.';
+
     public static function isApiMismatchError(\Throwable $e)
     {
         $error = $e->getMessage();
