@@ -163,4 +163,30 @@ class TbkResponseUtil
 
         return array_merge($commonFields, $oneclickFields);
     }
+
+    /**
+     * Get the common fields formatted for status response.
+     *
+     * @param object $statusResponse The status response.
+     * @return array The formatted common fields for status response.
+     */
+    private static function getCommonFieldsStatusFormatted(object $statusResponse): array
+    {
+        $utcDate = new DateTime($statusResponse->transactionDate, new DateTimeZone('UTC'));
+        $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+
+        $buyOrder = $statusResponse->buyOrder;
+        $cardNumber = "**** **** **** {$statusResponse->cardNumber}";
+        $transactionDate = $utcDate->format('d-m-Y');
+        $transactionTime = $utcDate->format('H:i:s');
+        $accountingDate = self::getAccountingDate($statusResponse->accountingDate);
+
+        return [
+            'buyOrder' => $buyOrder,
+            'cardNumber' => $cardNumber,
+            'transactionDate' => $transactionDate,
+            'transactionTime' => $transactionTime,
+            'accountingDate' => $accountingDate
+        ];
+    }
 }
