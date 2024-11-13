@@ -45,10 +45,11 @@ $hposHelper = new HposHelper();
 $hposExists = $hposHelper->checkIfHposExists();
 
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
-add_action('wp_loaded', function () use ($hposExists) {
-    woocommerceTransbankInit($hposExists);
-});
+add_action('wp_loaded', 'woocommerceTransbankInit');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
+add_action('add_meta_boxes', function () use ($hposExists) {
+    addTransbankStatusMetaBox($hposExists);
+});
 
 add_action('init', function() {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
@@ -113,7 +114,7 @@ add_action('init', function () {
     }
 });
 
-function woocommerceTransbankInit(bool $hposExists)
+function woocommerceTransbankInit()
 {
     if (!class_exists('WC_Payment_Gateway')) {
         noticeMissingWoocommerce();
@@ -122,7 +123,6 @@ function woocommerceTransbankInit(bool $hposExists)
 
     registerAdminMenu();
     registerPluginActionLinks();
-    registerMetaBoxes($hposExists);
     NoticeHelper::registerNoticesDismissHook();
     NoticeHelper::handleReviewNotice();
 }
@@ -174,13 +174,6 @@ function registerPluginActionLinks()
         ];
 
         return array_merge($actionLinks, $newLinks);
-    });
-}
-
-function registerMetaBoxes(bool $hPosExists)
-{
-    add_action('add_meta_boxes', function () use ($hPosExists) {
-        addTransbankStatusMetaBox($hPosExists);
     });
 }
 
