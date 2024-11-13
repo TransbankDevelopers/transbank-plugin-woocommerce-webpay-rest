@@ -129,7 +129,7 @@ class OneclickTransbankSdk extends TransbankSdk
             }
 
             if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
+                $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
             }
 
             $this->errorExecutionTbkApi(
