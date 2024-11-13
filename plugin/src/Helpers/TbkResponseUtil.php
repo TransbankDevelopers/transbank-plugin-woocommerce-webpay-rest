@@ -236,4 +236,49 @@ class TbkResponseUtil
         ];
     }
 
+    /**
+     * Get the formatted response for Oneclick status transactions.
+     *
+     * @param object $statusResponse The response object for Oneclick status transactions.
+     * @return array The formatted response fields.
+     */
+    public static function getOneclickStatusFormattedResponse(object $statusResponse): array
+    {
+        $commonFields = self::getCommonFieldsStatusFormatted($statusResponse);
+        $detail = $statusResponse->details[0];
+
+        $status = self::getStatus($detail->status);
+        $amount = self::getAmountFormatted($detail->amount);
+        $paymentType = self::getPaymentType($detail->paymentTypeCode);
+        $installmentType = self::getInstallmentType($detail->paymentTypeCode);
+        $installmentNumber = $detail->installmentsNumber;
+        $installmentAmount = 'N/A';
+        $balance = 'N/A';
+
+        if ($installmentNumber > 0) {
+            $installmentAmount = self::getAmountFormatted($detail->installmentsAmount ?? 0);
+        }
+
+        if (!is_null($detail->balance)) {
+            $balance = self::getAmountFormatted($detail->balance);
+        }
+
+        return [
+            'status' => $status,
+            'responseCode' => $detail->responseCode,
+            'amount' => $amount,
+            'authorizationCode' => $detail->authorizationCode,
+            'accountingDate' => $commonFields['accountingDate'],
+            'paymentType' => $paymentType,
+            'installmentType' => $installmentType,
+            'installmentNumber' => $installmentNumber,
+            'installmentAmount' => $installmentAmount,
+            'buyOrderMall' => $commonFields['buyOrder'],
+            'buyOrderStore' => $detail->buyOrder,
+            'cardNumber' => $commonFields['cardNumber'],
+            'transactionDate' => $commonFields['transactionDate'],
+            'transactionTime' => $commonFields['transactionTime'],
+            'balance' => $balance
+        ];
+    }
 }
