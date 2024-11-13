@@ -98,17 +98,24 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'status', $params, $response);
             return $response;
         } catch (Exception $e) {
-            if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = 'Esta utilizando una version de api distinta a la utilizada para crear la transacción';
-                $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
-                throw new StatusWebpayException($errorMessage, $token, $e);
-            } elseif (ErrorUtil::isMaxTimeError($e)) {
-                $errorMessage = 'Ya pasaron mas de 7 dias desde la creacion de la transacción, ya no es posible consultarla por este medio';
-                $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
-                throw new StatusWebpayException($errorMessage, $token, $e);
+            $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
+
+            if(ErrorUtil::isMaxTimeError($e)) {
+                $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
             }
-            $errorMessage = 'Ocurrió un error al tratar de obtener el status ( token: '.$token.') de la transacción Webpay en Transbank: '.$e->getMessage();
-            $this->errorExecutionTbkApi($orderId, 'status', $params, 'StatusWebpayException', $e->getMessage(), $errorMessage);
+
+            if (ErrorUtil::isApiMismatchError($e)) {
+                $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
+            }
+
+            $this->errorExecutionTbkApi(
+                $orderId,
+                'status',
+                $params,
+                'StatusWebpayException',
+                $e->getMessage(),
+                $errorMessage
+            );
             throw new StatusWebpayException($errorMessage, $token, $e);
         }
     }

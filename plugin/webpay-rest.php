@@ -1,4 +1,5 @@
 <?php
+
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
@@ -12,6 +13,8 @@ use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
 use Transbank\WooCommerce\WebpayRest\Utils\ConnectionCheck;
 use Transbank\WooCommerce\WebpayRest\Utils\TableCheck;
 use Transbank\Plugin\Helpers\PluginLogger;
+use Transbank\WooCommerce\WebpayRest\Utils\Template;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 if (!defined('ABSPATH')) {
     return;
@@ -36,16 +39,25 @@ if (!defined('ABSPATH')) {
  * WC tested up to: 8.9.1
  */
 
-require_once plugin_dir_path(__FILE__).'vendor/autoload.php';
+require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
+
+$hposHelper = new HposHelper();
+$hposExists = $hposHelper->checkIfHposExists();
 
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
+add_action('add_meta_boxes', function () use ($hposExists) {
+    addTransbankStatusMetaBox($hposExists);
+});
 
-add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
-add_action('wp_ajax_check_exist_tables', TableCheck::class . '::check');
-add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
-add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
+add_action('init', function() {
+    add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
+    add_action('wp_ajax_check_exist_tables', TableCheck::class . '::check');
+    add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
+    add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
+});
+
 add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
@@ -60,36 +72,34 @@ add_action('admin_enqueue_scripts', function () {
     ]);
 });
 
-add_action('woocommerce_blocks_loaded', function() {
-    if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ){
+add_action('woocommerce_blocks_loaded', function () {
+    if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
         require_once 'src/Blocks/WC_Gateway_Transbank_Webpay_Blocks.php';
         require_once 'src/Blocks/WC_Gateway_Transbank_Oneclick_Blocks.php';
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-                $payment_method_registry->register( new WCGatewayTransbankWebpayBlocks() );
-                $payment_method_registry->register( new WCGatewayTransbankOneclickBlocks() );
+            function (Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
+                $payment_method_registry->register(new WCGatewayTransbankWebpayBlocks());
+                $payment_method_registry->register(new WCGatewayTransbankOneclickBlocks());
             }
         );
     }
 });
 
-add_action( 'before_woocommerce_init', function() {
-    if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+add_action('before_woocommerce_init', function () {
+    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
     }
-} );
+});
 
-$hposHelper = new HposHelper();
-$hPosExists = $hposHelper->checkIfHposExists();
-if ($hPosExists)
-{
+if ($hposExists) {
     add_action('before_woocommerce_init', function () {
-        if (class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
             \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
                 'custom_order_tables',
                 __FILE__,
-                true);
+                true
+            );
         }
     });
 }
@@ -104,26 +114,30 @@ add_action('init', function () {
     }
 });
 
-function woocommerceTransbankInit() {
+function woocommerceTransbankInit()
+{
     if (!class_exists('WC_Payment_Gateway')) {
         noticeMissingWoocommerce();
         return;
     }
+
     registerAdminMenu();
     registerPluginActionLinks();
     NoticeHelper::registerNoticesDismissHook();
     NoticeHelper::handleReviewNotice();
 }
 
-function registerPaymentGateways() {
-    add_filter('woocommerce_payment_gateways', function($methods) {
+function registerPaymentGateways()
+{
+    add_filter('woocommerce_payment_gateways', function ($methods) {
         $methods[] = WC_Gateway_Transbank_Webpay_Plus_REST::class;
         $methods[] = WC_Gateway_Transbank_Oneclick_Mall_REST::class;
         return $methods;
     });
 }
 
-function registerAdminMenu() {
+function registerAdminMenu()
+{
     add_action('admin_menu', function () {
         add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
             $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_DEFAULT);
@@ -132,7 +146,7 @@ function registerAdminMenu() {
                 wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
             }
 
-            include_once __DIR__.'/views/admin/options-tabs.php';
+            include_once __DIR__ . '/views/admin/options-tabs.php';
         }, null);
 
         add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Oneclick', 'administrator', 'transbank_webpay_oneclick_rest', function () {
@@ -141,8 +155,9 @@ function registerAdminMenu() {
     });
 }
 
-function registerPluginActionLinks() {
-    add_filter('plugin_action_links_'.plugin_basename(__FILE__), function ($actionLinks) {
+function registerPluginActionLinks()
+{
+    add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($actionLinks) {
         $webpaySettingsLink = sprintf(
             '<a href="%s">%s</a>',
             admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest'),
@@ -162,6 +177,57 @@ function registerPluginActionLinks() {
     });
 }
 
+function addTransbankStatusMetaBox(bool $hPosExists)
+{
+    if ($hPosExists) {
+        $screen = wc_get_container()
+            ->get(CustomOrdersTableController::class)
+            ->custom_orders_table_usage_is_enabled()
+            ? wc_get_page_screen_id('shop-order')
+            : 'shop_order';
+
+        add_meta_box(
+            'transbank_check_payment_status',
+            __('Verificar estado del pago', 'transbank_wc_plugin'),
+            function ($post_or_order_object) {
+                $order = ($post_or_order_object instanceof WP_Post)
+                    ? wc_get_order($post_or_order_object->ID)
+                    : $post_or_order_object;
+
+                $orderId = $order->get_id();
+                renderTransactionStatusMetaBox($orderId);
+            },
+            $screen,
+            'side',
+            'core'
+        );
+    } else {
+        add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post) {
+            $order = new WC_Order($post->ID);
+            $orderId = $order->get_id();
+            renderTransactionStatusMetaBox($orderId);
+        }, 'shop_order', 'side', 'core');
+    }
+}
+
+function renderTransactionStatusMetaBox(int $orderId)
+{
+    $viewData = [];
+    $transaction = Transaction::getApprovedByOrderId($orderId);
+
+    if ($transaction) {
+        $viewData = [
+            'viewData' => [
+                'orderId' => $orderId,
+                'token' => $transaction->token,
+                'buyOrder' => $transaction->buy_order
+            ]
+        ];
+    }
+
+    (new Template())->render('admin/order/transaction-status.php', $viewData);
+}
+
 function on_transbank_rest_webpay_plugins_loaded()
 {
     DatabaseTableInstaller::createTableIfNeeded();
@@ -174,39 +240,7 @@ function transbank_rest_remove_database()
 
 register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 
-if ($hPosExists)
-{
-    add_action('add_meta_boxes', function () {
-        $screen = wc_get_container()
-            ->get(Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class)
-            ->custom_orders_table_usage_is_enabled()
-            ? wc_get_page_screen_id('shop-order')
-            : 'shop_order';
-        add_meta_box(
-            'transbank_check_payment_status',
-            __('Verificar estado del pago', 'transbank_wc_plugin'),
-            function ($post_or_order_object) {
-                $order = ($post_or_order_object instanceof WP_Post)
-                ? wc_get_order($post_or_order_object->ID)
-                : $post_or_order_object;
-                $transaction = Transaction::getApprovedByOrderId($order->get_id());
-                include_once __DIR__.'/views/get-status.php';
-            },
-            $screen,
-            'side',
-            'core');
-    });
-}
-else
-{
-    add_action('add_meta_boxes', function () {
-        add_meta_box('transbank_check_payment_status', __('Verificar estado del pago', 'transbank_wc_plugin'), function ($post) {
-            $order = new WC_Order($post->ID);
-            $transaction = Transaction::getApprovedByOrderId($order->get_id());
-            include_once __DIR__.'/views/get-status.php';
-        }, 'shop_order', 'side', 'core');
-    });
-}
+
 
 function transbank_rest_before_cart()
 {
@@ -225,7 +259,8 @@ function transbank_rest_check_cancelled_checkout()
     }
 }
 
-function noticeMissingWoocommerce() {
+function noticeMissingWoocommerce()
+{
     add_action(
         'admin_notices',
         function () {
@@ -253,7 +288,7 @@ function noticeMissingWoocommerce() {
                 $isWooInstalled = !empty($allPlugins['woocommerce/woocommerce.php']);
             }
 
-            if(function_exists('is_plugin_active')) {
+            if (function_exists('is_plugin_active')) {
                 $isWooActivated = is_plugin_active('woocommerce/woocommerce.php');
             }
 
@@ -272,7 +307,7 @@ function noticeMissingWoocommerce() {
                 $noticeDescription = "Woocommerce no se encuentra activado.";
             }
 
-            include_once plugin_dir_path(__FILE__) .'views/admin/components/notice-missing-woocommerce.php';
+            include_once plugin_dir_path(__FILE__) . 'views/admin/components/notice-missing-woocommerce.php';
         }
     );
 }

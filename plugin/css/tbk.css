@@ -1,3 +1,12 @@
+:root {
+    --tbk-red: #D5006C;
+    --tbk-red-2: #C00063;
+    --tbk-success: #28a745;
+    --tbk-info: #007bff;
+    --tbk-warning: #fd7e14;
+    --tbk-error: #dc3545;
+    --tbk-default: #6c757d:
+}
 
 .tbk_table_info {
     width: 600px;
@@ -221,8 +230,6 @@
 }
 
 .tbk-box {
-    --tbk-red: #D5006C;
-    --tbk-red-2: #C00063;
     background: #fff;
     border-radius: 10px;
     padding: 15px;
@@ -412,4 +419,96 @@
 .tbk-notice .tbk-review-title {
     font-size: 18px;
     font-weight: 500;
+}
+
+.tbk-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.tbk-field-name {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.tbk-field-value {
+    text-align: right;
+    word-break: break-word;
+}
+
+.tbk-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white
+}
+
+.tbk-badge-success {
+    background-color: var(--tbk-success);
+}
+
+.tbk-badge-info {
+    background-color: var(--tbk-info);
+}
+
+.tbk-badge-warning {
+    background-color: var(--tbk-warning);
+}
+
+.tbk-badge-error {
+    background-color: var(--tbk-error);
+}
+
+.tbk-badge-default {
+    background-color: var(--tbk-default);
+}
+
+.tbk-status {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.tbk-status i {
+    width: 100px;
+    max-width: 24px;
+    text-align: center;
+    font-size: x-large;
+}
+
+.tbk-status p {
+    padding-left: 10px;
+    margin: 0px;
+}
+
+.tbk-status.tbk-status-info i {
+    color: var(--tbk-info);
+}
+
+.tbk-status.tbk-status-error i, .tbk-status.tbk-status-error p {
+    color: var(--tbk-error);
+    font-weight: bold;
+}
+
+.tbk-status-button {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tbk-status-button .tbk-button-primary {
+    width: 100%;
+    text-align: center;
+}
+
+.tbk-separator {
+    width: 100%;
+    height: 1px;
+    background-color: #ccc;
+    margin: 10px 0;
 }
