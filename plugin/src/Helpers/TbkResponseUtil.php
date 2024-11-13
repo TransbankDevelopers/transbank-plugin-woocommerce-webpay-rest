@@ -189,4 +189,51 @@ class TbkResponseUtil
             'accountingDate' => $accountingDate
         ];
     }
+
+    /**
+     * Get the formatted response for Webpay status transactions.
+     *
+     * @param object $statusResponse The response object for Webpay status transactions.
+     * @return array The formatted response fields.
+     */
+    public static function getWebpayStatusFormattedResponse(object $statusResponse): array
+    {
+        $commonFields = self::getCommonFieldsStatusFormatted($statusResponse);
+
+        $status = self::getStatus($statusResponse->status);
+        $amount = self::getAmountFormatted($statusResponse->amount);
+        $paymentType = self::getPaymentType($statusResponse->paymentTypeCode);
+        $installmentType = self::getInstallmentType($statusResponse->paymentTypeCode);
+        $installmentNumber = $statusResponse->installmentsNumber;
+        $installmentAmount = 'N/A';
+        $balance = 'N/A';
+
+        if ($installmentNumber > 0) {
+            $installmentAmount = self::getAmountFormatted($statusResponse->installmentsAmount ?? 0);
+        }
+
+        if (!is_null($statusResponse->balance)) {
+            $balance = self::getAmountFormatted($statusResponse->balance);
+        }
+
+        return [
+            'vci' => $statusResponse->vci,
+            'status' => $status,
+            'responseCode' => $statusResponse->responseCode,
+            'amount' => $amount,
+            'authorizationCode' => $statusResponse->authorizationCode,
+            'accountingDate' => $commonFields['accountingDate'],
+            'paymentType' => $paymentType,
+            'installmentType' => $installmentType,
+            'installmentNumber' => $installmentNumber,
+            'installmentAmount' => $installmentAmount,
+            'sessionId' => $statusResponse->sessionId,
+            'buyOrder' => $commonFields['buyOrder'],
+            'cardNumber' => $commonFields['cardNumber'],
+            'transactionDate' => $commonFields['transactionDate'],
+            'transactionTime' => $commonFields['transactionTime'],
+            'balance' => $balance
+        ];
+    }
+
 }
