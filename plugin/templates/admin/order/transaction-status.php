@@ -11,6 +11,7 @@ if (empty($viewData)) {
 ?>
 
 <div class="tbk-status-button">
+<?php if (!empty($viewData)): ?>
     <a class="button tbk-button-primary get-transaction-status"
     data-order-id="<?php echo $viewData['orderId']; ?>"
     data-buy-order="<?php echo $viewData['buyOrder']; ?>"
@@ -18,6 +19,7 @@ if (empty($viewData)) {
     href="#">
         Consultar Estado
     </a>
+<?php endif; ?>
 </div>
 
 <div class="tbk-status tbk-status-info">
