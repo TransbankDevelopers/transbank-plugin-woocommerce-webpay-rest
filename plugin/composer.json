@@ -1,13 +1,13 @@
 {
     "require": {
-        "transbank/transbank-sdk": "~2.0",
+        "transbank/transbank-sdk": "4.0",
         "ext-json": "*",
-        "php": ">=7.0",
+        "php": ">=7.4",
         "monolog/monolog": "^1.27"
     },
     "config": {
         "platform": {
-            "php": "7.0"
+            "php": "7.4"
         }
     },
     "autoload": {
