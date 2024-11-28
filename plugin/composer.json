@@ -1,6 +1,6 @@
 {
     "require": {
-        "transbank/transbank-sdk": "~2.0",
+        "transbank/transbank-sdk": "4.0",
         "ext-json": "*",
         "php": ">=7.0",
         "monolog/monolog": "^1.27"
