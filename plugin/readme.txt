@@ -27,7 +27,7 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 = 1.9.1 =
 * Se arregla un mensaje de warning provocado por la función maskData en PHP mayor o igual a 8.x.
 * Se arregla un problema que impedía encontrar el archivo de log al migrar el sitio de un servidor a otro.
-* Se arregla la zona horaria de los logs. Se usa la que este configurada en el ecommerce del comercio.
+* Se arregla la zona horaria de los logs. Se usa la que está configurada en el ecommerce del comercio.
 * Se arregla un problema que provocaba registros duplicados en el selector de archivos logs de la vista registros.
 
 = 1.9.0 =
@@ -95,7 +95,7 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se agrega una validación que confirma la inserción en la tabla de inscripción del plugin antes de seguir proceso de inscripción en Oneclick.
 
 = 1.5.4 =
-* Se agrega la posibilidad de seleccionar el estado de la orden despues de un pago exitoso para Webpay Plus y Webpay Oneclick
+* Se agrega la posibilidad de seleccionar el estado de la orden después de un pago exitoso para Webpay Plus y Webpay Oneclick
 
 = 1.5.3 =
 * Se arregla información de pago al pagar con prepago
@@ -134,7 +134,7 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 = 1.3.3 =
 * Se actualiza el logo de webpay en el formulario de pago
 * Se arregla error de tipeo en la página de éxito
-* Se añade soporte a Wordpress 5.6
+* Se añade soporte a WordPress 5.6
 * Se mejora el detalle de las notas del pedido en transacciones aprobadas y rechazadas.
 
 
@@ -147,14 +147,14 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 = 1.3.0 =
 Agregado:
 * Se reemplaza el modal de diagnóstico por pantallas especiales
-* Se añade menú 'Webpay plus' en el menú lateral de la administración de Wordpress
+* Se añade menú 'Webpay plus' en el menú lateral de la administración de WordPress
 * Se añade mensaje de bienvenida al instalar el plugin
 * Se mejora compatibilidad con otros plugins
 * Se actualiza SDK de PHP a la versión 1.10.0
-* Se elimina Boostrap para los estilos de la administración
+* Se elimina Bootstrap para los estilos de la administración
 
 Arreglado:
-* Se arreglan "issues" internas destacadas por el equipo de Wordpress para subir el plugin al repositorio de wordpress.org
+* Se arreglan "issues" internas destacadas por el equipo de WordPress para subir el plugin al repositorio de wordpress.org
 
 = 1.2.0 =
 Agregado:
@@ -167,7 +167,7 @@ Arreglado:
 
 = 1.1.0 =
 Agregado:
-* Mejora compatibilidad con Wordpress MU [PR #9](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/9)
+* Mejora compatibilidad con WordPress MU [PR #9](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/9)
 * Añade mensaje cuando Woocommerce no está configurado en Pesos chilenos [PR #15](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/pull/15)
 
 
@@ -192,7 +192,7 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 = 1.9.1 =
 * Se arregla un mensaje de warning provocado por la función maskData en PHP mayor o igual a 8.x.
 * Se arregla un problema que impedía encontrar el archivo de log al migrar el sitio de un servidor a otro.
-* Se arregla la zona horaria de los logs. Se usa la que este configurada en el ecommerce del comercio.
+* Se arregla la zona horaria de los logs. Se usa la que está configurada en el ecommerce del comercio.
 * Se arregla un problema que provocaba registros duplicados en el selector de archivos logs de la vista registros.
 
 = 1.9.0 =
