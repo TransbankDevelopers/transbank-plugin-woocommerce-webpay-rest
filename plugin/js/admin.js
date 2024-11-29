@@ -99,11 +99,11 @@ jQuery(function($) {
 
                 const fieldValue = document.createElement('span');
                 fieldValue.className = 'tbk-field-value';
-                fieldValue.textContent = value.toString();
+                fieldValue.textContent = value;
 
                 if(key == 'status') {
                     fieldValue.classList.add('tbk-badge');
-                    fieldValue.classList.add(getBadgeColorFromStatus(value.toString()));
+                    fieldValue.classList.add(getBadgeColorFromStatus(value));
                 }
 
                 if(key == 'cardNumber') {
@@ -139,7 +139,7 @@ jQuery(function($) {
             'Reversada': 'tbk-badge-info',
             'Parcialmente anulada': 'tbk-badge-info'
         };
-    
+
         return statusColorsDictionary[status] ?? 'tbk-badge-default';
     }
 
