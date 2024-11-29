@@ -11,7 +11,27 @@ License URI: https://opensource.org/licenses/BSD-3-Clause
 Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick.
 
 == Description ==
-Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooCommerce a través de Webpay Plus y Webpay Oneclick
+🚀 ¡Haz crecer tu negocio con nuestro plugin oficial de Transbank para WooCommerce!
+
+Permite a tus clientes realizar pagos en línea de forma rápida, segura y conveniente gracias a la integración con Webpay Plus y Webpay Oneclick, las soluciones líderes de pago en Chile. Con este módulo, ofrecerás una experiencia de compra fluida y confiable, fortaleciendo la confianza de tus clientes y aumentando tus conversiones. 💳✨
+
+### Beneficios:
+- 🔒 **Pagos 100% seguros**: Cumple con los más altos estándares de seguridad para proteger a tus clientes.
+- ⚡ **Experiencia sin fricciones**: Con Webpay Oneclick, permite que los clientes habituales paguen con un solo clic.
+- 🛠️ **Fácil integración**: Configuración rápida y sencilla directamente desde WooCommerce.
+- ✅ **Compatibilidad garantizada**: Funciona con las últimas versiones de WooCommerce y WordPress.
+
+Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes la confianza que necesitan para comprar una y otra vez.
+
+**¿Necesitas más información?:**
+
+* [Documentación del Plugin](https://www.transbankdevelopers.cl/plugin/woocommerce/)
+* [Documentación Webpay Plus](https://www.transbankdevelopers.cl/documentacion/webpay-plus)
+* [Documentación Webpay Oneclick](https://www.transbankdevelopers.cl/documentacion/oneclick)
+* [Comunidad de Slack](https://transbank.continuumhq.dev/slack_community)
+* [Repositorio de GitHub](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest)
+
+🌟 ¿Te gusta nuestro plugin? ¿Lo encuentras útil? Por favor considera compartir tu experiencia dejando una referencia en [WordPress.org](). Tu feedback es valioso para continuar mejorando.
 
 == Changelog ==
 = 1.9.3 =
