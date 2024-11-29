@@ -16,11 +16,13 @@ Recibe pagos en línea con tarjetas de crédito, débito y prepago en tu WooComm
 == Changelog ==
 = 1.9.3 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
 * Se refina el flujo de pago de Oneclick.
 
 = 1.9.2 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
-*Se refina el flujo de pago de Webpay y Oneclick.
+
+* Se refina el flujo de pago de Webpay y Oneclick.
 
 = 1.9.1 =
 * Se arregla un mensaje de warning provocado por la función maskData en PHP mayor o igual a 8.x.
@@ -179,11 +181,13 @@ Arreglado:
 == Upgrade Notice ==
 = 1.9.3 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
 * Se refina el flujo de pago de Oneclick.
 
 = 1.9.2 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
-*Se refina el flujo de pago de Webpay y Oneclick.
+
+* Se refina el flujo de pago de Webpay y Oneclick.
 
 = 1.9.1 =
 * Se arregla un mensaje de warning provocado por la función maskData en PHP mayor o igual a 8.x.
