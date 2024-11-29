@@ -7,7 +7,7 @@ class ConnectionCheck
 {
     public static function check()
     {
-        $resp = ConnectionCheck::setCreateTransaction();
+        $resp = ConnectionCheck::performTestTransaction();
 
         header('Content-Type: application/json');
         ob_clean();
@@ -15,7 +15,7 @@ class ConnectionCheck
         wp_die();
     }
 
-    public static function setCreateTransaction()
+    public static function performTestTransaction()
     {
         $amount = 990;
         $buyOrder = '_Healthcheck_';
