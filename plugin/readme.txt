@@ -1,4 +1,4 @@
-=== Transbank Webpay REST ===
+=== Transbank Webpay ===
 Contributors: TransbankDevelopers
 Tags: transbank, webpay plus, webpay oneclick
 Requires at least: 5.3
