@@ -1,5 +1,3 @@
-version: '3.4'
-
 x-common-variables: &common-variables
   WORDPRESS_DB_HOST: db:3306
   WORDPRESS_DB_USER: wordpress
@@ -10,8 +8,9 @@ x-common-variables: &common-variables
 
 services:
   db:
+    platform: linux/x86_64
     image: mysql:5.7
-    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.2.0_mysql
+    container_name: php8.2-wp6.7.1-wc2.11.0-woo9.4.2_mysql
     ports:
       - "33060:3306"
     volumes:
@@ -25,8 +24,8 @@ services:
   wordpress:
     depends_on:
       - db
-    image: wordpress:6.4.1-php8.2-apache
-    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.2.0_wordpress
+    image: wordpress:6.7.1-php8.2-apache
+    container_name: php8.2-wp6.7.1-wc2.11.0-woo9.4.2_wordpress
     ports:
       - "8000:80"
     restart: always
@@ -38,8 +37,8 @@ services:
     depends_on:
       - db
       - wordpress
-    image: wordpress:cli-2.9.0-php8.2
-    container_name: php8.2-wp6.4.1-wc2.9.0-woo8.2.0_wordpress_cli
+    image: wordpress:cli-2.11.0-php8.2
+    container_name: php8.2-wp6.7.1-wc2.11.0-woo9.4.2_wordpress_cli
     # vstm: This is required to run wordpress-cli with the same
     # user-id as wordpress. This way there are no permission problems
     # when running the cli
@@ -54,7 +53,7 @@ services:
       sleep 40;
       sed -i "s|# END WordPress|php_value upload_max_filesize 5000M \\n php_value post_max_size 5000M \\n php_value memory_limit 256M \\n php_value max_execution_time 300 \\n php_value max_input_time 300 \\n |g" /var/www/html/.htaccess;
       wp core install --path="/var/www/html" --url="http://localhost:8000" --title="Transbank Store" --admin_user=admin --admin_password=admin --admin_email=transbankdevelopers@continuum.cl;
-      wp --allow-root plugin install woocommerce --version=8.2.0 --activate; 
+      wp --allow-root plugin install woocommerce --version=9.4.2 --activate;
       wp --allow-root theme install storefront --activate;
       wp --allow-root wc tool run install_pages --user=admin;
       wp --allow-root wc product create --name="Zapatos deportivos" --sku=1 --regular_price=1000 --status=publish --user=admin;
