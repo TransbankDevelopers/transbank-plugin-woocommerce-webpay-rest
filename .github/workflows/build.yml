@@ -1,9 +1,6 @@
 name: Build
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '**'
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
