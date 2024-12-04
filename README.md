@@ -33,7 +33,7 @@ A continuación, encontrarás información necesaria para el desarrollo de este 
 
 El plugin depende de las siguientes librerías:
 
-* transbank/transbank-sdk:~2.0
+* transbank/transbank-sdk:~4.0
 * monolog/monolog
 
 Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.org), e instalarlas con el comando `composer install`.
