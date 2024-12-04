@@ -61,6 +61,10 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 = 1.10.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
+__Agrega:__
+
+* Se agrega botón de descarga para los archivos de logs.
+
 __Actualiza:__
 
 * Se actualizan las dependencias para ampliar la compatibilidad con plugin de terceros.
