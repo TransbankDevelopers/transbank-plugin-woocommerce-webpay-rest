@@ -32,6 +32,11 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 * [Repositorio de GitHub](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest)
 
 🌟 ¿Te gusta nuestro plugin? ¿Lo encuentras útil? Por favor considera compartir tu experiencia dejando una referencia en [WordPress.org](). Tu feedback es valioso para continuar mejorando.
+== Screenshots ==
+
+1. Página de configuración de Webpay Plus
+2. Página de configuración de Webpay Oneclick
+3. Página de diagnostico
 
 == Changelog ==
 = 1.10.0 =
