@@ -32,6 +32,25 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 * [Repositorio de GitHub](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest)
 
 🌟 ¿Te gusta nuestro plugin? ¿Lo encuentras útil? Por favor considera compartir tu experiencia dejando una referencia en [WordPress.org](). Tu feedback es valioso para continuar mejorando.
+
+== Installation ==
+
+= Instalación Automática =
+
+1. Inicia sesión en tu panel de administración de WordPress.
+2. Haz clic en __Plugins__.
+3. Haz clic en __Añadir nuevo__.
+4. Busca __Transbank Webpay__.
+5. Haz clic en __Instalar ahora__.
+6. Activa el plugin.
+
+= Instalación Manual =
+
+1. Descarga el plugin desde [GitHub](https://github.com/TransbankDevelopers/transbank-plugin-woocommerce-webpay-rest/releases/latest).
+2. Extrae el contenido del archivo .zip.
+3. Sube el contenido extraído a la carpeta `wp-content/plugins/` de tu instalación de WordPress.
+4. Activa el plugin Transbank Webpay desde la __página de Plugins__.
+
 == Screenshots ==
 
 1. Página de configuración de Webpay Plus
