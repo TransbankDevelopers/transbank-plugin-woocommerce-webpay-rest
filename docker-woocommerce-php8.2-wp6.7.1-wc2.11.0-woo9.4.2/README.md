@@ -1,8 +1,8 @@
 ![Woocommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png)
 
-#  Woocommerce Docker para desarrollo
+# Woocommerce Docker para desarrollo
 
-### PHP 7.4 + Wordpress 6.0.0 + Wordpress Cli 2.6.0 + Mysql 5.7 + Woocommerce 6.5.0
+### PHP 8.2 + WordPress 6.7.1 + WordPress Cli 2.11.0 + Mysql 5.7 + Woocommerce 9.4.2
 
 ### Requerimientos
 
@@ -20,7 +20,7 @@ Instalar [Docker](https://docs.docker.com/engine/installation/linux/docker-ce/ub
 
 ### Como usar
 
-De forma automática se creará una imagen Wordpress y Wordpress Cli, se instalará WooCommerce con el tema Storefront y se creará un producto de ejemplo.
+De forma automática se creará una imagen WordPress y WordPress Cli, se instalará WooCommerce con el tema Storefront y se creará un producto de ejemplo.
 
 Para instalar Woocommerce, hacer lo siguiente y esperar 5 minutos:
 

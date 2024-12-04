@@ -28,6 +28,7 @@ use Transbank\Plugin\Exceptions\Oneclick\GetTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
+use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 
 /**
  * Class OneclickTransbankSdk.
@@ -121,14 +122,24 @@ class OneclickTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'status', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $maskedBuyOrder = $this->dataMasker->maskBuyOrder($buyOrder);
-            $errorMessage = 'Oneclick: Error al obtener el status ( buyOrder: '.$maskedBuyOrder.') '.$e->getMessage();
-            $this->errorExecutionTbkApi($orderId,
-                                        'status',
-                                        $params,
-                                        'StatusOneclickException',
-                                        $e->getMessage(),
-                                        $errorMessage);
+            $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
+
+            if(ErrorUtil::isMaxTimeError($e)) {
+                $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
+            }
+
+            if (ErrorUtil::isApiMismatchError($e)) {
+                $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
+            }
+
+            $this->errorExecutionTbkApi(
+                $orderId,
+                'status',
+                $params,
+                'StatusOneclickException',
+                $e->getMessage(),
+                $errorMessage
+            );
             throw new StatusOneclickException($errorMessage, $buyOrder, $e);
         }
     }

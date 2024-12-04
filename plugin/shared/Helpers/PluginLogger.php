@@ -171,4 +171,36 @@ final class PluginLogger implements ILogger
     {
         set_transient(self::CACHE_LOG_NAME, $logFileName, $expireTime);
     }
+
+    private static function fileExistsInFolder($fileName, $folderPath)
+    {
+        $filesInFolder = array_filter(scandir($folderPath), function ($file) use ($folderPath) {
+            return is_file($folderPath . '/' . $file);
+        });
+
+        return in_array($fileName, array_values($filesInFolder));
+    }
+
+    public static function checkCanDownloadLogFile()
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['error' => 'Debes iniciar sesión para poder descargar']);
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['error' => 'No tienes permisos para descargar']);
+        }
+
+        $baseUploadDir = wp_upload_dir();
+        $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
+        $logName = sanitize_text_field($_POST['file']);
+        $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
+        $fileExists = self::fileExistsInFolder($logName, $folderPath);
+
+        if (!$fileExists) {
+            wp_send_json_error(['error' => 'No existe el archivo solicitado']);
+        }
+
+        wp_send_json_success(['downloadUrl' => $baseUploadDir['baseurl'] . $tbkLogsFolder . $logName]);
+    }
 }

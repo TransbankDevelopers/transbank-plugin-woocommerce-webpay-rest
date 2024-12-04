@@ -13,7 +13,9 @@ jQuery(function($) {
         if ($(`.${btnName}`).data('sending') === true) {
             return false;
         }
-        $(`.${btnName}`).data('sending', true).html(msg);
+        const btn = $(`.${btnName}`);
+        btn.data('sending', true).html(`${msg} <i class="fa fa-spinner fa-spin"></i>`);
+
         e.preventDefault();
         return true;
     }
@@ -72,45 +74,175 @@ jQuery(function($) {
     });
 
     $('.get-transaction-status').on("click",function(e) {
-        if (!blockButton(e, 'get-transaction-status', 'Consultando al API REST...')){
+        e.preventDefault();
+        if (!blockButton(e, 'get-transaction-status', 'Consultando estado')){
             return;
         }
+
+        const container = document.getElementById('transaction_status_admin');
+        container.innerHTML = '';
+
+        const separator = document.createElement('div');
+        separator.className = 'tbk-separator';
+        separator.style.display = 'none';
+        container.appendChild(separator);
+
         post('get_transaction_status', {
             order_id: $('.get-transaction-status').data('order-id'),
             buy_order: $('.get-transaction-status').data('buy-order'),
             token: $('.get-transaction-status').data('token')
         }, (resp) => {
-            let $table = $('.transaction-status-response');
-            let statusData = resp.status;
-            if(resp.product == "webpay_plus"){
-                $("#tbk_wpp_vci").removeClass("tbk-hide");
-                $("#tbk_wpp_session_id").removeClass("tbk-hide");
-            }else{
-                $("#tbk_wpoc_commerce_code").removeClass("tbk-hide");
+            for (const [key, value] of Object.entries(resp)) {
+                const fieldName = document.createElement('span');
+                fieldName.className = 'tbk-field-name';
+                fieldName.textContent = getFieldName(key);
+
+                const fieldValue = document.createElement('span');
+                fieldValue.className = 'tbk-field-value';
+                fieldValue.textContent = value;
+
+                if(key == 'status') {
+                    fieldValue.classList.add('tbk-badge');
+                    fieldValue.classList.add(getBadgeColorFromStatus(value));
+                }
+
+                if(key == 'cardNumber') {
+                    fieldValue.style.width = '100%';
+                }
+
+                const field = document.createElement('div');
+                field.className = 'tbk-field';
+                field.appendChild(fieldName);
+                field.appendChild(fieldValue);
+
+                container.appendChild(field);
             }
-            const statusDataKeys = Object.keys(statusData);
-            statusDataKeys.forEach(key => {
-                let value = statusData[key] ? statusData[key] : '-';
-                const tableRow = $table.find('.status-' + key);
-                tableRow.html(value);
-            });
-            $table.find('.status-product').html(resp.product);
-            let niceJson = JSON.stringify(resp.raw, null, 2)
-            $table.find('.status-raw').html(`<pre>${niceJson}</pre>`);
-            $table.show();
-            releaseButton('get-transaction-status','Consultar estado de la transacción');
+            separator.style.removeProperty('display');
+
+            releaseButton('get-transaction-status','Consultar Estado');
         }, (error) => {
-            $('.error-status-raw').html(`<p>${error.responseJSON.message}</p>`);
-            $('.error-transaction-status-response').show();
-            releaseButton('get-transaction-status','Consultar estado de la transacción');
+            const errorContainer = createErrorContainer(error.responseJSON.message);
+            container.appendChild(errorContainer);
+            separator.style.removeProperty('display');
+
+            releaseButton('get-transaction-status','Consultar Estado');
         });
     });
+
+    function getBadgeColorFromStatus(status) {
+        const statusColorsDictionary = {
+            'Inicializada': 'tbk-badge-warning',
+            'Capturada': 'tbk-badge-success',
+            'Autorizada': 'tbk-badge-success',
+            'Fallida': 'tbk-badge-error',
+            'Anulada': 'tbk-badge-info',
+            'Reversada': 'tbk-badge-info',
+            'Parcialmente anulada': 'tbk-badge-info'
+        };
+
+        return statusColorsDictionary[status] ?? 'tbk-badge-default';
+    }
+
+    function getFieldName(fieldKey) {
+        const fieldNameDictionary = {
+            vci: 'VCI',
+            status: 'Estado',
+            responseCode: 'Código de respuesta',
+            amount: 'Monto',
+            authorizationCode: 'Código de autorización',
+            accountingDate: 'Fecha contable',
+            paymentType: 'Tipo de pago',
+            installmentType: 'Tipo de cuota',
+            installmentNumber: 'Número de cuotas',
+            installmentAmount: 'Monto cuota',
+            sessionId: 'ID de sesión',
+            buyOrder: 'Orden de compra',
+            buyOrderMall: 'Orden de compra mall',
+            buyOrderStore: 'Orden de compra tienda',
+            cardNumber: 'Número de tarjeta',
+            transactionDate: 'Fecha transacción',
+            transactionTime: 'Hora transacción',
+            balance: 'Balance'
+        };
+
+        return fieldNameDictionary[fieldKey] ?? fieldKey;
+    }
+
+    function createErrorContainer(errorMessage)
+    {
+        const errorContainer = document.createElement('div');
+        errorContainer.classList.add('tbk-status', 'tbk-status-error');
+        const icon = document.createElement('i');
+        icon.classList.add('fa', 'fa-times');
+        const paragraph = document.createElement('p');
+        paragraph.textContent = errorMessage;
+
+        errorContainer.appendChild(icon);
+        errorContainer.appendChild(paragraph);
+        return errorContainer;
+    }
 
     $('#mainform').on('click', '.notice-dismiss', function() {
         let noticeId = $(this).closest('.notice').attr('id');
 
         post('dismiss_notice', {
             notice_id: noticeId
+        });
+    });
+
+    function checkPermission(fileToDownload) {
+        return $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'check_can_download_file',
+                file: fileToDownload
+            }
+        }).then(function (response) {
+            return response;
+        }).catch(function (error) {
+            return { success: false, data: {
+                error: error.message || "Error en la solicitud de descarga"
+            } };
+        });
+    }
+
+    function showNotice(title, message, type = 'success') {
+        const notice = $('<div>')
+            .addClass(`is-dismissible notice notice-${type}`)
+            .prepend(`<p><strong>${title}</strong><br>${message}</p>`);
+
+        const dismissButton = $('<button>')
+            .addClass('notice-dismiss');
+
+        notice.append(dismissButton);
+
+
+        notice.find('.notice-dismiss').on('click', function () {
+            notice.fadeOut(300, function () {
+                notice.remove();
+            });
+        });
+
+        $('#logs-container').prepend(notice);
+    }
+
+    $('#btnDownload').on('click', function (e) {
+        e.preventDefault();
+        const logFileSelected = $('#log_file').val();
+
+        if (!logFileSelected) {
+            showNotice('Error en la descarga', 'Debes seleccionar un archivo', 'error');
+            return;
+        }
+
+        checkPermission(logFileSelected).then(function (checkResponse) {
+            if (checkResponse.success) {
+                window.location.href = checkResponse.data.downloadUrl;
+                return;
+            }
+            showNotice('Error en la descarga', checkResponse.data.error, 'error');
+
         });
     });
 })
