@@ -34,6 +34,14 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 🌟 ¿Te gusta nuestro plugin? ¿Lo encuentras útil? Por favor considera compartir tu experiencia dejando una referencia en [WordPress.org](). Tu feedback es valioso para continuar mejorando.
 
 == Changelog ==
+= 1.10.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
+__Actualiza:__
+
+* Se actualizan las dependencias para ampliar la compatibilidad con plugin de terceros.
+* Se actualiza el diseño de la respuesta de estado de transacción.
+
 = 1.9.3 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
