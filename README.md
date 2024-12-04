@@ -48,7 +48,7 @@ Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado 
 Para probar el plugin, ponemos a disposición el siguiente contenedor:
 - [WooCommerce 9.4 con php 8.2](./docker-woocommerce-php8.2-wp6.7.1-wc2.11.0-woo9.4.2)
 
-Si necesitas subir el plugin a Woocommerce y obtienes un error por que no se puede mover el archivo a `wp-contentent` entonces ejecuta
+Si necesitas subir el plugin a Woocommerce y obtienes un error por que no se puede mover el archivo a `wp-content` entonces ejecuta
 
 ```bash
 docker-compose run webserver chmod -Rv 767 wp-content/
