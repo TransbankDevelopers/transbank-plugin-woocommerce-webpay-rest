@@ -73,10 +73,10 @@ class TransactionResponseHandler
 
     public function handleRequestFromTbkReturn(array $request)
     {
-        $tokenWs = $params['token_ws'] ?? null;
-        $tbkToken = $params['TBK_TOKEN'] ?? null;
-        $sessionId = $params['TBK_ID_SESION'] ?? null;
-        $buyOrder = $params['TBK_ORDEN_COMPRA'] ?? null;
+        $tokenWs = $request['token_ws'] ?? null;
+        $tbkToken = $request['TBK_TOKEN'] ?? null;
+        $sessionId = $request['TBK_ID_SESION'] ?? null;
+        $buyOrder = $request['TBK_ORDEN_COMPRA'] ?? null;
         $webpayFlow = $this->getWebpayFlow($request);
 
         if ($webpayFlow == self::WEBPAY_NORMAL_FLOW) {
