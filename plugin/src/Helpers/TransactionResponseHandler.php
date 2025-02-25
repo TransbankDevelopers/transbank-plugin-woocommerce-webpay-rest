@@ -80,7 +80,7 @@ class TransactionResponseHandler
         $webpayFlow = $this->getWebpayFlow($request);
 
         if ($webpayFlow == self::WEBPAY_NORMAL_FLOW) {
-            $this->handleNormalFlow($tokenWs);
+            return $this->handleNormalFlow($tokenWs);
         }
 
         if ($webpayFlow == self::WEBPAY_TIMEOUT_FLOW) {
