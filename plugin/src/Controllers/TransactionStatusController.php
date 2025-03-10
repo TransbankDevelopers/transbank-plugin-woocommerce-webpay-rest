@@ -63,17 +63,19 @@ class TransactionStatusController
             $transaction = Transaction::getApprovedByOrderId($orderId);
 
             if (!$transaction) {
+                $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
                 $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
                 $response['body'] = self::NO_TRANSACTION_ERROR_MESSAGE;
                 wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
                 return;
             }
 
+            $this->logger->logInfo('Transacción encontrada.');
             $response = $this->handleGetStatus($transaction, $orderId, $buyOrder, $token);
 
             wp_send_json($response['body'], $response['code']);
         } catch (\Exception $e) {
-            wp_send_json([
+            $this->logger->logError($e->getMessage());
                 'message' => $e->getMessage(),
             ], 422);
         }
