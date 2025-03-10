@@ -11,9 +11,9 @@ class TransactionStatusController
 {
     const HTTP_OK = 200;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
-    const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta orden';
-    const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden';
-    const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden';
+    const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta order.';
+    const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden.';
+    const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden.';
 
     /**
      * Log instance.
