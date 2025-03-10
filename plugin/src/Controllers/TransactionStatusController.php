@@ -76,8 +76,8 @@ class TransactionStatusController
             wp_send_json($response['body'], $response['code']);
         } catch (\Throwable $e) {
             $this->logger->logError($e->getMessage());
-                'message' => $e->getMessage(),
-            ], 422);
+            $response['body']['message'] = $e->getMessage();
+            wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
