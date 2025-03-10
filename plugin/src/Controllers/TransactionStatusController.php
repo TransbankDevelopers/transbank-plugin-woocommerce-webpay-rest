@@ -14,6 +14,7 @@ class TransactionStatusController
     const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta orden';
     const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden';
     const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden';
+    const EXCEPTION_MESSAGE = 'Ha ocurrido un error al obtener el estado de la transacción.';
 
     /**
      * Log instance.
