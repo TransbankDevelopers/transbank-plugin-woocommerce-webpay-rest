@@ -60,7 +60,7 @@ class TransactionStatusController
         $this->logger->logDebug('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = Transaction::getApprovedByOrderId($orderId);
+            $transaction = Transaction::getByOrderId($orderId);
 
             if (!$transaction) {
                 $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
