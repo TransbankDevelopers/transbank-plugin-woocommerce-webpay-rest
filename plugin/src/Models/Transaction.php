@@ -19,6 +19,40 @@ class Transaction extends BaseModel
     const PRODUCT_WEBPAY_ONECLICK = 'webpay_oneclick';
 
     /**
+     * Get transactions by custom conditions.
+     *
+     * @param array $conditions Key-value pairs of column names and values.
+     *
+     * @return array|null Transaction data.
+     */
+    private static function getTransactionsByConditions(array $conditions): ?array
+    {
+        global $wpdb;
+        $tableName = static::getTableName();
+
+        $whereClauses = [];
+        foreach ($conditions as $column => $value) {
+            $whereClauses[] = $wpdb->prepare("`$column` = %s", $value);
+        }
+
+        $whereSql = implode(' AND ', $whereClauses);
+        $sql = "SELECT * FROM {$tableName} WHERE {$whereSql}";
+        return $wpdb->get_results($sql);
+    }
+
+    /**
+     * Get transaction by order ID.
+     *
+     * @param string $orderId Order ID.
+     *
+     * @return object|null Transaction data.
+     */
+    public static function getByOrderId($orderId): ?object
+    {
+        return static::getTransactionsByConditions(['order_id' => $orderId])[0] ?? null;
+    }
+
+    /**
      * @return string
      */
     public static function getTableName(): string
