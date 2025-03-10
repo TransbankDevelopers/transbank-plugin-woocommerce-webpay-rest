@@ -65,7 +65,6 @@ class TransactionStatusController
             if (!$transaction) {
                 $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
                 $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
-                $response['body'] = self::NO_TRANSACTION_ERROR_MESSAGE;
                 wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
                 return;
             }
