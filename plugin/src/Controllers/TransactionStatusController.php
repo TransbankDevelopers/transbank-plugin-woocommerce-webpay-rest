@@ -74,7 +74,7 @@ class TransactionStatusController
             $response = $this->handleGetStatus($transaction, $orderId, $buyOrder, $token);
 
             wp_send_json($response['body'], $response['code']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->logError($e->getMessage());
                 'message' => $e->getMessage(),
             ], 422);
