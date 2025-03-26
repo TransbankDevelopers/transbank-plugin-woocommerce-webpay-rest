@@ -520,8 +520,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
         $this->form_fields = [
             'enabled' => [
-                'title'   => __('Activar/Desactivar', 'transbank_wc_plugin'),
+                'title'   => __('Activo', 'transbank_wc_plugin'),
                 'type'    => 'checkbox',
+                'label'   => " ",
                 'default' => 'no',
             ],
             'environment' => [
