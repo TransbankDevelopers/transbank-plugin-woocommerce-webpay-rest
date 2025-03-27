@@ -51,7 +51,7 @@ add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
 
-add_action('init', function() {
+add_action('init', function () {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
     add_action('wp_ajax_check_exist_tables', TableCheck::class . '::check');
     add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
@@ -68,7 +68,7 @@ add_action('admin_enqueue_scripts', function () {
     wp_enqueue_script('tbk-thickbox', plugins_url('/js/swal.min.js', __FILE__));
     wp_localize_script('tbk-ajax-script', 'ajax_object', [
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('my-ajax-nonce'),
+        'nonce' => wp_create_nonce('my-ajax-nonce'),
     ]);
 });
 
@@ -213,7 +213,7 @@ function addTransbankStatusMetaBox(bool $hPosExists)
 function renderTransactionStatusMetaBox(int $orderId)
 {
     $viewData = [];
-    $transaction = Transaction::getApprovedByOrderId($orderId);
+    $transaction = Transaction::getByOrderId($orderId);
 
     if ($transaction) {
         $viewData = [
@@ -284,7 +284,7 @@ function noticeMissingWoocommerce()
             );
 
             if (function_exists('get_plugins')) {
-                $allPlugins  = get_plugins();
+                $allPlugins = get_plugins();
                 $isWooInstalled = !empty($allPlugins['woocommerce/woocommerce.php']);
             }
 

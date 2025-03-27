@@ -19,6 +19,53 @@ class Transaction extends BaseModel
     const PRODUCT_WEBPAY_ONECLICK = 'webpay_oneclick';
 
     /**
+     * Get transactions by custom conditions.
+     *
+     * @param array $conditions         Key-value pairs of column names and values.
+     * @param string|string[] $orderBy  Column name or an array of column names to order by.
+     * @param string $orderDirection    Order direction ('ASC' or 'DESC').
+     *
+     * @return array|null Transaction objects array.
+     */
+    private static function getTransactionsByConditions(array $conditions, string $orderBy = '', string $orderDirection = 'DESC'): ?array
+    {
+        global $wpdb;
+        $tableName = static::getTableName();
+
+        $whereClauses = [];
+        foreach ($conditions as $column => $value) {
+            $whereClauses[] = $wpdb->prepare("`$column` = %s", $value);
+        }
+
+        $whereSql = implode(' AND ', $whereClauses);
+        $sql = "SELECT * FROM {$tableName} WHERE {$whereSql}";
+
+        if (!empty($orderBy)) {
+            if (is_array($orderBy)) {
+                $orderBy = implode(", ", array_map('esc_sql', $orderBy));
+            } else {
+                $orderBy = esc_sql($orderBy);
+            }
+            $orderDirection = strtoupper($orderDirection) === 'DESC' ? 'DESC' : 'ASC';
+            $sql .= " ORDER BY {$orderBy} {$orderDirection}";
+        }
+
+        return $wpdb->get_results($sql);
+    }
+
+    /**
+     * Get transaction by order ID.
+     *
+     * @param string $orderId Order ID.
+     *
+     * @return object|null Transaction data.
+     */
+    public static function getByOrderId($orderId): ?object
+    {
+        return static::getTransactionsByConditions(['order_id' => $orderId], 'id')[0] ?? null;
+    }
+
+    /**
      * @return string
      */
     public static function getTableName(): string

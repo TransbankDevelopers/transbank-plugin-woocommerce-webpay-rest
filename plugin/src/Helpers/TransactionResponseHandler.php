@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Exceptions\Webpay\AlreadyProcessedException;
@@ -16,6 +17,7 @@ class TransactionResponseHandler
     const WEBPAY_TIMEOUT_FLOW = 'Timeout';
     const WEBPAY_ABORTED_FLOW = 'Aborted';
     const WEBPAY_ERROR_FLOW = 'Error';
+    const WEBPAY_INVALID_FLOW = 'Invalid';
 
     const WEBPAY_ALREADY_PROCESSED_MESSAGE = 'La transacción fue procesada anteriormente.';
     const WEBPAY_FAILED_FLOW_MESSAGE = 'Transacción no autorizada.';
@@ -69,47 +71,59 @@ class TransactionResponseHandler
         }
     }
 
-    private function detectFlow(array $params): string
+    public function handleRequestFromTbkReturn(array $request)
     {
-        $tokenWs = $params['token_ws'] ?? null;
-        $tbkToken = $params['TBK_TOKEN'] ?? null;
-        $tbkSessionId = $params['TBK_ID_SESION'] ?? null;
+        $tokenWs = $request['token_ws'] ?? null;
+        $tbkToken = $request['TBK_TOKEN'] ?? null;
+        $sessionId = $request['TBK_ID_SESION'] ?? null;
+        $buyOrder = $request['TBK_ORDEN_COMPRA'] ?? null;
+        $webpayFlow = $this->getWebpayFlow($request);
 
-        $flow = self::WEBPAY_ERROR_FLOW;
+        if ($webpayFlow == self::WEBPAY_NORMAL_FLOW) {
+            return $this->handleNormalFlow($tokenWs);
+        }
 
-        if ($tokenWs && !$tbkToken && !$tbkSessionId) {
-            $flow = self::WEBPAY_NORMAL_FLOW;
+        if ($webpayFlow == self::WEBPAY_TIMEOUT_FLOW) {
+            $this->handleTimeoutFlow($sessionId, $buyOrder);
         }
-        if ($tbkSessionId && !$tbkToken && !$tokenWs) {
-            $flow = self::WEBPAY_TIMEOUT_FLOW;
+
+        if ($webpayFlow == self::WEBPAY_ABORTED_FLOW) {
+            $this->handleAbortedFlow($tbkToken);
         }
-        if ($tbkToken && $tbkSessionId && !$tokenWs) {
-            $flow = self::WEBPAY_ABORTED_FLOW;
+
+        if ($webpayFlow == self::WEBPAY_ERROR_FLOW) {
+            $this->handleErrorFlow($tokenWs, $tbkToken);
         }
-        return $flow;
+
+        if ($webpayFlow == self::WEBPAY_INVALID_FLOW) {
+            throw new EcommerceException('Flujo de pago no reconocido.');
+        }
     }
 
-    public function handleRequestFromTbkReturn(array $params)
+    private function getWebpayFlow(array $request): string
     {
-        $tokenWs = $params['token_ws'] ?? null;
-        $tbkToken = $params['TBK_TOKEN'] ?? null;
-        $sessionId = $params['TBK_ID_SESION'] ?? null;
-        $buyOrder = $params['TBK_ORDEN_COMPRA'] ?? null;
-        $flow = $this->detectFlow($params);
+        $tokenWs = $request['token_ws'] ?? null;
+        $tbkToken = $request['TBK_TOKEN'] ?? null;
+        $tbkSessionId = $request['TBK_ID_SESION'] ?? null;
+        $webpayFlow = self::WEBPAY_INVALID_FLOW;
 
-        switch ($flow) {
-            case self::WEBPAY_NORMAL_FLOW:
-                return $this->handleNormalFlow($tokenWs);
-            case self::WEBPAY_TIMEOUT_FLOW:
-                $this->handleTimeoutFlow($sessionId, $buyOrder);
-                break;
-            case self::WEBPAY_ABORTED_FLOW:
-                $this->handleAbortedFlow($tbkToken);
-                break;
-            default:
-                $this->handleErrorFlow($tokenWs, $tbkToken);
-                break;
+        if (isset($tokenWs) && isset($tbkToken)) {
+            return self::WEBPAY_ERROR_FLOW;
         }
+
+        if ($tbkToken && $tbkSessionId && !$tokenWs) {
+            $webpayFlow = self::WEBPAY_ABORTED_FLOW;
+        }
+
+        if ($tbkSessionId && !$tbkToken && !$tokenWs) {
+            $webpayFlow = self::WEBPAY_TIMEOUT_FLOW;
+        }
+
+        if ($tokenWs && !$tbkToken && !$tbkSessionId) {
+            $webpayFlow = self::WEBPAY_NORMAL_FLOW;
+        }
+
+        return $webpayFlow;
     }
 
     private function handleNormalFlow(string $token)

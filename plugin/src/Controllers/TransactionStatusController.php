@@ -11,9 +11,9 @@ class TransactionStatusController
 {
     const HTTP_OK = 200;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
-    const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay aprobadas para esta orden';
-    const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden';
-    const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden';
+    const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay para esta orden.';
+    const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden.';
+    const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden.';
 
     /**
      * Log instance.
@@ -59,22 +59,23 @@ class TransactionStatusController
         $this->logger->logDebug('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = Transaction::getApprovedByOrderId($orderId);
+            $transaction = Transaction::getByOrderId($orderId);
 
             if (!$transaction) {
+                $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
                 $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
-                $response['body'] = self::NO_TRANSACTION_ERROR_MESSAGE;
                 wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
                 return;
             }
 
+            $this->logger->logInfo('Transacción encontrada.');
             $response = $this->handleGetStatus($transaction, $orderId, $buyOrder, $token);
 
             wp_send_json($response['body'], $response['code']);
-        } catch (\Exception $e) {
-            wp_send_json([
-                'message' => $e->getMessage(),
-            ], 422);
+        } catch (\Throwable $e) {
+            $this->logger->logError($e->getMessage());
+            $response['body']['message'] = $e->getMessage();
+            wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 

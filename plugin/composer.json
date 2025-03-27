@@ -3,7 +3,7 @@
         "transbank/transbank-sdk": "4.0",
         "ext-json": "*",
         "php": ">=7.4",
-        "monolog/monolog": "^1.27"
+        "monolog/monolog": "^2.10"
     },
     "config": {
         "platform": {
