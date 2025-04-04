@@ -10,6 +10,7 @@ use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
+use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
@@ -517,12 +518,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'configuración, en tu contrato de Oneclick, existe un límite de cantidad de transacciones diarias, ' .
             'un monto máximo por transacción y monto acumulado diario. Si un cliente supera ese límite, ' .
             'su transacción será rechazada.';
+        
+        $buyOrderDescription = 'Formato de orden de compra de la transacción en Transbank';
+        $childBuyOrderDescription = 'Formato de orden de compra de la transacción en Transbank';
 
         $this->form_fields = [
             'enabled' => [
-                'title'   => __('Activo', 'transbank_wc_plugin'),
+                'title'   => __('Activar/Desactivar', 'transbank_wc_plugin'),
                 'type'    => 'checkbox',
-                'label'   => " ",
                 'default' => 'no',
             ],
             'environment' => [
@@ -580,6 +583,20 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'desc_tip'    => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
+            ],
+            'buy_order_format' => [
+                'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
+                'placeholder' => 'Ej: ' . OneclickTransbankSdk::BUY_ORDER_FORMAT,
+                'desc_tip'    => $buyOrderDescription,
+                'type'        => 'text',
+                'default' => OneclickTransbankSdk::BUY_ORDER_FORMAT
+            ],
+            'child_buy_order_format' => [
+                'title'       => __('Formato de orden de compra hija', 'transbank_wc_plugin'),
+                'placeholder' => 'Ej: ' . OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT,
+                'desc_tip'    => $childBuyOrderDescription,
+                'type'        => 'text',
+                'default' => OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT
             ]
         ];
     }
@@ -796,6 +813,19 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         if (wc()->cart) {
             wc()->cart->empty_cart();
+        }
+    }
+
+    public function process_admin_options() {
+        parent::process_admin_options(); 
+
+        $buyOrderFormat = $this->get_option('buy_order_format');
+        $childBuyOrderFormat = $this->get_option('child_buy_order_format');
+        if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
+            \WC_Admin_Settings::add_error(__("El formato de 'Buy Order' no es válido.", 'woocommerce'));
+        }
+        if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
+            \WC_Admin_Settings::add_error(__("El formato de 'Buy Order Hijo' no es válido.", 'woocommerce'));
         }
     }
 }
