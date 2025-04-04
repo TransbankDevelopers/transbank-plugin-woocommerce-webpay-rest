@@ -822,10 +822,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $buyOrderFormat = $this->get_option('buy_order_format');
         $childBuyOrderFormat = $this->get_option('child_buy_order_format');
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato de 'Buy Order' no es válido.", 'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato de orden de compra no es válido.", 'woocommerce'));
         }
         if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato de 'Buy Order Hijo' no es válido.", 'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato de orden de compra hija no es válido.", 'woocommerce'));
         }
     }
 }

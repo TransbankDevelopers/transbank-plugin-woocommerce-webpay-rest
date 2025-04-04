@@ -292,7 +292,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         $buyOrderFormat = $this->get_option('buy_order_format');
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato de 'Buy Order' no es válido.", 'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato de orden de compra no es válido.", 'woocommerce'));
         }
     }
 }
