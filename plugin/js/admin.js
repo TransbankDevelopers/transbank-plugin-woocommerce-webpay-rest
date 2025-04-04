@@ -280,7 +280,7 @@ const isValidFormat = (format) => {
 };
 
 
-const atachBuyOrderFormatComponent = (inputId, defaultFormat) => {
+const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
     console.log('cargando el componente', inputId);
     const input = document.getElementById(inputId);
     if (!input) {
@@ -362,10 +362,10 @@ const atachBuyOrderFormatComponent = (inputId, defaultFormat) => {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    atachBuyOrderFormatComponent('woocommerce_transbank_webpay_plus_rest_buy_order_format', 
+    attachBuyOrderFormatComponent('woocommerce_transbank_webpay_plus_rest_buy_order_format', 
         'wc-{random, length=8}-{orderId}');
-    atachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_buy_order_format', 
+    attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_buy_order_format', 
         'wc-{random, length=8}-{orderId}');
-    atachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', 
+    attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', 
         'wc-child-{random, length=8}-{orderId}');
 });
