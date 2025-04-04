@@ -301,12 +301,14 @@ const atachBuyOrderFormatComponent = (inputId, defaultFormat) => {
     valueDisplay.style.color = '#333';
 
     const errorDisplay = document.createElement('div');
+    errorDisplay.style.maxWidth = '600px';
     errorDisplay.style.marginTop = '4px';
     errorDisplay.style.fontSize = '13px';
     errorDisplay.style.color = 'red';
     errorDisplay.style.display = 'none';
 
     const helpText = document.createElement('div');
+    helpText.style.maxWidth = '600px';
     helpText.style.marginTop = '4px';
     helpText.style.fontSize = '12px';
     helpText.style.color = '#666';
