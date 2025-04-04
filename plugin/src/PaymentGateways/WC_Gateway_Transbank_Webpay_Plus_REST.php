@@ -166,7 +166,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $apiKeyDescription = 'Esta llave privada te la entregará Transbank luego de que completes el proceso ' .
             'de validación (link más abajo).<br/><br/>No la compartas con nadie una vez que la tengas. ';
 
-        $buyOrderDescription = 'Formato de orden de compra de la transacción en Transbank'; 
+        $buyOrderDescription = 'Formato de orden de compra de la transacción en Transbank';
 
         $this->form_fields = [
             'enabled' => [
@@ -288,7 +288,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     }
 
     public function process_admin_options() {
-        parent::process_admin_options(); 
+        parent::process_admin_options();
 
         $buyOrderFormat = $this->get_option('buy_order_format');
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {

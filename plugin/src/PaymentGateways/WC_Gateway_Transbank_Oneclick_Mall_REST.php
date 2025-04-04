@@ -817,7 +817,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     public function process_admin_options() {
-        parent::process_admin_options(); 
+        parent::process_admin_options();
 
         $buyOrderFormat = $this->get_option('buy_order_format');
         $childBuyOrderFormat = $this->get_option('child_buy_order_format');

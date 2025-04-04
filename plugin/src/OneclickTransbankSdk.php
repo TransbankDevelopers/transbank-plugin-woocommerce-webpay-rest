@@ -52,11 +52,11 @@ class OneclickTransbankSdk extends TransbankSdk
     protected $mallInscription;
     private $childBuyOrderFormat;
 
-    public function __construct($log, 
-        $environment, 
-        $commerceCode, 
-        $apiKey, 
-        $childCommerceCode, 
+    public function __construct($log,
+        $environment,
+        $commerceCode,
+        $apiKey,
+        $childCommerceCode,
         $buyOrderFormat = self::BUY_ORDER_FORMAT,
         $childBuyOrderFormat = self::CHILD_BUY_ORDER_FORMAT)
     {
