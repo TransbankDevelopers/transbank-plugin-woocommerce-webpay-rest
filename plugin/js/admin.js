@@ -249,15 +249,20 @@ jQuery(function($) {
 
 const generateRandomString = (length = 6) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
     let result = '';
+    const randomValues = new Uint8Array(length);
+    crypto.getRandomValues(randomValues);
     for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
+        result += characters.charAt(randomValues[i] % charactersLength);
     }
     return result;
 };
 
 const generateBuyOrderPreview = (format) => {
-    const orderId = Math.floor(Math.random() * 90000) + 10000; 
+    const array = new Uint16Array(1);
+    crypto.getRandomValues(array);
+    const orderId = 10000 + (array[0] % 90000); 
     return format
         .replace('{orderId}', orderId.toString())
         .replace(/\{random(?:, length=(\d+))?\}/, (_, length) =>
