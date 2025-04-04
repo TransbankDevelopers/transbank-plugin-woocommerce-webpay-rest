@@ -246,3 +246,119 @@ jQuery(function($) {
         });
     });
 })
+
+const generateRandomString = (length = 6) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+};
+
+const generateBuyOrderPreview = (format) => {
+    const orderId = Math.floor(Math.random() * 90000) + 10000; 
+    return format
+        .replace('{orderId}', orderId.toString())
+        .replace(/\{random(?:, length=(\d+))?\}/, (_, length) =>
+            generateRandomString(length ? parseInt(length, 10) : 6)
+        );
+};
+
+const isValidFormat = (format) => {
+    const allowedCharsRegex = /^[A-Za-z0-9-_]*$/;
+    if (!allowedCharsRegex.test(format.replace(/\{orderId\}/g, '').replace(/\{random(?:, length=\d+)?\}/g, ''))) {
+        return false;
+    }
+    const hasOrderId = /\{orderId\}/.test(format);
+    return hasOrderId;
+};
+
+
+const atachBuyOrderFormatComponent = (inputId, defaultFormat) => {
+    console.log('cargando el componente', inputId);
+    const input = document.getElementById(inputId);
+    if (!input) {
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.gap = '8px';
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const valueDisplay = document.createElement('div');
+    valueDisplay.style.marginTop = '8px';
+    valueDisplay.style.fontSize = '14px';
+    valueDisplay.style.color = '#333';
+
+    const errorDisplay = document.createElement('div');
+    errorDisplay.style.marginTop = '4px';
+    errorDisplay.style.fontSize = '13px';
+    errorDisplay.style.color = 'red';
+    errorDisplay.style.display = 'none';
+
+    const helpText = document.createElement('div');
+    helpText.style.marginTop = '4px';
+    helpText.style.fontSize = '12px';
+    helpText.style.color = '#666';
+    helpText.innerHTML = `
+        <p><strong>Formato de compra:</strong></p>
+        <p>• Usa <code>{orderId}</code> (obligatorio).</p>
+        <p>• Opcional: <code>{random}</code> o <code>{random, length=12}</code>.</p>
+        <p><strong>Ejemplo válido:</strong> <code>cualquierTexto-{random, length=12}-{orderId}</code></p>
+        <p><strong>Nota:</strong> Solo se permiten caracteres alfanuméricos, guiones (<code>-</code>) 
+            y guiones bajos (<code>_</code>). No se permiten espacios.</p>
+    `;
+
+    const btn1 = document.createElement('button');
+    btn1.textContent = 'Refrescar';
+    btn1.addEventListener('click', (event) => {
+        event.preventDefault();
+        validateAndDisplay(input.value);
+    });
+
+    const btn2 = document.createElement('button');
+    btn2.textContent = 'Restablecer';
+    btn2.addEventListener('click', (event) => {
+        event.preventDefault();
+        input.value = defaultFormat;
+        validateAndDisplay(input.value);
+    });
+
+    wrapper.appendChild(btn1);
+    wrapper.appendChild(btn2);
+    wrapper.parentNode.insertBefore(valueDisplay, wrapper.nextSibling);
+    wrapper.parentNode.insertBefore(errorDisplay, valueDisplay.nextSibling);
+    wrapper.parentNode.insertBefore(helpText, errorDisplay.nextSibling);
+
+    const validateAndDisplay = (value) => {
+        if (isValidFormat(value)) {
+            errorDisplay.style.display = 'none';
+            valueDisplay.textContent = `Vista previa: ${generateBuyOrderPreview(value)}`;
+        } else {
+            valueDisplay.textContent = '';
+            errorDisplay.style.display = 'block';
+            errorDisplay.textContent = `❌ Formato inválido. Asegúrate de que contenga solo caracteres alfanuméricos, 
+                guiones (-) o guiones bajos (_), sin espacios, y que contenga {orderId}.`;
+        }
+    };
+
+    input.addEventListener('input', (event) => {
+        validateAndDisplay(event.target.value);
+    });
+
+    validateAndDisplay(input.value);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    atachBuyOrderFormatComponent('woocommerce_transbank_webpay_plus_rest_buy_order_format', 
+        'wc-{random, length=8}-{orderId}');
+    atachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_buy_order_format', 
+        'wc-{random, length=8}-{orderId}');
+    atachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', 
+        'wc-child-{random, length=8}-{orderId}');
+});
