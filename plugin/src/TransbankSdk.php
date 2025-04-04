@@ -5,6 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
+use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
 
 /**
  * Class TransbankSdk.
@@ -19,6 +20,7 @@ class TransbankSdk
     protected $childCommerceCode;
 
     protected $log;
+    protected $buyOrderFormat;
 
     /**
      * @var MaskData
@@ -88,11 +90,8 @@ class TransbankSdk
         TransbankExecutionErrorLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($data), $error, $originalError, $customError);
     }
 
-    protected function generateBuyOrder($prefix, $orderId, $maxLength = 25){
-        $randomComponentLength = $maxLength - (strlen($prefix) + strlen((string)$orderId));
-        $randomComponent = openssl_random_pseudo_bytes(floor($randomComponentLength / 2));
-        $randToHexValue = bin2hex($randomComponent);
-        return $prefix . $randToHexValue . ":" . $orderId;
+    protected function generateBuyOrder($orderId){
+        return BuyOrderHelper::generateFromFormat($this->buyOrderFormat, $orderId);
     }
 
 }

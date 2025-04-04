@@ -18,6 +18,7 @@ use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
+use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
 
 /**
  * Class WebpayplusTransbankSdk.
@@ -26,18 +27,21 @@ class WebpayplusTransbankSdk extends TransbankSdk
 {
 
     const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
+    const BUY_ORDER_FORMAT = 'wc-{random, length=8}-{orderId}';
 
     /**
      * @var WebpayPlusTransaction
      */
     protected $webpayplusTransaction;
 
-    public function __construct($log, $environment, $commerceCode, $apiKey)
+    public function __construct($log, $environment, $commerceCode, $apiKey, $buyOrderFormat = self::BUY_ORDER_FORMAT)
     {
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
         $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
+        $this->buyOrderFormat = BuyOrderHelper::isValidFormat($buyOrderFormat) ?
+            $buyOrderFormat : self::BUY_ORDER_FORMAT;
     }
 
     /**
@@ -144,7 +148,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     {
         global $wpdb;
         $randomNumber = uniqid();
-        $buyOrder = $this->generateBuyOrder('wc:', $orderId);
+        $buyOrder = $this->generateBuyOrder($orderId);
         $sessionId = 'wc:sessionId:'.$randomNumber.':'.$orderId;
         $params = [
             'sessionId'  => $sessionId,

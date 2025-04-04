@@ -29,6 +29,7 @@ use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
+use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
 
 /**
  * Class OneclickTransbankSdk.
@@ -37,6 +38,8 @@ class OneclickTransbankSdk extends TransbankSdk
 {
 
     const OPTION_KEY = 'woocommerce_transbank_oneclick_mall_rest_settings';
+    const BUY_ORDER_FORMAT = 'wc-{random, length=8}-{orderId}';
+    const CHILD_BUY_ORDER_FORMAT = 'wc-child-{random, length=8}-{orderId}';
 
     /**
      * @var MallTransaction
@@ -47,8 +50,15 @@ class OneclickTransbankSdk extends TransbankSdk
      * @var MallInscription
      */
     protected $mallInscription;
+    private $childBuyOrderFormat;
 
-    public function __construct($log, $environment, $commerceCode, $apiKey, $childCommerceCode)
+    public function __construct($log, 
+        $environment, 
+        $commerceCode, 
+        $apiKey, 
+        $childCommerceCode, 
+        $buyOrderFormat = self::BUY_ORDER_FORMAT,
+        $childBuyOrderFormat = self::CHILD_BUY_ORDER_FORMAT)
     {
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
@@ -57,6 +67,10 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
+        $this->buyOrderFormat = BuyOrderHelper::isValidFormat($buyOrderFormat) ?
+            $buyOrderFormat : self::BUY_ORDER_FORMAT;
+        $this->childBuyOrderFormat = BuyOrderHelper::isValidFormat($childBuyOrderFormat) ?
+            $childBuyOrderFormat : self::CHILD_BUY_ORDER_FORMAT;
     }
 
     /**
@@ -381,8 +395,8 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function authorize($orderId, $amount, $username, $token) {
         global $wpdb;
-        $parentBuyOrder = $this->generateBuyOrder('wc:', $orderId);
-        $childBuyOrder = $this->generateBuyOrder('wc:child:', $orderId);
+        $parentBuyOrder = $this->generateBuyOrder($orderId);
+        $childBuyOrder = $this->generateChildBuyOrder($orderId);
         $params = [
             'orderId'           => $orderId,
             'buyOrder'          => $parentBuyOrder,
@@ -534,4 +548,9 @@ class OneclickTransbankSdk extends TransbankSdk
             'refundResponse' => $response
         );
     }
+
+    protected function generateChildBuyOrder($orderId){
+        return BuyOrderHelper::generateFromFormat($this->childBuyOrderFormat, $orderId);
+    }
 }
+
