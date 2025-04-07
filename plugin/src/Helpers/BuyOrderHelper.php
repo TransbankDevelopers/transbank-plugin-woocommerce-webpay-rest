@@ -75,7 +75,6 @@ class BuyOrderHelper {
      * @return bool True if the format is valid, false otherwise.
      */
     public static function isValidFormat(string $format): bool {
-        // Pattern to match valid formats
         $pattern = '/^.*(\{random(?:, length=\d+)?\})?.*\{orderId\}.*$/';
         return preg_match($pattern, $format) === 1;
     }
