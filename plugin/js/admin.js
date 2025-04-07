@@ -323,6 +323,7 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
 
     const btn1 = document.createElement('button');
     btn1.textContent = 'Refrescar';
+    btn1.className = 'button';
     btn1.addEventListener('click', (event) => {
         event.preventDefault();
         validateAndDisplay(input.value);
@@ -330,6 +331,7 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
 
     const btn2 = document.createElement('button');
     btn2.textContent = 'Restablecer';
+    btn2.className = 'button';
     btn2.addEventListener('click', (event) => {
         event.preventDefault();
         input.value = defaultFormat;
