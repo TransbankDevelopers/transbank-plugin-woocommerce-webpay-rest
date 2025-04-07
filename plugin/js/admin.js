@@ -281,7 +281,6 @@ const isValidFormat = (format) => {
 
 
 const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
-    console.log('cargando el componente', inputId);
     const input = document.getElementById(inputId);
     if (!input) {
         return;
