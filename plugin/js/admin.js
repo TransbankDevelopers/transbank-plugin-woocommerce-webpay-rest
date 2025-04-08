@@ -281,38 +281,10 @@ const isValidFormat = (format) => {
     return /\{orderId\}/i.test(format); 
 };
 
-
-const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, otherInputId) => {
-    const input = document.getElementById(inputId);
-    if (!input) {
-        return;
-    }
-
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.gap = '8px';
-
-    input.parentNode.insertBefore(wrapper, input);
-    wrapper.appendChild(input);
-
-    const valueDisplay = document.createElement('div');
-    valueDisplay.style.marginTop = '8px';
-    valueDisplay.style.fontSize = '14px';
-    valueDisplay.style.color = '#333';
-
-    const errorDisplay = document.createElement('div');
-    errorDisplay.style.maxWidth = '600px';
-    errorDisplay.style.marginTop = '4px';
-    errorDisplay.style.fontSize = '13px';
-    errorDisplay.style.color = 'red';
-    errorDisplay.style.display = 'none';
-
+const createHelpTextBuyOrderFormat = (isOneclick) => {
     const helpText = document.createElement('div');
-    helpText.style.maxWidth = '600px';
-    helpText.style.marginTop = '4px';
-    helpText.style.fontSize = '12px';
-    helpText.style.color = '#666';
+    helpText.className = 'tbk_buy_order_format_help_text';
+
     helpText.innerHTML = `
         <p><strong>ℹ️ Información: </strong></p>
         <p><strong>Componentes disponibles:</strong></p>
@@ -327,10 +299,32 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
         ${isOneclick ? 
         `<p>•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.</p>` : ''}
     `;
+    return helpText;
+}
+
+const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, otherInputId) => {
+    const input = document.getElementById(inputId);
+    if (!input) {
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tbk_buy_order_format_container';
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const valueDisplay = document.createElement('div');
+    valueDisplay.className = 'tbk_buy_order_format_value_display';
+
+    const errorDisplay = document.createElement('div');
+    errorDisplay.className = 'tbk_buy_order_format_error_display';
+
+    const helpText = createHelpTextBuyOrderFormat(isOneclick);
 
     const btn1 = document.createElement('button');
     btn1.textContent = 'Refrescar';
-    btn1.className = 'button';
+    btn1.className = 'button button-primary tbk-button-primary';
     btn1.addEventListener('click', (event) => {
         event.preventDefault();
         validateAndDisplay(inputId);
@@ -338,7 +332,7 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
 
     const btn2 = document.createElement('button');
     btn2.textContent = 'Restablecer';
-    btn2.className = 'button';
+    btn2.className = 'button button-secondary tbk-button-secondary';
     btn2.addEventListener('click', (event) => {
         event.preventDefault();
         input.value = defaultFormat;
@@ -370,7 +364,7 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
 
     const validateAndDisplay = (inputId, isRecursive) => {
         const input = document.getElementById(inputId);
-        if (!input || !input._valueDisplay) {
+        if (!input?._valueDisplay) {
             return; 
         }
         const value = input.value;
