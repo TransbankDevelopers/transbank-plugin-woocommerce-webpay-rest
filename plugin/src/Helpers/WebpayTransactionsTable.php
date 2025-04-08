@@ -19,8 +19,8 @@ class WebpayTransactionsTable extends WP_List_Table
     {
         parent::__construct([
             'singular' => 'transbank_transaction',
-            'plural'   => 'transbank_transactions',
-            'ajax'     => false,
+            'plural' => 'transbank_transactions',
+            'ajax' => false,
         ]);
     }
 
@@ -85,13 +85,13 @@ class WebpayTransactionsTable extends WP_List_Table
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $itemsQuery,
-            [$orderby, (int)$offset, (int)$perPage]
+            [$orderby, (int) $offset, (int) $perPage]
         ));
 
         $this->set_pagination_args([
             'total_items' => $totalItems,
             'total_pages' => $totalPages,
-            'per_page'    => $perPage,
+            'per_page' => $perPage,
         ]);
 
         $columns = $this->get_columns();
