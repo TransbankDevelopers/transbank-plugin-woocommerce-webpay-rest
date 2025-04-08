@@ -147,6 +147,20 @@ class WebpayTransactionsTable extends WP_List_Table
         return '<a href="" onclick="this.innerHTML=\'' . $item->token . '\';return false; " title="Haz click para ver el token completo">...' . substr($item->token, -5) . '</a>';
     }
 
+    public function column_status($item)
+    {
+        $statusDictionary = [
+            Transaction::STATUS_PREPARED => 'Preparada',
+            Transaction::STATUS_INITIALIZED => 'Inicializada',
+            Transaction::STATUS_APPROVED => 'Aprobada',
+            Transaction::STATUS_TIMEOUT => 'Timeout en formulario de pago',
+            Transaction::STATUS_ABORTED_BY_USER => 'Abortada por el usuario',
+            Transaction::STATUS_FAILED => 'Fallida',
+        ];
+
+        return $statusDictionary[$item->status] ?? $item->status;
+    }
+
     public function column_default($item, $column_name)
     {
         return $item->$column_name ?? '-';
