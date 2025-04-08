@@ -43,7 +43,6 @@ class WebpayTransactionsTable extends WP_List_Table
     public function get_sortable_columns()
     {
         return [
-            'buy_order' => ['buy_order', false],
             'amount' => ['amount', false],
             'order_id' => ['order_id', false],
             'product' => ['product', false],
