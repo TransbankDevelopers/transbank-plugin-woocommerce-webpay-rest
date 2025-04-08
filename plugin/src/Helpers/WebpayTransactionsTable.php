@@ -135,8 +135,25 @@ class WebpayTransactionsTable extends WP_List_Table
         if ($item->product === Transaction::PRODUCT_WEBPAY_ONECLICK) {
             return '-';
         }
+        return '<a href="#" 
+        onclick="
+            const el = this;
+            const full = \'' . $item->token . '\';
+            const short = \'...' . substr($item->token, -5) . '\';
 
-        return '<a href="" onclick="this.innerHTML=\'' . $item->token . '\';return false; " title="Haz click para ver el token completo">...' . substr($item->token, -5) . '</a>';
+            if (el.dataset.state === \'short\') {
+                el.innerText = full;
+                el.dataset.state = \'full\';
+            } else {
+                el.innerText = short;
+                el.dataset.state = \'short\';
+            }
+
+            return false;
+        " 
+        data-state="short" 
+        title="Haz click para mostrar u ocultar el token completo"
+        >...' . substr($item->token, -5) . '</a>';
     }
 
     public function column_status($item)
@@ -162,6 +179,11 @@ class WebpayTransactionsTable extends WP_List_Table
         }
 
         return $item->order_id;
+    }
+
+    public function column_last_refund_type($item)
+    {
+        return $item->last_refund_type ? 'Si' : 'No';
     }
 
     public function column_default($item, $column_name)
