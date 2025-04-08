@@ -264,23 +264,25 @@ const generateBuyOrderPreview = (format) => {
     crypto.getRandomValues(array);
     const orderId = 10000 + (array[0] % 90000); 
     return format
-        .replace('{orderId}', orderId.toString())
-        .replace(/\{random(?:, length=(\d+))?\}/, (_, length) =>
+        .replace(/\{orderId\}/gi, orderId.toString())
+        .replace(/\{random(?:, length=\d+)?\}/gi, (_, length) =>
             generateRandomString(length ? parseInt(length, 10) : 6)
         );
 };
 
 const isValidFormat = (format) => {
-    const allowedCharsRegex = /^[A-Za-z0-9-_]*$/;
-    if (!allowedCharsRegex.test(format.replace(/\{orderId\}/g, '').replace(/\{random(?:, length=\d+)?\}/g, ''))) {
+    const allowedCharsRegex = /^[A-Za-z0-9-_:]*$/;
+    const formatWithoutPlaceholders = format
+        .replace(/\{orderId\}/gi, '') 
+        .replace(/\{random(?:, length=\d+)?\}/gi, ''); 
+    if (!allowedCharsRegex.test(formatWithoutPlaceholders)) {
         return false;
     }
-    const hasOrderId = /\{orderId\}/.test(format);
-    return hasOrderId;
+    return /\{orderId\}/i.test(format); 
 };
 
 
-const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
+const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, otherInputId) => {
     const input = document.getElementById(inputId);
     if (!input) {
         return;
@@ -312,12 +314,18 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
     helpText.style.fontSize = '12px';
     helpText.style.color = '#666';
     helpText.innerHTML = `
-        <p><strong>Formato de compra:</strong></p>
-        <p>• Usa <code>{orderId}</code> (obligatorio).</p>
-        <p>• Opcional: <code>{random}</code> o <code>{random, length=12}</code>.</p>
-        <p><strong>Ejemplo válido:</strong> <code>cualquierTexto-{random, length=12}-{orderId}</code></p>
-        <p><strong>Nota:</strong> Solo se permiten caracteres alfanuméricos, guiones (<code>-</code>) 
-            y guiones bajos (<code>_</code>). No se permiten espacios.</p>
+        <p><strong>ℹ️ Información: </strong></p>
+        <p><strong>Componentes disponibles:</strong></p>
+        <p>•<code>{orderId}</code> Número de orden de compra en Woocommerce (obligatorio).</p>
+        <p>•<code>{random}</code> Texto aleatorio con longitud de 8 caracteres (opcional).</p>
+        <p>•<code>{random, length=12}</code> Texto aleatorio con longitud especifica (opcional).</p>
+        <p><strong>Ejemplo:</strong> <code>cualquierTexto-{random, length=12}-{orderId}</code></p>
+        <p><strong>Notas:</strong></p> 
+        <p>•Solo se permiten caracteres alfanuméricos, guiones (<code>-</code>), guiones bajos (<code>_</code>)
+            o dos puntos (<code>:</code>). No se permiten espacios. </p>  
+        <p>•El valor generado no puede exceder los 26 caracteres.</p>
+        ${isOneclick ? 
+        `<p>•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.</p>` : ''}
     `;
 
     const btn1 = document.createElement('button');
@@ -325,7 +333,7 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
     btn1.className = 'button';
     btn1.addEventListener('click', (event) => {
         event.preventDefault();
-        validateAndDisplay(input.value);
+        validateAndDisplay(inputId);
     });
 
     const btn2 = document.createElement('button');
@@ -334,7 +342,7 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
     btn2.addEventListener('click', (event) => {
         event.preventDefault();
         input.value = defaultFormat;
-        validateAndDisplay(input.value);
+        validateAndDisplay(inputId);
     });
 
     wrapper.appendChild(btn1);
@@ -343,30 +351,65 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat) => {
     wrapper.parentNode.insertBefore(errorDisplay, valueDisplay.nextSibling);
     wrapper.parentNode.insertBefore(helpText, errorDisplay.nextSibling);
 
-    const validateAndDisplay = (value) => {
+    input._errorDisplay = errorDisplay;
+    input._valueDisplay = valueDisplay;
+    input._otherInputId = otherInputId;
+
+    const setDisplay = (inputId, message, error) => {
+        const input = document.getElementById(inputId);
+        if (error){
+            input._errorDisplay.style.display = 'block';
+            input._errorDisplay.textContent = error;
+            input._valueDisplay.textContent = '';
+        }
+        else{
+            input._errorDisplay.style.display = 'none';
+            input._valueDisplay.textContent = message;
+        }
+    };
+
+    const validateAndDisplay = (inputId, isRecursive) => {
+        const input = document.getElementById(inputId);
+        if (!input || !input._valueDisplay) {
+            return; 
+        }
+        const value = input.value;
         if (isValidFormat(value)) {
-            errorDisplay.style.display = 'none';
-            valueDisplay.textContent = `Vista previa: ${generateBuyOrderPreview(value)}`;
+            const preview = generateBuyOrderPreview(value);
+            setDisplay(inputId, `✅ Vista previa: ${preview} (${preview.length} caracteres)`, null);
         } else {
-            valueDisplay.textContent = '';
-            errorDisplay.style.display = 'block';
-            errorDisplay.textContent = `❌ Formato inválido. Asegúrate de que contenga solo caracteres alfanuméricos, 
-                guiones (-) o guiones bajos (_), sin espacios, y que contenga {orderId}.`;
+            setDisplay(inputId, null, `❌ Formato inválido. Asegúrate de que contenga solo caracteres alfanuméricos, 
+                guiones (-), guiones bajos (_) o dos puntos (:), sin espacios, y que contenga {orderId}.`);
+            return;
+        }
+        if (isOneclick){
+            const otherInput = document.getElementById(input._otherInputId);
+            if (!otherInput) {
+                return; 
+            }
+            const otherFormat = otherInput.value;
+            if (otherFormat && value && (otherFormat.toUpperCase() === value.toUpperCase())) {
+                setDisplay(inputId, null, `❌ El formato de orden de compra hija no puede ser igual 
+                    al formato de orden de compra principal.`);
+            }
+            if (!isRecursive){
+                validateAndDisplay(input._otherInputId, true);
+            }
         }
     };
 
     input.addEventListener('input', (event) => {
-        validateAndDisplay(event.target.value);
+        validateAndDisplay(inputId);
     });
 
-    validateAndDisplay(input.value);
+    validateAndDisplay(inputId);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
     attachBuyOrderFormatComponent('woocommerce_transbank_webpay_plus_rest_buy_order_format', 
         'wc-{random, length=8}-{orderId}');
     attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_buy_order_format', 
-        'wc-{random, length=8}-{orderId}');
+        'wc-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_child_buy_order_format');
     attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', 
-        'wc-child-{random, length=8}-{orderId}');
+        'wc-child-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_buy_order_format');
 });
