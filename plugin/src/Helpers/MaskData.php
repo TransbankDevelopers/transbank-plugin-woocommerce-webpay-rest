@@ -128,9 +128,7 @@ class MaskData
         if ($this->isIntegration) {
             return $buyOrder;
         }
-
-        $pattern = 'child';
-        return $this->maskWithPattern($buyOrder, $pattern);
+        return $this->mask($buyOrder);
     }
 
     /**
