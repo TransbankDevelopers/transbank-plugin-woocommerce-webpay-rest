@@ -27,34 +27,29 @@ class WebpayTransactionsTable extends WP_List_Table
     public function get_columns()
     {
         return [
-            'id'               => __('ID'),
-            'product'          => __('Producto'),
-            'order_id'         => __('Orden WooCommerce'),
-            'status'           => __('Estado interno'),
-            'transbank_status' => __('Estado Transacción'),
-            'buy_order'        => __('Orden Compra Transbank'),
-            'token'            => __('Token'),
-            'environment'      => __('Ambiente'),
-            'amount'           => __('Monto'),
-            'created_at'       => __('Fecha creación'),
-            'transaction_date' => __('Fecha Transacción Transbank'),
-            'last_refund_type' => __('Último refund'),
-            'error' => __('Error'),
-            'detail_error' => __('Detalle de Error'),
+            'order_id' => __('Nº de orden'),
+            'amount' => __('Monto'),
+            'product' => __('Producto'),
+            'status' => __('Estado'),
+            'token' => __('Token'),
+            'buy_order' => __('Orden de compra'),
+            'environment' => __('Ambiente'),
+            'transaction_date' => __('Fecha'),
+            'last_refund_type' => __('Transacción anulada'),
+            'detail_error' => __('Observaciones'),
         ];
     }
 
     public function get_sortable_columns()
     {
         return [
-            'id'          => ['id', true],
-            'buy_order'   => ['buy_order', false],
-            'amount'      => ['amount', false],
-            'order_id'    => ['order_id', false],
-            'product'     => ['product', false],
-            'status'      => ['status', false],
+            'buy_order' => ['buy_order', false],
+            'amount' => ['amount', false],
+            'order_id' => ['order_id', false],
+            'product' => ['product', false],
+            'status' => ['status', false],
             'environment' => ['environment', false],
-            'created_at'  => ['created_at', false],
+            'transaction_date' => ['transaction_date', false],
         ];
     }
 
@@ -64,11 +59,10 @@ class WebpayTransactionsTable extends WP_List_Table
     public function prepare_items()
     {
         global $wpdb;
-
         $orderByColumns = $this->get_sortable_columns();
         $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
             ? esc_sql($_GET['orderby'])
-            : 'ID';
+            : 'order_id';
 
         $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC'])
             ? esc_sql(strtoupper($_GET['order']))
