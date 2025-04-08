@@ -289,12 +289,15 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     }
 
     public function process_admin_options() {
-        parent::process_admin_options();
+        $buyOrderFormat = isset($_POST[$this->get_field_key('buy_order_format')])
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])): '';
 
-        $buyOrderFormat = $this->get_option('buy_order_format');
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra no es válido.",
-             'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra no es válido.", 
+            'woocommerce'));
+        }
+        else  {
+            parent::process_admin_options();
         }
     }
 }

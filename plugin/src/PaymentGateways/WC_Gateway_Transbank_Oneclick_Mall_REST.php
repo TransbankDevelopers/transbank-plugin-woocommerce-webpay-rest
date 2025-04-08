@@ -823,17 +823,26 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     }
 
     public function process_admin_options() {
-        parent::process_admin_options();
+        $buyOrderFormat = isset($_POST[$this->get_field_key('buy_order_format')])
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])): '';
+        $childBuyOrderFormat = isset($_POST[$this->get_field_key('child_buy_order_format')])
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('child_buy_order_format')])): '';
 
-        $buyOrderFormat = $this->get_option('buy_order_format');
-        $childBuyOrderFormat = $this->get_option('child_buy_order_format');
+        $isValid = true;
+
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra principal no es válido.",
-             'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra principal no es válido.", 
+            'woocommerce'));
+            $isValid = false;
         }
+
         if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
             \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra hija no es válido.", 
             'woocommerce'));
+            $isValid = false;
+        }
+        if ($isValid) {
+            parent::process_admin_options();
         }
     }
 }
