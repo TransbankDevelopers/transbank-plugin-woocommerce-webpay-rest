@@ -161,6 +161,17 @@ class WebpayTransactionsTable extends WP_List_Table
         return $statusDictionary[$item->status] ?? $item->status;
     }
 
+    public function column_order_id($item)
+    {
+        $userCanEditOrders = current_user_can('edit_shop_order', $item->order_id);
+
+        if ($userCanEditOrders) {
+            return '<a href="' . esc_url(admin_url('post.php?post=' . $item->order_id . '&action=edit')) . '" target="_blank">' . $item->order_id . '</a>';
+        }
+
+        return $item->order_id;
+    }
+
     public function column_default($item, $column_name)
     {
         return $item->$column_name ?? '-';
