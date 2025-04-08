@@ -284,8 +284,8 @@ const isValidFormat = (format) => {
 const createHelpTextBuyOrderFormat = (isOneclick) => {
     const helpText = document.createElement('div');
     helpText.className = 'tbk_buy_order_format_help_text';
-
     helpText.innerHTML = `
+        ${isOneclick ? `<br/><br/>` : ''}
         <p><strong>ℹ️ Información: </strong></p>
         <p><strong>Componentes disponibles:</strong></p>
         <p>•<code>{orderId}</code> Número de orden de compra en Woocommerce (obligatorio).</p>
@@ -302,7 +302,7 @@ const createHelpTextBuyOrderFormat = (isOneclick) => {
     return helpText;
 }
 
-const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, otherInputId) => {
+const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, otherInputId, addHelpText) => {
     const input = document.getElementById(inputId);
     if (!input) {
         return;
@@ -319,8 +319,6 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
 
     const errorDisplay = document.createElement('div');
     errorDisplay.className = 'tbk_buy_order_format_error_display';
-
-    const helpText = createHelpTextBuyOrderFormat(isOneclick);
 
     const btn1 = document.createElement('button');
     btn1.textContent = 'Refrescar';
@@ -343,7 +341,11 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
     wrapper.appendChild(btn2);
     wrapper.parentNode.insertBefore(valueDisplay, wrapper.nextSibling);
     wrapper.parentNode.insertBefore(errorDisplay, valueDisplay.nextSibling);
-    wrapper.parentNode.insertBefore(helpText, errorDisplay.nextSibling);
+
+    if (addHelpText){
+        const helpText = createHelpTextBuyOrderFormat(isOneclick);
+        wrapper.parentNode.insertBefore(helpText, errorDisplay.nextSibling);
+    }
 
     input._errorDisplay = errorDisplay;
     input._valueDisplay = valueDisplay;
@@ -401,9 +403,9 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
 
 document.addEventListener("DOMContentLoaded", function() {
     attachBuyOrderFormatComponent('woocommerce_transbank_webpay_plus_rest_buy_order_format', 
-        'wc-{random, length=8}-{orderId}');
+        'wc-{random, length=8}-{orderId}', false, null, true);
     attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_buy_order_format', 
-        'wc-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_child_buy_order_format');
+        'wc-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', false);
     attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', 
-        'wc-child-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_buy_order_format');
+        'wc-child-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_buy_order_format', true);
 });
