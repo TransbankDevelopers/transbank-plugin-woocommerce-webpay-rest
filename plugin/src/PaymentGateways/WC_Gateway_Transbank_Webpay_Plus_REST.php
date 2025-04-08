@@ -166,7 +166,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $apiKeyDescription = 'Esta llave privada te la entregará Transbank luego de que completes el proceso ' .
             'de validación (link más abajo).<br/><br/>No la compartas con nadie una vez que la tengas. ';
 
-        $buyOrderDescription = 'Define un formato personalizado para la orden de compra asociada a la transacción en 
+        $buyOrderDescription = 'Define un formato personalizado para la orden de compra asociada a la transacción en
             Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
 
         $this->form_fields = [

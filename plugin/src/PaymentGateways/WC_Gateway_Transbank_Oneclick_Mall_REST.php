@@ -519,11 +519,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'un monto máximo por transacción y monto acumulado diario. Si un cliente supera ese límite, ' .
             'su transacción será rechazada.';
         
-        $buyOrderDescription = 'Define un formato personalizado para la orden de compra principal asociada a la 
+        $buyOrderDescription = 'Define un formato personalizado para la orden de compra principal asociada a la
             transacción en Transbank. Esta orden identifica la transacción de manera única en el sistema de Transbank.';
 
-        $childBuyOrderDescription = 'Define un formato personalizado para la orden de compra hija, utilizada en 
-            transacciones con múltiples tiendas. Permite identificar individualmente cada subtransacción 
+        $childBuyOrderDescription = 'Define un formato personalizado para la orden de compra hija, utilizada en
+            transacciones con múltiples tiendas. Permite identificar individualmente cada subtransacción
             dentro del sistema de Transbank.';
             
 
@@ -590,7 +590,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'class' => 'admin-textarea'
             ],
             'buy_order_format' => [
-                'title'       => __('Formato personalizado de orden de compra principal', 
+                'title'       => __('Formato personalizado de orden de compra principal',
                 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . OneclickTransbankSdk::BUY_ORDER_FORMAT,
                 'desc_tip'    => $buyOrderDescription,
