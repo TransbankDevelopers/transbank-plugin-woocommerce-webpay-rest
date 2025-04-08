@@ -519,8 +519,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'un monto máximo por transacción y monto acumulado diario. Si un cliente supera ese límite, ' .
             'su transacción será rechazada.';
         
-        $buyOrderDescription = 'Formato de orden de compra de la transacción en Transbank';
-        $childBuyOrderDescription = 'Formato de orden de compra de la transacción en Transbank';
+        $buyOrderDescription = 'Define un formato personalizado para la orden de compra principal asociada a la 
+            transacción en Transbank. Esta orden identifica la transacción de manera única en el sistema de Transbank.';
+
+        $childBuyOrderDescription = 'Define un formato personalizado para la orden de compra hija, utilizada en 
+            transacciones con múltiples tiendas. Permite identificar individualmente cada subtransacción 
+            dentro del sistema de Transbank.';
+            
 
         $this->form_fields = [
             'enabled' => [
@@ -585,14 +590,15 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'class' => 'admin-textarea'
             ],
             'buy_order_format' => [
-                'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
+                'title'       => __('Formato personalizado de orden de compra principal', 
+                'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . OneclickTransbankSdk::BUY_ORDER_FORMAT,
                 'desc_tip'    => $buyOrderDescription,
                 'type'        => 'text',
                 'default' => OneclickTransbankSdk::BUY_ORDER_FORMAT
             ],
             'child_buy_order_format' => [
-                'title'       => __('Formato de orden de compra hija', 'transbank_wc_plugin'),
+                'title'       => __('Formato personalizado de orden de compra hija', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT,
                 'desc_tip'    => $childBuyOrderDescription,
                 'type'        => 'text',
@@ -822,10 +828,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $buyOrderFormat = $this->get_option('buy_order_format');
         $childBuyOrderFormat = $this->get_option('child_buy_order_format');
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato de orden de compra no es válido.", 'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra principal no es válido.",
+             'woocommerce'));
         }
         if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato de orden de compra hija no es válido.", 'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra hija no es válido.", 
+            'woocommerce'));
         }
     }
 }

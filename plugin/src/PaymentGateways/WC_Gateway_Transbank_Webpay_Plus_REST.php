@@ -166,7 +166,8 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $apiKeyDescription = 'Esta llave privada te la entregará Transbank luego de que completes el proceso ' .
             'de validación (link más abajo).<br/><br/>No la compartas con nadie una vez que la tengas. ';
 
-        $buyOrderDescription = 'Formato de orden de compra de la transacción en Transbank';
+        $buyOrderDescription = 'Define un formato personalizado para la orden de compra asociada a la transacción en 
+            Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
 
         $this->form_fields = [
             'enabled' => [
@@ -292,7 +293,8 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         $buyOrderFormat = $this->get_option('buy_order_format');
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato de orden de compra no es válido.", 'woocommerce'));
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra no es válido.",
+             'woocommerce'));
         }
     }
 }
