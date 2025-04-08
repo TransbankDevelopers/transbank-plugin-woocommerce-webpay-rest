@@ -62,7 +62,8 @@ class BuyOrderHelper {
         $maxRandomLength = self::BUY_ORDER_MAX_LENGTH - ($staticChars + strlen($orderIdStr));
         $randomLength = self::extractRandomLength($format);
         $random = self::generateRandomComponent(min($randomLength, $maxRandomLength));
-        return preg_replace('/\{random(?:, length=(\d+))?\}/', $random, str_replace('{orderId}', $orderIdStr, $format));
+        $formatWithOrderId = preg_replace('/\{orderId\}/i', $orderIdStr, $format);
+        return preg_replace('/\{random(?:, length=\d+)?\}/i', $random, $formatWithOrderId);
     }
     
     /**
@@ -75,8 +76,16 @@ class BuyOrderHelper {
      * @return bool True if the format is valid, false otherwise.
      */
     public static function isValidFormat(string $format): bool {
-        $pattern = '/^.*(\{random(?:, length=\d+)?\})?.*\{orderId\}.*$/';
-        return preg_match($pattern, $format) === 1;
+        if (!preg_match('/\{orderId\}/i', $format)) {
+            return false;
+        }
+        $formatWithoutPlaceholders = preg_replace('/\{orderId\}/i', '', $format);
+        $formatWithoutPlaceholders = preg_replace('/\{random(?:, length=\d+)?\}/i', '', $formatWithoutPlaceholders);
+        if (!preg_match('/^[A-Za-z0-9\-_:]*$/', $formatWithoutPlaceholders)) {
+            return false;
+        }
+    
+        return true;
     }
 
 }
