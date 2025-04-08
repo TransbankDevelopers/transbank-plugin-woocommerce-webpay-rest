@@ -135,7 +135,7 @@ class WebpayTransactionsTable extends WP_List_Table
         if ($item->product === Transaction::PRODUCT_WEBPAY_ONECLICK) {
             return '-';
         }
-        return '<a href="#" 
+        return '<a href="#"
         onclick="
             const el = this;
             const full = \'' . $item->token . '\';
@@ -150,8 +150,8 @@ class WebpayTransactionsTable extends WP_List_Table
             }
 
             return false;
-        " 
-        data-state="short" 
+        "
+        data-state="short"
         title="Haz click para mostrar u ocultar el token completo"
         >...' . substr($item->token, -5) . '</a>';
     }
