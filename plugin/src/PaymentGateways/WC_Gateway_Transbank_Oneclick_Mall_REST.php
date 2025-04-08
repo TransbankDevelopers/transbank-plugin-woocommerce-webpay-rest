@@ -831,13 +831,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $isValid = true;
 
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra principal no es válido.", 
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra principal no es válido.",
             'woocommerce'));
             $isValid = false;
         }
 
         if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra hija no es válido.", 
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra hija no es válido.",
             'woocommerce'));
             $isValid = false;
         }
