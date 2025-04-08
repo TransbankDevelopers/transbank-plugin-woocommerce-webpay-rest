@@ -113,13 +113,6 @@ class WebpayTransactionsTable extends WP_List_Table
         return TbkResponseUtil::transactionDateToLocalDate($tbkResponse->transactionDate);
     }
 
-    public function column_created_at($item)
-    {
-        $utcDate = new DateTime($item->created_at, new DateTimeZone(wc_timezone_string()));
-
-        return $utcDate->format('d-m-Y H:i:s P');
-    }
-
     public function column_environment($item)
     {
         if ($item->environment === Options::ENVIRONMENT_INTEGRATION) {
