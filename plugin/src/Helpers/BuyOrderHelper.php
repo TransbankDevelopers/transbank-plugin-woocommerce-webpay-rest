@@ -51,19 +51,18 @@ class BuyOrderHelper {
      * Example format: "wc-{random, length=10}-{orderId}"
      *
      * @param string $format The template string containing placeholders.
-     * @param int|string $orderId The order ID to be inserted into the formatted string.
+     * @param string $orderId The order ID to be inserted into the formatted string.
      * @return string A generated string where placeholders are replaced with actual values.
      */
     public static function generateFromFormat(
         string $format,
-        int|string $orderId
+        string $orderId
     ): string {
-        $orderIdStr = (string)$orderId;
         $staticChars = self::countStaticChars($format);
-        $maxRandomLength = self::BUY_ORDER_MAX_LENGTH - ($staticChars + strlen($orderIdStr));
+        $maxRandomLength = self::BUY_ORDER_MAX_LENGTH - ($staticChars + strlen($orderId));
         $randomLength = self::extractRandomLength($format);
         $random = self::generateRandomComponent(min($randomLength, $maxRandomLength));
-        $formatWithOrderId = preg_replace(self::ORDER_ID_VARIABLE_PATTERN, $orderIdStr, $format);
+        $formatWithOrderId = preg_replace(self::ORDER_ID_VARIABLE_PATTERN, $orderId, $format);
         return preg_replace('/\{random(?:, length=\d+)?\}/i', $random, $formatWithOrderId);
     }
     
