@@ -511,4 +511,13 @@
     color: #666;
 }
 
+.tbk-input-error {
+    border: 2px solid red !important;
+    outline: none;
+}
+
+.tbk-input-valid {
+    border: 2px solid green !important;
+    outline: none;
+}
 

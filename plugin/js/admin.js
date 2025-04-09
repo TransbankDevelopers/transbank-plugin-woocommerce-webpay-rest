@@ -357,10 +357,14 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
             input._errorDisplay.style.display = 'block';
             input._errorDisplay.textContent = error;
             input._valueDisplay.textContent = '';
+            input.classList.remove('tbk-input-valid');
+            input.classList.add('tbk-input-error');
         }
         else{
             input._errorDisplay.style.display = 'none';
             input._valueDisplay.textContent = message;
+            input.classList.remove('tbk-input-error');
+            input.classList.add('tbk-input-valid');
         }
     };
 
