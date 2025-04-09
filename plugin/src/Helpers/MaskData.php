@@ -118,7 +118,6 @@ class MaskData
 
     /**
      * Mask a string with buy order format.
-     * If buy order starts with 'wc:child:', this will be maintained.
      *
      * @param string $buyOrder An string with buy order to mask.
      * @return string buy order masked.
