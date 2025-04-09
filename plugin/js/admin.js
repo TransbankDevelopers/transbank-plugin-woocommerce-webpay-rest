@@ -285,7 +285,7 @@ const createHelpTextBuyOrderFormat = (isOneclick) => {
     const helpText = document.createElement('div');
     helpText.className = 'tbk_buy_order_format_help_text';
     helpText.innerHTML = `
-        ${isOneclick ? `<br/><br/>` : ''}
+        <br/><br/>
         <p><strong>ℹ️ Información: </strong></p>
         <p><strong>Componentes disponibles:</strong></p>
         <p>•<code>{orderId}</code> Número de orden de compra en Woocommerce (obligatorio).</p>
