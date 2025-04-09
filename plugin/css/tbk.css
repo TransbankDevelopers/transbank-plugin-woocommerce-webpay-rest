@@ -483,19 +483,19 @@
     margin: 10px 0;
 }
 
-.tbk_buy_order_format_container {
+.tbk-buy-order-format-container {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.tbk_buy_order_format_value_display {
+.tbk-buy-order-format-value-display {
     margin-top: 8px;
     font-size: 14px;
     color: #333;
 }
 
-.tbk_buy_order_format_error_display {
+.tbk-buy-order-format-error-display {
     max-width: 600px;
     margin-top: 4px;
     font-size: 13px;
@@ -504,7 +504,7 @@
     
 }
 
-.tbk_buy_order_format_help_text {
+.tbk-buy-order-format-help-text {
     max-width: 600px;
     margin-top: 4px;
     font-size: 12px;

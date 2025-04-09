@@ -283,7 +283,7 @@ const isValidFormat = (format) => {
 
 const createHelpTextBuyOrderFormat = (isOneclick) => {
     const helpText = document.createElement('div');
-    helpText.className = 'tbk_buy_order_format_help_text';
+    helpText.className = 'tbk-buy-order-format-help-text';
     helpText.innerHTML = `
         <br/><br/>
         <p><strong>ℹ️ Información: </strong></p>
@@ -309,16 +309,16 @@ const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, other
     }
 
     const wrapper = document.createElement('div');
-    wrapper.className = 'tbk_buy_order_format_container';
+    wrapper.className = 'tbk-buy-order-format-container';
 
     input.parentNode.insertBefore(wrapper, input);
     wrapper.appendChild(input);
 
     const valueDisplay = document.createElement('div');
-    valueDisplay.className = 'tbk_buy_order_format_value_display';
+    valueDisplay.className = 'tbk-buy-order-format-value-display';
 
     const errorDisplay = document.createElement('div');
-    errorDisplay.className = 'tbk_buy_order_format_error_display';
+    errorDisplay.className = 'tbk-buy-order-format-error-display';
 
     const btn1 = document.createElement('button');
     btn1.textContent = 'Refrescar';
