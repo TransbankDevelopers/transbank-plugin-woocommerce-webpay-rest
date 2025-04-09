@@ -19,42 +19,36 @@ class WebpayTransactionsTable extends WP_List_Table
     {
         parent::__construct([
             'singular' => 'transbank_transaction',
-            'plural'   => 'transbank_transactions',
-            'ajax'     => false,
+            'plural' => 'transbank_transactions',
+            'ajax' => false,
         ]);
     }
 
     public function get_columns()
     {
         return [
-            'id'               => __('ID'),
-            'product'          => __('Producto'),
-            'order_id'         => __('Orden WooCommerce'),
-            'status'           => __('Estado interno'),
-            'transbank_status' => __('Estado Transacción'),
-            'buy_order'        => __('Orden Compra Transbank'),
-            'token'            => __('Token'),
-            'environment'      => __('Ambiente'),
-            'amount'           => __('Monto'),
-            'created_at'       => __('Fecha creación'),
-            'transaction_date' => __('Fecha Transacción Transbank'),
-            'last_refund_type' => __('Último refund'),
-            'error' => __('Error'),
-            'detail_error' => __('Detalle de Error'),
+            'order_id' => __('Nº de orden'),
+            'amount' => __('Monto'),
+            'product' => __('Producto'),
+            'status' => __('Estado'),
+            'token' => __('Token'),
+            'buy_order' => __('Orden de compra'),
+            'environment' => __('Ambiente'),
+            'transaction_date' => __('Fecha'),
+            'last_refund_type' => __('Transacción anulada'),
+            'detail_error' => __('Observaciones'),
         ];
     }
 
     public function get_sortable_columns()
     {
         return [
-            'id'          => ['id', true],
-            'buy_order'   => ['buy_order', false],
-            'amount'      => ['amount', false],
-            'order_id'    => ['order_id', false],
-            'product'     => ['product', false],
-            'status'      => ['status', false],
+            'amount' => ['amount', false],
+            'order_id' => ['order_id', false],
+            'product' => ['product', false],
+            'status' => ['status', false],
             'environment' => ['environment', false],
-            'created_at'  => ['created_at', false],
+            'transaction_date' => ['transaction_date', false],
         ];
     }
 
@@ -64,11 +58,10 @@ class WebpayTransactionsTable extends WP_List_Table
     public function prepare_items()
     {
         global $wpdb;
-
         $orderByColumns = $this->get_sortable_columns();
         $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
             ? esc_sql($_GET['orderby'])
-            : 'ID';
+            : 'order_id';
 
         $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC'])
             ? esc_sql(strtoupper($_GET['order']))
@@ -91,13 +84,13 @@ class WebpayTransactionsTable extends WP_List_Table
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $itemsQuery,
-            [$orderby, (int)$offset, (int)$perPage]
+            [$orderby, (int) $offset, (int) $perPage]
         ));
 
         $this->set_pagination_args([
             'total_items' => $totalItems,
             'total_pages' => $totalPages,
-            'per_page'    => $perPage,
+            'per_page' => $perPage,
         ]);
 
         $columns = $this->get_columns();
@@ -117,13 +110,6 @@ class WebpayTransactionsTable extends WP_List_Table
         $tbkResponse = json_decode($item->transbank_response);
 
         return TbkResponseUtil::transactionDateToLocalDate($tbkResponse->transactionDate);
-    }
-
-    public function column_created_at($item)
-    {
-        $utcDate = new DateTime($item->created_at, new DateTimeZone(wc_timezone_string()));
-
-        return $utcDate->format('d-m-Y H:i:s P');
     }
 
     public function column_environment($item)
@@ -149,8 +135,55 @@ class WebpayTransactionsTable extends WP_List_Table
         if ($item->product === Transaction::PRODUCT_WEBPAY_ONECLICK) {
             return '-';
         }
+        return '<a href="#"
+        onclick="
+            const el = this;
+            const full = \'' . $item->token . '\';
+            const short = \'...' . substr($item->token, -5) . '\';
 
-        return '<a href="" onclick="this.innerHTML=\'' . $item->token . '\';return false; " title="Haz click para ver el token completo">...' . substr($item->token, -5) . '</a>';
+            if (el.dataset.state === \'short\') {
+                el.innerText = full;
+                el.dataset.state = \'full\';
+            } else {
+                el.innerText = short;
+                el.dataset.state = \'short\';
+            }
+
+            return false;
+        "
+        data-state="short"
+        title="Haz click para mostrar u ocultar el token completo"
+        >...' . substr($item->token, -5) . '</a>';
+    }
+
+    public function column_status($item)
+    {
+        $statusDictionary = [
+            Transaction::STATUS_PREPARED => 'Preparada',
+            Transaction::STATUS_INITIALIZED => 'Inicializada',
+            Transaction::STATUS_APPROVED => 'Aprobada',
+            Transaction::STATUS_TIMEOUT => 'Timeout en formulario de pago',
+            Transaction::STATUS_ABORTED_BY_USER => 'Abortada por el usuario',
+            Transaction::STATUS_FAILED => 'Fallida',
+        ];
+
+        return $statusDictionary[$item->status] ?? $item->status;
+    }
+
+    public function column_order_id($item)
+    {
+        $userCanEditOrders = current_user_can('edit_shop_order', $item->order_id);
+
+        if ($userCanEditOrders) {
+            return '<a href="' . esc_url(admin_url('post.php?post=' . $item->order_id . '&action=edit')) . '" target="_blank">' . $item->order_id . '</a>';
+        }
+
+        return $item->order_id;
+    }
+
+    public function column_last_refund_type($item)
+    {
+        return $item->last_refund_type ? 'Si' : 'No';
     }
 
     public function column_default($item, $column_name)
