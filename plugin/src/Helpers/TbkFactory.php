@@ -32,10 +32,13 @@ class TbkFactory
             $config['webpay_rest_commerce_code'] : null;
         $apiKey = isset($config['webpay_rest_api_key']) ?
             $config['webpay_rest_api_key'] : null;
+        $buyOrderFormat = isset($config['buy_order_format']) ?
+            $config['buy_order_format'] : WebpayplusTransbankSdk::BUY_ORDER_FORMAT;
         return new WebpayplusTransbankSdk(static::createLogger(),
             $environment,
             $commerceCode,
-            $apiKey
+            $apiKey,
+            $buyOrderFormat
         );
     }
 
@@ -53,11 +56,17 @@ class TbkFactory
             $config['api_key'] : null;
         $childCommerceCode = isset($config['child_commerce_code']) ?
             $config['child_commerce_code'] : null;
+        $buyOrderFormat = isset($config['buy_order_format']) ?
+            $config['buy_order_format'] : OneclickTransbankSdk::BUY_ORDER_FORMAT;
+        $childBuyOrderFormat = isset($config['child_buy_order_format']) ?
+            $config['child_buy_order_format'] : OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT;
         return new OneclickTransbankSdk(static::createLogger(),
             $environment,
             $commerceCode,
             $apiKey,
-            $childCommerceCode
+            $childCommerceCode,
+            $buyOrderFormat,
+            $childBuyOrderFormat
         );
     }
 
