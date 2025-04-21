@@ -34,11 +34,13 @@ class Transaction extends BaseModel
 
         $whereClauses = [];
         foreach ($conditions as $column => $value) {
-            $whereClauses[] = $wpdb->prepare("`$column` = %s", $value);
+            $whereClauses[] = "`$column` = %s";
+            $values[] = $value;
         }
 
         $whereSql = implode(' AND ', $whereClauses);
         $sql = "SELECT * FROM {$tableName} WHERE {$whereSql}";
+        $safeSql = $wpdb->prepare($sql, $values);
 
         if (!empty($orderBy)) {
             if (is_array($orderBy)) {
@@ -47,10 +49,10 @@ class Transaction extends BaseModel
                 $orderBy = esc_sql($orderBy);
             }
             $orderDirection = strtoupper($orderDirection) === 'DESC' ? 'DESC' : 'ASC';
-            $sql .= " ORDER BY {$orderBy} {$orderDirection}";
+            $safeSql .= " ORDER BY {$orderBy} {$orderDirection}";
         }
 
-        return $wpdb->get_results($sql);
+        return $wpdb->get_results($safeSql);
     }
 
     /**
