@@ -30,6 +30,8 @@ use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\Plugin\Model\OneclickConfig;
 
 /**
  * Class OneclickTransbankSdk.
@@ -50,27 +52,29 @@ class OneclickTransbankSdk extends TransbankSdk
      * @var MallInscription
      */
     protected $mallInscription;
+    protected TransactionRepositoryInterface $transactionRepository;
     private $childBuyOrderFormat;
 
     public function __construct($log,
-        $environment,
-        $commerceCode,
-        $apiKey,
-        $childCommerceCode,
-        $buyOrderFormat = self::BUY_ORDER_FORMAT,
-        $childBuyOrderFormat = self::CHILD_BUY_ORDER_FORMAT)
+        OneclickConfig $config,
+        $transactionRepository
+        )
     {
         $this->log = $log;
-        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
-        $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ?
-            $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+        $this->options = $this->createOptions(
+            $config->getEnvironment(),
+            $config->getCommerceCode(),
+            $config->getApikey());
+        $this->childCommerceCode = $config->getEnvironment() === Options::ENVIRONMENT_PRODUCTION ?
+            $config->getChildCommerceCode(): Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
-        $this->buyOrderFormat = BuyOrderHelper::isValidFormat($buyOrderFormat) ?
-            $buyOrderFormat : self::BUY_ORDER_FORMAT;
-        $this->childBuyOrderFormat = BuyOrderHelper::isValidFormat($childBuyOrderFormat) ?
-            $childBuyOrderFormat : self::CHILD_BUY_ORDER_FORMAT;
+        $this->transactionRepository = $transactionRepository;
+        $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
+            $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
+        $this->childBuyOrderFormat = BuyOrderHelper::isValidFormat(
+            $config->getChildBuyOrderFormat()) ? $config->getChildBuyOrderFormat() : self::CHILD_BUY_ORDER_FORMAT;
     }
 
     /**
@@ -408,7 +412,7 @@ class OneclickTransbankSdk extends TransbankSdk
         ];
 
         /*1. Creamos la transacción antes de autorizar en TBK */
-        $insert = Transaction::createTransaction([
+        $insert = $this->transactionRepository->create([
             'order_id'            => $orderId,
             'buy_order'           => $parentBuyOrder,
             'child_buy_order'     => $childBuyOrder,
@@ -428,7 +432,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $this->errorExecution($orderId, 'authorize', $params, 'CreateTransactionOneclickException', $wpdb->last_error, $errorMessage);
             throw new CreateTransactionOneclickException($errorMessage);
         }
-        $tx = Transaction::getByBuyOrder($parentBuyOrder);
+        $tx = $this->transactionRepository->getByBuyOrder($parentBuyOrder);
         if (!isset($tx)) {
             $errorMessage = "no se creo la transacción";
             $this->errorExecution($orderId, 'authorize', $params, 'CreateTransactionOneclickException', $errorMessage, $errorMessage);
@@ -455,7 +459,7 @@ class OneclickTransbankSdk extends TransbankSdk
             }
         }
 
-        Transaction::update(
+        $this->transactionRepository->update(
             $tx->id,
             [
                 'status'              => Transaction::STATUS_APPROVED,
@@ -469,7 +473,7 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function saveTransactionWithError($txId, $error, $detailError)
     {
-        Transaction::update(
+        $this->transactionRepository->update(
             $txId,
             [
                 'status'        => Transaction::STATUS_FAILED,
@@ -485,7 +489,7 @@ class OneclickTransbankSdk extends TransbankSdk
     public function getTransactionApprovedByOrderId($orderId)
     {
         try {
-            return Transaction::getApprovedByOrderId($orderId);
+            return $this->transactionRepository->findFirstApprovedByOrderId($orderId);
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada ("orderId": "'.$orderId.'") desde la base de datos. Error: '.$e->getMessage();
             $this->logError($errorMessage);
@@ -536,7 +540,7 @@ class OneclickTransbankSdk extends TransbankSdk
             throw new RejectedRefundOneclickException($errorMessage, $tx->buy_order, $tx->child_buy_order, $tx, $response);
         }
         /*4. Si todo ok guardamos el estado */
-        Transaction::update(
+        $this->transactionRepository->update(
             $tx->id,
             [
                 'last_refund_type'    => $response->getType(),
