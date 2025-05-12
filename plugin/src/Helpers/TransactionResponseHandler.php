@@ -9,6 +9,7 @@ use Transbank\Plugin\Exceptions\Webpay\TimeoutWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\UserCancelWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\DoubleTokenWebpayException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 
 class TransactionResponseHandler
 {
@@ -23,16 +24,18 @@ class TransactionResponseHandler
     const WEBPAY_ABORTED_FLOW_MESSAGE = 'Orden anulada por el usuario.';
     const WEBPAY_ERROR_FLOW_MESSAGE = 'Orden cancelada por un error en el formulario de pago.';
 
+    protected TransactionRepositoryInterface $transactionRepository;
     protected WebpayplusTransbankSdk $webpayPlusTransaction;
 
     public function __construct()
     {
+        $this->transactionRepository = TbkFactory::createTransactionRepository();
         $this->webpayPlusTransaction = TbkFactory::createWebpayplusTransbankSdk();
     }
 
     private function isTransactionProcessed(string $token): bool
     {
-        $transaction = Transaction::getByToken($token);
+        $transaction = $this->transactionRepository->getByToken($token);
         $status = $transaction->status;
 
         return $status != Transaction::STATUS_INITIALIZED;
@@ -40,7 +43,7 @@ class TransactionResponseHandler
 
     private function handleProcessedTransaction(string $token)
     {
-        $transaction = get_object_vars(Transaction::getByToken($token)) ?? null;
+        $transaction = get_object_vars($this->transactionRepository->getByToken($token)) ?? null;
         $buyOrder = $transaction['buy_order'] ?? null;
         $status = $transaction['status'] ?? null;
         $logMessage = self::WEBPAY_ALREADY_PROCESSED_MESSAGE;
@@ -120,13 +123,13 @@ class TransactionResponseHandler
             $this->handleProcessedTransaction($token);
         }
 
-        return Transaction::getByToken($token);
+        return $this->transactionRepository->getByToken($token);
     }
 
     private function handleTimeoutFlow(string $sessionId, string $buyOrder)
     {
         $this->webpayPlusTransaction->logInfo("Flujo de timeout detectado, sessionId: $sessionId, buyOrder: $buyOrder");
-        $transaction = Transaction::getByBuyOrderAndSessionId($buyOrder, $sessionId) ?? null;
+        $transaction = $this->transactionRepository->getByBuyOrderAndSessionId($buyOrder, $sessionId) ?? null;
         $token = $transaction->token ?? null;
 
         if ($this->isTransactionProcessed($token)) {

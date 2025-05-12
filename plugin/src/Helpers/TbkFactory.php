@@ -6,6 +6,8 @@ use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Model\LogConfig;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 
 define(
     'TRANSBANK_WEBPAY_REST_UPLOADS',
@@ -35,7 +37,8 @@ class TbkFactory
         return new WebpayplusTransbankSdk(static::createLogger(),
             $environment,
             $commerceCode,
-            $apiKey
+            $apiKey,
+            static::createTransactionRepository()
         );
     }
 
@@ -57,8 +60,22 @@ class TbkFactory
             $environment,
             $commerceCode,
             $apiKey,
-            $childCommerceCode
+            $childCommerceCode,
+            static::createTransactionRepository()
         );
+    }
+
+    /**
+     * Create and return an instance of the TransactionRepository.
+     *
+     * This allows decoupling from the concrete implementation
+     * and makes the codebase easier to maintain and test.
+     *
+     * @return TransactionRepositoryInterface
+     */
+    public static function createTransactionRepository(): TransactionRepositoryInterface
+    {
+        return new TransactionRepository();
     }
 
 }

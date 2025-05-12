@@ -59,7 +59,7 @@ class TransactionStatusController
         $this->logger->logDebug('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = Transaction::getApprovedByOrderId($orderId);
+            $transaction = TbkFactory::createTransactionRepository()->findFirstApprovedByOrderId($orderId);
 
             if (!$transaction) {
                 $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
