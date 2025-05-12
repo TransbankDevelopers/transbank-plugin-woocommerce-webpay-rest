@@ -43,7 +43,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getByToken(string $token)
     {
         $result = Transaction::findByToken($token);
-        if (!is_array($result) || count($result) <= 0) {
+        if (!is_array($result) || empty($result)) {
             throw new TokenNotFoundOnDatabaseException(
                 "Token '{$token}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
@@ -60,7 +60,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getByBuyOrder(string $buyOrder)
     {
         $result = Transaction::findByBuyOrder($buyOrder);
-        if (!is_array($result) || count($result) <= 0) {
+        if (!is_array($result) || empty($result)) {
             throw new TokenNotFoundOnDatabaseException(
                 "BuyOrder '{$buyOrder}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
@@ -90,7 +90,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId)
     {
         $result = Transaction::findByBuyOrderAndSessionId($buyOrder, $sessionId);
-        if (!is_array($result) || count($result) <= 0) {
+        if (!is_array($result) || empty($result)) {
             throw new TokenNotFoundOnDatabaseException(
                 "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
