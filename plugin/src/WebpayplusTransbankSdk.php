@@ -186,7 +186,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
         /*2. Validamos que la insercion en la bd fue exitosa */
         if (!$insert) {
-            $transactionTable = Transaction::getTableName();
+            $transactionTable = $this->transactionRepository->getTableName();
             $wpdb->show_errors();
             $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
             $this->errorExecution($orderId, 'create', $params, 'CreateTransactionWebpayException', $wpdb->last_error, $errorMessage);
