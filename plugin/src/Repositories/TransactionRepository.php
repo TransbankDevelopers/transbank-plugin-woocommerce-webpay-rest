@@ -4,16 +4,25 @@ namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException;
+use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
 
     /**
-     * Update an existing transaction record by its ID.
+     * Get the name of the transaction database table.
      *
-     * @param int $transactionId
-     * @param array $data
+     * @return string The name of the table used to store transactions.
+     */
+    public function getTableName(): string
+    {
+        return Transaction::getTableName();
+    }
+
+    /**
+     * Create a transaction record.
+     *
+     * @param array $data Transaction data to be stored.
      * @return mixed
      */
     public function create(array $data)
@@ -22,10 +31,10 @@ class TransactionRepository implements TransactionRepositoryInterface
     }
 
     /**
-     * Update an existing transaction record by its ID.
+     * Update an existing transaction record by id.
      *
-     * @param string $transactionId
-     * @param array $data
+     * @param string $transactionId Token identifying the transaction.
+     * @param array $data New data to update the transaction with.
      * @return mixed
      */
     public function update(string $transactionId, array $data)
@@ -34,41 +43,41 @@ class TransactionRepository implements TransactionRepositoryInterface
     }
 
      /**
-     * Retrieve a transaction by buy order. Throws if not found.
+     * Retrieve a transaction by token. Throws an exception if not found.
      *
-     * @param string $buyOrder
+     * @param string $token The transaction token.
      * @return mixed
-     * @throws TokenNotFoundOnDatabaseException
+     * @throws RecordNotFoundOnDatabaseException
      */
     public function getByToken(string $token)
     {
         $result = Transaction::findByToken($token);
         if (!is_array($result) || empty($result)) {
-            throw new TokenNotFoundOnDatabaseException(
+            throw new RecordNotFoundOnDatabaseException(
                 "Token '{$token}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
         return $result[0];
     }
 
      /**
-     * Retrieve a transaction by buy order. Throws if not found.
+     * Retrieve a transaction by buyOrder. Throws an exception if not found.
      *
-     * @param string $buyOrder
+     * @param string $buyOrder The buy order associated with the transaction.
      * @return mixed
-     * @throws TokenNotFoundOnDatabaseException
+     * @throws RecordNotFoundOnDatabaseException
      */
     public function getByBuyOrder(string $buyOrder)
     {
         $result = Transaction::findByBuyOrder($buyOrder);
         if (!is_array($result) || empty($result)) {
-            throw new TokenNotFoundOnDatabaseException(
+            throw new RecordNotFoundOnDatabaseException(
                 "BuyOrder '{$buyOrder}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
         return $result[0];
     }
 
     /**
-     * Retrieve the first approved transaction by order ID.
+     * Retrieve the first approved transaction by orderId.
      *
      * @param string $orderId
      * @return mixed|null
@@ -80,25 +89,25 @@ class TransactionRepository implements TransactionRepositoryInterface
     }
 
     /**
-     * Retrieve a transaction by buy order and session ID. Throws if not found.
+     * Retrieve a transaction by buyOrder and sessionId. Throws if not found.
      *
      * @param string $buyOrder
      * @param string $sessionId
      * @return mixed
-     * @throws TokenNotFoundOnDatabaseException
+     * @throws RecordNotFoundOnDatabaseException
      */
     public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId)
     {
         $result = Transaction::findByBuyOrderAndSessionId($buyOrder, $sessionId);
         if (!is_array($result) || empty($result)) {
-            throw new TokenNotFoundOnDatabaseException(
+            throw new RecordNotFoundOnDatabaseException(
                 "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
         }
         return $result[0];
     }
 
     /**
-     * Retrieve the first transaction by order ID.
+     * Retrieve the first transaction by orderId.
      *
      * @param mixed $orderId
      * @return object|null
