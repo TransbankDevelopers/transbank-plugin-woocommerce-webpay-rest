@@ -56,6 +56,7 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 1. Página de configuración de Webpay Plus
 2. Página de configuración de Webpay Oneclick
 3. Página de diagnostico
+4. Página de logs
 
 == Changelog ==
 = 1.11.0 =
