@@ -58,6 +58,20 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 3. Página de diagnostico
 
 == Changelog ==
+= 1.11.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+ 
+__Agrega:__
+
+* Se agrega a la opción de utilizar un formato de orden de compra personalizado para las transacciones de Webpay Plus y Webpay Oneclick. Esto se puede realizar desde las opciones de configuración de cada producto.
+ 
+__Actualiza:__
+
+* Se permite consultar el estado de las transacciones Webpay Plus y Webpay Oneclick para todas las órdenes que tenga una  transacción asociada. Antes solo se permitía si la transacción se encontraba aprobada previamente.
+* Se actualiza los nombres de columnas en la tabla transacciones con el objetivo de promover una lectura más clara y coherente.
+* Se actualiza el texto de la opción de activación de producto con el objetivo de promover una lectura más clara y coherente.
+* Se actualizan las dependencias necesarias para construir el plugin.
+
 = 1.10.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
@@ -146,6 +160,32 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
 
 == Upgrade Notice ==
+= 1.11.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+ 
+__Agrega:__
+
+* Se agrega a la opción de utilizar un formato de orden de compra personalizado para las transacciones de Webpay Plus y Webpay Oneclick. Esto se puede realizar desde las opciones de configuración de cada producto.
+ 
+__Actualiza:__
+
+* Se permite consultar el estado de las transacciones Webpay Plus y Webpay Oneclick para todas las órdenes que tenga una  transacción asociada. Antes solo se permitía si la transacción se encontraba aprobada previamente.
+* Se actualiza los nombres de columnas en la tabla transacciones con el objetivo de promover una lectura más clara y coherente.
+* Se actualiza el texto de la opción de activación de producto con el objetivo de promover una lectura más clara y coherente.
+* Se actualizan las dependencias necesarias para construir el plugin.
+
+= 1.10.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
+__Agrega:__
+
+* Se agrega botón de descarga para los archivos de logs.
+
+__Actualiza:__
+
+* Se actualizan las dependencias para ampliar la compatibilidad con plugin de terceros.
+* Se actualiza el diseño de la respuesta de estado de transacción.
+
 = 1.9.3 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
