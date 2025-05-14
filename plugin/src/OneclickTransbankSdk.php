@@ -31,6 +31,7 @@ use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\Plugin\Model\OneclickConfig;
 
 /**
@@ -53,11 +54,13 @@ class OneclickTransbankSdk extends TransbankSdk
      */
     protected $mallInscription;
     protected TransactionRepositoryInterface $transactionRepository;
+    protected InscriptionRepositoryInterface $inscriptionRepository;
     private $childBuyOrderFormat;
 
     public function __construct($log,
         OneclickConfig $config,
-        $transactionRepository
+        $transactionRepository,
+        $inscriptionRepository
         )
     {
         $this->log = $log;
@@ -71,6 +74,7 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
         $this->transactionRepository = $transactionRepository;
+        $this->inscriptionRepository = $inscriptionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
         $this->childBuyOrderFormat = BuyOrderHelper::isValidFormat(
@@ -208,7 +212,7 @@ class OneclickTransbankSdk extends TransbankSdk
 
         /*1. Iniciamos la inscripcion */
         $refundResponse = $this->startInner($orderId, $username, $email, $returnUrl);
-        $insert = Inscription::create([
+        $insert = $this->inscriptionRepository->create([
             'token'                 => $refundResponse->getToken(),
             'username'              => $username,
             'order_id'              => $orderId,
@@ -278,7 +282,7 @@ class OneclickTransbankSdk extends TransbankSdk
         $params = [
             'tbkToken' => $tbkToken
         ];
-        $inscription = Inscription::getByToken($tbkToken);
+        $inscription = $this->inscriptionRepository->getByToken($tbkToken);
 
         if ($inscription->status !== Inscription::STATUS_INITIALIZED) {
             $errorMessage = 'La inscripción no se encuentra en estado inicializada: '.$tbkToken;
@@ -313,7 +317,7 @@ class OneclickTransbankSdk extends TransbankSdk
     public function getInscriptionByToken($tbkToken)
     {
         try {
-            return Inscription::getByToken($tbkToken);
+            return $this->inscriptionRepository->getByToken($tbkToken);
         } catch (Exception $e) {
             $error = 'Ocurrió un error al obtener la inscripción: '.$e->getMessage();
             $this->logError($error);
@@ -327,7 +331,7 @@ class OneclickTransbankSdk extends TransbankSdk
         try {
             $response = $this->mallInscription->finish($tbkToken);
             $this->afterExecutionTbkApi($orderId, 'finish', $params, $response);
-            Inscription::update($inscription->id, [
+            $this->inscriptionRepository->update($inscription->id, [
                 'finished'           => true,
                 'authorization_code' => $response->getAuthorizationCode(),
                 'card_type'          => $response->getCardType(),
@@ -346,11 +350,11 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function saveInscriptionWithError($tbkToken, $error, $detailError)
     {
-        $inscription = Inscription::getByToken($tbkToken);
+        $inscription = $this->inscriptionRepository->getByToken($tbkToken);
         if ($inscription == null) {
             return null;
         }
-        Inscription::update($inscription->id, [
+        $this->inscriptionRepository->update($inscription->id, [
             'status' => Inscription::STATUS_FAILED,
             'error' => $error,
             'detail_error' => $detailError

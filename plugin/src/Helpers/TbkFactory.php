@@ -9,7 +9,9 @@ use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 
 define(
     'TRANSBANK_WEBPAY_REST_UPLOADS',
@@ -62,15 +64,13 @@ class TbkFactory
         return new OneclickTransbankSdk(
             static::createLogger(),
             static::getOneclickConfig(),
-            static::createTransactionRepository()
+            static::createTransactionRepository(),
+            static::createInscriptionRepository()
         );
     }
 
     /**
      * Create and return an instance of the TransactionRepository.
-     *
-     * This allows decoupling from the concrete implementation
-     * and makes the codebase easier to maintain and test.
      *
      * @return TransactionRepositoryInterface
      */
@@ -79,6 +79,15 @@ class TbkFactory
         return new TransactionRepository();
     }
 
+    /**
+     * Create and return an instance of the InscriptionRepository.
+     *
+     * @return InscriptionRepositoryInterface
+     */
+    public static function createInscriptionRepository(): InscriptionRepositoryInterface
+    {
+        return new InscriptionRepository();
+    }
 
 }
 
