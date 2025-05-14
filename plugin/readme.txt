@@ -135,30 +135,6 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 = 1.6.8 =
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
-= 1.6.7 =
-* Se sanitiza consulta sql por seguridad.
-
-= 1.6.6 =
-* Se corrige un problema con el versionamiento.
-
-= 1.6.5 =
-* Se agrega un servicio para recolectar datos que nos permitirán darle mayor seguimiento a las versiones del plugin y las versiones de WooCommerce mas usadas.
-
-= 1.6.4 =
-* Se mejora el log detallado para darle seguimiento a los errores.
-
-= 1.6.3 =
-* Se mueve la carpeta de logs al interior de la carpeta del plugin
-
-= 1.6.2 =
-* Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
-
-= 1.6.1 =
-* Se corrige error con librería "monolog/monolog"
-
-= 1.6.0 =
-* Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
-
 == Upgrade Notice ==
 = 1.11.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
@@ -236,27 +212,3 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 
 = 1.6.8 =
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
-
-= 1.6.7 =
-* Se sanitiza consulta sql por seguridad.
-
-= 1.6.6 =
-* Se corrige un problema con el versionamiento.
-
-= 1.6.5 =
-* Se agrega un servicio para recolectar datos que nos permitirán darle mayor seguimiento a las versiones del plugin y las versiones de WooCommerce mas usadas.
-
-= 1.6.4 =
-* Se mejora el log detallado para darle seguimiento a los errores.
-
-= 1.6.3 =
-* Se mueve la carpeta de logs al interior de la carpeta del plugin
-
-= 1.6.2 =
-* Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
-
-= 1.6.1 =
-* Se corrige error con librería "monolog/monolog"
-
-= 1.6.0 =
-* Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
