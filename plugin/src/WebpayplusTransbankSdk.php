@@ -39,6 +39,8 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     public function __construct($log,
         WebpayplusConfig $config,
+        $apiServiceLogRepository,
+        $errorLogRepository,
         $transactionRepository
         )
     {
@@ -49,6 +51,8 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $config->getApikey());
         $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
+        $this->apiServiceLogRepository = $apiServiceLogRepository;
+        $this->errorLogRepository = $errorLogRepository;
         $this->transactionRepository = $transactionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;

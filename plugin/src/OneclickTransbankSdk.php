@@ -59,6 +59,8 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function __construct($log,
         OneclickConfig $config,
+        $apiServiceLogRepository,
+        $errorLogRepository,
         $transactionRepository,
         $inscriptionRepository
         )
@@ -73,6 +75,8 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
+        $this->apiServiceLogRepository = $apiServiceLogRepository;
+        $this->errorLogRepository = $errorLogRepository;
         $this->transactionRepository = $transactionRepository;
         $this->inscriptionRepository = $inscriptionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
