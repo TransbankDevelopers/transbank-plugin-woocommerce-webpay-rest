@@ -11,13 +11,14 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
+use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\CreateTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
+use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use WC_Order;
 use WC_Payment_Gateway;
 
@@ -31,12 +32,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     const PAYMENT_GW_DESCRIPTION = 'Permite el pago de productos y/o servicios, ' .
         'con tarjetas de crédito, débito y prepago a través de Webpay Plus';
 
+
     protected $plugin_url;
     protected $log;
     protected $config;
 
     /**
-     * @var Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk
+     * @var WebpayplusTransbankSdk
      */
     protected $webpayplusTransbankSdk;
 
@@ -164,6 +166,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $apiKeyDescription = 'Esta llave privada te la entregará Transbank luego de que completes el proceso ' .
             'de validación (link más abajo).<br/><br/>No la compartas con nadie una vez que la tengas. ';
 
+        $buyOrderDescription = 'Define un formato personalizado para la orden de compra asociada a la transacción en
+            Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
+
         $this->form_fields = [
             'enabled' => [
                 'title' => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
@@ -211,6 +216,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
+            ],
+            'buy_order_format' => [
+                'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
+                'placeholder' => 'Ej: ' . WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+                'desc_tip'    => $buyOrderDescription,
+                'type'        => 'text',
+                'default' => WebpayplusTransbankSdk::BUY_ORDER_FORMAT
             ]
         ];
     }
@@ -259,8 +271,6 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             do_action($errorHookName, new Exception($errorMessage), true);
             BlocksHelper::addLegacyNotices($errorMessage, 'error');
             return;
-        } catch (CreateTransactionWebpayException $e) {
-            throw new EcommerceException($e->getMessage(), $e);
         } catch (Throwable $e) {
             throw new EcommerceException($e->getMessage(), $e);
         }
@@ -276,5 +286,18 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $tab = 'options';
         $environment = $this->config['MODO'];
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
+    }
+
+    public function process_admin_options() {
+        $buyOrderFormat = isset($_POST[$this->get_field_key('buy_order_format')])
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])): '';
+
+        if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
+            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra no es válido.",
+            'woocommerce'));
+        }
+        else  {
+            parent::process_admin_options();
+        }
     }
 }

@@ -1,8 +1,8 @@
 === Transbank Webpay ===
 Contributors: TransbankDevelopers
-Tags: transbank, webpay plus, webpay oneclick
+Tags: transbank, webpay_plus, webpay_oneclick
 Requires at least: 5.3
-Tested up to: 6.7.1
+Tested up to: 6.8.1
 Requires PHP: 7.4
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
@@ -56,8 +56,23 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 1. Página de configuración de Webpay Plus
 2. Página de configuración de Webpay Oneclick
 3. Página de diagnostico
+4. Página de logs
 
 == Changelog ==
+= 1.11.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+ 
+__Agrega:__
+
+* Se agrega a la opción de utilizar un formato de orden de compra personalizado para las transacciones de Webpay Plus y Webpay Oneclick. Esto se puede realizar desde las opciones de configuración de cada producto.
+ 
+__Actualiza:__
+
+* Se permite consultar el estado de las transacciones Webpay Plus y Webpay Oneclick para todas las órdenes que tenga una  transacción asociada. Antes solo se permitía si la transacción se encontraba aprobada previamente.
+* Se actualiza los nombres de columnas en la tabla transacciones con el objetivo de promover una lectura más clara y coherente.
+* Se actualiza el texto de la opción de activación de producto con el objetivo de promover una lectura más clara y coherente.
+* Se actualizan las dependencias necesarias para construir el plugin.
+
 = 1.10.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
@@ -121,31 +136,33 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 = 1.6.8 =
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
-= 1.6.7 =
-* Se sanitiza consulta sql por seguridad.
-
-= 1.6.6 =
-* Se corrige un problema con el versionamiento.
-
-= 1.6.5 =
-* Se agrega un servicio para recolectar datos que nos permitirán darle mayor seguimiento a las versiones del plugin y las versiones de WooCommerce mas usadas.
-
-= 1.6.4 =
-* Se mejora el log detallado para darle seguimiento a los errores.
-
-= 1.6.3 =
-* Se mueve la carpeta de logs al interior de la carpeta del plugin
-
-= 1.6.2 =
-* Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
-
-= 1.6.1 =
-* Se corrige error con librería "monolog/monolog"
-
-= 1.6.0 =
-* Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad
-
 == Upgrade Notice ==
+= 1.11.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+ 
+__Agrega:__
+
+* Se agrega a la opción de utilizar un formato de orden de compra personalizado para las transacciones de Webpay Plus y Webpay Oneclick. Esto se puede realizar desde las opciones de configuración de cada producto.
+ 
+__Actualiza:__
+
+* Se permite consultar el estado de las transacciones Webpay Plus y Webpay Oneclick para todas las órdenes que tenga una  transacción asociada. Antes solo se permitía si la transacción se encontraba aprobada previamente.
+* Se actualiza los nombres de columnas en la tabla transacciones con el objetivo de promover una lectura más clara y coherente.
+* Se actualiza el texto de la opción de activación de producto con el objetivo de promover una lectura más clara y coherente.
+* Se actualizan las dependencias necesarias para construir el plugin.
+
+= 1.10.0 =
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
+__Agrega:__
+
+* Se agrega botón de descarga para los archivos de logs.
+
+__Actualiza:__
+
+* Se actualizan las dependencias para ampliar la compatibilidad con plugin de terceros.
+* Se actualiza el diseño de la respuesta de estado de transacción.
+
 = 1.9.3 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
@@ -196,27 +213,3 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 
 = 1.6.8 =
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
-
-= 1.6.7 =
-* Se sanitiza consulta sql por seguridad.
-
-= 1.6.6 =
-* Se corrige un problema con el versionamiento.
-
-= 1.6.5 =
-* Se agrega un servicio para recolectar datos que nos permitirán darle mayor seguimiento a las versiones del plugin y las versiones de WooCommerce mas usadas.
-
-= 1.6.4 =
-* Se mejora el log detallado para darle seguimiento a los errores.
-
-= 1.6.3 =
-* Se mueve la carpeta de logs al interior de la carpeta del plugin
-
-= 1.6.2 =
-* Se agrega el uso del comando 'wp_mkdir_p' en la creación de la carpeta usada para guardar logs
-
-= 1.6.1 =
-* Se corrige error con librería "monolog/monolog"
-
-= 1.6.0 =
-* Se cambia la librería de logs "apache/log4php" por "monolog/monolog": "^1.27" por problemas de compatibilidad

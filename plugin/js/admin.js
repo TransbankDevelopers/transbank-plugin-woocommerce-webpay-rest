@@ -246,3 +246,170 @@ jQuery(function($) {
         });
     });
 })
+
+const generateRandomString = (length = 6) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let result = '';
+    const randomValues = new Uint8Array(length);
+    crypto.getRandomValues(randomValues);
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(randomValues[i] % charactersLength);
+    }
+    return result;
+};
+
+const generateBuyOrderPreview = (format) => {
+    const array = new Uint16Array(1);
+    crypto.getRandomValues(array);
+    const orderId = 10000 + (array[0] % 90000); 
+    return format
+        .replace(/\{orderId\}/gi, orderId.toString())
+        .replace(/\{random(?:, length=\d+)?\}/gi, (_, length) =>
+            generateRandomString(length ? parseInt(length, 10) : 6)
+        );
+};
+
+const isValidFormat = (format) => {
+    const allowedCharsRegex = /^[A-Za-z0-9-_:]*$/;
+    const formatWithoutPlaceholders = format
+        .replace(/\{orderId\}/gi, '') 
+        .replace(/\{random(?:, length=\d+)?\}/gi, ''); 
+    if (!allowedCharsRegex.test(formatWithoutPlaceholders)) {
+        return false;
+    }
+    return /\{orderId\}/i.test(format); 
+};
+
+const createHelpTextBuyOrderFormat = (isOneclick) => {
+    const helpText = document.createElement('div');
+    helpText.className = 'tbk-buy-order-format-help-text';
+    helpText.innerHTML = `
+        <br/><br/>
+        <p><strong>ℹ️ Información: </strong></p>
+        <p><strong>Componentes disponibles:</strong></p>
+        <p>•<code>{orderId}</code> Número de orden de compra en Woocommerce (obligatorio).</p>
+        <p>•<code>{random}</code> Texto aleatorio con longitud de 8 caracteres (opcional).</p>
+        <p>•<code>{random, length=12}</code> Texto aleatorio con longitud especifica (opcional).</p>
+        <p><strong>Ejemplo:</strong> <code>cualquierTexto-{random, length=12}-{orderId}</code></p>
+        <p><strong>Notas:</strong></p> 
+        <p>•Solo se permiten caracteres alfanuméricos, guiones (<code>-</code>), guiones bajos (<code>_</code>)
+            o dos puntos (<code>:</code>). No se permiten espacios. </p>  
+        <p>•El valor generado no puede exceder los 26 caracteres.</p>
+        ${isOneclick ? 
+        `<p>•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.</p>` : ''}
+    `;
+    return helpText;
+}
+
+const attachBuyOrderFormatComponent = (inputId, defaultFormat, isOneclick, otherInputId, addHelpText) => {
+    const input = document.getElementById(inputId);
+    if (!input) {
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tbk-buy-order-format-container';
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const valueDisplay = document.createElement('div');
+    valueDisplay.className = 'tbk-buy-order-format-value-display';
+
+    const errorDisplay = document.createElement('div');
+    errorDisplay.className = 'tbk-buy-order-format-error-display';
+
+    const btn1 = document.createElement('button');
+    btn1.textContent = 'Refrescar';
+    btn1.className = 'button button-primary tbk-button-primary';
+    btn1.addEventListener('click', (event) => {
+        event.preventDefault();
+        validateAndDisplay(inputId);
+    });
+
+    const btn2 = document.createElement('button');
+    btn2.textContent = 'Restablecer';
+    btn2.className = 'button button-secondary tbk-button-secondary';
+    btn2.addEventListener('click', (event) => {
+        event.preventDefault();
+        input.value = defaultFormat;
+        validateAndDisplay(inputId);
+    });
+
+    wrapper.appendChild(btn1);
+    wrapper.appendChild(btn2);
+    wrapper.parentNode.insertBefore(valueDisplay, wrapper.nextSibling);
+    wrapper.parentNode.insertBefore(errorDisplay, valueDisplay.nextSibling);
+
+    if (addHelpText){
+        const helpText = createHelpTextBuyOrderFormat(isOneclick);
+        wrapper.parentNode.insertBefore(helpText, errorDisplay.nextSibling);
+    }
+
+    input._errorDisplay = errorDisplay;
+    input._valueDisplay = valueDisplay;
+    input._otherInputId = otherInputId;
+
+    const setDisplay = (inputId, message, error) => {
+        const input = document.getElementById(inputId);
+        if (error){
+            input._errorDisplay.style.display = 'block';
+            input._errorDisplay.textContent = error;
+            input._valueDisplay.textContent = '';
+            input.classList.remove('tbk-input-valid');
+            input.classList.add('tbk-input-error');
+        }
+        else{
+            input._errorDisplay.style.display = 'none';
+            input._valueDisplay.textContent = message;
+            input.classList.remove('tbk-input-error');
+            input.classList.add('tbk-input-valid');
+        }
+    };
+
+    const validateAndDisplay = (inputId, isRecursive) => {
+        const input = document.getElementById(inputId);
+        if (!input?._valueDisplay) {
+            return; 
+        }
+        const value = input.value;
+        if (isValidFormat(value)) {
+            const preview = generateBuyOrderPreview(value);
+            setDisplay(inputId, `✅ Vista previa: ${preview} (${preview.length} caracteres)`, null);
+        } else {
+            setDisplay(inputId, null, `❌ Formato inválido. Asegúrate de que contenga solo caracteres alfanuméricos, 
+                guiones (-), guiones bajos (_) o dos puntos (:), sin espacios, y que contenga {orderId}.`);
+            return;
+        }
+        if (isOneclick){
+            const otherInput = document.getElementById(input._otherInputId);
+            if (!otherInput) {
+                return; 
+            }
+            const otherFormat = otherInput.value;
+            if (otherFormat && value && (otherFormat.toUpperCase() === value.toUpperCase())) {
+                setDisplay(inputId, null, `❌ El formato de orden de compra hija no puede ser igual 
+                    al formato de orden de compra principal.`);
+            }
+            if (!isRecursive){
+                validateAndDisplay(input._otherInputId, true);
+            }
+        }
+    };
+
+    input.addEventListener('input', (event) => {
+        validateAndDisplay(inputId);
+    });
+
+    validateAndDisplay(inputId);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    attachBuyOrderFormatComponent('woocommerce_transbank_webpay_plus_rest_buy_order_format', 
+        'wc-{random, length=8}-{orderId}', false, null, true);
+    attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_buy_order_format', 
+        'wc-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', false);
+    attachBuyOrderFormatComponent('woocommerce_transbank_oneclick_mall_rest_child_buy_order_format', 
+        'wc-child-{random, length=8}-{orderId}', true, 'woocommerce_transbank_oneclick_mall_rest_buy_order_format', true);
+});
