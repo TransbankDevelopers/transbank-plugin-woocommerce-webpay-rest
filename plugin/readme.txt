@@ -2,7 +2,7 @@
 Contributors: TransbankDevelopers
 Tags: transbank, webpay plus, webpay oneclick
 Requires at least: 5.3
-Tested up to: 6.7.1
+Tested up to: 6.8.1
 Requires PHP: 7.4
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
