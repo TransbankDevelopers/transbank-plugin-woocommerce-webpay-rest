@@ -171,8 +171,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         $this->form_fields = [
             'enabled' => [
-                'title' => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
+                'title' => __('Activo', 'transbank_webpay_plus_rest'),
                 'type' => 'checkbox',
+                'label' => " ",
                 'default' => 'yes',
             ],
             'webpay_rest_environment' => [
