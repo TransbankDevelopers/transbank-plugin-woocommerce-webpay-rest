@@ -94,6 +94,7 @@ class TbkFactory
     {
         return new InscriptionRepository();
     }
+    
 
 }
 
