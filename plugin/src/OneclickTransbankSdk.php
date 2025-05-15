@@ -87,12 +87,12 @@ class OneclickTransbankSdk extends TransbankSdk
 
     /**
      * @return Options
-    */
+     */
     private function createOptions($environment, $commerceCode, $apiKey)
     {
-        $options = \Transbank\Webpay\Oneclick\MallTransaction::getDefaultOptions();
+        $options = new Options(Oneclick::INTEGRATION_API_KEY, Oneclick::INTEGRATION_COMMERCE_CODE, Options::ENVIRONMENT_INTEGRATION);
         if ($environment == Options::ENVIRONMENT_PRODUCTION) {
-            $options = Options::forProduction($commerceCode, $apiKey);
+            $options = new Options($apiKey, $commerceCode, Options::ENVIRONMENT_PRODUCTION);
         }
         return $options;
     }
