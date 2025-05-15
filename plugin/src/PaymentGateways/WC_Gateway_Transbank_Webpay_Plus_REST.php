@@ -64,9 +64,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $this->config = [
             'MODO' => trim($this->get_option('webpay_rest_environment', 'TEST')),
             'COMMERCE_CODE' => trim(
-                $this->get_option('webpay_rest_commerce_code', WebpayPlus::DEFAULT_COMMERCE_CODE)
+                $this->get_option('webpay_rest_commerce_code', WebpayPlus::INTEGRATION_COMMERCE_CODE)
             ),
-            'API_KEY' => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
+            'API_KEY' => $this->get_option('webpay_rest_api_key', WebpayPlus::INTEGRATION_API_KEY),
             'ECOMMERCE' => 'woocommerce',
             'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', ''),
         ];

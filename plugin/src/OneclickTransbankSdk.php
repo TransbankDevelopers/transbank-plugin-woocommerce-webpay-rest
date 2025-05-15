@@ -63,7 +63,7 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->log = $log;
         $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
         $this->childCommerceCode = $environment === Options::ENVIRONMENT_PRODUCTION ?
-            $childCommerceCode : Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+            $childCommerceCode : Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
@@ -75,12 +75,12 @@ class OneclickTransbankSdk extends TransbankSdk
 
     /**
      * @return Options
-    */
+     */
     private function createOptions($environment, $commerceCode, $apiKey)
     {
-        $options = \Transbank\Webpay\Oneclick\MallTransaction::getDefaultOptions();
+        $options = new Options(Oneclick::INTEGRATION_API_KEY, Oneclick::INTEGRATION_COMMERCE_CODE, Options::ENVIRONMENT_INTEGRATION);
         if ($environment == Options::ENVIRONMENT_PRODUCTION) {
-            $options = Options::forProduction($commerceCode, $apiKey);
+            $options = new Options($apiKey, $commerceCode, Options::ENVIRONMENT_PRODUCTION);
         }
         return $options;
     }
