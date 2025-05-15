@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest;
 
 use \Exception;
 use Transbank\Webpay\Options;
+use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
@@ -46,12 +47,12 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     /**
      * @return Options
-    */
+     */
     private function createOptions($environment, $commerceCode, $apiKey)
     {
-        $options = WebpayPlusTransaction::getDefaultOptions();
+        $options = new Options(WebpayPlus::INTEGRATION_API_KEY, WebpayPlus::INTEGRATION_COMMERCE_CODE, Options::ENVIRONMENT_INTEGRATION);
         if ($environment == Options::ENVIRONMENT_PRODUCTION) {
-            $options = Options::forProduction($commerceCode, $apiKey);
+            $options = new Options($apiKey, $commerceCode, Options::ENVIRONMENT_PRODUCTION);
         }
         return $options;
     }
