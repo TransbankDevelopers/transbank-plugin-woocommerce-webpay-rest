@@ -5,7 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use \Exception;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\Models\Inscription;
+use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use  Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
 use  Transbank\Plugin\Exceptions\Oneclick\InvalidStatusInscriptionOneclickException;
 use  Transbank\Plugin\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
@@ -24,6 +24,7 @@ class OneclickInscriptionResponseController
     * @var Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk
     */
     protected $oneclickTransbankSdk;
+    protected InscriptionRepositoryInterface $inscriptionRepository;
     /**
      * OneclickInscriptionResponseController constructor.
      */
@@ -31,6 +32,7 @@ class OneclickInscriptionResponseController
     {
         $this->logger = TbkFactory::createLogger();
         $this->gatewayId = $gatewayId;
+        $this->inscriptionRepository = TbkFactory::createInscriptionRepository();
         $this->oneclickTransbankSdk = TbkFactory::createOneclickTransbankSdk();
     }
 
@@ -87,7 +89,7 @@ class OneclickInscriptionResponseController
                 $order->add_order_note('Tarjeta inscrita satisfactoriamente');
             }
 
-            Inscription::update($inscription->id, [
+            $this->inscriptionRepository->update($inscription->id, [
                 'token_id' => $token->get_id(),
             ]);
 

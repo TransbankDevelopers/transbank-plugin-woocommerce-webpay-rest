@@ -4,8 +4,6 @@ namespace Transbank\WooCommerce\WebpayRest\Utils;
 
 use Throwable;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
 
 class TableCheck
@@ -13,10 +11,12 @@ class TableCheck
     public static function check()
     {
         $logger = TbkFactory::createLogger();
+        $transactionRepository = TbkFactory::createTransactionRepository();
+        $inscriptionRepository = TbkFactory::createInscriptionRepository();
         try {
-            $resp = Transaction::checkExistTable();
+            $resp = $transactionRepository->checkExistTable();
             if ($resp['ok']){
-                $resp = Inscription::checkExistTable();
+                $resp = $inscriptionRepository->checkExistTable();
                 if (!$resp['ok']){
                     DatabaseTableInstaller::createTableInscription();
                 }

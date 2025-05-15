@@ -4,8 +4,16 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Model\LogConfig;
+use Transbank\Plugin\Model\WebpayplusConfig;
+use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransbankApiServiceLogRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransbankExecutionErrorLogRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 
 define(
     'TRANSBANK_WEBPAY_REST_UPLOADS',
@@ -20,54 +28,74 @@ class TbkFactory
         return new PluginLogger($config);
     }
 
+    public static function getWebpayplusConfig(): WebpayplusConfig
+    {
+        $config = get_option(WebpayplusTransbankSdk::OPTION_KEY) ?? [];
+        return new WebpayplusConfig([
+            'environment' => $config['webpay_rest_environment'] ?? null,
+            'commerceCode' => $config['webpay_rest_commerce_code'] ?? null,
+            'apiKey' => $config['webpay_rest_api_key'] ?? null,
+            'buyOrderFormat' => $config['buy_order_format'] ?? WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+        ]);
+    }
+
+    public static function getOneclickConfig(): OneclickConfig
+    {
+        $config = get_option(OneclickTransbankSdk::OPTION_KEY) ?? [];
+        return new OneclickConfig([
+            'environment' => $config['environment'] ?? null,
+            'commerceCode' => $config['commerce_code'] ?? null,
+            'apiKey' => $config['api_key'] ?? null,
+            'childCommerceCode' => $config['child_commerce_code'] ?? null,
+            'buyOrderFormat' => $config['buy_order_format'] ?? OneclickTransbankSdk::BUY_ORDER_FORMAT,
+            'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT,
+        ]);
+    }
+
     public static function createWebpayplusTransbankSdk()
     {
-        $config = get_option(WebpayplusTransbankSdk::OPTION_KEY);
-        if (!isset($config)){
-            $config = [];
-        }
-        $environment = isset($config['webpay_rest_environment']) ?
-            $config['webpay_rest_environment'] : null;
-        $commerceCode = isset($config['webpay_rest_commerce_code']) ?
-            $config['webpay_rest_commerce_code'] : null;
-        $apiKey = isset($config['webpay_rest_api_key']) ?
-            $config['webpay_rest_api_key'] : null;
-        $buyOrderFormat = isset($config['buy_order_format']) ?
-            $config['buy_order_format'] : WebpayplusTransbankSdk::BUY_ORDER_FORMAT;
-        return new WebpayplusTransbankSdk(static::createLogger(),
-            $environment,
-            $commerceCode,
-            $apiKey,
-            $buyOrderFormat
+        return new WebpayplusTransbankSdk(
+            static::createLogger(),
+            static::getWebpayplusConfig(),
+            new TransbankApiServiceLogRepository(),
+            new TransbankExecutionErrorLogRepository(),
+            static::createTransactionRepository()
         );
     }
 
     public static function createOneclickTransbankSdk()
     {
-        $config = get_option(OneclickTransbankSdk::OPTION_KEY);
-        if (!isset($config)){
-            $config = [];
-        }
-        $environment = isset($config['environment']) ?
-            $config['environment'] : null;
-        $commerceCode = isset($config['commerce_code']) ?
-            $config['commerce_code'] : null;
-        $apiKey = isset($config['api_key']) ?
-            $config['api_key'] : null;
-        $childCommerceCode = isset($config['child_commerce_code']) ?
-            $config['child_commerce_code'] : null;
-        $buyOrderFormat = isset($config['buy_order_format']) ?
-            $config['buy_order_format'] : OneclickTransbankSdk::BUY_ORDER_FORMAT;
-        $childBuyOrderFormat = isset($config['child_buy_order_format']) ?
-            $config['child_buy_order_format'] : OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT;
-        return new OneclickTransbankSdk(static::createLogger(),
-            $environment,
-            $commerceCode,
-            $apiKey,
-            $childCommerceCode,
-            $buyOrderFormat,
-            $childBuyOrderFormat
+        return new OneclickTransbankSdk(
+            static::createLogger(),
+            static::getOneclickConfig(),
+            new TransbankApiServiceLogRepository(),
+            new TransbankExecutionErrorLogRepository(),
+            static::createTransactionRepository(),
+            static::createInscriptionRepository()
         );
     }
 
+    /**
+     * Create and return an instance of the TransactionRepository.
+     *
+     * @return TransactionRepositoryInterface
+     */
+    public static function createTransactionRepository(): TransactionRepositoryInterface
+    {
+        return new TransactionRepository();
+    }
+
+    /**
+     * Create and return an instance of the InscriptionRepository.
+     *
+     * @return InscriptionRepositoryInterface
+     */
+    public static function createInscriptionRepository(): InscriptionRepositoryInterface
+    {
+        return new InscriptionRepository();
+    }
+    
+
 }
+
+

@@ -6,6 +6,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 
 class TransactionStatusController
 {
@@ -20,6 +21,7 @@ class TransactionStatusController
      * @var \Transbank\Plugin\Helpers\PluginLogger
      */
     private $logger;
+    protected TransactionRepositoryInterface $transactionRepository;
 
     /**
      * Controller for status requests.
@@ -27,6 +29,7 @@ class TransactionStatusController
     public function __construct()
     {
         $this->logger = TbkFactory::createLogger();
+        $this->transactionRepository = TbkFactory::createTransactionRepository();
     }
 
     public function getStatus(): void
@@ -59,7 +62,7 @@ class TransactionStatusController
         $this->logger->logDebug('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = Transaction::getByOrderId($orderId);
+            $transaction = $this->transactionRepository->findFirstByOrderId($orderId);
 
             if (!$transaction) {
                 $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);

@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Models;
 
-use Transbank\Plugin\Exceptions\TokenNotFoundOnDatabaseException;
-
 class Inscription extends BaseModel
 {
     const INSCRIPTIONS_TABLE_NAME = 'transbank_inscriptions';
@@ -28,21 +26,12 @@ class Inscription extends BaseModel
     {
         return static::updateBase(static::getTableName(), $inscriptionId, $data);
     }
-
-    /**
-     * @throws TokenNotFoundOnDatabaseException
-     */
-    public static function getByToken($token)
+    public static function findByToken($token)
     {
         global $wpdb;
         $inscriptionTableName = static::getTableName();
         $sql = $wpdb->prepare("SELECT * FROM $inscriptionTableName WHERE `token` = '%s'", $token);
-        $sqlResult = $wpdb->get_results($sql);
-        if (!is_array($sqlResult) || count($sqlResult) <= 0) {
-            throw new TokenNotFoundOnDatabaseException("Token '{$token}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
-        }
-
-        return $sqlResult[0] ?? null;
+        return $wpdb->get_results($sql);
     }
 
     public static function checkExistTable()

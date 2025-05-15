@@ -3,8 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\Inscription;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
 use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 
@@ -40,7 +38,7 @@ class DatabaseTableInstaller
         | Webpay Transactions Table
         |--------------------------------------------------------------------------
         */
-        $tableName = Transaction::getTableName();
+        $tableName = TbkFactory::createTransactionRepository()->getTableName();
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
             `order_id`             varchar(60) NOT NULL,
@@ -77,7 +75,7 @@ class DatabaseTableInstaller
         | Oneclick inscriptions table
         |--------------------------------------------------------------------------
         */
-        $tableName = Inscription::getTableName();
+        $tableName = TbkFactory::createInscriptionRepository()->getTableName();
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
             `token`                 varchar(100) NOT NULL,
@@ -187,8 +185,8 @@ class DatabaseTableInstaller
 
     public static function deleteTable()
     {
-        static::deleteTableByName(Transaction::getTableName());
-        static::deleteTableByName(Inscription::getTableName());
+        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
+        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
         static::deleteTableByName(TransbankApiServiceLog::getTableName());
         static::deleteTableByName(TransbankExecutionErrorLog::getTableName());
     }

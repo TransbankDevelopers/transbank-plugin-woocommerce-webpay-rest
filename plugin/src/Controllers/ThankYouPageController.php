@@ -23,7 +23,7 @@ class ThankYouPageController
             return;
         }
 
-        $webpayTransaction = Transaction::getApprovedByOrderId($orderId);
+        $webpayTransaction = TbkFactory::createTransactionRepository()->findFirstApprovedByOrderId($orderId);
 
         if (is_null($webpayTransaction)) {
             wc_print_notice('<strong>Transacción fallida</strong>. Puedes volver a intentar el pago', 'error');

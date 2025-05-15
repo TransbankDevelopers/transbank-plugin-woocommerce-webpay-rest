@@ -20,6 +20,8 @@ use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
 use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\Plugin\Model\WebpayplusConfig;
 
 /**
  * Class WebpayplusTransbankSdk.
@@ -34,15 +36,27 @@ class WebpayplusTransbankSdk extends TransbankSdk
      * @var WebpayPlusTransaction
      */
     protected $webpayplusTransaction;
+    protected TransactionRepositoryInterface $transactionRepository;
 
-    public function __construct($log, $environment, $commerceCode, $apiKey, $buyOrderFormat = self::BUY_ORDER_FORMAT)
+    public function __construct($log,
+        WebpayplusConfig $config,
+        $apiServiceLogRepository,
+        $errorLogRepository,
+        $transactionRepository
+        )
     {
         $this->log = $log;
-        $this->options = $this->createOptions($environment, $commerceCode, $apiKey);
+        $this->options = $this->createOptions(
+            $config->getEnvironment(),
+            $config->getCommerceCode(),
+            $config->getApikey());
         $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
-        $this->buyOrderFormat = BuyOrderHelper::isValidFormat($buyOrderFormat) ?
-            $buyOrderFormat : self::BUY_ORDER_FORMAT;
+        $this->apiServiceLogRepository = $apiServiceLogRepository;
+        $this->errorLogRepository = $errorLogRepository;
+        $this->transactionRepository = $transactionRepository;
+        $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
+            $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
     }
 
     /**
@@ -171,19 +185,19 @@ class WebpayplusTransbankSdk extends TransbankSdk
             'status'      => Transaction::STATUS_PREPARED,
         ];
 
-        $insert = Transaction::createTransaction($transaction);
+        $insert = $this->transactionRepository->create($transaction);
 
         $this->logInfoData($buyOrder, 'Transacción creada en la base de datos con estado "prepared"', $params);
 
         /*2. Validamos que la insercion en la bd fue exitosa */
         if (!$insert) {
-            $transactionTable = Transaction::getTableName();
+            $transactionTable = $this->transactionRepository->getTableName();
             $wpdb->show_errors();
             $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
             $this->errorExecution($orderId, 'create', $params, 'CreateTransactionWebpayException', $wpdb->last_error, $errorMessage);
             throw new CreateTransactionWebpayException($errorMessage);
         }
-        $tx = Transaction::getByBuyOrder($buyOrder);
+        $tx = $this->transactionRepository->getByBuyOrder($buyOrder);
         if (!isset($tx)) {
             $errorMessage = "No se puede obtener la transacción desde la base de datos";
             $this->errorExecution($orderId, 'create', $params, 'CreateTransactionWebpayException', $errorMessage, $errorMessage);
@@ -199,7 +213,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $this->errorExecution($orderId, 'create', $params, 'CreateWebpayException', $errorMessage, $errorMessage);
             throw new CreateWebpayException($errorMessage);
         }
-        Transaction::update(
+        $this->transactionRepository->update(
             $tx->id,
             [
                 'token'  => $createResponse->token,
@@ -215,7 +229,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
     public function getTransactionApprovedByOrderId($orderId)
     {
         try {
-            return Transaction::getApprovedByOrderId($orderId);
+            return $this->transactionRepository->findFirstApprovedByOrderId($orderId);
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada para la "orden": "'.$orderId.'" desde la base de datos. Error: '.$e->getMessage();
             $this->errorExecution($orderId, 'create', [], 'GetTransactionWebpayException', $e->getMessage(), $errorMessage);
@@ -281,7 +295,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         ]);
 
         /*4. Si todo ok guardamos el estado */
-        Transaction::update(
+        $this->transactionRepository->update(
             $tx->id,
             [
                 'last_refund_type'    => $refundResponse->getType(),
@@ -317,7 +331,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $params = [
             'token' => $token
         ];
-        $transaction = Transaction::getByToken($token);
+        $transaction = $this->transactionRepository->getByToken($token);
         if ($transaction->status !== Transaction::STATUS_INITIALIZED) {
             $errorMessage = 'La transacción no se encuentra en estado inicializada: '.$token;
             $this->errorExecution($orderId, 'commit', $params, 'InvalidStatusWebpayException', $errorMessage, $errorMessage);
@@ -334,7 +348,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             'token'  => $token,
             'response'  => $commitResponse
         ]);
-        Transaction::update(
+        $this->transactionRepository->update(
             $transaction->id,
             [
                 'status'             => Transaction::STATUS_APPROVED,
@@ -356,7 +370,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $data['transbank_status'] = $commitResponse->getStatus();
             $data['transbank_response'] = json_encode($commitResponse);
         }
-        Transaction::update(
+        $this->transactionRepository->update(
             $txId,
             $data
         );
@@ -373,7 +387,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     public function saveTransactionWithErrorByToken($token, $error, $detailError)
     {
-        $transaction = Transaction::getByToken($token);
+        $transaction = $this->transactionRepository->getByToken($token);
         $this->saveTransactionWithErrorByTransaction($transaction, $error, $detailError);
         return $transaction;
     }
