@@ -2,10 +2,10 @@
 
 namespace Transbank\WooCommerce\WebpayRest;
 
-use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
-use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
 use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
 use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Repositories\TransbankApiServiceLogRepositoryInterface;
+use Transbank\Plugin\Repositories\TransbankExecutionErrorLogRepositoryInterface;
 
 /**
  * Class TransbankSdk.
@@ -26,6 +26,8 @@ class TransbankSdk
      * @var MaskData
      */
     public $dataMasker;
+    protected TransbankApiServiceLogRepositoryInterface $apiServiceLogRepository;
+    protected TransbankExecutionErrorLogRepositoryInterface $errorLogRepository;
 
     public function logInfo($str)
     {
@@ -76,18 +78,18 @@ class TransbankSdk
 
     protected function createApiServiceLogBase($orderId, $service, $product, $input, $response)
     {
-        TransbankApiServiceLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), json_encode($response));
+        $this->apiServiceLogRepository->create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), json_encode($response));
     }
 
     protected function createErrorApiServiceLogBase($orderId, $service, $product, $input, $error, $originalError, $customError)
     {
-        TransbankApiServiceLog::createError($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), $error, $originalError, $customError);
+        $this->apiServiceLogRepository->createError($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($input), $error, $originalError, $customError);
         $this->createTransbankExecutionErrorLogBase($orderId, $service, $product, $input, $error, $originalError, $customError);
     }
 
     protected function createTransbankExecutionErrorLogBase($orderId, $service, $product, $data, $error, $originalError, $customError)
     {
-        TransbankExecutionErrorLog::create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($data), $error, $originalError, $customError);
+        $this->errorLogRepository->create($orderId, $service, $product, $this->getEnviroment(), $this->getCommerceCode(), json_encode($data), $error, $originalError, $customError);
     }
 
     protected function generateBuyOrder($orderId){

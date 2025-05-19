@@ -20,6 +20,7 @@ use Transbank\Plugin\Exceptions\Webpay\InvalidStatusWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\RejectedCommitWebpayException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
+use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use WC_Order;
 
 class ResponseController
@@ -34,6 +35,7 @@ class ResponseController
     protected PluginLogger $logger;
     protected WebpayplusTransbankSdk $webpayplusTransbankSdk;
     protected TransactionResponseHandler $transactionResponseHandler;
+    protected TransactionRepositoryInterface $transactionRepository;
 
     /**
      * ResponseController constructor.
@@ -44,6 +46,7 @@ class ResponseController
     {
         $this->logger = TbkFactory::createLogger();
         $this->pluginConfig = $pluginConfig;
+        $this->transactionRepository = TbkFactory::createTransactionRepository();
         $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
         $this->transactionResponseHandler = new TransactionResponseHandler();
     }
@@ -224,7 +227,7 @@ class ResponseController
             $this->logger->logError(json_encode($commitResponse));
         }
 
-        Transaction::update(
+        $this->transactionRepository->update(
             $webpayTransaction->id,
             [
                 'status' => Transaction::STATUS_FAILED,
@@ -238,7 +241,7 @@ class ResponseController
         // Transaction aborted by user
         $order_info->add_order_note(__('Webpay Plus: Pago abortado por el usuario en el formulario de pago', 'transbank_wc_plugin'));
         $order_info->update_status('cancelled');
-        Transaction::update(
+        $this->transactionRepository->update(
             $webpayTransaction->id,
             ['status' => Transaction::STATUS_ABORTED_BY_USER]
         );

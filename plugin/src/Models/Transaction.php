@@ -56,13 +56,12 @@ class Transaction extends BaseModel
     }
 
     /**
-     * Get transaction by order ID.
+     * Retrieve the first transaction by order ID.
      *
-     * @param string $orderId Order ID.
-     *
-     * @return object|null Transaction data.
+     * @param mixed $orderId
+     * @return object|null
      */
-    public static function getByOrderId($orderId): ?object
+    public static function findFirstByOrderId($orderId): ?object
     {
         return static::getTransactionsByConditions(['order_id' => $orderId], 'id')[0] ?? null;
     }
@@ -75,7 +74,7 @@ class Transaction extends BaseModel
         return static::getBaseTableName(static::TRANSACTIONS_TABLE_NAME);
     }
 
-    public static function createTransaction(array $data)
+    public static function create(array $data)
     {
         return static::insertBase(static::getTableName(), $data);
     }
@@ -85,23 +84,15 @@ class Transaction extends BaseModel
         return static::updateBase(static::getTableName(), $transactionId, $data);
     }
 
-    /**
-     * @throws TokenNotFoundOnDatabaseException
-     */
-    public static function getByToken($token)
+    public static function findByToken($token)
     {
         global $wpdb;
         $transactionTable = static::getTableName();
         $sql = $wpdb->prepare("SELECT * FROM $transactionTable WHERE `token` = '%s'", $token);
-        $sqlResult = $wpdb->get_results($sql);
-        if (!is_array($sqlResult) || count($sqlResult) <= 0) {
-            throw new TokenNotFoundOnDatabaseException("Token '{$token}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
-        }
-
-        return $sqlResult[0];
+        return $wpdb->get_results($sql);
     }
 
-    public static function getApprovedByOrderId($orderId)
+    public static function findApprovedByOrderId($orderId)
     {
         global $wpdb;
         $transaction = static::getTableName();
@@ -110,15 +101,10 @@ class Transaction extends BaseModel
             "SELECT * FROM $transaction WHERE status = '$statusApproved' AND order_id = '%s'",
             $orderId
         );
-        $sqlResult = $wpdb->get_results($sql);
-
-        return $sqlResult[0] ?? null;
+        return $wpdb->get_results($sql);
     }
 
-    /**
-     * @throws TokenNotFoundOnDatabaseException
-     */
-    public static function getByBuyOrderAndSessionId($buyOrder, $sessionId)
+    public static function findByBuyOrderAndSessionId($buyOrder, $sessionId)
     {
         global $wpdb;
         $transactionTableName = Transaction::getTableName();
@@ -127,15 +113,10 @@ class Transaction extends BaseModel
             $sessionId,
             $buyOrder
         );
-        $sqlResult = $wpdb->get_results($sql);
-        if (!is_array($sqlResult) || count($sqlResult) <= 0) {
-            throw new TokenNotFoundOnDatabaseException('No se encontró el session_id y buy_order en la base de datos de transacciones, por lo que no se puede completar el proceso');
-        }
-
-        return $sqlResult[0];
+        return $wpdb->get_results($sql);
     }
 
-    public static function getByBuyOrder($buyOrder)
+    public static function findByBuyOrder($buyOrder)
     {
         global $wpdb;
         $transactionTableName = Transaction::getTableName();
@@ -143,11 +124,7 @@ class Transaction extends BaseModel
             "SELECT * FROM $transactionTableName WHERE buy_order = '%s'",
             $buyOrder
         );
-        $sqlResult = $wpdb->get_results($sql);
-        if (!is_array($sqlResult) || count($sqlResult) <= 0) {
-            throw new TokenNotFoundOnDatabaseException('No se encontró el session_id y order_id en la base de datos de transacciones, por lo que no se puede completar el proceso');
-        }
-        return $sqlResult[0];
+        return $wpdb->get_results($sql);
     }
 
     public static function checkExistTable()
