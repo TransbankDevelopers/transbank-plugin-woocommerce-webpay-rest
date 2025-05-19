@@ -10,8 +10,6 @@ use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
 use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
-use Transbank\WooCommerce\WebpayRest\Repositories\TransbankApiServiceLogRepository;
-use Transbank\WooCommerce\WebpayRest\Repositories\TransbankExecutionErrorLogRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 
@@ -57,8 +55,6 @@ class TbkFactory
         return new WebpayplusTransbankSdk(
             static::createLogger(),
             static::getWebpayplusConfig(),
-            new TransbankApiServiceLogRepository(),
-            new TransbankExecutionErrorLogRepository(),
             static::createTransactionRepository()
         );
     }
@@ -68,8 +64,6 @@ class TbkFactory
         return new OneclickTransbankSdk(
             static::createLogger(),
             static::getOneclickConfig(),
-            new TransbankApiServiceLogRepository(),
-            new TransbankExecutionErrorLogRepository(),
             static::createTransactionRepository(),
             static::createInscriptionRepository()
         );
