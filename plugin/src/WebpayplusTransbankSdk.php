@@ -40,8 +40,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
 
     public function __construct($log,
         WebpayplusConfig $config,
-        $apiServiceLogRepository,
-        $errorLogRepository,
         $transactionRepository
         )
     {
@@ -52,8 +50,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $config->getApikey());
         $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
-        $this->apiServiceLogRepository = $apiServiceLogRepository;
-        $this->errorLogRepository = $errorLogRepository;
         $this->transactionRepository = $transactionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
@@ -77,35 +73,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $maskedResponse = $this->dataMasker->maskData($response);
         $this->logInfo('ORDER_ID: '.$orderId);
         $this->logInfo('INPUT: '.json_encode($maskedInput).' => RESPONSE: '.json_encode($maskedResponse));
-        $this->createApiServiceLogBase($orderId, $service, 'webpay_plus', $input, $response);
-    }
-
-    protected function errorExecutionTbkApi($orderId, $service, $input, $error, $originalError, $customError)
-    {
-        $this->logErrorWithOrderId($orderId, $service, $input, $error, $originalError, $customError);
-        $this->createErrorApiServiceLogBase(
-            $orderId,
-            $service,
-            'webpay_plus',
-            $input,
-            $error,
-            $originalError,
-            $customError
-        );
-    }
-
-    public function errorExecution($orderId, $service, $data, $error, $originalError, $customError)
-    {
-        $this->logErrorWithOrderId($orderId, $service, $data, $error, $originalError, $customError);
-        $this->createTransbankExecutionErrorLogBase(
-            $orderId,
-            $service,
-            'webpay_plus',
-            $data,
-            $error,
-            $originalError,
-            $customError
-        );
     }
 
     /* Metodo STATUS  */
@@ -127,14 +94,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
                 $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
             }
 
-            $this->errorExecutionTbkApi(
-                $orderId,
-                'status',
-                $params,
-                'StatusWebpayException',
-                $e->getMessage(),
-                $errorMessage
-            );
             throw new StatusWebpayException($errorMessage, $token, $e);
         }
     }
@@ -154,7 +113,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
             return $response;
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de crear la transacción en Transbank: '.$e->getMessage();
-            $this->errorExecutionTbkApi($orderId, 'create', $params, 'CreateWebpayException', $e->getMessage(), $errorMessage);
             throw new CreateWebpayException($errorMessage, $e);
         }
     }
@@ -194,13 +152,11 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $transactionTable = $this->transactionRepository->getTableName();
             $wpdb->show_errors();
             $errorMessage = "La transacción no se pudo registrar en la tabla: '{$transactionTable}', query: {$wpdb->last_query}, error: {$wpdb->last_error}";
-            $this->errorExecution($orderId, 'create', $params, 'CreateTransactionWebpayException', $wpdb->last_error, $errorMessage);
             throw new CreateTransactionWebpayException($errorMessage);
         }
         $tx = $this->transactionRepository->getByBuyOrder($buyOrder);
         if (!isset($tx)) {
             $errorMessage = "No se puede obtener la transacción desde la base de datos";
-            $this->errorExecution($orderId, 'create', $params, 'CreateTransactionWebpayException', $errorMessage, $errorMessage);
             throw new CreateTransactionWebpayException($errorMessage);
         }
 
@@ -210,7 +166,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
         /*4. Validamos si esta ok */
         if (!isset($createResponse) || !isset($createResponse->url) || !isset($createResponse->token)) {
             $errorMessage = 'No se pudo crear una transacción válida en Transbank';
-            $this->errorExecution($orderId, 'create', $params, 'CreateWebpayException', $errorMessage, $errorMessage);
             throw new CreateWebpayException($errorMessage);
         }
         $this->transactionRepository->update(
@@ -232,7 +187,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
             return $this->transactionRepository->findFirstApprovedByOrderId($orderId);
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada para la "orden": "'.$orderId.'" desde la base de datos. Error: '.$e->getMessage();
-            $this->errorExecution($orderId, 'create', [], 'GetTransactionWebpayException', $e->getMessage(), $errorMessage);
             throw new GetTransactionWebpayException($errorMessage, $orderId, $e);
         }
     }
@@ -249,7 +203,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
             return $response;
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay con el "token": "'.$token.'" y "monto": "'.$amount.'". Error: '.$e->getMessage();
-            $this->errorExecutionTbkApi($orderId, 'refund', $params, 'RefundWebpayException', $e->getMessage(), $errorMessage);
             throw new RefundWebpayException($errorMessage, $token, $tx, $e);
         }
     }
@@ -265,7 +218,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $tx = $this->getTransactionApprovedByOrderId($orderId);
         if (!$tx) {
             $errorMessage = 'No se encontró una transacción aprobada en la bd, que sea válida para ejecutar un refund para la "orden": "'.$orderId.'"';
-            $this->errorExecution($orderId, 'refund', $params, 'NotFoundTransactionWebpayException', $errorMessage, $errorMessage);
             throw new NotFoundTransactionWebpayException($errorMessage, $orderId);
         }
 
@@ -286,7 +238,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
         /*3. Validamos si fue exitoso */
         if (!(($refundResponse->getType() === 'REVERSED' || $refundResponse->getType() === 'NULLIFIED') && (int) $refundResponse->getResponseCode() === 0)) {
             $errorMessage = 'El refund de la transacción ha sido rechazado por Transbank (código de respuesta: "'.$refundResponse->getResponseCode().'")';
-            $this->errorExecution($orderId, 'refund', $params, 'RejectedRefundWebpayException', $errorMessage, $errorMessage);
             throw new RejectedRefundWebpayException($errorMessage, $tx->token, $tx, $refundResponse);
         }
         $this->logInfoWithOrderId($orderId, 'refund', '***** REFUND TBK OK *****', [
@@ -320,7 +271,6 @@ class WebpayplusTransbankSdk extends TransbankSdk
             return $response;
         } catch (Exception $e) {
             $errorMessage = 'Ocurrió un error al ejecutar el commit de la transacción: '.$e->getMessage();
-            $this->errorExecutionTbkApi($orderId, 'commit', $params, 'CommitWebpayException', $e->getMessage(), $errorMessage);
             $this->saveTransactionWithErrorByTransaction($transaction, 'CommitWebpayException', $errorMessage);
             throw new CommitWebpayException($errorMessage, $token, $transaction, $e);
         }
@@ -334,13 +284,11 @@ class WebpayplusTransbankSdk extends TransbankSdk
         $transaction = $this->transactionRepository->getByToken($token);
         if ($transaction->status !== Transaction::STATUS_INITIALIZED) {
             $errorMessage = 'La transacción no se encuentra en estado inicializada: '.$token;
-            $this->errorExecution($orderId, 'commit', $params, 'InvalidStatusWebpayException', $errorMessage, $errorMessage);
             throw new InvalidStatusWebpayException($errorMessage, $token, $transaction);
         }
         $commitResponse = $this->commitInner($transaction->order_id, $token, $transaction);
         if (!$commitResponse->isApproved()) {
             $errorMessage = 'El commit de la transacción ha sido rechazada en Transbank (código de respuesta: '.$commitResponse->getResponseCode().')';
-            $this->errorExecution($orderId, 'commit', $params, 'RejectedCommitWebpayException', $errorMessage, $errorMessage);
             $this->saveTransactionWithError($transaction->id, 'RejectedCommitWebpayException', $errorMessage, $commitResponse);
             throw new RejectedCommitWebpayException($errorMessage, $token, $transaction, $commitResponse);
         }

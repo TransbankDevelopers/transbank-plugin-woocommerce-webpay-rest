@@ -3,8 +3,8 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
-use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
+use Transbank\WooCommerce\WebpayRest\Models\BaseModel;
+
 
 require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
@@ -25,6 +25,7 @@ class DatabaseTableInstaller
 
     public static function install(): bool
     {
+        static::deleteUnusedTable();
         return static::createTables();
     }
 
@@ -105,58 +106,6 @@ class DatabaseTableInstaller
         return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
     }
 
-    public static function createTableTransbankExecutionErrorLog(): bool
-    {
-        global $wpdb;
-        $charsetCollate = $wpdb->get_charset_collate();
-        $tableName = TransbankExecutionErrorLog::getTableName();
-
-        $sql = "CREATE TABLE `{$tableName}` (
-            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
-            `order_id`         varchar(60) NOT NULL,
-            `service`          varchar(100) NOT NULL,
-            `product`          varchar(30) NOT NULL,
-            `enviroment`       varchar(20) NOT NULL,
-            `commerce_code`    varchar(60) NOT NULL,
-            `data`             LONGTEXT,
-            `error`            varchar(255),
-            `original_error`   LONGTEXT,
-            `custom_error`     LONGTEXT,
-            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
-            PRIMARY KEY (id)
-        ) $charsetCollate";
-
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
-    }
-
-    public static function createTableTransbankApiServiceLog(): bool
-    {
-        global $wpdb;
-        
-        $charsetCollate = $wpdb->get_charset_collate();
-        $tableName = TransbankApiServiceLog::getTableName();
-
-        $sql = "CREATE TABLE `{$tableName}` (
-            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
-            `order_id`         varchar(60) NOT NULL,
-            `service`          varchar(100) NOT NULL,
-            `product`          varchar(30) NOT NULL,
-            `enviroment`       varchar(20) NOT NULL,
-            `commerce_code`    varchar(60) NOT NULL,
-            `input`            LONGTEXT,
-            `response`         LONGTEXT,
-            `error`            varchar(255),
-            `original_error`   LONGTEXT,
-            `custom_error`     LONGTEXT,
-            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
-            PRIMARY KEY (id)
-        ) $charsetCollate";
-
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
-    }
-
     public static function createTableProccessError($tableName, $wpdbError): bool
     {
         $success = empty($wpdbError);
@@ -175,20 +124,16 @@ class DatabaseTableInstaller
     {
         $successTransaction = static::createTableTransaction();
         $successInscription = static::createTableInscription();
-        $successExecutionErrorLog = static::createTableTransbankExecutionErrorLog();
-        $successTransbankApiServiceLog = static::createTableTransbankApiServiceLog();
-        if ($successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog) {
+        if ($successTransaction && $successInscription) {
             update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
         }
-        return $successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog;
+        return $successTransaction && $successInscription;
     }
 
     public static function deleteTable()
     {
         static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
         static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
-        static::deleteTableByName(TransbankApiServiceLog::getTableName());
-        static::deleteTableByName(TransbankExecutionErrorLog::getTableName());
     }
 
     public static function deleteTableByName($tableName)
@@ -206,5 +151,11 @@ class DatabaseTableInstaller
         }
 
         return null;
+    }
+
+    public static function deleteUnusedTable()
+    {
+        static::deleteTableByName(BaseModel::getBaseTableName('transbank_api_service_log'));
+        static::deleteTableByName(BaseModel::getBaseTableName('transbank_execution_error_log'));
     }
 }
