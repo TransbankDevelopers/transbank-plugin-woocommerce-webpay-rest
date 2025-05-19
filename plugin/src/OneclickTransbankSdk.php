@@ -71,7 +71,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $config->getCommerceCode(),
             $config->getApikey());
         $this->childCommerceCode = $config->getEnvironment() === Options::ENVIRONMENT_PRODUCTION ?
-            $config->getChildCommerceCode(): Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+            $config->getChildCommerceCode() : Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
