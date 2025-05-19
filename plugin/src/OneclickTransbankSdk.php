@@ -57,21 +57,22 @@ class OneclickTransbankSdk extends TransbankSdk
     protected InscriptionRepositoryInterface $inscriptionRepository;
     private $childBuyOrderFormat;
 
-    public function __construct($log,
+    public function __construct(
+        $log,
         OneclickConfig $config,
         $apiServiceLogRepository,
         $errorLogRepository,
         $transactionRepository,
         $inscriptionRepository
-        )
-    {
+    ) {
         $this->log = $log;
         $this->options = $this->createOptions(
             $config->getEnvironment(),
             $config->getCommerceCode(),
-            $config->getApikey());
+            $config->getApikey()
+        );
         $this->childCommerceCode = $config->getEnvironment() === Options::ENVIRONMENT_PRODUCTION ?
-            $config->getChildCommerceCode(): Oneclick::DEFAULT_CHILD_COMMERCE_CODE_1;
+            $config->getChildCommerceCode() : Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
         $this->dataMasker = new MaskData($this->getEnviroment());
@@ -80,9 +81,11 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->transactionRepository = $transactionRepository;
         $this->inscriptionRepository = $inscriptionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
-            $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
+            $config->getBuyOrderFormat()
+        ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
         $this->childBuyOrderFormat = BuyOrderHelper::isValidFormat(
-            $config->getChildBuyOrderFormat()) ? $config->getChildBuyOrderFormat() : self::CHILD_BUY_ORDER_FORMAT;
+            $config->getChildBuyOrderFormat()
+        ) ? $config->getChildBuyOrderFormat() : self::CHILD_BUY_ORDER_FORMAT;
     }
 
     /**
@@ -106,8 +109,8 @@ class OneclickTransbankSdk extends TransbankSdk
     {
         $maskedInput = $this->dataMasker->maskData($input);
         $maskedResponse = $this->dataMasker->maskData($response);
-        $this->logInfo('ORDER_ID: '.$orderId);
-        $this->logInfo('INPUT: '.json_encode($maskedInput).' => RESPONSE: '.json_encode($maskedResponse));
+        $this->logInfo('ORDER_ID: ' . $orderId);
+        $this->logInfo('INPUT: ' . json_encode($maskedInput) . ' => RESPONSE: ' . json_encode($maskedResponse));
         $this->createApiServiceLogBase($orderId, $service, 'webpay_oneclick', $input, $response);
     }
 
@@ -142,7 +145,7 @@ class OneclickTransbankSdk extends TransbankSdk
     /* Metodo STATUS  */
     public function status($orderId, $buyOrder)
     {
-        $params = ['buyOrder'  => $buyOrder];
+        $params = ['buyOrder' => $buyOrder];
         try {
             $response = $this->mallTransaction->status($buyOrder);
             $this->afterExecutionTbkApi($orderId, 'status', $params, $response);
@@ -150,7 +153,7 @@ class OneclickTransbankSdk extends TransbankSdk
         } catch (Exception $e) {
             $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
 
-            if(ErrorUtil::isMaxTimeError($e)) {
+            if (ErrorUtil::isMaxTimeError($e)) {
                 $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
             }
 
@@ -174,8 +177,8 @@ class OneclickTransbankSdk extends TransbankSdk
     public function startInner($orderId, $username, $email, $returnUrl)
     {
         $params = [
-            'username'  => $username,
-            'email'     => $email,
+            'username' => $username,
+            'email' => $email,
             'returnUrl' => $returnUrl
         ];
         try {
@@ -183,7 +186,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'start', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al tratar iniciar la inscripcion: '.$e->getMessage();
+            $errorMessage = 'Ocurrió un error al tratar iniciar la inscripcion: ' . $e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'start', $params, 'StartOneclickException', $e->getMessage(), $errorMessage);
             throw new StartOneclickException($errorMessage, $e);
         }
@@ -206,27 +209,27 @@ class OneclickTransbankSdk extends TransbankSdk
         global $wpdb;
         $orderId = $orderId !== null ? $orderId : 0;
         $randomNumber = uniqid();
-        $username = 'wc:'.$randomNumber.':'.$userId;
+        $username = 'wc:' . $randomNumber . ':' . $userId;
         $params = [
-            'username'  => $username,
-            'email'     => $email,
+            'username' => $username,
+            'email' => $email,
             'returnUrl' => $returnUrl,
-            'from'      => $from
+            'from' => $from
         ];
 
         /*1. Iniciamos la inscripcion */
         $refundResponse = $this->startInner($orderId, $username, $email, $returnUrl);
         $insert = $this->inscriptionRepository->create([
-            'token'                 => $refundResponse->getToken(),
-            'username'              => $username,
-            'order_id'              => $orderId,
-            'user_id'               => $userId,
+            'token' => $refundResponse->getToken(),
+            'username' => $username,
+            'order_id' => $orderId,
+            'user_id' => $userId,
             'pay_after_inscription' => false,
-            'email'                 => $email,
-            'from'                  => $from,
-            'status'                => Inscription::STATUS_INITIALIZED,
-            'environment'           => $this->getEnviroment(),
-            'commerce_code'         => $this->getCommerceCode(),
+            'email' => $email,
+            'from' => $from,
+            'status' => Inscription::STATUS_INITIALIZED,
+            'environment' => $this->getEnviroment(),
+            'commerce_code' => $this->getCommerceCode(),
         ]);
         /*2. Validamos que la insercion en la bd fue exitosa */
         if (!$insert) {
@@ -264,16 +267,22 @@ class OneclickTransbankSdk extends TransbankSdk
         if ($tbkOrdenCompra && $tbkSessionId && !$tbkToken) {
             $errorMessage = 'La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.';
             $this->errorExecution(0, 'finish', $params1, 'TimeoutInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken,
-                'TimeoutInscriptionOneclickException', $errorMessage);
+            $inscription = $this->saveInscriptionWithError(
+                $tbkToken,
+                'TimeoutInscriptionOneclickException',
+                $errorMessage
+            );
             throw new TimeoutInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
 
         if (isset($tbkOrdenCompra)) {
             $errorMessage = 'La inscripción fue anulada por el usuario o hubo un error en el formulario de inscripción.';
             $this->errorExecution(0, 'finish', $params1, 'UserCancelInscriptionOneclickException', $errorMessage, $errorMessage);
-            $inscription = $this->saveInscriptionWithError($tbkToken,
-                'UserCancelInscriptionOneclickException', $errorMessage);
+            $inscription = $this->saveInscriptionWithError(
+                $tbkToken,
+                'UserCancelInscriptionOneclickException',
+                $errorMessage
+            );
             throw new UserCancelInscriptionOneclickException($errorMessage, $tbkToken, $inscription);
         }
 
@@ -289,21 +298,43 @@ class OneclickTransbankSdk extends TransbankSdk
         $inscription = $this->inscriptionRepository->getByToken($tbkToken);
 
         if ($inscription->status !== Inscription::STATUS_INITIALIZED) {
-            $errorMessage = 'La inscripción no se encuentra en estado inicializada: '.$tbkToken;
-            $this->errorExecution($inscription->order_id, 'finish',
-                $params, 'InvalidStatusInscriptionOneclickException', $errorMessage, $errorMessage);
-            throw new InvalidStatusInscriptionOneclickException($errorMessage,
-                $tbkToken, $inscription);
+            $errorMessage = 'La inscripción no se encuentra en estado inicializada: ' . $tbkToken;
+            $this->errorExecution(
+                $inscription->order_id,
+                'finish',
+                $params,
+                'InvalidStatusInscriptionOneclickException',
+                $errorMessage,
+                $errorMessage
+            );
+            throw new InvalidStatusInscriptionOneclickException(
+                $errorMessage,
+                $tbkToken,
+                $inscription
+            );
         }
-        $finishInscriptionResponse = $this->finishInscription($inscription->order_id,
-            $tbkToken, $inscription);
+        $finishInscriptionResponse = $this->finishInscription(
+            $inscription->order_id,
+            $tbkToken,
+            $inscription
+        );
         if (!$finishInscriptionResponse->isApproved()) {
-            $errorMessage = 'La inscripción de la tarjeta ha sido rechazada (código de respuesta: '.
-                $finishInscriptionResponse->getResponseCode().')';
-            $this->errorExecution($inscription->order_id, 'finish', $params,
-                'RejectedInscriptionOneclickException', $errorMessage, $errorMessage);
-            throw new RejectedInscriptionOneclickException($errorMessage,
-                $tbkToken, $inscription, $finishInscriptionResponse);
+            $errorMessage = 'La inscripción de la tarjeta ha sido rechazada (código de respuesta: ' .
+                $finishInscriptionResponse->getResponseCode() . ')';
+            $this->errorExecution(
+                $inscription->order_id,
+                'finish',
+                $params,
+                'RejectedInscriptionOneclickException',
+                $errorMessage,
+                $errorMessage
+            );
+            throw new RejectedInscriptionOneclickException(
+                $errorMessage,
+                $tbkToken,
+                $inscription,
+                $finishInscriptionResponse
+            );
         }
         return array(
             'inscription' => $inscription,
@@ -314,7 +345,7 @@ class OneclickTransbankSdk extends TransbankSdk
     public function logOneclickInscriptionRetornandoDesdeTbk($method, $params)
     {
         $maskedParams = $this->dataMasker->maskData($params);
-        $this->logInfo('Iniciando validación luego de redirección desde tbk => method: '.$method);
+        $this->logInfo('Iniciando validación luego de redirección desde tbk => method: ' . $method);
         $this->logInfo(json_encode($maskedParams));
     }
 
@@ -323,7 +354,7 @@ class OneclickTransbankSdk extends TransbankSdk
         try {
             return $this->inscriptionRepository->getByToken($tbkToken);
         } catch (Exception $e) {
-            $error = 'Ocurrió un error al obtener la inscripción: '.$e->getMessage();
+            $error = 'Ocurrió un error al obtener la inscripción: ' . $e->getMessage();
             $this->logError($error);
             throw new GetInscriptionOneclickException($error, $e);
         }
@@ -331,21 +362,21 @@ class OneclickTransbankSdk extends TransbankSdk
 
     public function finishInscription($orderId, $tbkToken, $inscription)
     {
-        $params = ['tbkToken'  => $tbkToken];
+        $params = ['tbkToken' => $tbkToken];
         try {
             $response = $this->mallInscription->finish($tbkToken);
             $this->afterExecutionTbkApi($orderId, 'finish', $params, $response);
             $this->inscriptionRepository->update($inscription->id, [
-                'finished'           => true,
+                'finished' => true,
                 'authorization_code' => $response->getAuthorizationCode(),
-                'card_type'          => $response->getCardType(),
-                'card_number'        => $response->getCardNumber(),
+                'card_type' => $response->getCardType(),
+                'card_number' => $response->getCardNumber(),
                 'transbank_response' => json_encode($response),
-                'status'             => $response->isApproved() ? Inscription::STATUS_COMPLETED : Inscription::STATUS_FAILED,
+                'status' => $response->isApproved() ? Inscription::STATUS_COMPLETED : Inscription::STATUS_FAILED,
             ]);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al ejecutar la inscripción: '.$e->getMessage();
+            $errorMessage = 'Ocurrió un error al ejecutar la inscripción: ' . $e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'finish', $params, 'FinishInscriptionOneclickException', $e->getMessage(), $errorMessage);
             $ins = $this->saveInscriptionWithError($tbkToken, 'FinishInscriptionOneclickException', $errorMessage);
             throw new FinishInscriptionOneclickException($errorMessage, $tbkToken, $ins, $e);
@@ -371,19 +402,19 @@ class OneclickTransbankSdk extends TransbankSdk
     public function authorizeInner($orderId, $parentBuyOrder, $childBuyOrder, $amount, $username, $token, $txId)
     {
         $params = [
-            'child_commerce_code'    => $this->getChildCommerceCode(),
-            'parentBuyOrder'         => $parentBuyOrder,
-            'childBuyOrder'          => $childBuyOrder,
-            'amount'                 => $amount,
-            'username'               => $username,
-            'token'                  => $token
+            'child_commerce_code' => $this->getChildCommerceCode(),
+            'parentBuyOrder' => $parentBuyOrder,
+            'childBuyOrder' => $childBuyOrder,
+            'amount' => $amount,
+            'username' => $username,
+            'token' => $token
         ];
         try {
             $details = [
                 [
-                    'commerce_code'       => $this->getChildCommerceCode(),
-                    'buy_order'           => $childBuyOrder,
-                    'amount'              => $amount,
+                    'commerce_code' => $this->getChildCommerceCode(),
+                    'buy_order' => $childBuyOrder,
+                    'amount' => $amount,
                     'installments_number' => 1,
                 ],
             ];
@@ -397,7 +428,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $this->afterExecutionTbkApi($orderId, 'authorize', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al ejecutar la autorización: '.$e->getMessage();
+            $errorMessage = 'Ocurrió un error al ejecutar la autorización: ' . $e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'authorize', $params, 'AuthorizeOneclickException', $e->getMessage(), $errorMessage);
             $this->saveTransactionWithError($txId, 'AuthorizeOneclickException', $errorMessage);
             throw new AuthorizeOneclickException($e->getMessage(), $e);
@@ -405,31 +436,32 @@ class OneclickTransbankSdk extends TransbankSdk
     }
 
 
-    public function authorize($orderId, $amount, $username, $token) {
+    public function authorize($orderId, $amount, $username, $token)
+    {
         global $wpdb;
         $parentBuyOrder = $this->generateBuyOrder($orderId);
         $childBuyOrder = $this->generateChildBuyOrder($orderId);
         $params = [
-            'orderId'           => $orderId,
-            'buyOrder'          => $parentBuyOrder,
-            'childBuyOrder'     => $childBuyOrder,
+            'orderId' => $orderId,
+            'buyOrder' => $parentBuyOrder,
+            'childBuyOrder' => $childBuyOrder,
             'childCommerceCode' => $this->getChildCommerceCode(),
-            'amount'            => $amount,
-            'username'          => $username,
-            'token'             => $token
+            'amount' => $amount,
+            'username' => $username,
+            'token' => $token
         ];
 
         /*1. Creamos la transacción antes de autorizar en TBK */
         $insert = $this->transactionRepository->create([
-            'order_id'            => $orderId,
-            'buy_order'           => $parentBuyOrder,
-            'child_buy_order'     => $childBuyOrder,
-            'commerce_code'       => $this->getCommerceCode(),
+            'order_id' => $orderId,
+            'buy_order' => $parentBuyOrder,
+            'child_buy_order' => $childBuyOrder,
+            'commerce_code' => $this->getCommerceCode(),
             'child_commerce_code' => $this->getChildCommerceCode(),
-            'amount'              => $amount,
-            'environment'         => $this->getEnviroment(),
-            'product'             => Transaction::PRODUCT_WEBPAY_ONECLICK,
-            'status'              => Transaction::STATUS_INITIALIZED
+            'amount' => $amount,
+            'environment' => $this->getEnviroment(),
+            'product' => Transaction::PRODUCT_WEBPAY_ONECLICK,
+            'status' => Transaction::STATUS_INITIALIZED
         ]);
 
         /*2. Validamos que la insercion en la bd fue exitosa */
@@ -460,7 +492,7 @@ class OneclickTransbankSdk extends TransbankSdk
                 throw new ConstraintsViolatedAuthorizeOneclickException($errorMessage, $authorizeResponse);
             } else {
                 $errorCode = $authorizeResponse->getDetails()[0]->getResponseCode() ?? null;
-                $errorMessage = 'La transacción ha sido rechazada (Código de error: '.$errorCode.')';
+                $errorMessage = 'La transacción ha sido rechazada (Código de error: ' . $errorCode . ')';
                 $this->errorExecution($orderId, 'authorize', $params, 'RejectedAuthorizeOneclickException', $errorMessage, $errorMessage);
                 $this->saveTransactionWithError($tx->id, 'RejectedAuthorizeOneclickException', $errorMessage);
                 throw new RejectedAuthorizeOneclickException($errorMessage, $authorizeResponse);
@@ -470,9 +502,9 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->transactionRepository->update(
             $tx->id,
             [
-                'status'              => Transaction::STATUS_APPROVED,
-                'transbank_status'    => $transbankStatus,
-                'transbank_response'  => json_encode($authorizeResponse),
+                'status' => Transaction::STATUS_APPROVED,
+                'transbank_status' => $transbankStatus,
+                'transbank_response' => json_encode($authorizeResponse),
             ]
         );
 
@@ -484,9 +516,9 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->transactionRepository->update(
             $txId,
             [
-                'status'        => Transaction::STATUS_FAILED,
-                'error'         => $error,
-                'detail_error'  => $detailError
+                'status' => Transaction::STATUS_FAILED,
+                'error' => $error,
+                'detail_error' => $detailError
             ]
         );
     }
@@ -499,7 +531,7 @@ class OneclickTransbankSdk extends TransbankSdk
         try {
             return $this->transactionRepository->findFirstApprovedByOrderId($orderId);
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada ("orderId": "'.$orderId.'") desde la base de datos. Error: '.$e->getMessage();
+            $errorMessage = 'Ocurrió un error al tratar de obtener la transacción aprobada ("orderId": "' . $orderId . '") desde la base de datos. Error: ' . $e->getMessage();
             $this->logError($errorMessage);
             throw new GetTransactionOneclickException($errorMessage, $orderId, $e);
         }
@@ -508,17 +540,17 @@ class OneclickTransbankSdk extends TransbankSdk
     public function refundInner($orderId, $buyOrder, $childCommerceCode, $childBuyOrder, $amount, $transaction)
     {
         $params = [
-            'child_commerce_code'    => $childCommerceCode,
-            'buyOrder'               => $buyOrder,
-            'childBuyOrder'          => $childBuyOrder,
-            'amount'                 => $amount
+            'child_commerce_code' => $childCommerceCode,
+            'buyOrder' => $buyOrder,
+            'childBuyOrder' => $childBuyOrder,
+            'amount' => $amount
         ];
         try {
             $response = $this->mallTransaction->refund($buyOrder, $childCommerceCode, $childBuyOrder, $amount);
             $this->afterExecutionTbkApi($orderId, 'refund', $params, $response);
             return $response;
         } catch (Exception $e) {
-            $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay ("buyOrder": "'.$buyOrder.'", "childBuyOrder": "'.$childBuyOrder.'", "amount": "'.$amount.'"). Error: '.$e->getMessage();
+            $errorMessage = 'Ocurrió un error al ejecutar el refund de la transacción en Webpay ("buyOrder": "' . $buyOrder . '", "childBuyOrder": "' . $childBuyOrder . '", "amount": "' . $amount . '"). Error: ' . $e->getMessage();
             $this->errorExecutionTbkApi($orderId, 'refund', $params, 'RefundOneclickException', $e->getMessage(), $errorMessage);
             throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder, $transaction, $e);
         }
@@ -527,13 +559,13 @@ class OneclickTransbankSdk extends TransbankSdk
     public function refundTransaction($orderId, $amount)
     {
         $params = [
-            'orderId'    => $orderId,
-            'amount'     => $amount
+            'orderId' => $orderId,
+            'amount' => $amount
         ];
         /*1. Extraemos la transacción */
         $tx = $this->getTransactionApprovedByOrderId($orderId);
         if (!$tx) {
-            $errorMessage = 'No se encontró una transacción aprobada ("orderId": "'.$orderId.'") en la base de datos';
+            $errorMessage = 'No se encontró una transacción aprobada ("orderId": "' . $orderId . '") en la base de datos';
             $this->errorExecution($orderId, 'refund', $params, 'NotFoundTransactionOneclickException', $errorMessage, $errorMessage);
             throw new NotFoundTransactionOneclickException($errorMessage, $orderId);
         }
@@ -543,7 +575,7 @@ class OneclickTransbankSdk extends TransbankSdk
 
         /*3. Validamos si fue exitoso */
         if (!(($response->getType() === 'REVERSED' || $response->getType() === 'NULLIFIED') && (int) $response->getResponseCode() === 0)) {
-            $errorMessage = 'El refund de la transacción no se pudo realizar en Webpay ("buyOrder": "'.$tx->buy_order.'", "childBuyOrder": "'.$tx->child_buy_order.'", "amount"'.$amount.'". ';
+            $errorMessage = 'El refund de la transacción no se pudo realizar en Webpay ("buyOrder": "' . $tx->buy_order . '", "childBuyOrder": "' . $tx->child_buy_order . '", "amount"' . $amount . '". ';
             $this->errorExecution($orderId, 'refund', $params, 'RejectedRefundOneclickException', $errorMessage, $errorMessage);
             throw new RejectedRefundOneclickException($errorMessage, $tx->buy_order, $tx->child_buy_order, $tx, $response);
         }
@@ -551,8 +583,8 @@ class OneclickTransbankSdk extends TransbankSdk
         $this->transactionRepository->update(
             $tx->id,
             [
-                'last_refund_type'    => $response->getType(),
-                'last_refund_response'   => json_encode($response)
+                'last_refund_type' => $response->getType(),
+                'last_refund_response' => json_encode($response)
             ]
         );
         return array(
@@ -561,7 +593,8 @@ class OneclickTransbankSdk extends TransbankSdk
         );
     }
 
-    protected function generateChildBuyOrder($orderId){
+    protected function generateChildBuyOrder($orderId)
+    {
         return BuyOrderHelper::generateFromFormat($this->childBuyOrderFormat, $orderId);
     }
 }
