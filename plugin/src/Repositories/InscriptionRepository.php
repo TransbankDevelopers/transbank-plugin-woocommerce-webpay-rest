@@ -54,7 +54,7 @@ class InscriptionRepository implements InscriptionRepositoryInterface
         $result = Inscription::findByToken($token);
         if (!is_array($result) || empty($result)) {
             throw new RecordNotFoundOnDatabaseException(
-                "Token '{$token}' no se encontró en la base de datos de inscripciones, por lo que no se puede completar el proceso");
+                "Token no se encontró en la base de datos de inscripciones");
         }
         return $result[0];
     }

@@ -54,7 +54,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         $result = Transaction::findByToken($token);
         if (!is_array($result) || empty($result)) {
             throw new RecordNotFoundOnDatabaseException(
-                "Token '{$token}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
+                "Token no se encontró en la base de datos de transacciones");
         }
         return $result[0];
     }
@@ -71,7 +71,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         $result = Transaction::findByBuyOrder($buyOrder);
         if (!is_array($result) || empty($result)) {
             throw new RecordNotFoundOnDatabaseException(
-                "BuyOrder '{$buyOrder}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
+                "BuyOrder no se encontró en la base de datos de transacciones");
         }
         return $result[0];
     }
