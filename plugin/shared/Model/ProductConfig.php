@@ -1,6 +1,7 @@
 <?php
 
 namespace Transbank\Plugin\Model;
+use Transbank\Webpay\Options;
 
 abstract class ProductConfig {
     public $apikey = null;
@@ -35,5 +36,10 @@ abstract class ProductConfig {
     public function getBuyOrderFormat()
     {
         return $this->buyOrderFormat;
+    }
+
+    public function isIntegration()
+    {
+        return $this->getEnvironment() == Options::ENVIRONMENT_INTEGRATION;
     }
 }
