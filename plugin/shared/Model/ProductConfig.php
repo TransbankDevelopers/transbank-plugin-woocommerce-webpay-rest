@@ -8,6 +8,7 @@ abstract class ProductConfig {
     public $commerceCode = null;
     public $environment = null;
     public $buyOrderFormat = null;
+    public $statusAfterPayment = null;
 
     public function __construct($data = null) {
         if (!is_null($data)) {
@@ -15,6 +16,7 @@ abstract class ProductConfig {
             $this->commerceCode = $data['commerceCode'] ?? null;
             $this->environment = $data['environment'] ?? null;
             $this->buyOrderFormat = $data['buyOrderFormat'] ?? null;
+            $this->statusAfterPayment = $data['statusAfterPayment'] ?? null;
         }
     }
 
@@ -36,6 +38,11 @@ abstract class ProductConfig {
     public function getBuyOrderFormat()
     {
         return $this->buyOrderFormat;
+    }
+
+    public function getStatusAfterPayment()
+    {
+        return $this->statusAfterPayment;
     }
 
     public function isIntegration()

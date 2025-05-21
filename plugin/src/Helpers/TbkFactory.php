@@ -34,6 +34,7 @@ class TbkFactory
             'commerceCode' => $config['webpay_rest_commerce_code'] ?? null,
             'apiKey' => $config['webpay_rest_api_key'] ?? null,
             'buyOrderFormat' => $config['buy_order_format'] ?? WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $config['webpay_rest_after_payment_order_status'] ?? ''
         ]);
     }
 
@@ -47,6 +48,7 @@ class TbkFactory
             'childCommerceCode' => $config['child_commerce_code'] ?? null,
             'buyOrderFormat' => $config['buy_order_format'] ?? OneclickTransbankSdk::BUY_ORDER_FORMAT,
             'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $config['oneclick_after_payment_order_status'] ?? ''
         ]);
     }
 
