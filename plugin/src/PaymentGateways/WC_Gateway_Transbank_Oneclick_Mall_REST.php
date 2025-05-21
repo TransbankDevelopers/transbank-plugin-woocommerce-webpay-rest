@@ -10,7 +10,7 @@ use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\OneclickInscriptionResponseController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;

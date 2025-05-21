@@ -19,7 +19,7 @@ use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
-use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Model\WebpayplusConfig;
 

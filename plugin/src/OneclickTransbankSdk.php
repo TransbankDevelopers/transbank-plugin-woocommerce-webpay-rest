@@ -29,7 +29,7 @@ use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\StartInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
-use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\Plugin\Model\OneclickConfig;

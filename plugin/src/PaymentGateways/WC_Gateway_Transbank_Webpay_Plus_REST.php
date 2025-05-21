@@ -11,7 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
 use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
