@@ -49,7 +49,7 @@ class WebpayplusTransbankSdk extends TransbankSdk
             $config->getCommerceCode(),
             $config->getApikey());
         $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
-        $this->dataMasker = new MaskData($log,$config->$this->isIntegration());
+        $this->dataMasker = new MaskData($log,$config->isIntegration());
         $this->transactionRepository = $transactionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
