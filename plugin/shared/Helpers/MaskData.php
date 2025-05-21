@@ -2,8 +2,6 @@
 
 namespace Transbank\Plugin\Helpers;
 
-use Transbank\Webpay\Options;
-
 class MaskData
 {
 
@@ -32,10 +30,10 @@ class MaskData
     protected $isIntegration;
     protected $log;
 
-    public function __construct($environment)
+    public function __construct($log, $isIntegration)
     {
-        $this->isIntegration = $environment == Options::ENVIRONMENT_INTEGRATION;
-        $this->log = TbkFactory::createLogger();
+        $this->isIntegration = $isIntegration;
+        $this->log = $log;
     }
 
     /**

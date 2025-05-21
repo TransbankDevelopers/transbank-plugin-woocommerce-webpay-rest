@@ -73,7 +73,7 @@ class OneclickTransbankSdk extends TransbankSdk
             $config->getChildCommerceCode() : Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1;
         $this->mallTransaction = new MallTransaction($this->options);
         $this->mallInscription = new MallInscription($this->options);
-        $this->dataMasker = new MaskData($this->getEnviroment());
+        $this->dataMasker = new MaskData($log, $config->$this->isIntegration());
         $this->transactionRepository = $transactionRepository;
         $this->inscriptionRepository = $inscriptionRepository;
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
