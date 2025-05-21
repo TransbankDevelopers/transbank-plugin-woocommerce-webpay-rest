@@ -9,7 +9,7 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
+use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Exceptions\Oneclick\TimeoutInscriptionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\UserCancelInscriptionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\WithoutTokenInscriptionOneclickException;

@@ -2,7 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\MaskData;
+use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
 
 /**
