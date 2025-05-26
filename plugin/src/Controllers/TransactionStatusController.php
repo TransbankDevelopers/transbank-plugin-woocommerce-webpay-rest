@@ -88,7 +88,7 @@ class TransactionStatusController
             return $this->handleOneclickStatus($orderId, $buyOrder, $transaction->buy_order);
         }
 
-        return $this->handleWebpayStatus($orderId, $token, $transaction->token);
+        return $this->handleWebpayStatus($token, $transaction->token);
     }
 
     private function handleOneclickStatus(
@@ -114,7 +114,6 @@ class TransactionStatusController
     }
 
     private function handleWebpayStatus(
-        string $orderId,
         string $requestToken,
         string $transactionToken
     ): array {
@@ -127,7 +126,7 @@ class TransactionStatusController
             ];
         }
 
-        $statusResponse = $this->getStatusForWebpayTransaction($orderId, $transactionToken);
+        $statusResponse = $this->getStatusForWebpayTransaction($transactionToken);
 
         return [
             'body' => TbkResponseUtil::getWebpayStatusFormattedResponse($statusResponse),
@@ -135,10 +134,10 @@ class TransactionStatusController
         ];
     }
 
-    private function getStatusForWebpayTransaction(string $orderId, string $token)
+    private function getStatusForWebpayTransaction(string $token)
     {
-        $webpayTransbankSDK = TbkFactory::createWebpayplusTransbankSdk();
-        return $webpayTransbankSDK->status($orderId, $token);
+        $webpayTransbankSDK = TbkFactory::createWebpayService();
+        return $webpayTransbankSDK->status($token);
     }
 
     private function getStatusForOneclickTransaction(string $orderId, string $buyOrder)
