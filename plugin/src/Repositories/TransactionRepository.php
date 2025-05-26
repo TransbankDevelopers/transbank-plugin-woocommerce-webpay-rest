@@ -2,6 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
+use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
@@ -22,12 +24,23 @@ class TransactionRepository implements TransactionRepositoryInterface
     /**
      * Create a transaction record.
      *
-     * @param array $data Transaction data to be stored.
+     * @param TbkTransaction $data Transaction data to be stored.
      * @return mixed
      */
-    public function create(array $data)
+    public function create(TbkTransaction $data)
     {
-        return Transaction::create($data);
+        $transaction = [
+                'order_id'    => $data->getOrderId(),
+                'buy_order'   => $data->getBuyOrder(),
+                'token'       => $data->getToken(),
+                'amount'      => $data->getAmount(),
+                'environment' => $data->getEnvironment(),
+                'session_id'  => $data->getSessionId(),
+                'commerce_code'  => $data->getCommerceCode(),
+                'product'     => $data->getProduct(),
+                'status'      => $data->getStatus()
+            ];
+        return Transaction::create($transaction);
     }
 
     /**
@@ -125,5 +138,30 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function checkExistTable(): array
     {
         return Transaction::checkExistTable();
+    }
+
+    public function findFirstByToken($token): ?object
+    {
+        $result = Transaction::findByToken($token);
+        if (!is_array($result) || empty($result)) {
+            return null;
+        }
+        return $result[0];
+    }
+
+    /**
+     * Checks if the transaction is already processed by the token.
+     *
+     * @param string $token The transaction token.
+     *
+     * @return bool
+     */
+    public function checkIsAlreadyProcessed(string $token): bool
+    {
+        $result = $this->findFirstByToken($token);
+        if (is_null($result)) {
+            return false;
+        }
+        return $result->status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
     }
 }
