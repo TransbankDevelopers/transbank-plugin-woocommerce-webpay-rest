@@ -13,6 +13,7 @@ use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
+use Transbank\Plugin\Services\WebpayService;
 
 define(
     'TRANSBANK_WEBPAY_REST_UPLOADS',
@@ -95,6 +96,14 @@ class TbkFactory
     public static function createEcommerceService()
     {
         return new EcommerceService(
+            static::createLogger(),
+            static::getWebpayplusConfig()
+        );
+    }
+
+    public static function createWebpayService()
+    {
+        return new WebpayService(
             static::createLogger(),
             static::getWebpayplusConfig()
         );
