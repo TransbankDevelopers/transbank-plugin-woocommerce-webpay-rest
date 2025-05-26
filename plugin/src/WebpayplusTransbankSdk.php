@@ -6,7 +6,7 @@ use \Exception;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
+use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
 use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;

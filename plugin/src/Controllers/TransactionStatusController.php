@@ -2,7 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
+use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;

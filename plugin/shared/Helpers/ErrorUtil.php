@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Helpers;
+namespace Transbank\Plugin\Helpers;
 
 class ErrorUtil {
 
