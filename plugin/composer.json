@@ -1,4 +1,6 @@
 {
+    "description": "Transbank WooCommerce Plugin",
+    "name": "transbank/woocommerce-plugin",
     "require": {
         "transbank/transbank-sdk": "^5.0",
         "ext-json": "*",
@@ -16,6 +18,12 @@
             "Transbank\\Plugin\\": "shared/"
         }
     },
-    "description": "Transbank WooCommerce Plugin",
-    "name": "transbank/woocommerce-plugin"
+    "autoload-dev": {
+        "psr-4": {
+        "Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    }   
 }

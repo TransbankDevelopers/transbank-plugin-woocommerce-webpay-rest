@@ -90,7 +90,7 @@ class CommitWebpayController
      * @throws EcommerceException If the payment flow is not recognized.
      * @return void
      */
-    private function handleRequest(array $request): void
+    protected function handleRequest(array $request): void
     {
         $webpayFlow = $this->getWebpayFlow($request);
 
@@ -121,7 +121,7 @@ class CommitWebpayController
      * @param array $request The request data from the payment gateway.
      * @return string The type of payment flow.
      */
-    private function getWebpayFlow(array $request): string
+    protected function getWebpayFlow(array $request): string
     {
         $tokenWs = $request['token_ws'] ?? null;
         $tbkToken = $request['TBK_TOKEN'] ?? null;
@@ -153,7 +153,7 @@ class CommitWebpayController
      * @param string $token The transaction token.
      * @return void
      */
-    private function handleNormalFlow(string $token): void
+    protected function handleNormalFlow(string $token): void
     {
         $this->logInfo("Procesando transacción por flujo Normal => token: {$token}");
         
@@ -183,7 +183,7 @@ class CommitWebpayController
      * @param string $buyOrder The buy order identifier.
      * @return void
      */
-    private function handleFlowTimeout(string $buyOrder): void
+    protected function handleFlowTimeout(string $buyOrder): void
     {
         $this->logInfo("Procesando transacción por flujo timeout => Orden de compra: {$buyOrder}");
 
@@ -208,7 +208,7 @@ class CommitWebpayController
      * @param string $token The transaction token.
      * @return void
      */
-    private function handleFlowAborted(string $token): void
+    protected function handleFlowAborted(string $token): void
     {
         $this->logInfo("Procesando transacción por flujo de pago abortado => Token: {$token}");
 
@@ -233,7 +233,7 @@ class CommitWebpayController
      * @param string $token The transaction token.
      * @return void
      */
-    private function handleFlowError(string $token): void
+    protected function handleFlowError(string $token): void
     {
         $this->logInfo(
             "Procesando transacción por flujo de error en formulario de pago => Token: {$token}"
@@ -264,7 +264,7 @@ class CommitWebpayController
      * @throws EcommerceException
      * @return void
      */
-    private function handleAuthorizedTransaction(
+    protected function handleAuthorizedTransaction(
         $wooCommerceOrder,
         $webpayTransaction,
         $commitResponse
@@ -298,7 +298,7 @@ class CommitWebpayController
      * @throws EcommerceException
      * @return void
      */
-    private function handleUnauthorizedTransaction(
+    protected function handleUnauthorizedTransaction(
         $webpayTransaction,
         TransactionCommitResponse $commitResponse
     ): void {
@@ -325,7 +325,7 @@ class CommitWebpayController
      *
      * @return void
      */
-    private function handleTransactionAlreadyProcessed(string $token): void
+    protected function handleTransactionAlreadyProcessed(string $token): void
     {
         $this->logInfo("Transacción ya se encontraba procesada. Token: {$token}");
 
@@ -366,7 +366,7 @@ class CommitWebpayController
      *
      * @return void
      */
-    private function handleAbortedTransaction(
+    protected function handleAbortedTransaction(
         $action,
         $status,
         $errorCode,
@@ -396,23 +396,23 @@ class CommitWebpayController
     }
     
 
-    private function setPaymentErrorPage($errorCode){
+    protected function setPaymentErrorPage($errorCode){
         $this->doAction('transbank_webpay_plus_unexpected_error');
         $this->logError(self::ERROR_MESSAGES[$errorCode]);
         $this->redirect($this->getCheckoutUrlWithError( $errorCode));
     }
 
-    private function redirect($url)
+    protected function redirect($url)
     {
         wp_redirect($url);
     }
 
-    private function getCheckoutUrlWithError($errorCode)
+    protected function getCheckoutUrlWithError($errorCode)
     {
         return add_query_arg(['transbank_status' => $errorCode], wc_get_checkout_url());
     }
 
-    private function doAction($name, $wooCommerceOrder = null, $webpayTransaction = null, $response = null)
+    protected function doAction($name, $wooCommerceOrder = null, $webpayTransaction = null, $response = null)
     {
         do_action($name, [
             'order' => $wooCommerceOrder ? $wooCommerceOrder->get_data() : null,
@@ -428,7 +428,7 @@ class CommitWebpayController
      *
      * @return bool
      */
-    private function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
+    protected function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
     {
         return $status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
     }
