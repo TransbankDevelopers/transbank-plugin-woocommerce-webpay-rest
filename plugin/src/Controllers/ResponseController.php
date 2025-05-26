@@ -107,8 +107,14 @@ class ResponseController
             $transaction = $e->getTransaction();
             $commitResponse = $e->getCommitResponse();
             $wooCommerceOrder = $this->ecommerceService->getOrderById($transaction->order_id);
-            $this->setWooCommerceOrderAsFailed($wooCommerceOrder, $transaction, $commitResponse);
-
+            $this->ecommerceService->setWebpayOrderAsFailed($wooCommerceOrder, $transaction, $commitResponse);
+            $this->transactionRepository->update(
+            $transaction->id,
+                [
+                    'status' => Transaction::STATUS_FAILED,
+                    'transbank_response' => json_encode($commitResponse),
+                ]
+            );
             do_action('wc_transbank_webpay_plus_transaction_failed', [
                 'order' => $wooCommerceOrder->get_data(),
                 'transbankTransaction' => $transaction,
@@ -142,41 +148,6 @@ class ResponseController
         }
 
         return wp_redirect($redirectUrl);
-    }
-
-    /**
-     * @param WC_Order $wooCommerceOrder
-     * @param array    $result
-     * @param $webpayTransaction
-     */
-    protected function setWooCommerceOrderAsFailed(
-        WC_Order $wooCommerceOrder,
-        $webpayTransaction,
-        TransactionCommitResponse $commitResponse
-    ) {
-        $_SESSION['woocommerce_order_failed'] = true;
-        $wooCommerceOrder->update_status('failed');
-        if ($commitResponse !== null) {
-            $message = 'Webpay Plus: Pago rechazado';
-
-            $this->ecommerceService->addNotes(
-                $wooCommerceOrder,
-                $commitResponse,
-                $message,
-                $webpayTransaction->token
-            );
-
-            $this->logger->logError('C.5. Respuesta de tbk commit fallido => token: ' . $webpayTransaction->token);
-            $this->logger->logError(json_encode($commitResponse));
-        }
-
-        $this->transactionRepository->update(
-            $webpayTransaction->id,
-            [
-                'status' => Transaction::STATUS_FAILED,
-                'transbank_response' => json_encode($commitResponse),
-            ]
-        );
     }
 
     protected function setOrderAsCancelledByUser(WC_Order $order_info, $webpayTransaction)

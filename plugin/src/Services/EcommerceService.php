@@ -152,6 +152,68 @@ class EcommerceService
         $this->setAfterPaymentOrderStatus($wooCommerceOrder, $this->webpayConfig->getStatusAfterPayment());
     }
 
+
+     /**
+     * @param WC_Order $wooCommerceOrder
+     * @param $webpayTransaction
+     * @param $commitResponse
+     */
+    public function setWebpayOrderAsFailed(
+        WC_Order $wooCommerceOrder,
+        $webpayTransaction,
+        TransactionCommitResponse $commitResponse
+    ) {
+        $_SESSION['woocommerce_order_failed'] = true;
+        $wooCommerceOrder->update_status('failed');
+        if ($commitResponse !== null) {
+            $message = 'Webpay Plus: Pago rechazado';
+
+            $this->addNotes(
+                $wooCommerceOrder,
+                $commitResponse,
+                $message,
+                $webpayTransaction->token
+            );
+
+            $this->log->logError('C.5. Respuesta de tbk commit fallido => token: ' . $webpayTransaction->token);
+            $this->log->logError(json_encode($commitResponse));
+        }
+    }
+
+    /**
+     * @param $response
+     * @param WC_Order $order
+     * @param $amount
+     */
+    public function addRefundOrderNote($response, WC_Order $order, $amount)
+    {
+        $type = $response->getType() === 'REVERSED' ? 'Reversa' : 'Anulación';
+        $amountFormatted = '$'.number_format($amount, 0, ',', '.');
+        $commonFields = "<div class='transbank_response_note'>
+            <h3>Reembolso exitoso</h3>
+            <strong>Tipo:</strong> {$type}
+            <strong>Monto reembolso:</strong> {$amountFormatted}";
+
+        if($type === 'Reversa') {
+            $note = "{$commonFields}
+            </div>";
+        }
+        else {
+            $balanceFormatted = '$'.number_format($response->getBalance(), 0, ',', '.');
+            $transactionDate = $response->getAuthorizationDate();
+            $formattedDate = TbkResponseUtil::transactionDateToLocalDate($transactionDate);
+
+            $note = "{$commonFields}
+                <strong>Saldo:</strong> {$balanceFormatted}
+                <strong>Fecha:</strong> {$formattedDate}
+                <strong>Código autorización:</strong> {$response->getAuthorizationCode()}
+                <strong>Código de respuesta:</strong> {$response->getResponseCode()}
+            </div>";
+        }
+
+        $order->add_order_note($note);
+    }
+
 }
 
  
