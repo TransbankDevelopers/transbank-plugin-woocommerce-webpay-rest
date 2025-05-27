@@ -51,7 +51,7 @@ class CreateWebpayController
                 'result' => 'success',
                 'redirect' => $createResponse->getUrl() . '?token_ws=' . $createResponse->getToken()
             ];
-        } 
+        }
         catch (EcommerceException $e) {
             $this->log->logError($e->getMessage());
             if (ErrorHelper::isGuzzleError($e)) {
