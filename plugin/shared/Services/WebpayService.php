@@ -5,7 +5,10 @@ namespace Transbank\Plugin\Services;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Transbank\Plugin\Helpers\ErrorUtil;
-use Transbank\Plugin\Exceptions\EcommerceException;
+use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
+use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
 use Transbank\Webpay\Options;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
@@ -82,12 +85,11 @@ class WebpayService
     }
 
     /**
+     * @param $orderId
      * @param $amount
-     * @param $sessionId
-     * @param $buyOrder
      * @param $returnUrl
      *
-     * @throws EcommerceException
+     * @throws CreateWebpayException
      *
      * @return TbkTransaction
      */
@@ -119,19 +121,19 @@ class WebpayService
                 return $result;
             } else {
                 $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}";
-                throw new EcommerceException($errorMessage);
+                throw new CreateWebpayException($errorMessage);
             }
         } catch (TransactionCreateException $e) {
             $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
-            throw new EcommerceException($errorMessage, $e);
+            throw new CreateWebpayException($errorMessage, $e);
         }
     }
 
     /**
      * @param $token
      *
-     * @throws \Transbank\Plugin\Exceptions\EcommerceException
+     * @throws CommitWebpayException
      *
      * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse
      */
@@ -140,13 +142,12 @@ class WebpayService
         try {
             $this->log->logInfo("commitTransaction : token: {$token}");
             if (!isset($token)) {
-                throw new EcommerceException('El token webpay es requerido');
+                throw new CommitWebpayException('El token webpay es requerido', $token);
             }
-
             return $this->webpayplusTransaction->commit($token);
         } catch (TransactionCommitException | \InvalidArgumentException | GuzzleException $e) {
             $errorMessage = "Error confirmando la transacción para el token: {$token}, error: {$e->getMessage()}";
-            throw new EcommerceException($errorMessage, $e);
+            throw new CommitWebpayException($errorMessage, $token, $e);
         }
     }
 
@@ -154,6 +155,13 @@ class WebpayService
         return BuyOrderHelper::generateFromFormat($this->buyOrderFormat, $orderId);
     }
 
+    /**
+     * @param $token
+     *
+     * @throws StatusWebpayException
+     *
+     * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionStatusResponse
+     */
     public function status($token)
     {
         try {
@@ -168,8 +176,34 @@ class WebpayService
             if (ErrorUtil::isApiMismatchError($e)) {
                 $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
             }
+            throw new StatusWebpayException($errorMessage, $token, $e);
+        }
+    }
 
-            throw new EcommerceException($errorMessage, $token);
+    /**
+     * @param $token
+     * @param $amount
+     *
+     * @throws RefundWebpayException
+     *
+     * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse
+     */
+    public function refund($token, $amount)
+    {
+        $errorMessageBase = 'Ocurrió un error al realizar la anulación en Webpay. ';
+        $refundInstructions = 'Intente realizar la anulación mediante su portal privado de Transbank.
+          Para mayor información del error revise los logs de la transacción.';
+        try {
+            $response = $this->webpayplusTransaction->refund($token, $amount);
+            if (($response->getType() === 'REVERSED' || $response->getType() === 'NULLIFIED') && (int) $response->getResponseCode() === 0) {
+                $this->log->logInfo('Rembolso realizado correctamente en Transbank');
+                return $response;
+            }
+            $errorMessage = 'Código de respuesta Transbank: ' . $response->getResponseCode();
+            throw new RefundWebpayException($errorMessage, $token);
+        } catch (Exception $e) {
+            $errorMessage = $errorMessageBase . $e->getMessage() . '. ' . $refundInstructions;
+            throw new RefundWebpayException($errorMessage, $token, $e);
         }
     }
 }
