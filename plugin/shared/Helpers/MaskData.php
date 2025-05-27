@@ -45,7 +45,7 @@ class MaskData
      */
     private function maskWithFormat($input)
     {
-        return preg_replace_callback('/(?<=-).+?(?=-)/', function ($matches) {
+        return preg_replace_callback('/(?<=-).+(?=-)/', function ($matches) {
             return str_repeat('x', strlen($matches[0]));
         }, $input);
     }
