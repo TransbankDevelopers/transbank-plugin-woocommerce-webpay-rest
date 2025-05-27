@@ -88,7 +88,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        return new RefundWebpayController()->proccess(
+        return (new RefundWebpayController())->proccess(
             $order_id,
             $amount,
             $reason
