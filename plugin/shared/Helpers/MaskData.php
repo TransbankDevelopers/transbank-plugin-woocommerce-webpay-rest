@@ -28,12 +28,10 @@ class MaskData
     ];
 
     protected $isIntegration;
-    protected $log;
 
-    public function __construct($log, $isIntegration)
+    public function __construct($isIntegration)
     {
         $this->isIntegration = $isIntegration;
-        $this->log = $log;
     }
 
     /**
@@ -189,7 +187,6 @@ class MaskData
             }
             return $newData;
         } catch (\Exception $e) {
-            $this->log->logError('Error on Mask Data: ' . $e->getMessage());
             return $data;
         }
     }

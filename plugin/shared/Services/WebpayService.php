@@ -65,7 +65,7 @@ class WebpayService
             );
         }
         $this->options = $this->webpayplusTransaction->getOptions();
-        $this->dataMasker = new MaskData($log, $config->isIntegration());
+        $this->dataMasker = new MaskData($config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
     }

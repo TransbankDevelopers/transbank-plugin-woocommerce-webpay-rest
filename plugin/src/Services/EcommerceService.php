@@ -35,7 +35,7 @@ class EcommerceService
     {
         $this->log = $log;
         $this->webpayConfig = $webpayConfig;
-        $this->webpayDataMasker = new MaskData($log, $webpayConfig->isIntegration());
+        $this->webpayDataMasker = new MaskData($webpayConfig->isIntegration());
     }
 
     /**
