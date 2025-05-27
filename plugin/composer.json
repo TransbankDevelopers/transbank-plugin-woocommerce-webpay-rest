@@ -17,13 +17,5 @@
             "Transbank\\WooCommerce\\WebpayRest\\": "src/",
             "Transbank\\Plugin\\": "shared/"
         }
-    },
-    "autoload-dev": {
-        "psr-4": {
-        "Tests\\": "tests/"
-        }
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^10.0"
-    }   
+    }
 }
