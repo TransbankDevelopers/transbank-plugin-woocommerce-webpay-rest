@@ -378,10 +378,14 @@ class CommitWebpayController
             "Error al procesar transacción por Transbank. Token: {$webpayTransaction->token}"
         );
 
-        $data = ['status' => $status];
+        $data = [
+            'status' => $status,
+            'detail_error' => self::ERROR_MESSAGES[$errorCode]
+        ];
 
         if (!is_null($response)) {
             $data['transbank_response'] = json_encode($response);
+            $data['transbank_status'] = $response->getStatus();
         }
 
         $this->transactionRepository->update($webpayTransaction->id,$data);
