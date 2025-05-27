@@ -52,26 +52,22 @@ class WebpayService
         )
     {
         $this->log = $log;
-        $this->options = $this->createOptions(
-            $config->getEnvironment(),
-            $config->getCommerceCode(),
-            $config->getApikey());
-        $this->webpayplusTransaction = new WebpayPlusTransaction($this->options);
+        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION){
+            $this->webpayplusTransaction = WebpayPlusTransaction::buildForProduction(
+                $config->getApikey(),
+                $config->getCommerceCode()
+            );
+        }
+        else {
+            $this->webpayplusTransaction = WebpayPlusTransaction::buildForIntegration(
+                WebpayPlus::INTEGRATION_API_KEY,
+                WebpayPlus::INTEGRATION_COMMERCE_CODE
+            );
+        }
+        $this->options = $this->webpayplusTransaction->getOptions();
         $this->dataMasker = new MaskData($log, $config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
-    }
-
-    /**
-     * @return Options
-     */
-    private function createOptions($environment, $commerceCode, $apiKey)
-    {
-        $options = new Options(WebpayPlus::INTEGRATION_API_KEY, WebpayPlus::INTEGRATION_COMMERCE_CODE, Options::ENVIRONMENT_INTEGRATION);
-        if ($environment == Options::ENVIRONMENT_PRODUCTION) {
-            $options = new Options($apiKey, $commerceCode, Options::ENVIRONMENT_PRODUCTION);
-        }
-        return $options;
     }
 
     public function getCommerceCode()
