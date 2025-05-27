@@ -7,7 +7,6 @@ use Transbank\Plugin\Model\LogConfig;
 use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
@@ -22,6 +21,7 @@ define(
 
 class TbkFactory
 {
+    const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
     public static function createLogger()
     {
         $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS .'/logs');
@@ -30,12 +30,12 @@ class TbkFactory
 
     public static function getWebpayplusConfig(): WebpayplusConfig
     {
-        $config = get_option(WebpayplusTransbankSdk::OPTION_KEY) ?? [];
+        $config = get_option(static::OPTION_KEY) ?? [];
         return new WebpayplusConfig([
             'environment' => $config['webpay_rest_environment'] ?? null,
             'commerceCode' => $config['webpay_rest_commerce_code'] ?? null,
             'apiKey' => $config['webpay_rest_api_key'] ?? null,
-            'buyOrderFormat' => $config['buy_order_format'] ?? WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+            'buyOrderFormat' => $config['buy_order_format'] ?? WebpayService::BUY_ORDER_FORMAT,
             'statusAfterPayment' => $config['webpay_rest_after_payment_order_status'] ?? ''
         ]);
     }
@@ -52,15 +52,6 @@ class TbkFactory
             'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT,
             'statusAfterPayment' => $config['oneclick_after_payment_order_status'] ?? ''
         ]);
-    }
-
-    public static function createWebpayplusTransbankSdk()
-    {
-        return new WebpayplusTransbankSdk(
-            static::createLogger(),
-            static::getWebpayplusConfig(),
-            static::createTransactionRepository()
-        );
     }
 
     public static function createOneclickTransbankSdk()

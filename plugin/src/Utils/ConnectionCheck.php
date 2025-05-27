@@ -18,14 +18,12 @@ class ConnectionCheck
     public static function performTestTransaction()
     {
         $amount = 990;
-        $buyOrder = '_Healthcheck_';
-        $sessionId = uniqid();
         $returnUrl = 'http://test.com/test';
 
         $status = 'Error';
         try {
-            $webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
-            $result = $webpayplusTransbankSdk->createInner(0, $buyOrder, $sessionId, $amount, $returnUrl);
+            $webpayService = TbkFactory::createWebpayService();
+            $result = $webpayService->createTransaction(0, $amount, $returnUrl);
             $status = 'OK';
 
         } catch (\Exception $e) {
@@ -38,7 +36,10 @@ class ConnectionCheck
 
         return [
             'status'   => ['string' => $status],
-            'response' => $result
+            'response' => [
+                'token' => $result->getToken(),
+                'url'   => $result->getUrl()
+            ]
         ];
     }
 }

@@ -9,8 +9,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\CreateWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
-use WC_Order;
+use Transbank\Plugin\Services\WebpayService;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
@@ -26,14 +25,8 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     protected $log;
     protected $config;
 
-    /**
-     * @var WebpayplusTransbankSdk
-     */
-    protected $webpayplusTransbankSdk;
-
     public function __construct()
     {
-        $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
         $this->id = self::ID;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
@@ -94,7 +87,6 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             $reason
         );
     }
-
 
     /**
      * Comprueba configuración de moneda (Peso Chileno).
@@ -175,10 +167,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             ],
             'buy_order_format' => [
                 'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
-                'placeholder' => 'Ej: ' . WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+                'placeholder' => 'Ej: ' . WebpayService::BUY_ORDER_FORMAT,
                 'desc_tip'    => $buyOrderDescription,
                 'type'        => 'text',
-                'default' => WebpayplusTransbankSdk::BUY_ORDER_FORMAT
+                'default' => WebpayService::BUY_ORDER_FORMAT
             ]
         ];
     }
