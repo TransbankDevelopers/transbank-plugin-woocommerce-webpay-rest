@@ -42,7 +42,7 @@ class RefundWebpayController
      * @param  string     $reason Refund reason.
      * @return boolean True or false based on success, or a WP_Error object.
      */
-    public function proccess($orderId, $amount = null, $reason = '')
+    public function proccess($orderId, $amount = null)
     {
         $order = null;
         $refundResponse = null;
