@@ -4,7 +4,6 @@ use Transbank\WooCommerce\WebpayRest\Controllers\CommitWebpayController;
 use PHPUnit\Framework\TestCase;
 
 class TestableCommitController extends CommitWebpayController {
-    public function __construct(){}
     public function callGetWebpayFlow(array $request): string {
         return $this->getWebpayFlow($request);
     }
