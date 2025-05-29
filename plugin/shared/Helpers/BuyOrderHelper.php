@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Helpers;
+namespace Transbank\Plugin\Helpers;
 
 class BuyOrderHelper {
     private const BUY_ORDER_MAX_LENGTH = 26;
