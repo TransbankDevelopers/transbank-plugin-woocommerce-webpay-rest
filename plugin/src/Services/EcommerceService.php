@@ -146,7 +146,7 @@ class EcommerceService
 
         $maskedBuyOrder = $this->webpayDataMasker->maskBuyOrder($commitResponse->getBuyOrder());
         $this->log->logInfo(
-            'C.5. Transacción con commit exitoso en Transbank y guardado => OC: ' . $maskedBuyOrder
+            'Transacción con commit exitoso en Transbank y guardado => OC: ' . $maskedBuyOrder
         );
 
         $this->setAfterPaymentOrderStatus($wooCommerceOrder, $this->webpayConfig->getStatusAfterPayment());
