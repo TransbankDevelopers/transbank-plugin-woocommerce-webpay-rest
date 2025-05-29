@@ -45,22 +45,30 @@ class RefundWebpayController
     public function proccess($orderId, $amount = null)
     {
         $order = null;
-        $refundResponse = null;
-        $transaction = null;
+        $response = null;
+        $webpayTransaction = null;
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
-            $transaction = $this->transactionRepository->findFirstApprovedByOrderId($orderId);
-            if (is_null($transaction)) {
+            $webpayTransaction = $this->transactionRepository->findFirstApprovedByOrderId($orderId);
+            if (is_null($webpayTransaction)) {
                 $messageError = '<strong>Error en el reembolso:</strong><br />';
                 $messageError = $messageError . 'No hay transacciones webpay para esta orden.';
+                $this->log->logError($messageError);
                 $order->add_order_note($messageError);
                 do_action('transbank_webpay_plus_refund_transaction_not_found', $order, null, $messageError);
                 return false;
             }
-            $refundResponse = $this->webpayService->refund($transaction->token, round($amount));
-            $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
-            $this->ecommerceService->addRefundOrderNote($refundResponse, $order, $amount);
-            do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $jsonResponse);
+            $response = $this->webpayService->refund($webpayTransaction->token, round($amount));
+            $this->transactionRepository->update(
+            $webpayTransaction->id,
+                [
+                    'last_refund_type' => $response->getType(),
+                    'last_refund_response' => json_encode($response)
+                ]
+            );
+            $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
+            $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
+            do_action('transbank_webpay_plus_refund_completed', $order, $webpayTransaction, $jsonResponse);
             return true;
         } catch (Throwable $e) {
             $messageError = '<strong>Error en el reembolso:</strong><br />';
@@ -68,8 +76,14 @@ class RefundWebpayController
             if (isset($response)) {
                 $messageError = $messageError . "\n\n" . json_encode($response, JSON_PRETTY_PRINT);
             }
+            $this->log->logError($messageError);
             $order->add_order_note($messageError);
-            do_action('transbank_webpay_plus_refund_failed', $order, $transaction, $messageError);
+            if (!is_null($webpayTransaction)){
+                $this->transactionRepository->update($webpayTransaction->id,[
+                    'detail_error' => $messageError
+                ]);
+            }
+            do_action('transbank_webpay_plus_refund_failed', $order, $webpayTransaction, $messageError);
         }
         return false;
     }
