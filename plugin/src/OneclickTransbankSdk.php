@@ -337,7 +337,7 @@ class OneclickTransbankSdk extends TransbankSdk
         $parentBuyOrder = $this->generateBuyOrder($orderId);
         $childBuyOrder = $this->generateChildBuyOrder($orderId);
         /*1. Creamos la transacción antes de autorizar en TBK */
-        $insert = $this->transactionService->create([
+        $insert = $this->transactionService->createOneclick([
             'order_id' => $orderId,
             'buy_order' => $parentBuyOrder,
             'child_buy_order' => $childBuyOrder,

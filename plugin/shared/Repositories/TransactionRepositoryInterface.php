@@ -7,7 +7,8 @@ use Transbank\Plugin\Model\TbkTransaction;
 interface TransactionRepositoryInterface
 {
     public function getTableName(): string;
-    public function create(TbkTransaction $data);
+    public function createWebpay(TbkTransaction $data);
+    public function createOneclick(array $data);
     public function update(string $transactionId, array $data);
     public function getByToken(string $token);
     public function getByBuyOrder(string $buyOrder);

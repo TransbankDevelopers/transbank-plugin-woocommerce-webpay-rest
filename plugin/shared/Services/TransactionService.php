@@ -17,9 +17,14 @@ class TransactionService
         $this->repository = $repository;
     }
 
-    public function create(TbkTransaction $data): mixed
+    public function createWebpay(TbkTransaction $data): mixed
     {
-        return $this->repository->create($data);
+        return $this->repository->createWebpay($data);
+    }
+
+    public function createOneclick(array $data): mixed
+    {
+        return $this->repository->createOneclick($data);
     }
 
     public function update(string $transactionId, array $data): mixed
