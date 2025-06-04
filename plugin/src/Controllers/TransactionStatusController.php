@@ -4,9 +4,9 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\Plugin\Services\TransactionService;
 
 class TransactionStatusController
 {
@@ -21,7 +21,7 @@ class TransactionStatusController
      * @var \Transbank\Plugin\Helpers\PluginLogger
      */
     private $logger;
-    protected TransactionRepositoryInterface $transactionRepository;
+    protected TransactionService $transactionService;
 
     /**
      * Controller for status requests.
@@ -29,7 +29,7 @@ class TransactionStatusController
     public function __construct()
     {
         $this->logger = TbkFactory::createLogger();
-        $this->transactionRepository = TbkFactory::createTransactionRepository();
+        $this->transactionService = TbkFactory::createTransactionService();
     }
 
     public function getStatus(): void
@@ -62,7 +62,7 @@ class TransactionStatusController
         $this->logger->logDebug('Request: payload -> ' . json_encode($params));
 
         try {
-            $transaction = $this->transactionRepository->findFirstByOrderId($orderId);
+            $transaction = $this->transactionService->findFirstByOrderId($orderId);
 
             if (!$transaction) {
                 $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
@@ -84,7 +84,7 @@ class TransactionStatusController
 
     private function handleGetStatus(object $transaction, string $orderId, string $buyOrder, string $token): array
     {
-        if ($transaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
+        if ($transaction->product == TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
             return $this->handleOneclickStatus($orderId, $buyOrder, $transaction->buy_order);
         }
 

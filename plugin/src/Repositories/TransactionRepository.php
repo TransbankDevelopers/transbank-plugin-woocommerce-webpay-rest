@@ -5,11 +5,11 @@ namespace Transbank\WooCommerce\WebpayRest\Repositories;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
-class TransactionRepository implements TransactionRepositoryInterface
+class TransactionRepository extends BaseRepository implements TransactionRepositoryInterface
 {
+    const TRANSACTIONS_TABLE_NAME = 'webpay_rest_transactions';
 
     /**
      * Get the name of the transaction database table.
@@ -18,7 +18,7 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function getTableName(): string
     {
-        return Transaction::getTableName();
+        return $this->getBaseTableName(static::TRANSACTIONS_TABLE_NAME);
     }
 
     /**
@@ -40,7 +40,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'product'     => $data->getProduct(),
                 'status'      => $data->getStatus()
             ];
-        return Transaction::create($transaction);
+        return $this->insertBase($transaction);
     }
 
     /**
@@ -52,7 +52,7 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function update(string $transactionId, array $data)
     {
-        return Transaction::update($transactionId, $data);
+        return $this->updateBase($transactionId, $data);
     }
 
      /**
@@ -64,12 +64,12 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function getByToken(string $token)
     {
-        $result = Transaction::findByToken($token);
-        if (!is_array($result) || empty($result)) {
+        $result = $this->findFirstByToken($token);
+        if (is_null($result)) {
             throw new RecordNotFoundOnDatabaseException(
                 "Token no se encontró en la base de datos de transacciones");
         }
-        return $result[0];
+        return $result;
     }
 
      /**
@@ -81,13 +81,18 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function getByBuyOrder(string $buyOrder)
     {
-        $result = Transaction::findByBuyOrder($buyOrder);
+        $transactionTable = $this->getTableName();
+        $result = $this->executeQuery(
+            "SELECT * FROM $transactionTable WHERE buy_order = '%s'",
+            $buyOrder
+        );
         if (!is_array($result) || empty($result)) {
             throw new RecordNotFoundOnDatabaseException(
                 "BuyOrder no se encontró en la base de datos de transacciones");
         }
         return $result[0];
     }
+
 
     /**
      * Retrieve the first approved transaction by orderId.
@@ -97,8 +102,12 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function findFirstApprovedByOrderId(string $orderId)
     {
-        $result = Transaction::findApprovedByOrderId($orderId);
-        return $result[0] ?? null;
+        $transactionTable = $this->getTableName();
+        $statusApproved = TbkConstants::TRANSACTION_STATUS_APPROVED;
+        return $this->findFirst(
+            "SELECT * FROM $transactionTable WHERE status = '$statusApproved' AND order_id = '%s'",
+            $orderId
+        );
     }
 
     /**
@@ -111,7 +120,12 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId)
     {
-        $result = Transaction::findByBuyOrderAndSessionId($buyOrder, $sessionId);
+        $transactionTable = $this->getTableName();
+        $result = $this->executeQuery(
+            "SELECT * FROM $transactionTable WHERE session_id = '%s' && buy_order='%s'",
+            $sessionId,
+            $buyOrder
+        );
         if (!is_array($result) || empty($result)) {
             throw new RecordNotFoundOnDatabaseException(
                 "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
@@ -127,41 +141,16 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     public function findFirstByOrderId($orderId): ?object
     {
-        return Transaction::findFirstByOrderId($orderId);
-    }
-
-    /**
-     * Check if the transaction table exists in the database.
-     *
-     * @return array
-     */
-    public function checkExistTable(): array
-    {
-        return Transaction::checkExistTable();
+        return $this->getTransactionsByConditions(['order_id' => $orderId], 'id')[0] ?? null;
     }
 
     public function findFirstByToken($token): ?object
     {
-        $result = Transaction::findByToken($token);
-        if (!is_array($result) || empty($result)) {
-            return null;
-        }
-        return $result[0];
+        $transactionTable = $this->getTableName();
+        return $this->findFirst(
+            "SELECT * FROM $transactionTable WHERE `token` = '%s'",
+            $token
+        );
     }
 
-    /**
-     * Checks if the transaction is already processed by the token.
-     *
-     * @param string $token The transaction token.
-     *
-     * @return bool
-     */
-    public function checkIsAlreadyProcessed(string $token): bool
-    {
-        $result = $this->findFirstByToken($token);
-        if (is_null($result)) {
-            return false;
-        }
-        return $result->status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
-    }
 }

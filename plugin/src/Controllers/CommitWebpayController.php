@@ -2,7 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Services\WebpayService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\Plugin\Helpers\TbkConstants;
@@ -10,6 +9,7 @@ use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
+use Transbank\Plugin\Services\TransactionService;
 
 class CommitWebpayController
 {
@@ -41,7 +41,7 @@ class CommitWebpayController
      * @var ILogger
      */
     protected $log;
-    protected TransactionRepositoryInterface $transactionRepository;
+    protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
 
@@ -51,7 +51,7 @@ class CommitWebpayController
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();
-        $this->transactionRepository = TbkFactory::createTransactionRepository();
+        $this->transactionService = TbkFactory::createTransactionService();
         $this->webpayService = TbkFactory::createWebpayService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
@@ -157,12 +157,12 @@ class CommitWebpayController
     {
         $this->logInfo("Procesando transacción por flujo Normal => token: {$token}");
         
-        if ($this->transactionRepository->checkIsAlreadyProcessed($token)) {
+        if ($this->transactionService->checkIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
             return;
         }
         
-        $webpayTransaction = $this->transactionRepository->findFirstByToken($token);
+        $webpayTransaction = $this->transactionService->findFirstByToken($token);
         $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
         $commitResponse = $this->webpayService->commitTransaction($token);
 
@@ -187,7 +187,7 @@ class CommitWebpayController
     {
         $this->logInfo("Procesando transacción por flujo timeout => Orden de compra: {$buyOrder}");
 
-        $webpayTransaction = $this->transactionRepository->getByBuyOrder($buyOrder);
+        $webpayTransaction = $this->transactionService->getByBuyOrder($buyOrder);
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($webpayTransaction->token);
@@ -212,7 +212,7 @@ class CommitWebpayController
     {
         $this->logInfo("Procesando transacción por flujo de pago abortado => Token: {$token}");
 
-        $webpayTransaction = $this->transactionRepository->findFirstByToken($token);
+        $webpayTransaction = $this->transactionService->findFirstByToken($token);
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -239,9 +239,9 @@ class CommitWebpayController
             "Procesando transacción por flujo de error en formulario de pago => Token: {$token}"
         );
 
-        $webpayTransaction = $this->transactionRepository->findFirstByToken($token);
+        $webpayTransaction = $this->transactionService->findFirstByToken($token);
 
-        if ($this->transactionRepository->checkIsAlreadyProcessed($token)) {
+        if ($this->transactionService->checkIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
             return;
         }
@@ -272,7 +272,7 @@ class CommitWebpayController
         $token = $webpayTransaction->token;
         $this->logInfo("Transacción autorizada por Transbank, procesando orden con token: {$token}");
 
-        $this->transactionRepository->update(
+        $this->transactionService->update(
             $webpayTransaction->id,
             [
                 'status'             => TbkConstants::TRANSACTION_STATUS_APPROVED,
@@ -329,7 +329,7 @@ class CommitWebpayController
     {
         $this->logInfo("Transacción ya se encontraba procesada. Token: {$token}");
 
-        $webpayTransaction = $this->transactionRepository->findFirstByToken($token);
+        $webpayTransaction = $this->transactionService->findFirstByToken($token);
         $status = $webpayTransaction->status;
         $errorCode = self::WEBPAY_EXCEPTION_FLOW_MESSAGE;
 
@@ -388,7 +388,7 @@ class CommitWebpayController
             $data['transbank_status'] = $response->getStatus();
         }
 
-        $this->transactionRepository->update($webpayTransaction->id,$data);
+        $this->transactionService->update($webpayTransaction->id,$data);
 
         $this->doAction(
             $action,

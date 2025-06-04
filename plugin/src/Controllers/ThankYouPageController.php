@@ -4,7 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use Transbank\WooCommerce\WebpayRest\Utils\Template;
@@ -23,7 +23,7 @@ class ThankYouPageController
             return;
         }
 
-        $webpayTransaction = TbkFactory::createTransactionRepository()->findFirstApprovedByOrderId($orderId);
+        $webpayTransaction = TbkFactory::createTransactionService()->findFirstApprovedByOrderId($orderId);
 
         if (is_null($webpayTransaction)) {
             wc_print_notice('<strong>Transacción fallida</strong>. Puedes volver a intentar el pago', 'error');
@@ -34,7 +34,7 @@ class ThankYouPageController
         $transactionResponse = json_decode($webpayTransaction->transbank_response);
 
         $formattedResponse = [];
-        if ($webpayTransaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
+        if ($webpayTransaction->product == TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
             $formattedResponse = TbkResponseUtil::getOneclickFormattedResponse($transactionResponse);
         } else {
             $formattedResponse = TbkResponseUtil::getWebpayFormattedResponse($transactionResponse);

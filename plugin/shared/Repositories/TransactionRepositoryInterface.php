@@ -16,5 +16,4 @@ interface TransactionRepositoryInterface
     public function checkExistTable(): array;
     public function findFirstByOrderId($orderId): ?object;
     public function findFirstByToken($token): ?object;
-    public function checkIsAlreadyProcessed(string $token): bool;
 }

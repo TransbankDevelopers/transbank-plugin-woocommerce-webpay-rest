@@ -4,7 +4,6 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Exception;
 use Throwable;
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Services\WebpayService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\Plugin\Exceptions\EcommerceException;
@@ -12,6 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
+use Transbank\Plugin\Services\TransactionService;
 use WC_Order;
 
 
@@ -21,7 +21,7 @@ class CreateWebpayController
      * @var ILogger
      */
     protected $log;
-    protected TransactionRepositoryInterface $transactionRepository;
+    protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
 
@@ -31,7 +31,7 @@ class CreateWebpayController
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();
-        $this->transactionRepository = TbkFactory::createTransactionRepository();
+        $this->transactionService = TbkFactory::createTransactionService();
         $this->webpayService = TbkFactory::createWebpayService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
@@ -45,7 +45,7 @@ class CreateWebpayController
             $amount = (int) number_format($order->get_total(), 0, ',', '');
             $returnUrl = add_query_arg('wc-api', $apiSlug, home_url('/'));
             $createResponse = $this->webpayService->createTransaction($order->get_id(), $amount, $returnUrl);
-            $this->transactionRepository->create($createResponse);
+            $this->transactionService->create($createResponse);
             do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->getToken());
             return [
                 'result' => 'success',

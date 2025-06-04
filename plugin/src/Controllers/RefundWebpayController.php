@@ -3,11 +3,11 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Throwable;
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Services\WebpayService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
+use Transbank\Plugin\Services\TransactionService;
 
 class RefundWebpayController
 {
@@ -15,7 +15,7 @@ class RefundWebpayController
      * @var ILogger
      */
     protected $log;
-    protected TransactionRepositoryInterface $transactionRepository;
+    protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
 
@@ -25,7 +25,7 @@ class RefundWebpayController
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();
-        $this->transactionRepository = TbkFactory::createTransactionRepository();
+        $this->transactionService = TbkFactory::createTransactionService();
         $this->webpayService = TbkFactory::createWebpayService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
@@ -49,7 +49,7 @@ class RefundWebpayController
         $webpayTransaction = null;
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
-            $webpayTransaction = $this->transactionRepository->findFirstApprovedByOrderId($orderId);
+            $webpayTransaction = $this->transactionService->findFirstApprovedByOrderId($orderId);
             if (is_null($webpayTransaction)) {
                 $messageError = '<strong>Error en el reembolso:</strong><br />';
                 $messageError = $messageError . 'No hay transacciones webpay para esta orden.';
@@ -59,7 +59,7 @@ class RefundWebpayController
                 return false;
             }
             $response = $this->webpayService->refund($webpayTransaction->token, round($amount));
-            $this->transactionRepository->update(
+            $this->transactionService->update(
             $webpayTransaction->id,
                 [
                     'last_refund_type' => $response->getType(),
@@ -79,7 +79,7 @@ class RefundWebpayController
             $this->log->logError($messageError);
             $order->add_order_note($messageError);
             if (!is_null($webpayTransaction)){
-                $this->transactionRepository->update($webpayTransaction->id,[
+                $this->transactionService->update($webpayTransaction->id,[
                     'detail_error' => $messageError
                 ]);
             }
