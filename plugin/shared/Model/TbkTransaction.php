@@ -8,9 +8,11 @@ class TbkTransaction
     private string $url;
     private string $sessionId;
     private string $buyOrder;
+    private string $childBuyOrder;
     private int|float $amount;
     private string $environment;
     private string $commerceCode;
+    private string $childCommerceCode;
     private string $product;
     private string $status;
     private string $orderId;
@@ -111,5 +113,21 @@ class TbkTransaction
     public function setOrderId(string $orderId): void
     {
         $this->orderId = $orderId;
+    }
+    public function getChildBuyOrder(): string
+    {
+        return $this->childBuyOrder;
+    }
+    public function setChildBuyOrder(string $childBuyOrder): void
+    {
+        $this->childBuyOrder = $childBuyOrder;
+    }
+    public function getChildCommerceCode(): string
+    {
+        return $this->childCommerceCode;
+    }
+    public function setChildCommerceCode(string $childCommerceCode): void
+    {
+        $this->childCommerceCode = $childCommerceCode;
     }
 }

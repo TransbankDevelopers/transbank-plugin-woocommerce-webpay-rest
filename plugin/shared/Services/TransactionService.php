@@ -17,14 +17,17 @@ class TransactionService
         $this->repository = $repository;
     }
 
-    public function createWebpay(TbkTransaction $data): mixed
+    public function create(TbkTransaction $data): mixed
     {
-        return $this->repository->createWebpay($data);
-    }
-
-    public function createOneclick(array $data): mixed
-    {
-        return $this->repository->createOneclick($data);
+        if ($data->getProduct() === TbkConstants::TRANSACTION_WEBPAY_PLUS) {
+            $data->setChildBuyOrder('');
+            $data->setChildCommerceCode('');
+        }
+        else {
+            $data->setToken('');
+            $data->setSessionId('');
+        }
+        return $this->repository->create($data);
     }
 
     public function update(string $transactionId, array $data): mixed

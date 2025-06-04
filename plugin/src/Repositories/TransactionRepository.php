@@ -27,25 +27,24 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      * @param TbkTransaction $data Transaction data to be stored.
      * @return mixed
      */
-    public function createWebpay(TbkTransaction $data)
+    public function create(TbkTransaction $data)
     {
         $transaction = [
                 'order_id'    => $data->getOrderId(),
                 'buy_order'   => $data->getBuyOrder(),
-                'token'       => $data->getToken(),
                 'amount'      => $data->getAmount(),
                 'environment' => $data->getEnvironment(),
-                'session_id'  => $data->getSessionId(),
                 'commerce_code'  => $data->getCommerceCode(),
                 'product'     => $data->getProduct(),
-                'status'      => $data->getStatus()
+                'status'      => $data->getStatus(),
+
+                'token'       => $data->getToken(),
+                'session_id'  => $data->getSessionId(),
+
+                'child_buy_order' => $data->getChildBuyOrder(),
+                'child_commerce_code' => $data->getChildCommerceCode()
             ];
         return $this->insertBase($transaction);
-    }
-
-    public function createOneclick(array $data)
-    {
-        return $this->insertBase($data);
     }
 
     /**

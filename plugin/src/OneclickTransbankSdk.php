@@ -33,6 +33,7 @@ use Transbank\Plugin\Services\TransactionService;
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\Plugin\Model\TbkTransaction;
 
 /**
  * Class OneclickTransbankSdk.
@@ -337,17 +338,19 @@ class OneclickTransbankSdk extends TransbankSdk
         $parentBuyOrder = $this->generateBuyOrder($orderId);
         $childBuyOrder = $this->generateChildBuyOrder($orderId);
         /*1. Creamos la transacción antes de autorizar en TBK */
-        $insert = $this->transactionService->createOneclick([
-            'order_id' => $orderId,
-            'buy_order' => $parentBuyOrder,
-            'child_buy_order' => $childBuyOrder,
-            'commerce_code' => $this->getCommerceCode(),
-            'child_commerce_code' => $this->getChildCommerceCode(),
-            'amount' => $amount,
-            'environment' => $this->getEnviroment(),
-            'product' => TbkConstants::TRANSACTION_WEBPAY_ONECLICK,
-            'status' => TbkConstants::TRANSACTION_STATUS_INITIALIZED
-        ]);
+        
+        $data = new TbkTransaction();
+        $data->setBuyOrder($parentBuyOrder);
+        $data->setChildBuyOrder($childBuyOrder);
+        $data->setAmount($amount);
+        $data->setOrderId($orderId);
+        $data->setEnvironment($this->options->getIntegrationType());
+        $data->setCommerceCode($this->options->getCommerceCode());
+        $data->setChildCommerceCode($this->getChildCommerceCode());
+        $data->setProduct(TbkConstants::TRANSACTION_WEBPAY_ONECLICK);
+        $data->setStatus(TbkConstants::TRANSACTION_STATUS_INITIALIZED);
+
+        $insert = $this->transactionService->create($data);
 
         /*2. Validamos que la insercion en la bd fue exitosa */
         if (!$insert) {

@@ -45,7 +45,7 @@ class CreateWebpayController
             $amount = (int) number_format($order->get_total(), 0, ',', '');
             $returnUrl = add_query_arg('wc-api', $apiSlug, home_url('/'));
             $createResponse = $this->webpayService->createTransaction($order->get_id(), $amount, $returnUrl);
-            $this->transactionService->createWebpay($createResponse);
+            $this->transactionService->create($createResponse);
             do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->getToken());
             return [
                 'result' => 'success',
