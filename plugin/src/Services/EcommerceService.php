@@ -51,12 +51,10 @@ class EcommerceService
     /**
      * @param WC_Order $order
      */
-    public function setAfterPaymentOrderStatus(WC_Order $order, $status)
+    public function setAfterPaymentOrderStatus(WC_Order $order, $status): void
     {
-        if ($status == '') {
-            $order->payment_complete();
-        } else {
-            $order->payment_complete();
+        $order->payment_complete();
+        if (!empty($status)) {
             $order->update_status($status);
         }
     }
