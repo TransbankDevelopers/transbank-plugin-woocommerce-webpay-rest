@@ -102,6 +102,7 @@ class WebpayService
             $createResponse = $this->webpayplusTransaction->create($buyOrder, $sessionId, $amount, $returnUrl);
             $this->log->logInfo("Transacción creada. [Respuesta]:");
             $this->log->logInfo(json_encode($createResponse));
+
             if (isset($createResponse) && isset($createResponse->url) && isset($createResponse->token)) {
                 $result = new TbkTransaction();
                 $result->setToken($createResponse->token);
@@ -119,6 +120,7 @@ class WebpayService
                 $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}";
                 throw new CreateWebpayException($errorMessage);
             }
+            
         } catch (TransactionCreateException $e) {
             $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
@@ -170,7 +172,7 @@ class WebpayService
             }
 
             if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
+                $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
             }
             throw new StatusWebpayException($errorMessage, $token, $e);
         }
