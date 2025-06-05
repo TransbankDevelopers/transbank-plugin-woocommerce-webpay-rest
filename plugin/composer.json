@@ -1,4 +1,6 @@
 {
+    "description": "Transbank WooCommerce Plugin",
+    "name": "transbank/woocommerce-plugin",
     "require": {
         "transbank/transbank-sdk": "^5.0",
         "ext-json": "*",
@@ -15,7 +17,5 @@
             "Transbank\\WooCommerce\\WebpayRest\\": "src/",
             "Transbank\\Plugin\\": "shared/"
         }
-    },
-    "description": "Transbank WooCommerce Plugin",
-    "name": "transbank/woocommerce-plugin"
+    }
 }

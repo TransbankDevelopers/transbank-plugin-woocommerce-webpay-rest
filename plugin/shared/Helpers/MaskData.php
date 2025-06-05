@@ -1,8 +1,6 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Helpers;
-
-use Transbank\Webpay\Options;
+namespace Transbank\Plugin\Helpers;
 
 class MaskData
 {
@@ -30,12 +28,10 @@ class MaskData
     ];
 
     protected $isIntegration;
-    protected $log;
 
-    public function __construct($environment)
+    public function __construct($isIntegration)
     {
-        $this->isIntegration = $environment == Options::ENVIRONMENT_INTEGRATION;
-        $this->log = TbkFactory::createLogger();
+        $this->isIntegration = $isIntegration;
     }
 
     /**
@@ -47,7 +43,7 @@ class MaskData
      */
     private function maskWithFormat($input)
     {
-        return preg_replace_callback('/(?<=-).+?(?=-)/', function ($matches) {
+        return preg_replace_callback('/(?<=-).+(?=-)/', function ($matches) {
             return str_repeat('x', strlen($matches[0]));
         }, $input);
     }
@@ -191,7 +187,6 @@ class MaskData
             }
             return $newData;
         } catch (\Exception $e) {
-            $this->log->logError('Error on Mask Data: ' . $e->getMessage());
             return $data;
         }
     }

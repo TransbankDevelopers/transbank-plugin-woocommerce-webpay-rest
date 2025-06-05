@@ -213,7 +213,7 @@ function addTransbankStatusMetaBox(bool $hPosExists)
 function renderTransactionStatusMetaBox(int $orderId)
 {
     $viewData = [];
-    $transaction = TbkFactory::createTransactionRepository()->findFirstByOrderId($orderId);
+    $transaction = TbkFactory::createTransactionService()->findFirstByOrderId($orderId);
 
     if ($transaction) {
         $viewData = [

@@ -7,11 +7,13 @@ use Transbank\Plugin\Model\LogConfig;
 use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
+use Transbank\Plugin\Services\WebpayService;
+use Transbank\Plugin\Services\TransactionService;
 
 define(
     'TRANSBANK_WEBPAY_REST_UPLOADS',
@@ -20,6 +22,7 @@ define(
 
 class TbkFactory
 {
+    const OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
     public static function createLogger()
     {
         $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS .'/logs');
@@ -28,12 +31,13 @@ class TbkFactory
 
     public static function getWebpayplusConfig(): WebpayplusConfig
     {
-        $config = get_option(WebpayplusTransbankSdk::OPTION_KEY) ?? [];
+        $config = get_option(static::OPTION_KEY) ?? [];
         return new WebpayplusConfig([
             'environment' => $config['webpay_rest_environment'] ?? null,
             'commerceCode' => $config['webpay_rest_commerce_code'] ?? null,
             'apiKey' => $config['webpay_rest_api_key'] ?? null,
-            'buyOrderFormat' => $config['buy_order_format'] ?? WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+            'buyOrderFormat' => $config['buy_order_format'] ?? WebpayService::BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $config['webpay_rest_after_payment_order_status'] ?? ''
         ]);
     }
 
@@ -47,16 +51,8 @@ class TbkFactory
             'childCommerceCode' => $config['child_commerce_code'] ?? null,
             'buyOrderFormat' => $config['buy_order_format'] ?? OneclickTransbankSdk::BUY_ORDER_FORMAT,
             'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $config['oneclick_after_payment_order_status'] ?? ''
         ]);
-    }
-
-    public static function createWebpayplusTransbankSdk()
-    {
-        return new WebpayplusTransbankSdk(
-            static::createLogger(),
-            static::getWebpayplusConfig(),
-            static::createTransactionRepository()
-        );
     }
 
     public static function createOneclickTransbankSdk()
@@ -64,7 +60,7 @@ class TbkFactory
         return new OneclickTransbankSdk(
             static::createLogger(),
             static::getOneclickConfig(),
-            static::createTransactionRepository(),
+            static::createTransactionService(),
             static::createInscriptionRepository()
         );
     }
@@ -89,6 +85,33 @@ class TbkFactory
         return new InscriptionRepository();
     }
     
+    public static function createEcommerceService()
+    {
+        return new EcommerceService(
+            static::createLogger(),
+            static::getWebpayplusConfig()
+        );
+    }
+
+    public static function createWebpayService()
+    {
+        return new WebpayService(
+            static::createLogger(),
+            static::getWebpayplusConfig()
+        );
+    }
+
+    /**
+     * Create and return an instance of the InscriptionRepository.
+     *
+     * @return TransactionService
+     */
+    public static function createTransactionService()
+    {
+        return new TransactionService(
+            static::createTransactionRepository()
+        );
+    }
 
 }
 

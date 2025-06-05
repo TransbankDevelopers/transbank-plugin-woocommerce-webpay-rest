@@ -2,30 +2,18 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use Exception;
-use Throwable;
-use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\WebpayPlus;
-use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
+use Transbank\WooCommerce\WebpayRest\Controllers\CommitWebpayController;
+use Transbank\WooCommerce\WebpayRest\Controllers\CreateWebpayController;
+use Transbank\WooCommerce\WebpayRest\Controllers\RefundWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
-use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
-use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
-use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
-use WC_Order;
+use Transbank\Plugin\Helpers\BuyOrderHelper;
+use Transbank\Plugin\Services\WebpayService;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
-    use TransbankRESTPaymentGateway;
-
     const ID = 'transbank_webpay_plus_rest';
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 
@@ -37,14 +25,8 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     protected $log;
     protected $config;
 
-    /**
-     * @var WebpayplusTransbankSdk
-     */
-    protected $webpayplusTransbankSdk;
-
     public function __construct()
     {
-        $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
         $this->id = self::ID;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
@@ -99,46 +81,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        $order = null;
-        try {
-            $order = new WC_Order($order_id);
-            $resp = $this->webpayplusTransbankSdk->refundTransaction($order->get_id(), round($amount));
-            $refundResponse = $resp['refundResponse'];
-            $transaction = $resp['transaction'];
-            $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
-            $this->addRefundOrderNote($refundResponse, $order, $amount);
-            do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $jsonResponse);
-            return true;
-        } catch (GetTransactionWebpayException $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
-        } catch (NotFoundTransactionWebpayException $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_transaction_not_found', null, null);
-        } catch (RefundWebpayException $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), null);
-        } catch (RejectedRefundWebpayException $e) {
-            $this->processRefundError(
-                $order,
-                $e,
-                'transbank_webpay_plus_refund_failed',
-                $e->getTransaction(),
-                $e->getRefundResponse()
-            );
-        } catch (Throwable $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
-        }
-        return false;
-    }
-
-    private function processRefundError($order, $exception, $action, $tx, $response)
-    {
-        $messageError = '<strong>Error en el reembolso:</strong><br />';
-        $messageError = $messageError . $exception->getMessage();
-        if (isset($response)) {
-            $messageError = $messageError . "\n\n" . json_encode($exception->getRefundResponse(), JSON_PRETTY_PRINT);
-        }
-        $order->add_order_note($messageError);
-        do_action($action, $order, $tx, $exception->getMessage());
-        throw new EcommerceException($messageError);
+        return (new RefundWebpayController())->proccess(
+            $order_id,
+            $amount
+        );
     }
 
     /**
@@ -220,10 +166,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             ],
             'buy_order_format' => [
                 'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
-                'placeholder' => 'Ej: ' . WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
+                'placeholder' => 'Ej: ' . WebpayService::BUY_ORDER_FORMAT,
                 'desc_tip'    => $buyOrderDescription,
                 'type'        => 'text',
-                'default' => WebpayplusTransbankSdk::BUY_ORDER_FORMAT
+                'default' => WebpayService::BUY_ORDER_FORMAT
             ]
         ];
     }
@@ -235,46 +181,15 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
         ob_clean();
         header('HTTP/1.1 200 OK');
-        $requestMethod = $_SERVER['REQUEST_METHOD'];
-        $params = ($requestMethod === 'GET') ? $_GET : $_POST;
-
-        return (new ResponseController($this->config))->response($requestMethod, $params);
+        return (new CommitWebpayController())->proccess();
     }
-
-
-
 
     /**
      * Procesar pago y retornar resultado.
      **/
     public function process_payment($order_id)
     {
-        $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
-        try {
-            $order = new WC_Order($order_id);
-            do_action('transbank_webpay_plus_starting_transaction', $order);
-            $amount = (int) number_format($order->get_total(), 0, ',', '');
-            $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
-            $createResponse = $this->webpayplusTransbankSdk->createTransaction($order->get_id(), $amount, $returnUrl);
-            do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->token);
-            return [
-                'result' => 'success',
-                'redirect' => $createResponse->url . '?token_ws=' . $createResponse->token,
-            ];
-        } catch (CreateWebpayException $e) {
-            if (ErrorHelper::isGuzzleError($e)) {
-                $errorMessage = ErrorHelper::getGuzzleError();
-                do_action($errorHookName, new Exception($errorMessage), true);
-                BlocksHelper::addLegacyNotices(ErrorHelper::getGuzzleError(), 'error');
-                return;
-            }
-            $errorMessage = 'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.';
-            do_action($errorHookName, new Exception($errorMessage), true);
-            BlocksHelper::addLegacyNotices($errorMessage, 'error');
-            return;
-        } catch (Throwable $e) {
-            throw new EcommerceException($e->getMessage(), $e);
-        }
+        return (new CreateWebpayController())->proccess($this->id, static::WOOCOMMERCE_API_SLUG, $order_id);
     }
 
     /**
