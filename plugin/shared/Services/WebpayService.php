@@ -14,32 +14,15 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
-use Transbank\Plugin\Helpers\ILogger;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\TbkConstants;
 
-class WebpayService
+class WebpayService extends ProductBaseService
 {
     const BUY_ORDER_FORMAT = 'wc-{random, length=8}-{orderId}';
-
-    /**
-     * @var Options
-     */
-    public $options;
-
-    /**
-     * @var ILogger
-     */
-    protected $log;
-    /**
-     * @var MaskData
-     */
-    public $dataMasker;
-    protected $buyOrderFormat;
-
     /**
      * @var WebpayPlusTransaction
      */
@@ -70,15 +53,7 @@ class WebpayService
             $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
     }
 
-    public function getCommerceCode()
-    {
-        return $this->options->getCommerceCode();
-    }
 
-    public function getEnviroment()
-    {
-        return $this->options->getIntegrationType();
-    }
 
     /**
      * @param $orderId
@@ -147,10 +122,6 @@ class WebpayService
             $errorMessage = "Error confirmando la transacción para el token: {$token}, error: {$e->getMessage()}";
             throw new CommitWebpayException($errorMessage, $token, $e);
         }
-    }
-
-    protected function generateBuyOrder($orderId){
-        return BuyOrderHelper::generateFromFormat($this->buyOrderFormat, $orderId);
     }
 
     /**
