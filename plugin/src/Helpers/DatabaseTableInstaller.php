@@ -3,8 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\BaseModel;
-
 
 require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
@@ -130,12 +128,6 @@ class DatabaseTableInstaller
         return $successTransaction && $successInscription;
     }
 
-    public static function deleteTable()
-    {
-        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
-        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
-    }
-
     public static function deleteTableByName($tableName)
     {
         global $wpdb;
@@ -155,7 +147,7 @@ class DatabaseTableInstaller
 
     public static function deleteUnusedTable()
     {
-        static::deleteTableByName(BaseModel::getBaseTableName('transbank_api_service_log'));
-        static::deleteTableByName(BaseModel::getBaseTableName('transbank_execution_error_log'));
+        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
+        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
     }
 }
