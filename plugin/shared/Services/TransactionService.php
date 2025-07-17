@@ -6,6 +6,8 @@ use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
+use Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionRefundResponse;
 
 class TransactionService
 {
@@ -158,6 +160,14 @@ class TransactionService
     public function getTableName(): string
     {
         return $this->repository->getTableName();
+    }
+
+    public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp)
+    {
+        $this->update($transactionId, [
+            'last_refund_type' => $resp->getType(),
+            'last_refund_response' => json_encode($resp)
+        ]);
     }
 
     public function updateWithAuthorizeResponse(string $transactionId, MallTransactionAuthorizeResponse $resp)

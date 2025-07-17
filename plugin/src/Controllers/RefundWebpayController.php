@@ -59,13 +59,7 @@ class RefundWebpayController
                 return false;
             }
             $response = $this->webpayService->refund($webpayTransaction->token, round($amount));
-            $this->transactionService->update(
-            $webpayTransaction->id,
-                [
-                    'last_refund_type' => $response->getType(),
-                    'last_refund_response' => json_encode($response)
-                ]
-            );
+            $this->transactionService->updateWithRefundResponse($webpayTransaction->id,$response);
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
             do_action('transbank_webpay_plus_refund_completed', $order, $webpayTransaction, $jsonResponse);
