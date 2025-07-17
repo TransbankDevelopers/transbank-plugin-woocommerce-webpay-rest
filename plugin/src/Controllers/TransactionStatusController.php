@@ -72,7 +72,7 @@ class TransactionStatusController
             }
 
             $this->logger->logInfo('Transacción encontrada.');
-            $response = $this->handleGetStatus($transaction, $orderId, $buyOrder, $token);
+            $response = $this->handleGetStatus($transaction, $buyOrder, $token);
 
             wp_send_json($response['body'], $response['code']);
         } catch (\Throwable $e) {
@@ -82,17 +82,16 @@ class TransactionStatusController
         }
     }
 
-    private function handleGetStatus(object $transaction, string $orderId, string $buyOrder, string $token): array
+    private function handleGetStatus(object $transaction, string $buyOrder, string $token): array
     {
         if ($transaction->product == TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
-            return $this->handleOneclickStatus($orderId, $buyOrder, $transaction->buy_order);
+            return $this->handleOneclickStatus( $buyOrder, $transaction->buy_order);
         }
 
         return $this->handleWebpayStatus($token, $transaction->token);
     }
 
     private function handleOneclickStatus(
-        string $orderId,
         string $requestBuyOrder,
         string $transactionBuyOrder
     ): array {
@@ -105,7 +104,7 @@ class TransactionStatusController
             ];
         }
 
-        $statusResponse = $this->getStatusForOneclickTransaction($orderId, $transactionBuyOrder);
+        $statusResponse = $this->getStatusForOneclickTransaction($transactionBuyOrder);
 
         return [
             'body' => TbkResponseUtil::getOneclickStatusFormattedResponse($statusResponse),
@@ -136,14 +135,14 @@ class TransactionStatusController
 
     private function getStatusForWebpayTransaction(string $token)
     {
-        $webpayTransbankSDK = TbkFactory::createWebpayService();
-        return $webpayTransbankSDK->status($token);
+        $service = TbkFactory::createWebpayService();
+        return $service->status($token);
     }
 
-    private function getStatusForOneclickTransaction(string $orderId, string $buyOrder)
+    private function getStatusForOneclickTransaction(string $buyOrder)
     {
-        $oneclickTransbankSDK = TbkFactory::createOneclickTransbankSdk();
-        return $oneclickTransbankSDK->status($orderId, $buyOrder);
+        $service = TbkFactory::createOneclickService();
+        return $service->status($buyOrder);
     }
 
     private function getSecureInputValue(string $varName): string
