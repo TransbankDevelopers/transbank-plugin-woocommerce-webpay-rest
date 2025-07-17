@@ -96,6 +96,7 @@ class InscriptionService
             'card_type' => $resp->getCardType(),
             'card_number' => $resp->getCardNumber(),
             'transbank_response' => json_encode($resp),
+            'response_code' => $resp->getResponseCode(),
             'status' => $resp->isApproved() ? TbkConstants::INSCRIPTIONS_STATUS_COMPLETED : TbkConstants::INSCRIPTIONS_STATUS_FAILED
         ]);
     }
