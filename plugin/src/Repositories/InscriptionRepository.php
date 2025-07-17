@@ -6,8 +6,9 @@ use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
-class InscriptionRepository implements InscriptionRepositoryInterface
+class InscriptionRepository extends BaseRepository implements InscriptionRepositoryInterface
 {
+    const TABLE_NAME = 'transbank_inscriptions';
 
     /**
      * Get the name of the inscription database table.
@@ -16,7 +17,7 @@ class InscriptionRepository implements InscriptionRepositoryInterface
      */
     public function getTableName(): string
     {
-        return Inscription::getTableName();
+        return $this->getBaseTableName(static::TABLE_NAME);
     }
 
     /**
@@ -27,7 +28,7 @@ class InscriptionRepository implements InscriptionRepositoryInterface
      */
     public function create(array $data)
     {
-        return Inscription::create($data);
+        return $this->insertBase($data);
     }
 
     /**
@@ -39,7 +40,7 @@ class InscriptionRepository implements InscriptionRepositoryInterface
      */
     public function update(string $inscriptionId, array $data)
     {
-        return Inscription::update($inscriptionId, $data);
+        return $this->updateBase($inscriptionId, $data);
     }
 
      /**
@@ -51,12 +52,11 @@ class InscriptionRepository implements InscriptionRepositoryInterface
      */
     public function getByToken(string $token)
     {
-        $result = Inscription::findByToken($token);
-        if (!is_array($result) || empty($result)) {
-            throw new RecordNotFoundOnDatabaseException(
-                "Token no se encontró en la base de datos de inscripciones");
-        }
-        return $result[0];
+        $inscriptionTableName = $this->getTableName();
+        return $this->getFirst(
+            "SELECT * FROM $inscriptionTableName WHERE `token` = '%s'",
+            "Token no se encontró en la base de datos de inscripciones",
+            $token);
     }
 
     /**

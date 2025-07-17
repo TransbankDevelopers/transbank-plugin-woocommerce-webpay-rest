@@ -2,6 +2,8 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
+use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
+
 abstract class BaseRepository
 {
     abstract protected function getTableName(): string;
@@ -18,7 +20,16 @@ abstract class BaseRepository
     protected function insertBase(array $data)
     {
         global $wpdb;
-        return $wpdb->insert($this->getTableName(), $data);
+        $table = $this->getTableName();
+        $inserted = $wpdb->insert($table, $data);
+        if ($inserted !== false) {
+            $id = $wpdb->insert_id;
+            return $wpdb->get_row(
+                $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id),
+                OBJECT
+            );
+        }
+        return null;
     }
 
     protected function updateBase($id, array $data)
@@ -105,5 +116,23 @@ abstract class BaseRepository
             return null;
         }
         return $result[0];
+    }
+
+    /**
+     * Retrieve a first record. Throws if not found.
+     *
+     * @param string $query
+     * @param string $errorMessage
+     * @param $args
+     * @return mixed
+     * @throws RecordNotFoundOnDatabaseException
+     */
+    public function getFirst($query, $errorMessage, ...$args)
+    {
+        $result = $this->findFirst($query, ...$args);
+        if (is_null($result)) {
+            throw new RecordNotFoundOnDatabaseException($errorMessage);
+        }
+        return $result;
     }
 }

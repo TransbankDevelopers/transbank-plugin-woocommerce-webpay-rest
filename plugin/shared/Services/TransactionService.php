@@ -5,6 +5,7 @@ namespace Transbank\Plugin\Services;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 
 class TransactionService
 {
@@ -23,7 +24,7 @@ class TransactionService
      * @param TbkTransaction $data Transaction data to be stored.
      * @return mixed
      */
-    public function create(TbkTransaction $data): mixed
+    public function create(TbkTransaction $data): TbkTransaction
     {
         if ($data->getProduct() === TbkConstants::TRANSACTION_WEBPAY_PLUS) {
             $data->setChildBuyOrder('');
@@ -33,7 +34,11 @@ class TransactionService
             $data->setToken('');
             $data->setSessionId('');
         }
-        return $this->repository->create($data);
+        $record = $this->repository->create($data);
+        if ($record === null) {
+            throw new \Exception("Problemas al crear el registro de Transacción");
+        }
+        return new TbkTransaction($record);
     }
 
     /**
@@ -153,6 +158,15 @@ class TransactionService
     public function getTableName(): string
     {
         return $this->repository->getTableName();
+    }
+
+    public function updateWithAuthorizeResponse(string $transactionId, MallTransactionAuthorizeResponse $resp)
+    {
+        $this->update($transactionId, [
+            'status' => TbkConstants::TRANSACTION_STATUS_APPROVED,
+            'transbank_status' => $resp->getDetails()[0]->getStatus() ?? null,
+            'transbank_response' => json_encode($resp),
+        ]);
     }
 
 }
