@@ -145,9 +145,25 @@ class DatabaseTableInstaller
         return null;
     }
 
-    public static function deleteUnusedTable()
+    public static function deleteTable()
     {
         static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
         static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
+    }
+
+    public static function deleteUnusedTable()
+    {
+        static::deleteTableByName(self::getBaseTableName('transbank_api_service_log'));
+        static::deleteTableByName(self::getBaseTableName('transbank_execution_error_log'));
+    }
+
+    public static function getBaseTableName($baseName): string
+    {
+        global $wpdb;
+        if (is_multisite()) {
+            return $wpdb->base_prefix.$baseName;
+        } else {
+            return $wpdb->prefix.$baseName;
+        }
     }
 }
