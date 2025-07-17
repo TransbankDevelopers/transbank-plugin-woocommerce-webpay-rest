@@ -58,14 +58,4 @@ class InscriptionRepository extends BaseRepository implements InscriptionReposit
             "Token no se encontró en la base de datos de inscripciones",
             $token);
     }
-
-    /**
-     * Check if the inscription table exists in the database.
-     *
-     * @return array
-     */
-    public function checkExistTable(): array
-    {
-        return Inscription::checkExistTable();
-    }
 }
