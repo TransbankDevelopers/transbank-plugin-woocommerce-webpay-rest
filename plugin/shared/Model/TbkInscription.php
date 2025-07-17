@@ -53,66 +53,214 @@ class TbkInscription
         }
     }
 
-    public function getId(): int { return $this->id; }
-    public function setId(int $id): void { $this->id = $id; }
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
-    public function getToken(): string { return $this->token; }
-    public function setToken(string $token): void { $this->token = $token; }
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 
-    public function getUsername(): string { return $this->username; }
-    public function setUsername(string $username): void { $this->username = $username; }
+    public function getToken(): string
+    {
+        return $this->token;
+    }
 
-    public function getEmail(): string { return $this->email; }
-    public function setEmail(string $email): void { $this->email = $email; }
+    public function setToken(string $token): void
+    {
+        $this->token = $token;
+    }
 
-    public function getUserId(): int { return $this->userId; }
-    public function setUserId(int $userId): void { $this->userId = $userId; }
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
 
-    public function getTokenId(): int { return $this->tokenId; }
-    public function setTokenId(int $tokenId): void { $this->tokenId = $tokenId; }
+    public function setUsername(string $username): void
+    {
+        $this->username = $username;
+    }
 
-    public function getOrderId(): int { return $this->orderId; }
-    public function setOrderId(int $orderId): void { $this->orderId = $orderId; }
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
 
-    public function getPayAfterInscription(): bool { return $this->payAfterInscription; }
-    public function setPayAfterInscription(bool $payAfterInscription): void { $this->payAfterInscription = $payAfterInscription; }
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
 
-    public function getFinished(): bool { return $this->finished; }
-    public function setFinished(bool $finished): void { $this->finished = $finished; }
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
 
-    public function getResponseCode(): string { return $this->responseCode; }
-    public function setResponseCode(string $responseCode): void { $this->responseCode = $responseCode; }
+    public function setUserId(int $userId): void
+    {
+        $this->userId = $userId;
+    }
 
-    public function getAuthorizationCode(): string { return $this->authorizationCode; }
-    public function setAuthorizationCode(string $authorizationCode): void { $this->authorizationCode = $authorizationCode; }
+    public function getTokenId(): int
+    {
+        return $this->tokenId;
+    }
 
-    public function getCardType(): string { return $this->cardType; }
-    public function setCardType(string $cardType): void { $this->cardType = $cardType; }
+    public function setTokenId(int $tokenId): void
+    {
+        $this->tokenId = $tokenId;
+    }
 
-    public function getCardNumber(): string { return $this->cardNumber; }
-    public function setCardNumber(string $cardNumber): void { $this->cardNumber = $cardNumber; }
+    public function getOrderId(): int
+    {
+        return $this->orderId;
+    }
 
-    public function getFrom(): string { return $this->from; }
-    public function setFrom(string $from): void { $this->from = $from; }
+    public function setOrderId(int $orderId): void
+    {
+        $this->orderId = $orderId;
+    }
 
-    public function getStatus(): string { return $this->status; }
-    public function setStatus(string $status): void { $this->status = $status; }
+    public function getPayAfterInscription(): bool
+    {
+        return $this->payAfterInscription;
+    }
 
-    public function getEnvironment(): string { return $this->environment; }
-    public function setEnvironment(string $environment): void { $this->environment = $environment; }
+    public function setPayAfterInscription(bool $payAfterInscription): void
+    {
+        $this->payAfterInscription = $payAfterInscription;
+    }
 
-    public function getCommerceCode(): string { return $this->commerceCode; }
-    public function setCommerceCode(string $commerceCode): void { $this->commerceCode = $commerceCode; }
+    public function getFinished(): bool
+    {
+        return $this->finished;
+    }
 
-    public function getTransbankResponse(): string { return $this->transbankResponse; }
-    public function setTransbankResponse(string $transbankResponse): void { $this->transbankResponse = $transbankResponse; }
+    public function setFinished(bool $finished): void
+    {
+        $this->finished = $finished;
+    }
 
-    public function getError(): string { return $this->error; }
-    public function setError(string $error): void { $this->error = $error; }
+    public function getResponseCode(): string
+    {
+        return $this->responseCode;
+    }
 
-    public function getDetailError(): string { return $this->detailError; }
-    public function setDetailError(string $detailError): void { $this->detailError = $detailError; }
+    public function setResponseCode(string $responseCode): void
+    {
+        $this->responseCode = $responseCode;
+    }
 
-    public function getCreatedAt(): string { return $this->createdAt; }
-    public function setCreatedAt(string $createdAt): void { $this->createdAt = $createdAt; }
+    public function getAuthorizationCode(): string
+    {
+        return $this->authorizationCode;
+    }
+
+    public function setAuthorizationCode(string $authorizationCode): void
+    {
+        $this->authorizationCode = $authorizationCode;
+    }
+
+    public function getCardType(): string
+    {
+        return $this->cardType;
+    }
+
+    public function setCardType(string $cardType): void
+    {
+        $this->cardType = $cardType;
+    }
+
+    public function getCardNumber(): string
+    {
+        return $this->cardNumber;
+    }
+
+    public function setCardNumber(string $cardNumber): void
+    {
+        $this->cardNumber = $cardNumber;
+    }
+
+    public function getFrom(): string
+    {
+        return $this->from;
+    }
+
+    public function setFrom(string $from): void
+    {
+        $this->from = $from;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function getEnvironment(): string
+    {
+        return $this->environment;
+    }
+
+    public function setEnvironment(string $environment): void
+    {
+        $this->environment = $environment;
+    }
+
+    public function getCommerceCode(): string
+    {
+        return $this->commerceCode;
+    }
+
+    public function setCommerceCode(string $commerceCode): void
+    {
+        $this->commerceCode = $commerceCode;
+    }
+
+    public function getTransbankResponse(): string
+    {
+        return $this->transbankResponse;
+    }
+
+    public function setTransbankResponse(string $transbankResponse): void
+    {
+        $this->transbankResponse = $transbankResponse;
+    }
+
+    public function getError(): string
+    {
+        return $this->error;
+    }
+
+    public function setError(string $error): void
+    {
+        $this->error = $error;
+    }
+
+    public function getDetailError(): string
+    {
+        return $this->detailError;
+    }
+
+    public function setDetailError(string $detailError): void
+    {
+        $this->detailError = $detailError;
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(string $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
 }

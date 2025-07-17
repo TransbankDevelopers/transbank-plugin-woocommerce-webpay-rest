@@ -32,64 +32,225 @@ class TbkTransaction
             $this->id = (int) ($record->id ?? 0);
             $this->token = $record->token ?? '';
             $this->url = $record->url ?? '';
-            $this->sessionId = $record->sessionId ?? '';
-            $this->buyOrder = $record->buyOrder ?? '';
-            $this->childBuyOrder = $record->childBuyOrder ?? '';
+            $this->sessionId = $record->session_id ?? '';
+            $this->buyOrder = $record->buy_order ?? '';
+            $this->childBuyOrder = $record->child_buy_order ?? '';
             $this->amount = is_numeric($record->amount ?? null) ? $record->amount : 0;
             $this->environment = $record->environment ?? '';
-            $this->commerceCode = $record->commerceCode ?? '';
-            $this->childCommerceCode = $record->childCommerceCode ?? '';
+            $this->commerceCode = $record->commerce_code ?? '';
+            $this->childCommerceCode = $record->child_commerce_code ?? '';
             $this->product = $record->product ?? '';
             $this->status = $record->status ?? '';
-            $this->orderId = $record->orderId ?? '';
-            $this->transbankStatus = $record->transbankStatus ?? '';
-            $this->transbankResponse = $record->transbankResponse ?? '';
-            $this->lastRefundType = $record->lastRefundType ?? '';
-            $this->lastRefundResponse = $record->lastRefundResponse ?? '';
+            $this->orderId = $record->order_id ?? '';
+            $this->transbankStatus = $record->transbank_status ?? '';
+            $this->transbankResponse = $record->transbank_response ?? '';
+            $this->lastRefundType = $record->last_refund_type ?? '';
+            $this->lastRefundResponse = $record->last_refund_response ?? '';
             $this->error = $record->error ?? '';
-            $this->detailError = $record->detailError ?? '';
-            $this->createdAt = $record->createdAt ?? '';
+            $this->detailError = $record->detail_error ?? '';
+            $this->createdAt = $record->created_at ?? '';
         }
     }
 
-    public function getId(): int { return $this->id; } public function setId(int $id): void { $this->id = $id; }
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
-    public function getToken(): string { return $this->token; } public function setToken(string $token): void { $this->token = $token; }
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 
-    public function getUrl(): string { return $this->url; } public function setUrl(string $url): void { $this->url = $url; }
+    public function getToken(): string
+    {
+        return $this->token;
+    }
 
-    public function getSessionId(): string { return $this->sessionId; } public function setSessionId(string $sessionId): void { $this->sessionId = $sessionId; }
+    public function setToken(string $token): void
+    {
+        $this->token = $token;
+    }
 
-    public function getBuyOrder(): string { return $this->buyOrder; } public function setBuyOrder(string $buyOrder): void { $this->buyOrder = $buyOrder; }
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
 
-    public function getChildBuyOrder(): string { return $this->childBuyOrder; } public function setChildBuyOrder(string $childBuyOrder): void { $this->childBuyOrder = $childBuyOrder; }
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
+    }
 
-    public function getAmount(): int|float { return $this->amount; } public function setAmount(int|float $amount): void { $this->amount = $amount; }
+    public function getSessionId(): string
+    {
+        return $this->sessionId;
+    }
 
-    public function getEnvironment(): string { return $this->environment; } public function setEnvironment(string $environment): void { $this->environment = $environment; }
+    public function setSessionId(string $sessionId): void
+    {
+        $this->sessionId = $sessionId;
+    }
 
-    public function getCommerceCode(): string { return $this->commerceCode; } public function setCommerceCode(string $commerceCode): void { $this->commerceCode = $commerceCode; }
+    public function getBuyOrder(): string
+    {
+        return $this->buyOrder;
+    }
 
-    public function getChildCommerceCode(): string { return $this->childCommerceCode; } public function setChildCommerceCode(string $childCommerceCode): void { $this->childCommerceCode = $childCommerceCode; }
+    public function setBuyOrder(string $buyOrder): void
+    {
+        $this->buyOrder = $buyOrder;
+    }
 
-    public function getProduct(): string { return $this->product; } public function setProduct(string $product): void { $this->product = $product; }
+    public function getChildBuyOrder(): string
+    {
+        return $this->childBuyOrder;
+    }
 
-    public function getStatus(): string { return $this->status; } public function setStatus(string $status): void { $this->status = $status; }
+    public function setChildBuyOrder(string $childBuyOrder): void
+    {
+        $this->childBuyOrder = $childBuyOrder;
+    }
 
-    public function getOrderId(): string { return $this->orderId; } public function setOrderId(string $orderId): void { $this->orderId = $orderId; }
+    public function getAmount(): int|float
+    {
+        return $this->amount;
+    }
 
-    public function getTransbankStatus(): string { return $this->transbankStatus; } public function setTransbankStatus(string $transbankStatus): void { $this->transbankStatus = $transbankStatus; }
+    public function setAmount(int|float $amount): void
+    {
+        $this->amount = $amount;
+    }
 
-    public function getTransbankResponse(): string { return $this->transbankResponse; } public function setTransbankResponse(string $transbankResponse): void { $this->transbankResponse = $transbankResponse; }
+    public function getEnvironment(): string
+    {
+        return $this->environment;
+    }
 
-    public function getLastRefundType(): string { return $this->lastRefundType; } public function setLastRefundType(string $lastRefundType): void { $this->lastRefundType = $lastRefundType; }
+    public function setEnvironment(string $environment): void
+    {
+        $this->environment = $environment;
+    }
 
-    public function getLastRefundResponse(): string { return $this->lastRefundResponse; } public function setLastRefundResponse(string $lastRefundResponse): void { $this->lastRefundResponse = $lastRefundResponse; }
+    public function getCommerceCode(): string
+    {
+        return $this->commerceCode;
+    }
 
-    public function getError(): string { return $this->error; } public function setError(string $error): void { $this->error = $error; }
+    public function setCommerceCode(string $commerceCode): void
+    {
+        $this->commerceCode = $commerceCode;
+    }
 
-    public function getDetailError(): string { return $this->detailError; } public function setDetailError(string $detailError): void { $this->detailError = $detailError; }
+    public function getChildCommerceCode(): string
+    {
+        return $this->childCommerceCode;
+    }
 
-    public function getCreatedAt(): string { return $this->createdAt; } public function setCreatedAt(string $createdAt): void { $this->createdAt = $createdAt; }
+    public function setChildCommerceCode(string $childCommerceCode): void
+    {
+        $this->childCommerceCode = $childCommerceCode;
+    }
+
+    public function getProduct(): string
+    {
+        return $this->product;
+    }
+
+    public function setProduct(string $product): void
+    {
+        $this->product = $product;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function getOrderId(): string
+    {
+        return $this->orderId;
+    }
+
+    public function setOrderId(string $orderId): void
+    {
+        $this->orderId = $orderId;
+    }
+
+    public function getTransbankStatus(): string
+    {
+        return $this->transbankStatus;
+    }
+
+    public function setTransbankStatus(string $transbankStatus): void
+    {
+        $this->transbankStatus = $transbankStatus;
+    }
+
+    public function getTransbankResponse(): string
+    {
+        return $this->transbankResponse;
+    }
+
+    public function setTransbankResponse(string $transbankResponse): void
+    {
+        $this->transbankResponse = $transbankResponse;
+    }
+
+    public function getLastRefundType(): string
+    {
+        return $this->lastRefundType;
+    }
+
+    public function setLastRefundType(string $lastRefundType): void
+    {
+        $this->lastRefundType = $lastRefundType;
+    }
+
+    public function getLastRefundResponse(): string
+    {
+        return $this->lastRefundResponse;
+    }
+
+    public function setLastRefundResponse(string $lastRefundResponse): void
+    {
+        $this->lastRefundResponse = $lastRefundResponse;
+    }
+
+    public function getError(): string
+    {
+        return $this->error;
+    }
+
+    public function setError(string $error): void
+    {
+        $this->error = $error;
+    }
+
+    public function getDetailError(): string
+    {
+        return $this->detailError;
+    }
+
+    public function setDetailError(string $detailError): void
+    {
+        $this->detailError = $detailError;
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(string $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
 
 }
