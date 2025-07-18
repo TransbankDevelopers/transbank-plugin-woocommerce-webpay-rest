@@ -2,8 +2,6 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Exception;
-use Throwable;
 use WC_Order;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
