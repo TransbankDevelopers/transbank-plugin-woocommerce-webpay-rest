@@ -6,30 +6,18 @@ use WC_Order;
 use Throwable;
 use WC_Payment_Tokens;
 use Transbank\Plugin\Exceptions\EcommerceException;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
 use Transbank\Plugin\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
-use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\WooCommerce\WebpayRest\Controllers\StartOneclickController;
-use Transbank\Plugin\Services\TransactionService;
-use Transbank\Plugin\Services\OneclickService;
-use Transbank\Plugin\Helpers\ILogger;
-use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
-use Transbank\Plugin\Helpers\TbkConstants;
 
-class AuthorizeOneclickController
+class AuthorizeOneclickController extends BaseAuthorizeOneclickController
 {
-    protected ILogger $log;
-    protected TransactionService $transactionService;
-    protected OneclickService $oneclickService;
-    protected EcommerceService $ecommerceService;
     protected string $gatewayId;
     protected string $returnUrl;
 
@@ -38,14 +26,10 @@ class AuthorizeOneclickController
      */
     public function __construct(string $gatewayId, string $returnUrl)
     {
-        $this->log = TbkFactory::createLogger();
-        $this->transactionService = TbkFactory::createTransactionService();
-        $this->oneclickService = TbkFactory::createOneclickService();
-        $this->ecommerceService = TbkFactory::createEcommerceService();
+        parent::__construct();
         $this->gatewayId = $gatewayId;
         $this->returnUrl = $returnUrl;
     }
-
 
     /**
      * Procesar pago y retornar resultado.
@@ -73,61 +57,7 @@ class AuthorizeOneclickController
             ];
         }
     }
-
-    /**
-     * Processes a scheduled subscription payment.
-     *
-     * This method authorizes a scheduled subscription payment for the given renewal order. It retrieves the customer ID
-     * from the renewal order, obtains the customer's default payment token and authorizes the payment with Oneclick.
-     *
-     * @param float $amount_to_charge The amount to charge for the subscription payment.
-     * @param WC_Order $renewalOrder The renewal order object for the subscription.
-     *
-     * @throws EcommerceException If there is no customer ID on the renewal order.
-     */
-    public function scheduledSubscriptionPayment($amount_to_charge, WC_Order $renewalOrder)
-    {
-        try {
-            $this->log->logInfo('Autorizando suscripción para la orden #' . $renewalOrder->get_id());
-            $customerId = $renewalOrder->get_customer_id();
-
-            if (!$customerId) {
-                $this->log->logError('No existe el ID de usuario en la suscripción.');
-                throw new EcommerceException('There is no costumer id on the renewal order');
-            }
-
-            /** @var WC_Payment_Token_Oneclick $paymentToken */
-            $paymentToken = WC_Payment_Tokens::get_customer_default_token($customerId);
-
-            $transaction = $this->oneclickService->prepareTransaction($renewalOrder->get_id(), $amount_to_charge);
-            $tx = $this->transactionService->create($transaction);
-            $authorizeResponse = $this->oneclickService->authorize(
-                $paymentToken->get_username(),
-                $paymentToken->get_token(),
-                $transaction->getBuyOrder(),
-                $transaction->getChildBuyOrder(),
-                $transaction->getAmount()
-            );
-
-            $this->transactionService->updateWithAuthorizeResponse($tx->id,$authorizeResponse);
-
-            $renewalOrder->add_payment_token($paymentToken);
-
-            $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago de suscripción exitoso');
-            $renewalOrder->add_order_note($orderNotes);
-
-            do_action('wc_transbank_oneclick_transaction_approved', ['order' => $renewalOrder->get_data()]);
-
-            $this->ecommerceService->completeOneclickOrder($renewalOrder);
-
-            $this->log->logInfo('Suscripción autorizada correctamente para la orden #' . $renewalOrder->get_id());
-        } catch (Throwable $ex) {
-            $this->log->logError("Error al procesar suscripción: " . $ex->getMessage());
-            $logsUrl = admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs');
-            $this->ecommerceService->setOneclickOrderAsFailed($renewalOrder, 'Error al procesar suscripción, para más detalles revisar el archivo de <a href=" ' . $logsUrl . '">logs</a>.');
-        }
-    }
-
+    
     /**
      * Handles the request for processing a payment or initiating a new card inscription.
      *
@@ -169,9 +99,11 @@ class AuthorizeOneclickController
      */
     private function handleAuthorization(WC_Order $order, string $paymentTokenId)
     {
+        $transaction = null;
+        $orderNotes = '';
         try {
-            $orderNotes = '';
             $this->log->logInfo('[Oneclick] Checkout: pagando con el token ID #' . $paymentTokenId);
+            
             $paymentToken = $this->getWcPaymentToken($paymentTokenId);
             $amount = $this->ecommerceService->getTotalAmountFromOrder($order);
 
@@ -179,9 +111,8 @@ class AuthorizeOneclickController
                 throw new EcommerceException("Datos incorrectos para autorizar la transacción.");
             }
 
-            $transaction = $this->transactionService->create(
-                $this->oneclickService->prepareTransaction($order->get_id(), $amount)
-            );
+            $transactionData = $this->oneclickService->prepareTransaction($order->get_id(), $amount);
+            $transaction = $this->transactionService->create($transactionData);
 
             $authorizeResponse = $this->oneclickService->authorize(
                 $paymentToken->get_username(),
@@ -191,26 +122,10 @@ class AuthorizeOneclickController
                 $transaction->getAmount()
             );
 
-            $this->transactionService->updateWithAuthorizeResponse($transaction->id,$authorizeResponse);
+            $this->transactionService->updateWithAuthorizeResponse($transaction->getId(),$authorizeResponse);
 
             if (!$authorizeResponse->isApproved()) {
-                $this->log->logError("Transacción con autorización rechazada => parentBuyOrder:
-                    {$transaction->getBuyOrder()}, childBuyOrder: {$transaction->getChildBuyOrder()}");
-                $this->log->logError(json_encode($authorizeResponse));
-                $orderNotes = $this->getOrderNotesFromAuthorizeResponse(
-                    $authorizeResponse,
-                    'Oneclick: Pago rechazado'
-                );
-                if ($authorizeResponse->getDetails()[0]->getStatus() === 'CONSTRAINTS_VIOLATED') {
-                    $errorMessage = 'La transacción ha sido rechazada porque se superó el monto máximo por transacción, el monto máximo diario o el número de transacciones diarias configuradas por el comercio para cada usuario';
-                    $order->add_order_note($errorMessage);
-                }
-                else {
-                    $errorCode = $authorizeResponse->getDetails()[0]->getResponseCode() ?? null;
-                    $errorMessage = 'La transacción ha sido rechazada (Código de error: ' . $errorCode . ')';
-                }
-                $order->add_meta_data('transbank_response', json_encode($authorizeResponse));
-                throw new EcommerceException($errorMessage);
+                $this->handleFailedAuthorization($order, $transaction, $authorizeResponse);
             }
 
             $order->add_payment_token($paymentToken);
@@ -221,7 +136,6 @@ class AuthorizeOneclickController
             $order->add_order_note($orderNotes);
 
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
-
             $this->log->logInfo('Se ha autorizado el pago correctamente para la orden #' . $order->get_id());
 
             return [
@@ -231,43 +145,17 @@ class AuthorizeOneclickController
         } catch (\Exception $e) {
             $this->shouldThrowException = true;
             $this->ecommerceService->setOneclickOrderAsFailed($order, $orderNotes);
-            do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
             $this->log->logError('Error al autorizar: ' . $e->getMessage());
+            if($transaction){
+                $this->transactionService->updateWithAuthorizeResponseError(
+                    $transaction->getId(),
+                    'error',
+                    $e->getMessage()
+                );
+            }
+            do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
             throw $e;
         }
-    }
-
-    protected function getOrderNotesFromAuthorizeResponse(MallTransactionAuthorizeResponse $response, string $orderNotesTitle)
-    {
-        $firstDetail = $response->getDetails()[0];
-        $formattedAmount = TbkResponseUtil::getAmountFormatted($firstDetail->getAmount());
-        $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
-        $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
-        $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
-        $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
-        $formattedDate = TbkResponseUtil::transactionDateToLocalDate($response->getTransactionDate());
-        $installmentAmount = $firstDetail->getInstallmentsAmount() ?? 0;
-        $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
-
-        return "
-            <div class='transbank_response_note'>
-                <p><h3>{$orderNotesTitle}</h3></p>
-
-                <strong>Estado: </strong>{$status} <br />
-                <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
-                <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
-                <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
-                <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
-                <strong>Monto: </strong>{$formattedAmount} <br />
-                <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
-                <strong>Tipo de pago: </strong>{$paymentType} <br />
-                <strong>Tipo de cuota: </strong>{$installmentType} <br />
-                <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
-                <strong>Monto de cada cuota: </strong>{$formattedInstallmentAmount} <br />
-                <strong>Fecha:</strong> {$formattedDate} <br />
-                <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
-            </div>
-        ";
     }
 
     /**

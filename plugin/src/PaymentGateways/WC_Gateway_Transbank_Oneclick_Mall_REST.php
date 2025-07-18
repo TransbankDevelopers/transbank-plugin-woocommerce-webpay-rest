@@ -11,6 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\WooCommerce\WebpayRest\Controllers\AuthorizeOneclickController;
+use Transbank\WooCommerce\WebpayRest\Controllers\ScheduledAuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\StartOneclickController;
 use Transbank\Plugin\Services\OneclickService;
@@ -104,7 +105,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function process_payment($order_id)
     {
         $order = new WC_Order($order_id);
-        return (new AuthorizeOneclickController($this->id, $this->get_return_url($order)))->proccess($order_id);
+        $returnUrl = $this->get_return_url($order);
+        return (new AuthorizeOneclickController($this->id, $returnUrl))->proccess($order_id);
     }
 
     /**
@@ -120,7 +122,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        (new AuthorizeOneclickController($this->id,$this->get_return_url($renewalOrder)))->scheduledSubscriptionPayment(
+        (new ScheduledAuthorizeOneclickController())->proccess(
             $amount_to_charge,
             $renewalOrder
         );

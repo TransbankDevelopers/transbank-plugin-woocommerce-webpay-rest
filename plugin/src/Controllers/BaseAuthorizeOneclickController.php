@@ -1,0 +1,89 @@
+<?php
+
+namespace Transbank\WooCommerce\WebpayRest\Controllers;
+
+use WC_Order;
+use Transbank\Plugin\Exceptions\EcommerceException;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
+use Transbank\Plugin\Services\TransactionService;
+use Transbank\Plugin\Services\OneclickService;
+use Transbank\Plugin\Helpers\ILogger;
+use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
+
+abstract class BaseAuthorizeOneclickController
+{
+    protected ILogger $log;
+    protected TransactionService $transactionService;
+    protected OneclickService $oneclickService;
+    protected EcommerceService $ecommerceService;
+
+    /**
+     * Constructor initializes the logger.
+     */
+    public function __construct()
+    {
+        $this->log = TbkFactory::createLogger();
+        $this->transactionService = TbkFactory::createTransactionService();
+        $this->oneclickService = TbkFactory::createOneclickService();
+        $this->ecommerceService = TbkFactory::createEcommerceService();
+    }
+
+    protected function handleFailedAuthorization(WC_Order $order, $transaction, $authorizeResponse)
+    {
+        $details = $authorizeResponse->getDetails()[0] ?? null;
+        $status = $details?->getStatus();
+        $responseCode = $details?->getResponseCode();
+        $responseJson = json_encode($authorizeResponse);
+
+        $this->log->logError("Transacción con autorización rechazada => parentBuyOrder: {$transaction->getBuyOrder()}, childBuyOrder: {$transaction->getChildBuyOrder()}");
+        $this->log->logError($responseJson);
+
+        $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago rechazado');
+        $order->add_order_note($orderNotes);
+        $order->add_meta_data('transbank_response', $responseJson);
+
+        if ($status === 'CONSTRAINTS_VIOLATED') {
+            $message = 'La transacción ha sido rechazada porque se superó el monto máximo por transacción, el monto máximo diario o el número de transacciones diarias configuradas por el comercio para cada usuario';
+        } else {
+            $message = "La transacción ha sido rechazada (Código de error: $responseCode)";
+        }
+
+        throw new EcommerceException($message);
+    }
+
+    protected function getOrderNotesFromAuthorizeResponse(MallTransactionAuthorizeResponse $response, string $orderNotesTitle)
+    {
+        $firstDetail = $response->getDetails()[0];
+        $formattedAmount = TbkResponseUtil::getAmountFormatted($firstDetail->getAmount());
+        $status = TbkResponseUtil::getStatus($firstDetail->getStatus());
+        $paymentType = TbkResponseUtil::getPaymentType($firstDetail->getPaymentTypeCode());
+        $installmentType = TbkResponseUtil::getInstallmentType($firstDetail->getPaymentTypeCode());
+        $formattedAccountingDate = TbkResponseUtil::getAccountingDate($response->getAccountingDate());
+        $formattedDate = TbkResponseUtil::transactionDateToLocalDate($response->getTransactionDate());
+        $installmentAmount = $firstDetail->getInstallmentsAmount() ?? 0;
+        $formattedInstallmentAmount = TbkResponseUtil::getAmountFormatted($installmentAmount);
+
+        return "
+            <div class='transbank_response_note'>
+                <p><h3>{$orderNotesTitle}</h3></p>
+
+                <strong>Estado: </strong>{$status} <br />
+                <strong>Orden de compra mall: </strong>{$response->getBuyOrder()} <br />
+                <strong>Orden de compra tienda: </strong>{$firstDetail->getBuyOrder()} <br />
+                <strong>Código de autorización: </strong>{$firstDetail->getAuthorizationCode()} <br />
+                <strong>Últimos dígitos tarjeta: </strong>{$response->getCardNumber()} <br />
+                <strong>Monto: </strong>{$formattedAmount} <br />
+                <strong>Código de respuesta: </strong>{$firstDetail->getResponseCode()} <br />
+                <strong>Tipo de pago: </strong>{$paymentType} <br />
+                <strong>Tipo de cuota: </strong>{$installmentType} <br />
+                <strong>Número de cuotas: </strong>{$firstDetail->getInstallmentsNumber()} <br />
+                <strong>Monto de cada cuota: </strong>{$formattedInstallmentAmount} <br />
+                <strong>Fecha:</strong> {$formattedDate} <br />
+                <strong>Fecha contable:</strong> {$formattedAccountingDate} <br />
+            </div>
+        ";
+    }
+    
+}

@@ -179,4 +179,13 @@ class TransactionService
         ]);
     }
 
+    public function updateWithAuthorizeResponseError(string $transactionId, $error, $detailError)
+    {
+        $this->update($transactionId, [
+            'status' => TbkConstants::TRANSACTION_STATUS_FAILED,
+            'error' => $error,
+            'detail_error' => $detailError
+        ]);
+    }
+
 }
