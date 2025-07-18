@@ -42,7 +42,7 @@ class RefundWebpayController
      * @param  string     $reason Refund reason.
      * @return boolean True or false based on success, or a WP_Error object.
      */
-    public function proccess($orderId, $amount = null, $reason = '')
+    public function process($orderId, $amount = null, $reason = '')
     {
         $order = null;
         $response = null;
@@ -63,24 +63,23 @@ class RefundWebpayController
             }
             $response = $this->webpayService->refund($webpayTransaction->token, round($amount));
             $this->transactionService->updateWithRefundResponse($webpayTransaction->id,$response);
-            $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
+            $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             do_action('transbank_webpay_plus_refund_completed', $order, $webpayTransaction, $jsonResponse);
             return true;
         } catch (Throwable $e) {
-            $messageError = '<strong>Error en el reembolso:</strong><br />';
-            $messageError = $messageError . $e->getMessage();
+            $message = "<strong>Error en el reembolso:</strong><br />{$e->getMessage()}";
             if (isset($response)) {
-                $messageError = $messageError . "\n\n" . json_encode($response, JSON_PRETTY_PRINT);
+                $message .= "\n\n" . json_encode($response, JSON_PRETTY_PRINT);
             }
-            $this->log->logError($messageError);
-            $order->add_order_note($messageError);
-            if ($webpayTransaction){
-                $this->transactionService->updateWithRefundResponseError($webpayTransaction->id,$messageError);
+            $this->log->logError($message);
+            $order->add_order_note($message);
+            if ($webpayTransaction) {
+                $this->transactionService->updateWithRefundResponseError($webpayTransaction->id, $message);
             }
-            do_action('transbank_webpay_plus_refund_failed', $order, $webpayTransaction, $messageError);
+            do_action('transbank_webpay_plus_refund_failed', $order, $webpayTransaction, $message);
+            return false;
         }
-        return false;
     }
 
 }
