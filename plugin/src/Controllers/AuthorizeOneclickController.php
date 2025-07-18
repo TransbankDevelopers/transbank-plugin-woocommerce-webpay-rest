@@ -8,12 +8,7 @@ use WC_Payment_Tokens;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\Plugin\Exceptions\Oneclick\RejectedAuthorizeOneclickException;
-use Transbank\Plugin\Exceptions\Oneclick\CreateTransactionOneclickException;
-use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
-use Transbank\Plugin\Exceptions\Oneclick\ConstraintsViolatedAuthorizeOneclickException;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
-use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
 use Transbank\WooCommerce\WebpayRest\Controllers\StartOneclickController;
 
 class AuthorizeOneclickController extends BaseAuthorizeOneclickController
@@ -33,9 +28,6 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
 
     /**
      * Procesar pago y retornar resultado.
-     **
-     *
-     * @throws MallTransactionAuthorizeException
      */
     public function process($orderId)
     {
@@ -92,10 +84,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
      *
      * @return array The result of the authorization process, including a success message and redirect URL.
      *
-     * @throws CreateTransactionOneclickException If there are issues creating the transaction.
-     * @throws AuthorizeOneclickException If there are problems with authorization.
-     * @throws RejectedAuthorizeOneclickException If the authorization is rejected.
-     * @throws ConstraintsViolatedAuthorizeOneclickException If constraints are violated during authorization.
+     * @throws EcommerceException
      */
     private function handleAuthorization(WC_Order $order, string $paymentTokenId)
     {
@@ -154,7 +143,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
                 );
             }
             do_action('wc_transbank_oneclick_transaction_failed', ['order' => $order->get_data()]);
-            throw $e;
+            throw new EcommerceException($e->getMessage(), $e);
         }
     }
 
