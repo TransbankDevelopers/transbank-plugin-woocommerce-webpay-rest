@@ -19,9 +19,6 @@ class RefundWebpayController
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
 
-    /**
-     * Constructor initializes the logger.
-     */
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();

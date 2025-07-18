@@ -16,9 +16,6 @@ class RefundOneclickController
     protected OneclickService $oneclickService;
     protected EcommerceService $ecommerceService;
 
-    /**
-     * Constructor initializes the logger.
-     */
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();
