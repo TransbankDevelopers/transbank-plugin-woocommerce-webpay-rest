@@ -22,7 +22,7 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
      *
      * @throws EcommerceException If there is no customer ID on the renewal order.
      */
-    public function proccess($amount, WC_Order $order)
+    public function process($amount, WC_Order $order)
     {
         $transaction = null;
         $orderNotes = '';

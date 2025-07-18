@@ -36,7 +36,7 @@ class CreateWebpayController
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
-    public function proccess($gatewayId, $apiSlug, $orderId)
+    public function process($gatewayId, $apiSlug, $orderId)
     {
         $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $gatewayId;
         try {

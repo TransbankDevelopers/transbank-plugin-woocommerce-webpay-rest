@@ -66,7 +66,7 @@ class CommitWebpayController
         $this->log->logInfo($msg);
     }
 
-    public function proccess(): void
+    public function process(): void
     {
         try {
             $requestMethod = $_SERVER['REQUEST_METHOD'];

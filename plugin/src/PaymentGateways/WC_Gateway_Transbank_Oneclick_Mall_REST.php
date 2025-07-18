@@ -106,7 +106,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     {
         $order = new WC_Order($order_id);
         $returnUrl = $this->get_return_url($order);
-        return (new AuthorizeOneclickController($this->id, $returnUrl))->proccess($order_id);
+        return (new AuthorizeOneclickController($this->id, $returnUrl))->process($order_id);
     }
 
     /**
@@ -122,7 +122,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     public function scheduled_subscription_payment($amount_to_charge, WC_Order $renewalOrder)
     {
-        (new ScheduledAuthorizeOneclickController())->proccess(
+        (new ScheduledAuthorizeOneclickController())->process(
             $amount_to_charge,
             $renewalOrder
         );
@@ -130,7 +130,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        return (new RefundOneclickController())->proccess($order_id, $amount, $reason);
+        return (new RefundOneclickController())->process($order_id, $amount, $reason);
     }
 
     public function payment_fields()

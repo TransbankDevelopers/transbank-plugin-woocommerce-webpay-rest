@@ -37,7 +37,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
      *
      * @throws MallTransactionAuthorizeException
      */
-    public function proccess($orderId)
+    public function process($orderId)
     {
         try {
             $order = $this->ecommerceService->getOrderById($orderId);

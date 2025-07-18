@@ -62,7 +62,7 @@ class DatabaseTableInstaller
         ) $charsetCollate";
 
         dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
     }
 
     public static function createTableInscription(): bool
@@ -101,10 +101,10 @@ class DatabaseTableInstaller
         ) $charsetCollate";
 
         dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
     }
 
-    public static function createTableProccessError($tableName, $wpdbError): bool
+    public static function createTableProcessError($tableName, $wpdbError): bool
     {
         $success = empty($wpdbError);
         if (!$success) {
