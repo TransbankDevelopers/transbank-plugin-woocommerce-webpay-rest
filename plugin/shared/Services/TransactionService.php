@@ -8,6 +8,7 @@ use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionRefundResponse;
+use Transbank\Plugin\Exceptions\RecordCreateOnDatabaseException;
 
 class TransactionService
 {
@@ -38,7 +39,7 @@ class TransactionService
         }
         $record = $this->repository->create($data);
         if ($record === null) {
-            throw new \Exception("Problemas al crear el registro de Transacción");
+            throw new RecordCreateOnDatabaseException("Problemas al crear el registro de Transacción");
         }
         return new TbkTransaction($record);
     }

@@ -6,6 +6,7 @@ use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkInscription;
+use Transbank\Plugin\Exceptions\RecordCreateOnDatabaseException;
 
 class InscriptionService
 {
@@ -39,7 +40,7 @@ class InscriptionService
             'commerce_code' => $data->getCommerceCode()
         ]);
         if ($record === null) {
-            throw new \Exception("Problemas al crear el registro de Inscripción");
+            throw new RecordCreateOnDatabaseException("Problemas al crear el registro de Inscripción");
         }
         return new TbkInscription($record);
     }
