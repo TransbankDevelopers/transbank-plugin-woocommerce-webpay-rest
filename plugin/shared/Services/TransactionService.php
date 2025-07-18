@@ -170,6 +170,14 @@ class TransactionService
         ]);
     }
 
+    public function updateWithRefundResponseError(string $transactionId, $detailError)
+    {
+        $this->update($transactionId, [
+            'error' => 'Refund error',
+            'detail_error' => $detailError
+        ]);
+    }
+
     public function updateWithAuthorizeResponse(string $transactionId, MallTransactionAuthorizeResponse $resp)
     {
         $this->update($transactionId, [

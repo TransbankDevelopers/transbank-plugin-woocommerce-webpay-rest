@@ -130,7 +130,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        return (new RefundOneclickController())->process($order_id, $amount, $reason);
+        return (new RefundOneclickController())->proccess($order_id, $amount, $reason);
     }
 
     public function payment_fields()

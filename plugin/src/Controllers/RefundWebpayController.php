@@ -42,11 +42,14 @@ class RefundWebpayController
      * @param  string     $reason Refund reason.
      * @return boolean True or false based on success, or a WP_Error object.
      */
-    public function proccess($orderId, $amount = null)
+    public function proccess($orderId, $amount = null, $reason = '')
     {
         $order = null;
         $response = null;
         $webpayTransaction = null;
+        $this->log->logInfo("Iniciando proceso de reembolso para la orden #{$orderId}."
+            . ($amount !== null ? " Monto solicitado: {$amount}." : " Monto no especificado.")
+            . (!empty($reason) ? " Motivo: {$reason}." : " Motivo no especificado."));
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
             $webpayTransaction = $this->transactionService->findFirstApprovedByOrderId($orderId);
@@ -72,10 +75,8 @@ class RefundWebpayController
             }
             $this->log->logError($messageError);
             $order->add_order_note($messageError);
-            if (!is_null($webpayTransaction)){
-                $this->transactionService->update($webpayTransaction->id,[
-                    'detail_error' => $messageError
-                ]);
+            if ($webpayTransaction){
+                $this->transactionService->updateWithRefundResponseError($webpayTransaction->id,$messageError);
             }
             do_action('transbank_webpay_plus_refund_failed', $order, $webpayTransaction, $messageError);
         }

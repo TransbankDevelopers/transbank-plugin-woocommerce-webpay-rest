@@ -2,9 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Exception;
 use Throwable;
-use WC_Order;
 use Transbank\Plugin\Services\TransactionService;
 use Transbank\Plugin\Services\OneclickService;
 use Transbank\Plugin\Helpers\ILogger;
@@ -28,12 +26,14 @@ class RefundOneclickController
         $this->oneclickService = TbkFactory::createOneclickService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
-
     public function proccess($orderId, $amount = null, $reason = '')
     {
         $order = null;
         $response = null;
         $webpayTransaction = null;
+        $this->log->logInfo("Iniciando proceso de reembolso para la orden #{$orderId}."
+            . ($amount !== null ? " Monto solicitado: {$amount}." : " Monto no especificado.")
+            . (!empty($reason) ? " Motivo: {$reason}." : " Motivo no especificado."));
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
             $webpayTransaction = $this->transactionService->findFirstApprovedByOrderId($orderId);
@@ -63,28 +63,11 @@ class RefundOneclickController
             }
             $this->log->logError($messageError);
             $order->add_order_note($messageError);
-            if (!is_null($webpayTransaction)){
-                $this->transactionService->update($webpayTransaction->id,[
-                    'detail_error' => $messageError
-                ]);
+            if ($webpayTransaction){
+                $this->transactionService->updateWithRefundResponseError($webpayTransaction->id,$messageError);
             }
             do_action('transbank_oneclick_refund_failed', $order, $webpayTransaction, $messageError);
         }
         return false;
     }
-
-
-    /**
-     * @param WC_Order $order
-     * @param string   $message
-     *
-     * @throws \Exception
-     */
-    protected function failedRefund(WC_Order $order, string $message)
-    {
-        $order->add_order_note($message);
-
-        throw new \Exception($message);
-    }
-    
 }
