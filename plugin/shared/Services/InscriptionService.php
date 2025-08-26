@@ -27,22 +27,24 @@ class InscriptionService
      */
     public function create(TbkInscription $data): TbkInscription
     {
-        $record = $this->repository->create([
-            'token' => $data->getToken(),
-            'username' => $data->getUsername(),
-            'order_id' => $data->getOrderId(),
-            'user_id' => $data->getUserId(),
-            'pay_after_inscription' => false,
-            'email' => $data->getEmail(),
-            'from' => $data->getFrom(),
-            'status' => $data->getStatus(),
-            'environment' => $data->getEnvironment(),
-            'commerce_code' => $data->getCommerceCode()
-        ]);
-        if ($record === null) {
-            throw new DatabaseRecordCreationException("Problemas al crear el registro de Inscripción");
+        try {
+            $record = $this->repository->create([
+                'token' => $data->getToken(),
+                'username' => $data->getUsername(),
+                'order_id' => $data->getOrderId(),
+                'user_id' => $data->getUserId(),
+                'pay_after_inscription' => false,
+                'email' => $data->getEmail(),
+                'from' => $data->getFrom(),
+                'status' => $data->getStatus(),
+                'environment' => $data->getEnvironment(),
+                'commerce_code' => $data->getCommerceCode()
+            ]);
+
+            return new TbkInscription($record);
+        } catch (\Exception $e) {
+            throw new DatabaseRecordCreationException("Error al crear el registro de Inscripción");
         }
-        return new TbkInscription($record);
     }
 
     /**
