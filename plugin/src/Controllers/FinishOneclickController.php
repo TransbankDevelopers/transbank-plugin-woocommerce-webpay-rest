@@ -134,9 +134,12 @@ class FinishOneclickController
 
 
     /**
-     * @param $from
+     * Redirect the user to the appropriate page based on the context.
+     *
+     * @param string $from The context from which the user is being redirected.
+     * @param string|null $errorCode Optional error code to include in the redirect.
      */
-    public function redirectUser($from, $errorCode = null)
+    public function redirectUser($from, $errorCode = null): void
     {
         $redirectUrl = null;
         if ($from === 'checkout') {
