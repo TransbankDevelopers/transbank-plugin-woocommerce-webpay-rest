@@ -14,7 +14,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\AuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ScheduledAuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\StartOneclickController;
-use Transbank\Plugin\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
 
 use WC_Order;
 use WC_Payment_Gateway_CC;
@@ -151,20 +151,20 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             update_site_option('transbank_webpay_oneclick_rest_showed_welcome_message', true);
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
-?>
+            ?>
             <div class="inline error">
                 <p>
                     <strong><?php esc_html_e(
-                                'Gateway disabled',
-                                'woocommerce'
-                            ); ?></strong>: <?php esc_html_e(
-                                                'Oneclick no soporta la moneda configurada en tu tienda. ' .
-                                                    'Solo soporta CLP',
-                                                'transbank_wc_plugin'
-                                            ); ?>
+                        'Gateway disabled',
+                        'woocommerce'
+                    ); ?></strong>: <?php esc_html_e(
+                         'Oneclick no soporta la moneda configurada en tu tienda. ' .
+                         'Solo soporta CLP',
+                         'transbank_wc_plugin'
+                     ); ?>
                 </p>
             </div>
-<?php
+            <?php
         }
     }
 
@@ -268,14 +268,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'configuración, en tu contrato de Oneclick, existe un límite de cantidad de transacciones diarias, ' .
             'un monto máximo por transacción y monto acumulado diario. Si un cliente supera ese límite, ' .
             'su transacción será rechazada.';
-        
+
         $buyOrderDescription = 'Define un formato personalizado para la orden de compra principal asociada a la
             transacción en Transbank. Esta orden identifica la transacción de manera única en el sistema de Transbank.';
 
         $childBuyOrderDescription = 'Define un formato personalizado para la orden de compra hija, utilizada en
             transacciones con múltiples tiendas. Permite identificar individualmente cada subtransacción
             dentro del sistema de Transbank.';
-            
+
 
         $this->form_fields = [
             'enabled' => [
@@ -285,74 +285,76 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'default' => 'no',
             ],
             'environment' => [
-                'title'       => __('Ambiente', 'transbank_wc_plugin'),
-                'type'        => 'select',
-                'desc_tip'    => $environmentDescription,
+                'title' => __('Ambiente', 'transbank_wc_plugin'),
+                'type' => 'select',
+                'desc_tip' => $environmentDescription,
                 'options' => [
                     Options::ENVIRONMENT_INTEGRATION => __('Integración', 'transbank_wc_plugin'),
-                    Options::ENVIRONMENT_PRODUCTION  => __('Producción', 'transbank_wc_plugin'),
+                    Options::ENVIRONMENT_PRODUCTION => __('Producción', 'transbank_wc_plugin'),
                 ],
                 'default' => Options::ENVIRONMENT_INTEGRATION,
             ],
             'commerce_code' => [
-                'title'       => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
+                'title' => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'desc_tip'    => $commerceCodeDescription,
-                'type'        => 'text',
-                'default'     => '',
+                'desc_tip' => $commerceCodeDescription,
+                'type' => 'text',
+                'default' => '',
             ],
             'child_commerce_code' => [
-                'title'       => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
+                'title' => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
-                'desc_tip'    => $childCommerceCodeDescription,
-                'type'        => 'text',
-                'default'     => '',
+                'desc_tip' => $childCommerceCodeDescription,
+                'type' => 'text',
+                'default' => '',
             ],
             'api_key' => [
-                'title'       => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
-                'type'        => 'password',
+                'title' => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
+                'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-                'desc_tip'    => $apiKeyDescription,
-                'default'     => '',
+                'desc_tip' => $apiKeyDescription,
+                'default' => '',
             ],
             'max_amount' => [
-                'title'       => __('Monto máximo de transacción permitido', 'transbank_wc_plugin'),
-                'type'        => 'number',
-                'options'     => ['step' => 100],
-                'default'     => '0',
-                'desc_tip'    => $maxAmountDescription,
+                'title' => __('Monto máximo de transacción permitido', 'transbank_wc_plugin'),
+                'type' => 'number',
+                'options' => ['step' => 100],
+                'default' => '0',
+                'desc_tip' => $maxAmountDescription,
             ],
             'oneclick_after_payment_order_status' => [
-                'title'       => __('Order Status', 'transbank_wc_plugin'),
-                'type'        => 'select',
-                'desc_tip'    => 'Define el estado de la orden luego del pago exitoso.',
+                'title' => __('Order Status', 'transbank_wc_plugin'),
+                'type' => 'select',
+                'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
                 'options' => [
                     '' => 'Default',
                     'processing' => 'Processing',
-                    'completed'  => 'Completed',
+                    'completed' => 'Completed',
                 ],
                 'default' => '',
             ],
             'oneclick_payment_gateway_description' => [
-                'title'       => __('Descripción', 'transbank_wc_plugin'),
-                'type'        => 'textarea',
-                'desc_tip'    => 'Define la descripción del medio de pago.',
+                'title' => __('Descripción', 'transbank_wc_plugin'),
+                'type' => 'textarea',
+                'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
             'buy_order_format' => [
-                'title'       => __('Formato personalizado de orden de compra principal',
-                'transbank_wc_plugin'),
+                'title' => __(
+                    'Formato personalizado de orden de compra principal',
+                    'transbank_wc_plugin'
+                ),
                 'placeholder' => 'Ej: ' . OneclickService::BUY_ORDER_FORMAT,
-                'desc_tip'    => $buyOrderDescription,
-                'type'        => 'text',
+                'desc_tip' => $buyOrderDescription,
+                'type' => 'text',
                 'default' => OneclickService::BUY_ORDER_FORMAT
             ],
             'child_buy_order_format' => [
-                'title'       => __('Formato personalizado de orden de compra hija', 'transbank_wc_plugin'),
+                'title' => __('Formato personalizado de orden de compra hija', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . OneclickService::CHILD_BUY_ORDER_FORMAT,
-                'desc_tip'    => $childBuyOrderDescription,
-                'type'        => 'text',
+                'desc_tip' => $childBuyOrderDescription,
+                'type' => 'text',
                 'default' => OneclickService::CHILD_BUY_ORDER_FORMAT
             ]
         ];
@@ -372,23 +374,28 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         );
     }
 
-    public function process_admin_options() {
+    public function process_admin_options()
+    {
         $buyOrderFormat = isset($_POST[$this->get_field_key('buy_order_format')])
-            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])): '';
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])) : '';
         $childBuyOrderFormat = isset($_POST[$this->get_field_key('child_buy_order_format')])
-            ? wc_clean(wp_unslash($_POST[$this->get_field_key('child_buy_order_format')])): '';
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('child_buy_order_format')])) : '';
 
         $isValid = true;
 
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra principal no es válido.",
-            'woocommerce'));
+            \WC_Admin_Settings::add_error(__(
+                "El formato personalizado de orden de compra principal no es válido.",
+                'woocommerce'
+            ));
             $isValid = false;
         }
 
         if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra hija no es válido.",
-            'woocommerce'));
+            \WC_Admin_Settings::add_error(__(
+                "El formato personalizado de orden de compra hija no es válido.",
+                'woocommerce'
+            ));
             $isValid = false;
         }
         if ($isValid) {

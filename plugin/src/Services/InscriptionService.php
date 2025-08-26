@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\Plugin\Services;
+namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse;

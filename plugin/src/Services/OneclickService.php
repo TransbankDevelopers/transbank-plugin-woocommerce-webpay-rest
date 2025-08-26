@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\Plugin\Services;
+namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use \Exception;
 use Transbank\Webpay\Oneclick\MallInscription;
@@ -37,12 +37,11 @@ class OneclickService extends ProductBaseService
     private $childCommerceCode;
 
     public function __construct(
-            $log,
-            $config,
-        )
-    {
+        $log,
+        $config,
+    ) {
         $this->log = $log;
-        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION){
+        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->mallInscription = MallInscription::buildForProduction(
                 $config->getApikey(),
                 $config->getCommerceCode()
@@ -52,8 +51,7 @@ class OneclickService extends ProductBaseService
                 $config->getCommerceCode()
             );
             $this->childCommerceCode = $config->getChildCommerceCode();
-        }
-        else {
+        } else {
             $this->mallInscription = MallInscription::buildForIntegration(
                 Oneclick::INTEGRATION_API_KEY,
                 Oneclick::INTEGRATION_COMMERCE_CODE
@@ -68,7 +66,8 @@ class OneclickService extends ProductBaseService
         $this->options = $this->mallInscription->getOptions();
         $this->dataMasker = new MaskData(isIntegration: $config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
-            $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
+            $config->getBuyOrderFormat()
+        ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
         $this->childBuyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getChildBuyOrderFormat()
         ) ? $config->getChildBuyOrderFormat() : self::CHILD_BUY_ORDER_FORMAT;
@@ -153,7 +152,7 @@ class OneclickService extends ProductBaseService
         } catch (Exception $e) {
             $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
 
-            if(ErrorUtil::isMaxTimeError($e)) {
+            if (ErrorUtil::isMaxTimeError($e)) {
                 $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
             }
 
@@ -181,13 +180,13 @@ class OneclickService extends ProductBaseService
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
             $this->log->logInfo('authorize => username: ' . $username . ' parentBuyOrder: '
-                . $parentBuyOrder. ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
+                . $parentBuyOrder . ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
                 ', txDate: ' . $txDate . ', txTime: ' . $txTime);
             $details = [
                 [
-                    'commerce_code'       => $this->getChildCommerceCode(),
-                    'buy_order'           => $childBuyOrder,
-                    'amount'              => $amount,
+                    'commerce_code' => $this->getChildCommerceCode(),
+                    'buy_order' => $childBuyOrder,
+                    'amount' => $amount,
                     'installments_number' => 1,
                 ],
             ];
@@ -234,8 +233,9 @@ class OneclickService extends ProductBaseService
         return BuyOrderHelper::generateFromFormat($this->childBuyOrderFormat, $orderId);
     }
 
-    private function generateUsername($userId){
-        return 'wc:'.$this->generateRandomId().':'.$userId;
+    private function generateUsername($userId)
+    {
+        return 'wc:' . $this->generateRandomId() . ':' . $userId;
     }
 
     private function generateRandomId($length = 10)
@@ -253,7 +253,7 @@ class OneclickService extends ProductBaseService
         $userEmail,
         $orderId,
         $from = 'checkout',
-        
+
     ): TbkInscription {
         $username = $this->generateUsername($userId);
         $data = new TbkInscription();
@@ -268,7 +268,8 @@ class OneclickService extends ProductBaseService
         return $data;
     }
 
-    public function prepareTransaction($orderId, $amount): TbkTransaction {
+    public function prepareTransaction($orderId, $amount): TbkTransaction
+    {
         $parentBuyOrder = $this->generateBuyOrder($orderId);
         $childBuyOrder = $this->generateChildBuyOrder($orderId);
         $data = new TbkTransaction();
@@ -283,5 +284,5 @@ class OneclickService extends ProductBaseService
         $data->setStatus(TbkConstants::TRANSACTION_STATUS_INITIALIZED);
         return $data;
     }
-    
+
 }

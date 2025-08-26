@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\Plugin\Services;
+namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -28,20 +28,18 @@ class WebpayService extends ProductBaseService
      */
     protected $webpayplusTransaction;
 
-    
+
     public function __construct(
-            $log,
-            $config,
-        )
-    {
+        $log,
+        $config,
+    ) {
         $this->log = $log;
-        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION){
+        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->webpayplusTransaction = WebpayPlusTransaction::buildForProduction(
                 $config->getApikey(),
                 $config->getCommerceCode()
             );
-        }
-        else {
+        } else {
             $this->webpayplusTransaction = WebpayPlusTransaction::buildForIntegration(
                 WebpayPlus::INTEGRATION_API_KEY,
                 WebpayPlus::INTEGRATION_COMMERCE_CODE
@@ -50,7 +48,8 @@ class WebpayService extends ProductBaseService
         $this->options = $this->webpayplusTransaction->getOptions();
         $this->dataMasker = new MaskData($config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
-            $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
+            $config->getBuyOrderFormat()
+        ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
     }
 
 
@@ -69,7 +68,7 @@ class WebpayService extends ProductBaseService
         try {
             $buyOrder = $this->generateBuyOrder($orderId);
             $randomNumber = uniqid();
-            $sessionId = 'wc:sessionId:'.$randomNumber.':'.$orderId;
+            $sessionId = 'wc:sessionId:' . $randomNumber . ':' . $orderId;
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
             $this->log->logInfo("Creando transacción Webpay Plus. [Datos]:");
@@ -95,7 +94,7 @@ class WebpayService extends ProductBaseService
                 $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}";
                 throw new CreateWebpayException($errorMessage);
             }
-            
+
         } catch (TransactionCreateException $e) {
             $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
@@ -138,7 +137,7 @@ class WebpayService extends ProductBaseService
         } catch (Exception $e) {
             $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
 
-            if(ErrorUtil::isMaxTimeError($e)) {
+            if (ErrorUtil::isMaxTimeError($e)) {
                 $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
             }
 

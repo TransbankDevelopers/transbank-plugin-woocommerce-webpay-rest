@@ -6,8 +6,8 @@ use WC_Order;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
-use Transbank\Plugin\Services\InscriptionService;
-use Transbank\Plugin\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
@@ -66,7 +66,8 @@ class StartOneclickController
         $response = $this->oneclickService->startInscription(
             $inscription->getUsername(),
             $inscription->getEmail(),
-            $returnUrl);
+            $returnUrl
+        );
         $inscription->setToken($response->getToken());
         $this->inscriptionService->create($inscription);
         return $response;
@@ -95,10 +96,10 @@ class StartOneclickController
         do_action('transbank_oneclick_adding_card_from_order', $order);
 
         return [
-            'result'   => 'success',
+            'result' => 'success',
             'redirect' => $response->getRedirectUrl(),
         ];
     }
 
-    
+
 }

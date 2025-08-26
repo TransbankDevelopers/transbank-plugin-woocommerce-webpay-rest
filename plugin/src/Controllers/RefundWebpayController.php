@@ -3,11 +3,11 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Throwable;
-use Transbank\Plugin\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
-use Transbank\Plugin\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
 class RefundWebpayController
 {
@@ -59,7 +59,7 @@ class RefundWebpayController
                 return false;
             }
             $response = $this->webpayService->refund($webpayTransaction->token, round($amount));
-            $this->transactionService->updateWithRefundResponse($webpayTransaction->id,$response);
+            $this->transactionService->updateWithRefundResponse($webpayTransaction->id, $response);
             $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             do_action('transbank_webpay_plus_refund_completed', $order, $webpayTransaction, $jsonResponse);

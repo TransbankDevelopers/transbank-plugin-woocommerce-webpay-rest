@@ -6,7 +6,7 @@ use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Plugin\Helpers\TbkConstants;
-use Transbank\Plugin\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
 class TransactionStatusController
 {
@@ -85,7 +85,7 @@ class TransactionStatusController
     private function handleGetStatus(object $transaction, string $buyOrder, string $token): array
     {
         if ($transaction->product == TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
-            return $this->handleOneclickStatus( $buyOrder, $transaction->buy_order);
+            return $this->handleOneclickStatus($buyOrder, $transaction->buy_order);
         }
 
         return $this->handleWebpayStatus($token, $transaction->token);

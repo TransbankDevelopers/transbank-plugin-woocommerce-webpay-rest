@@ -7,8 +7,8 @@ use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
-use Transbank\Plugin\Services\TransactionService;
-use Transbank\Plugin\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
@@ -85,5 +85,5 @@ abstract class BaseAuthorizeOneclickController
             </div>
         ";
     }
-    
+
 }

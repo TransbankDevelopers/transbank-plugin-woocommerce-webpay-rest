@@ -6,8 +6,8 @@ use \Exception;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\Plugin\Services\InscriptionService;
-use Transbank\Plugin\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
@@ -34,7 +34,8 @@ class FinishOneclickController
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
-    private function savePaymentToken($inscription, $finishInscriptionResponse){
+    private function savePaymentToken($inscription, $finishInscriptionResponse)
+    {
         $token = new WC_Payment_Token_Oneclick();
         $token->set_token($finishInscriptionResponse->getTbkUser()); // Token comes from payment processor
         $token->set_gateway_id($this->gatewayId);
@@ -53,13 +54,13 @@ class FinishOneclickController
     {
         try {
             $method = $_SERVER['REQUEST_METHOD'];
-        
+
             $data = $method === 'GET' ? $_GET : $_POST;
             $token = isset($data["TBK_TOKEN"]) ? $data['TBK_TOKEN'] : null;
             $tbkSessionId = isset($data["TBK_ID_SESION"]) ? $data['TBK_ID_SESION'] : null;
             $tbkOrdenCompra = isset($data["TBK_ORDEN_COMPRA"]) ? $data['TBK_ORDEN_COMPRA'] : null;
 
-            if ($tbkOrdenCompra && $tbkSessionId && !$token){
+            if ($tbkOrdenCompra && $tbkSessionId && !$token) {
                 BlocksHelper::addLegacyNotices('La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.', 'error');
                 $params = ['transbank_status' => BlocksHelper::ONECLICK_TIMEOUT];
                 $redirectUrl = add_query_arg($params, wc_get_checkout_url());
@@ -101,7 +102,8 @@ class FinishOneclickController
         }
     }
 
-    private function finishInscription($ins, $token){
+    private function finishInscription($ins, $token)
+    {
         try {
             $resp = $this->oneclickService->finishInscription($token, $ins->username, $ins->email);
         } catch (Exception $e) {
@@ -141,9 +143,9 @@ class FinishOneclickController
         do_action('wc_transbank_oneclick_inscription_approved', [
             'transbankInscriptionResponse' => $resp,
             'transbankToken' => $token,
-            'from' =>$from
+            'from' => $from
         ]);
-        $this->log->logInfo('Inscription finished successfully for user #'.$ins->user_id);
+        $this->log->logInfo('Inscription finished successfully for user #' . $ins->user_id);
         $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
     }
 
@@ -159,7 +161,7 @@ class FinishOneclickController
             $redirectUrl = $checkoutPageId ? get_permalink($checkoutPageId) : null;
         }
         if ($from === 'my_account') {
-            $redirectUrl = get_permalink(get_option('woocommerce_myaccount_page_id')).'/'.get_option(
+            $redirectUrl = get_permalink(get_option('woocommerce_myaccount_page_id')) . '/' . get_option(
                 'woocommerce_myaccount_payment_methods_endpoint',
                 'payment-methods'
             );

@@ -2,14 +2,14 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Transbank\Plugin\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
-use Transbank\Plugin\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
 class CommitWebpayController
 {

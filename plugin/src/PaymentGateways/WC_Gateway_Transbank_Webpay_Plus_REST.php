@@ -9,7 +9,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\CreateWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
-use Transbank\Plugin\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway

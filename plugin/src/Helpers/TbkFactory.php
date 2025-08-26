@@ -11,10 +11,10 @@ use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
-use Transbank\Plugin\Services\WebpayService;
-use Transbank\Plugin\Services\OneclickService;
-use Transbank\Plugin\Services\TransactionService;
-use Transbank\Plugin\Services\InscriptionService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 
 
 define(
@@ -28,7 +28,7 @@ class TbkFactory
     const ONECLICK_OPTION_KEY = 'woocommerce_transbank_oneclick_mall_rest_settings';
     public static function createLogger()
     {
-        $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS .'/logs');
+        $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS . '/logs');
         return new PluginLogger($config);
     }
 
@@ -77,7 +77,7 @@ class TbkFactory
     {
         return new InscriptionRepository();
     }
-    
+
     public static function createEcommerceService()
     {
         return new EcommerceService(

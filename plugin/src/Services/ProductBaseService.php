@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\Plugin\Services;
+namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use Exception;
 use Transbank\Webpay\Options;
@@ -35,7 +35,8 @@ class ProductBaseService
         return $this->options->getIntegrationType();
     }
 
-    protected function generateBuyOrder($orderId){
+    protected function generateBuyOrder($orderId)
+    {
         return BuyOrderHelper::generateFromFormat($this->buyOrderFormat, $orderId);
     }
 
