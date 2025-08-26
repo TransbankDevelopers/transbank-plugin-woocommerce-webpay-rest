@@ -34,21 +34,6 @@ class FinishOneclickController
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
-    private function savePaymentToken($inscription, $finishInscriptionResponse)
-    {
-        $token = new WC_Payment_Token_Oneclick();
-        $token->set_token($finishInscriptionResponse->getTbkUser()); // Token comes from payment processor
-        $token->set_gateway_id($this->gatewayId);
-        $token->set_last4(substr($finishInscriptionResponse->getCardNumber(), -4));
-        $token->set_email($inscription->email);
-        $token->set_username($inscription->username);
-        $token->set_card_type($finishInscriptionResponse->getCardType());
-        $token->set_user_id($inscription->user_id);
-        $token->set_environment($inscription->environment);
-        $token->save();
-        return $token;
-    }
-
     public function process()
     {
         try {
@@ -171,5 +156,20 @@ class FinishOneclickController
             }
             wp_redirect($redirectUrl);
         }
+    }
+
+    private function savePaymentToken($inscription, $finishInscriptionResponse)
+    {
+        $token = new WC_Payment_Token_Oneclick();
+        $token->set_token($finishInscriptionResponse->getTbkUser()); // Token comes from payment processor
+        $token->set_gateway_id($this->gatewayId);
+        $token->set_last4(substr($finishInscriptionResponse->getCardNumber(), -4));
+        $token->set_email($inscription->email);
+        $token->set_username($inscription->username);
+        $token->set_card_type($finishInscriptionResponse->getCardType());
+        $token->set_user_id($inscription->user_id);
+        $token->set_environment($inscription->environment);
+        $token->save();
+        return $token;
     }
 }
