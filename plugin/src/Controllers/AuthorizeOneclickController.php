@@ -27,9 +27,13 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
     }
 
     /**
-     * Procesar pago y retornar resultado.
+     * Process payment and return result.
+     *
+     * @param mixed $orderId
+     *
+     * @return array The result of the payment process, including success status and redirect URL.
      */
-    public function process($orderId)
+    public function process($orderId): array
     {
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
