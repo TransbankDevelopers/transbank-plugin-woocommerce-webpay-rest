@@ -44,9 +44,10 @@ class RefundWebpayController
         $order = null;
         $response = null;
         $webpayTransaction = null;
-        $this->log->logInfo("Iniciando proceso de reembolso para la orden #{$orderId}."
-            . ($amount !== null ? " Monto solicitado: {$amount}." : " Monto no especificado.")
-            . (!empty($reason) ? " Motivo: {$reason}." : " Motivo no especificado."));
+        $logMessage = "Iniciando proceso de reembolso para la orden #{$orderId}."
+            . " Monto solicitado: {$amount}."
+            . (!empty($reason) ? " Motivo: {$reason}." : " Motivo no especificado.");
+        $this->log->logInfo($logMessage);
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
             $webpayTransaction = $this->transactionService->findFirstApprovedByOrderId($orderId);
