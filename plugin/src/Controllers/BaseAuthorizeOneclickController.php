@@ -30,6 +30,26 @@ abstract class BaseAuthorizeOneclickController
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
+    protected function authorizeTransaction($orderId, $amount, $paymentToken): MallTransactionAuthorizeResponse
+    {
+        $transactionData = $this->oneclickAuthorizationService->prepareTransaction(
+            $orderId,
+            $amount
+        );
+        $transaction = $this->transactionService->create($transactionData);
+
+        $authorizeResponse = $this->oneclickAuthorizationService->authorize(
+            $paymentToken->get_username(),
+            $paymentToken->get_token(),
+            $transaction->getBuyOrder(),
+            $transaction->getChildBuyOrder(),
+            $transaction->getAmount()
+        );
+
+        $this->transactionService->updateWithAuthorizeResponse($transaction->getId(), $authorizeResponse);
+        return $authorizeResponse;
+    }
+
     protected function handleFailedAuthorization(WC_Order $order, $transaction, $authorizeResponse)
     {
         $details = $authorizeResponse->getDetails()[0] ?? null;

@@ -100,21 +100,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
                 throw new EcommerceException("Datos incorrectos para autorizar la transacción.");
             }
 
-            $transactionData = $this->oneclickAuthorizationService->prepareTransaction(
-                $order->get_id(),
-                $amount
-            );
-            $transaction = $this->transactionService->create($transactionData);
-
-            $authorizeResponse = $this->oneclickAuthorizationService->authorize(
-                $paymentToken->get_username(),
-                $paymentToken->get_token(),
-                $transaction->getBuyOrder(),
-                $transaction->getChildBuyOrder(),
-                $transaction->getAmount()
-            );
-
-            $this->transactionService->updateWithAuthorizeResponse($transaction->getId(), $authorizeResponse);
+            $authorizeResponse = $this->authorizeTransaction($order->get_id(), $amount, $paymentToken);
 
             if (!$authorizeResponse->isApproved()) {
                 $this->handleFailedAuthorization($order, $transaction, $authorizeResponse);
