@@ -121,14 +121,14 @@ class OneclickInscriptionService extends ProductBaseService
     ): TbkInscription {
         $username = $this->generateUsername($userId);
         $data = new TbkInscription();
-        $data->setUsername($username);
-        $data->setEmail($userEmail);
-        $data->setUserId($userId);
-        $data->setOrderId($orderId);
-        $data->setFrom($from);
-        $data->setStatus(TbkConstants::TRANSACTION_STATUS_INITIALIZED);
-        $data->setEnvironment($this->getEnviroment());
-        $data->setCommerceCode($this->getCommerceCode());
+        $data->username = $username;
+        $data->email = $userEmail;
+        $data->userId = $userId;
+        $data->orderId = $orderId;
+        $data->from = $from;
+        $data->status = TbkConstants::TRANSACTION_STATUS_INITIALIZED;
+        $data->environment = $this->getEnvironment();
+        $data->commerceCode = $this->getCommerceCode();
         return $data;
     }
 }

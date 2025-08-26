@@ -29,16 +29,16 @@ class InscriptionService
     {
         try {
             $record = $this->repository->create([
-                'token' => $data->getToken(),
-                'username' => $data->getUsername(),
-                'order_id' => $data->getOrderId(),
-                'user_id' => $data->getUserId(),
+                'token' => $data->token,
+                'username' => $data->username,
+                'order_id' => $data->orderId,
+                'user_id' => $data->userId,
                 'pay_after_inscription' => false,
-                'email' => $data->getEmail(),
-                'from' => $data->getFrom(),
-                'status' => $data->getStatus(),
-                'environment' => $data->getEnvironment(),
-                'commerce_code' => $data->getCommerceCode()
+                'email' => $data->email,
+                'from' => $data->from,
+                'status' => $data->status,
+                'environment' => $data->environment,
+                'commerce_code' => $data->commerceCode
             ]);
 
             return new TbkInscription($record);

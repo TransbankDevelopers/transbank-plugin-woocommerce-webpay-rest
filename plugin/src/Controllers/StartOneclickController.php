@@ -64,11 +64,11 @@ class StartOneclickController
             $from
         );
         $response = $this->oneclickInscriptionService->startInscription(
-            $inscription->getUsername(),
-            $inscription->getEmail(),
+            $inscription->username,
+            $inscription->email,
             $returnUrl
         );
-        $inscription->setToken($response->getToken());
+        $inscription->token = $response->getToken();
         $this->inscriptionService->create($inscription);
         return $response;
     }
