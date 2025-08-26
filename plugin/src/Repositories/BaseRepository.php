@@ -47,33 +47,30 @@ abstract class BaseRepository
     {
         global $wpdb;
         $table = $this->getTableName();
-        try {
-            if (empty($data)) {
-                throw new InvalidArgumentException('No se proporcionaron datos para insertar.');
-            }
 
-            $sanitizedData = array_map('sanitize_text_field', $data);
-            $inserted = $wpdb->insert($table, $sanitizedData);
-            if ($inserted === false) {
-                throw new DatabaseInsertException(
-                    'Error al insertar en la tabla ' . $table . ': ' . $wpdb->last_error
-                );
-            }
-
-            $id = $wpdb->insert_id;
-            $row = $wpdb->get_row(
-                $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id),
-                OBJECT
-            );
-            if (!$row) {
-                throw new DatabaseInsertException(
-                    'No se pudo recuperar el registro insertado en la tabla ' . $table
-                );
-            }
-            return $row;
-        } catch (Throwable $e) {
-            throw $e;
+        if (empty($data)) {
+            throw new InvalidArgumentException('No se proporcionaron datos para insertar.');
         }
+
+        $sanitizedData = array_map('sanitize_text_field', $data);
+        $inserted = $wpdb->insert($table, $sanitizedData);
+        if ($inserted === false) {
+            throw new DatabaseInsertException(
+                'Error al insertar en la tabla ' . $table . ': ' . $wpdb->last_error
+            );
+        }
+
+        $id = $wpdb->insert_id;
+        $row = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id),
+            OBJECT
+        );
+        if (!$row) {
+            throw new DatabaseInsertException(
+                'No se pudo recuperar el registro insertado en la tabla ' . $table
+            );
+        }
+        return $row;
     }
 
     /**
