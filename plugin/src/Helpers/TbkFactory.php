@@ -12,7 +12,8 @@ use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
-use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 
@@ -52,8 +53,8 @@ class TbkFactory
             'commerceCode' => $config['commerce_code'] ?? null,
             'apiKey' => $config['api_key'] ?? null,
             'childCommerceCode' => $config['child_commerce_code'] ?? null,
-            'buyOrderFormat' => $config['buy_order_format'] ?? OneclickService::BUY_ORDER_FORMAT,
-            'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickService::CHILD_BUY_ORDER_FORMAT,
+            'buyOrderFormat' => $config['buy_order_format'] ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
+            'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
             'statusAfterPayment' => $config['oneclick_after_payment_order_status'] ?? ''
         ]);
     }
@@ -95,9 +96,17 @@ class TbkFactory
         );
     }
 
-    public static function createOneclickService()
+    public static function createOneclickInscriptionService()
     {
-        return new OneclickService(
+        return new OneclickInscriptionService(
+            static::createLogger(),
+            static::getOneclickConfig()
+        );
+    }
+
+    public static function createOneclickAuthorizationService()
+    {
+        return new OneclickAuthorizationService(
             static::createLogger(),
             static::getOneclickConfig()
         );

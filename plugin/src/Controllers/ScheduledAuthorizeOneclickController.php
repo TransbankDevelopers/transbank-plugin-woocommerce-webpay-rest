@@ -27,15 +27,18 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
         $transaction = null;
         $orderNotes = '';
         try {
-            
+
             $this->log->logInfo('Autorizando suscripción para la orden #' . $order->get_id());
             $customerId = $this->getCustomerIdOrFail($order);
             $paymentToken = $this->getDefaultPaymentTokenOrFail($customerId);
 
-            $transactionData = $this->oneclickService->prepareTransaction($order->get_id(), $amount);
+            $transactionData = $this->oneclickAuthorizationService->prepareTransaction(
+                $order->get_id(),
+                $amount
+            );
             $transaction = $this->transactionService->create($transactionData);
 
-            $authorizeResponse = $this->oneclickService->authorize(
+            $authorizeResponse = $this->oneclickAuthorizationService->authorize(
                 $paymentToken->get_username(),
                 $paymentToken->get_token(),
                 $transaction->getBuyOrder(),
@@ -43,7 +46,7 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
                 $transaction->getAmount()
             );
 
-            $this->transactionService->updateWithAuthorizeResponse($transaction->getId(),$authorizeResponse);
+            $this->transactionService->updateWithAuthorizeResponse($transaction->getId(), $authorizeResponse);
 
             if (!$authorizeResponse->isApproved()) {
                 $this->handleFailedAuthorization($order, $transaction, $authorizeResponse);
@@ -60,7 +63,7 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
             $this->log->logError("Error al procesar suscripción: " . $e->getMessage());
             $logsUrl = admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs');
             $this->ecommerceService->setOneclickOrderAsFailed($order, 'Error al procesar suscripción, para más detalles revisar el archivo de <a href=" ' . $logsUrl . '">logs</a>.');
-            if($transaction){
+            if ($transaction) {
                 $this->transactionService->updateWithAuthorizeResponseError(
                     $transaction->getId(),
                     'error en suscripción',

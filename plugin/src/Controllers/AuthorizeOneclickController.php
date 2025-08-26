@@ -49,7 +49,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
             ];
         }
     }
-    
+
     /**
      * Handles the request for processing a payment or initiating a new card inscription.
      *
@@ -74,7 +74,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
         return $this->handleAuthorization($order, $paymentTokenId);
     }
 
-     /**
+    /**
      * Handles the authorization process for a OneClick payment.
      *
      * This method performs the authorization process for a OneClick payment.
@@ -92,7 +92,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
         $orderNotes = '';
         try {
             $this->log->logInfo('[Oneclick] Checkout: pagando con el token ID #' . $paymentTokenId);
-            
+
             $paymentToken = $this->getWcPaymentToken($paymentTokenId);
             $amount = $this->ecommerceService->getTotalAmountFromOrder($order);
 
@@ -100,10 +100,13 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
                 throw new EcommerceException("Datos incorrectos para autorizar la transacción.");
             }
 
-            $transactionData = $this->oneclickService->prepareTransaction($order->get_id(), $amount);
+            $transactionData = $this->oneclickAuthorizationService->prepareTransaction(
+                $order->get_id(),
+                $amount
+            );
             $transaction = $this->transactionService->create($transactionData);
 
-            $authorizeResponse = $this->oneclickService->authorize(
+            $authorizeResponse = $this->oneclickAuthorizationService->authorize(
                 $paymentToken->get_username(),
                 $paymentToken->get_token(),
                 $transaction->getBuyOrder(),
@@ -111,7 +114,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
                 $transaction->getAmount()
             );
 
-            $this->transactionService->updateWithAuthorizeResponse($transaction->getId(),$authorizeResponse);
+            $this->transactionService->updateWithAuthorizeResponse($transaction->getId(), $authorizeResponse);
 
             if (!$authorizeResponse->isApproved()) {
                 $this->handleFailedAuthorization($order, $transaction, $authorizeResponse);
@@ -128,14 +131,14 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
             $this->log->logInfo('Se ha autorizado el pago correctamente para la orden #' . $order->get_id());
 
             return [
-                'result'   => 'success',
+                'result' => 'success',
                 'redirect' => $this->returnUrl
             ];
         } catch (\Exception $e) {
             $this->shouldThrowException = true;
             $this->ecommerceService->setOneclickOrderAsFailed($order, $orderNotes);
             $this->log->logError('Error al autorizar: ' . $e->getMessage());
-            if($transaction){
+            if ($transaction) {
                 $this->transactionService->updateWithAuthorizeResponseError(
                     $transaction->getId(),
                     'error',
@@ -176,7 +179,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
         return $userId == $inscriptionId;
     }
 
-        /**
+    /**
      * Retrieves a WC_Payment_Token_Oneclick object by its token ID.
      *
      * This method retrieves a payment token of type WC_Payment_Token_Oneclick using its ID.
@@ -204,7 +207,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
             $this->log->logInfo('El usuario debe tener una cuenta creada para poder inscribir una tarjeta.');
             $errorMessage = __(
                 'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
-                    'tu tarjeta y usar este método de pago.',
+                'tu tarjeta y usar este método de pago.',
                 'transbank_wc_plugin'
             );
 
@@ -212,7 +215,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
         }
     }
 
-        /**
+    /**
      * Checks if the order can be paid.
      *
      * This method verifies whether an order requires payment or if it's already paid.

@@ -8,7 +8,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
-use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
@@ -16,7 +16,7 @@ abstract class BaseAuthorizeOneclickController
 {
     protected ILogger $log;
     protected TransactionService $transactionService;
-    protected OneclickService $oneclickService;
+    protected OneclickAuthorizationService $oneclickAuthorizationService;
     protected EcommerceService $ecommerceService;
 
     /**
@@ -26,7 +26,7 @@ abstract class BaseAuthorizeOneclickController
     {
         $this->log = TbkFactory::createLogger();
         $this->transactionService = TbkFactory::createTransactionService();
-        $this->oneclickService = TbkFactory::createOneclickService();
+        $this->oneclickAuthorizationService = TbkFactory::createOneclickAuthorizationService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 

@@ -14,7 +14,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\AuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ScheduledAuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\StartOneclickController;
-use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 
 use WC_Order;
 use WC_Payment_Gateway_CC;
@@ -345,17 +345,17 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                     'Formato personalizado de orden de compra principal',
                     'transbank_wc_plugin'
                 ),
-                'placeholder' => 'Ej: ' . OneclickService::BUY_ORDER_FORMAT,
+                'placeholder' => 'Ej: ' . OneclickAuthorizationService::BUY_ORDER_FORMAT,
                 'desc_tip' => $buyOrderDescription,
                 'type' => 'text',
-                'default' => OneclickService::BUY_ORDER_FORMAT
+                'default' => OneclickAuthorizationService::BUY_ORDER_FORMAT
             ],
             'child_buy_order_format' => [
                 'title' => __('Formato personalizado de orden de compra hija', 'transbank_wc_plugin'),
-                'placeholder' => 'Ej: ' . OneclickService::CHILD_BUY_ORDER_FORMAT,
+                'placeholder' => 'Ej: ' . OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
                 'desc_tip' => $childBuyOrderDescription,
                 'type' => 'text',
-                'default' => OneclickService::CHILD_BUY_ORDER_FORMAT
+                'default' => OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT
             ]
         ];
     }

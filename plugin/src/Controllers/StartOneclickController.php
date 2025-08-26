@@ -7,7 +7,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
-use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
@@ -16,7 +16,7 @@ class StartOneclickController
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
     protected ILogger $log;
     protected InscriptionService $inscriptionService;
-    protected OneclickService $oneclickService;
+    protected OneclickInscriptionService $oneclickInscriptionService;
     protected EcommerceService $ecommerceService;
 
     /**
@@ -26,7 +26,7 @@ class StartOneclickController
     {
         $this->log = TbkFactory::createLogger();
         $this->inscriptionService = TbkFactory::createInscriptionService();
-        $this->oneclickService = TbkFactory::createOneclickService();
+        $this->oneclickInscriptionService = TbkFactory::createOneclickInscriptionService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
@@ -57,13 +57,13 @@ class StartOneclickController
         // The user selected Oneclick, Pay with new card and choosed to save it in their account.
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
-        $inscription = $this->oneclickService->prepareInscription(
+        $inscription = $this->oneclickInscriptionService->prepareInscription(
             $userInfo->ID,
             $userInfo->user_email,
             $orderId,
             $from
         );
-        $response = $this->oneclickService->startInscription(
+        $response = $this->oneclickInscriptionService->startInscription(
             $inscription->getUsername(),
             $inscription->getEmail(),
             $returnUrl

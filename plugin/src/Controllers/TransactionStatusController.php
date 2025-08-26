@@ -141,7 +141,7 @@ class TransactionStatusController
 
     private function getStatusForOneclickTransaction(string $buyOrder)
     {
-        $service = TbkFactory::createOneclickService();
+        $service = TbkFactory::createOneclickAuthorizationService();
         return $service->status($buyOrder);
     }
 

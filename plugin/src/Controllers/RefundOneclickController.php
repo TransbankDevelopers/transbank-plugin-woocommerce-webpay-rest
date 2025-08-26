@@ -4,7 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Throwable;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
-use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
@@ -13,14 +13,14 @@ class RefundOneclickController
 {
     protected ILogger $log;
     protected TransactionService $transactionService;
-    protected OneclickService $oneclickService;
+    protected OneclickAuthorizationService $oneclickAuthorizationService;
     protected EcommerceService $ecommerceService;
 
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();
         $this->transactionService = TbkFactory::createTransactionService();
-        $this->oneclickService = TbkFactory::createOneclickService();
+        $this->oneclickAuthorizationService = TbkFactory::createOneclickAuthorizationService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
     public function process($orderId, $amount = null, $reason = '')
@@ -42,12 +42,13 @@ class RefundOneclickController
                 do_action('transbank_oneclick_refund_transaction_not_found', $order, null, $messageError);
                 return false;
             }
-            $response = $this->oneclickService->refund(
+            $response = $this->oneclickAuthorizationService->refund(
                 $webpayTransaction->buy_order,
                 $webpayTransaction->child_commerce_code,
                 $webpayTransaction->child_buy_order,
-                round($amount));
-            $this->transactionService->updateWithRefundResponse($webpayTransaction->id,$response);
+                round($amount)
+            );
+            $this->transactionService->updateWithRefundResponse($webpayTransaction->id, $response);
             $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             do_action('transbank_oneclick_refund_completed', $order, $webpayTransaction, $jsonResponse);

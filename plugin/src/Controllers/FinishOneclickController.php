@@ -7,7 +7,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
-use Transbank\WooCommerce\WebpayRest\Services\OneclickService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
@@ -17,7 +17,7 @@ class FinishOneclickController
 {
     protected ILogger $log;
     protected InscriptionService $inscriptionService;
-    protected OneclickService $oneclickService;
+    protected OneclickInscriptionService $oneclickInscriptionService;
     protected EcommerceService $ecommerceService;
     protected $gatewayId;
 
@@ -30,7 +30,7 @@ class FinishOneclickController
         $this->gatewayId = $gatewayId;
         $this->log = TbkFactory::createLogger();
         $this->inscriptionService = TbkFactory::createInscriptionService();
-        $this->oneclickService = TbkFactory::createOneclickService();
+        $this->oneclickInscriptionService = TbkFactory::createOneclickInscriptionService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
@@ -105,7 +105,11 @@ class FinishOneclickController
     private function finishInscription($ins, $token)
     {
         try {
-            $resp = $this->oneclickService->finishInscription($token, $ins->username, $ins->email);
+            $resp = $this->oneclickInscriptionService->finishInscription(
+                $token,
+                $ins->username,
+                $ins->email
+            );
         } catch (Exception $e) {
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
