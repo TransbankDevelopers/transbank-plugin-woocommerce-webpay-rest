@@ -23,14 +23,18 @@ class RefundOneclickController
         $this->oneclickAuthorizationService = TbkFactory::createOneclickAuthorizationService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
-    public function process($orderId, $amount = null, $reason = '')
+    public function process($orderId, $amount, $reason = '')
     {
+        if ($amount === null) {
+            throw new \InvalidArgumentException('El monto de la devolución no puede ser nulo.');
+        }
         $order = null;
         $response = null;
         $webpayTransaction = null;
-        $this->log->logInfo("Iniciando proceso de reembolso para la orden #{$orderId}."
-            . ($amount !== null ? " Monto solicitado: {$amount}." : " Monto no especificado.")
-            . (!empty($reason) ? " Motivo: {$reason}." : " Motivo no especificado."));
+        $logMessage = "Iniciando proceso de reembolso para la orden #{$orderId}."
+            . " Monto solicitado: {$amount}."
+            . (!empty($reason) ? " Motivo: {$reason}." : " Motivo no especificado.");
+        $this->log->logInfo($logMessage);
         try {
             $order = $this->ecommerceService->getOrderById($orderId);
             $webpayTransaction = $this->transactionService->findFirstApprovedByOrderId($orderId);
