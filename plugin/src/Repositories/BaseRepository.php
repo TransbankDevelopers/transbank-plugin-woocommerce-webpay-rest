@@ -2,77 +2,131 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
+use InvalidArgumentException;
+use Throwable;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 
 abstract class BaseRepository
 {
+    /**
+     * Returns the table name for the repository.
+     *
+     * @return string
+     */
     abstract protected function getTableName(): string;
-    protected function getBaseTableName($baseName): string
+    /**
+     * Returns the base table name, considering multisite installations.
+     *
+     * @param string $baseName The base name of the table.
+     *
+     * @return string
+     */
+    protected function getBaseTableName(string $baseName): string
     {
         global $wpdb;
         if (is_multisite()) {
-            return $wpdb->base_prefix.$baseName;
+            return $wpdb->base_prefix . $baseName;
         } else {
-            return $wpdb->prefix.$baseName;
+            return $wpdb->prefix . $baseName;
         }
-    }
-
-    protected function insertBase(array $data)
-    {
-        global $wpdb;
-        $table = $this->getTableName();
-        $inserted = $wpdb->insert($table, $data);
-        if ($inserted !== false) {
-            $id = $wpdb->insert_id;
-            return $wpdb->get_row(
-                $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id),
-                OBJECT
-            );
-        }
-        return null;
-    }
-
-    protected function updateBase($id, array $data)
-    {
-        global $wpdb;
-
-        return $wpdb->update($this->getTableName(),  $data, ['id' => $id]);
     }
 
     /**
-     * Check if the transaction table exists in the database.
+     * Inserts a record into the base table and returns the inserted object.
+     * Validates errors and applies security best practices.
+     * Throws an exception if an error occurs.
      *
-     * @return array
+     * @param array $data Data to insert into the table.
+     *
+     * @return object The inserted row object.
+     * @throws InvalidArgumentException If no data is provided.
+     * @throws DatabaseInsertException If the insert fails or the row cannot be retrieved.
+     */
+    protected function insertBase(array $data): object
+    {
+        global $wpdb;
+        $table = $this->getTableName();
+        try {
+            if (empty($data)) {
+                throw new InvalidArgumentException('No se proporcionaron datos para insertar.');
+            }
+
+            $sanitizedData = array_map('sanitize_text_field', $data);
+            $inserted = $wpdb->insert($table, $sanitizedData);
+            if ($inserted === false) {
+                throw new DatabaseInsertException(
+                    'Error al insertar en la tabla ' . $table . ': ' . $wpdb->last_error
+                );
+            }
+
+            $id = $wpdb->insert_id;
+            $row = $wpdb->get_row(
+                $wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id),
+                OBJECT
+            );
+            if (!$row) {
+                throw new DatabaseInsertException(
+                    'No se pudo recuperar el registro insertado en la tabla ' . $table
+                );
+            }
+            return $row;
+        } catch (Throwable $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Updates a record in the base table by ID.
+     *
+     * @param int|string $id The record ID to update.
+     * @param array $data Data to update in the record.
+     *
+     * @return int|false Number of rows updated or false on failure.
+     */
+    protected function updateBase(int|string $id, array $data): int|false
+    {
+        global $wpdb;
+        return $wpdb->update($this->getTableName(), $data, ['id' => $id]);
+    }
+
+    /**
+     * Checks if the transaction table exists in the database.
+     *
+     * @return array Status information about the table existence.
      */
     public function checkExistTable(): array
     {
         $tableName = $this->getTableName();
         global $wpdb;
-        $sql = "SELECT COUNT(1) FROM ".$tableName;
+        $sql = "SELECT COUNT(1) FROM " . $tableName;
         try {
             $wpdb->get_results($sql);
             $success = empty($wpdb->last_error);
             if (!$success) {
-                return array('ok' => false,
+                return array(
+                    'ok' => false,
                     'error' => "La tabla '{$tableName}' no se encontró en la base de datos.",
-                    'exception' => "{$wpdb->last_error}");
+                    'exception' => "{$wpdb->last_error}"
+                );
             }
         } catch (\Exception $e) {
-            return array('ok' => false,
+            return array(
+                'ok' => false,
                 'error' => "La tabla '{$tableName}' no se encontró en la base de datos.",
-                'exception' => "{$e->getMessage()}");
+                'exception' => "{$e->getMessage()}"
+            );
         }
         return array('ok' => true, 'msg' => "La tabla '{$tableName}' existe.");
     }
 
     /**
-     * Get transactions by custom conditions.
+     * Retrieves transactions by custom conditions.
      *
-     * @param array $conditions         Key-value pairs of column names and values.
-     * @param string|string[] $orderBy  Column name or an array of column names to order by.
-     * @param string $orderDirection    Order direction ('ASC' or 'DESC').
-     *
-     * @return array|null Transaction objects array.
+     * @param array $conditions Key-value pairs of column names and values.
+     * @param string|string[] $orderBy Column name or an array of column names to order by.
+     * @param string $orderDirection Order direction ('ASC' or 'DESC').
+     * @return array|null Array of transaction objects or null.
      */
     protected function getTransactionsByConditions(array $conditions, string $orderBy = '', string $orderDirection = 'DESC'): ?array
     {
@@ -102,14 +156,28 @@ abstract class BaseRepository
         return $wpdb->get_results($safeSql);
     }
 
-    protected function executeQuery($query, ...$args)
+    /**
+     * Executes a prepared SQL query and returns the results.
+     *
+     * @param string $query The SQL query to execute.
+     * @param mixed ...$args Arguments for the prepared statement.
+     * @return array|null Array of result objects or null.
+     */
+    protected function executeQuery(string $query, mixed ...$args): array|null
     {
         global $wpdb;
         $sql = $wpdb->prepare($query, $args);
         return $wpdb->get_results($sql);
     }
 
-    protected function findFirst($query, ...$args): ?object
+    /**
+     * Finds and returns the first result of a query.
+     *
+     * @param string $query The SQL query to execute.
+     * @param mixed ...$args Arguments for the prepared statement.
+     * @return object|null The first result object or null.
+     */
+    protected function findFirst(string $query, mixed ...$args): object|null
     {
         $result = $this->executeQuery($query, ...$args);
         if (!is_array($result) || empty($result)) {
@@ -119,15 +187,15 @@ abstract class BaseRepository
     }
 
     /**
-     * Retrieve a first record. Throws if not found.
+     * Retrieves the first record from a query. Throws if not found.
      *
-     * @param string $query
-     * @param string $errorMessage
-     * @param $args
-     * @return mixed
-     * @throws RecordNotFoundOnDatabaseException
+     * @param string $query The SQL query to execute.
+     * @param string $errorMessage Error message for the exception if not found.
+     * @param mixed ...$args Arguments for the prepared statement.
+     * @return object The first result object.
+     * @throws RecordNotFoundOnDatabaseException If no record is found.
      */
-    public function getFirst($query, $errorMessage, ...$args)
+    public function getFirst(string $query, string $errorMessage, mixed ...$args): object
     {
         $result = $this->findFirst($query, ...$args);
         if (is_null($result)) {
