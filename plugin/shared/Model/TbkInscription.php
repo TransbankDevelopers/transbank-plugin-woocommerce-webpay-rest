@@ -53,16 +53,6 @@ class TbkInscription
         }
     }
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
     public function getToken(): string
     {
         return $this->token;
@@ -103,16 +93,6 @@ class TbkInscription
         $this->userId = $userId;
     }
 
-    public function getTokenId(): int
-    {
-        return $this->tokenId;
-    }
-
-    public function setTokenId(int $tokenId): void
-    {
-        $this->tokenId = $tokenId;
-    }
-
     public function getOrderId(): int
     {
         return $this->orderId;
@@ -121,66 +101,6 @@ class TbkInscription
     public function setOrderId(int $orderId): void
     {
         $this->orderId = $orderId;
-    }
-
-    public function getPayAfterInscription(): bool
-    {
-        return $this->payAfterInscription;
-    }
-
-    public function setPayAfterInscription(bool $payAfterInscription): void
-    {
-        $this->payAfterInscription = $payAfterInscription;
-    }
-
-    public function getFinished(): bool
-    {
-        return $this->finished;
-    }
-
-    public function setFinished(bool $finished): void
-    {
-        $this->finished = $finished;
-    }
-
-    public function getResponseCode(): string
-    {
-        return $this->responseCode;
-    }
-
-    public function setResponseCode(string $responseCode): void
-    {
-        $this->responseCode = $responseCode;
-    }
-
-    public function getAuthorizationCode(): string
-    {
-        return $this->authorizationCode;
-    }
-
-    public function setAuthorizationCode(string $authorizationCode): void
-    {
-        $this->authorizationCode = $authorizationCode;
-    }
-
-    public function getCardType(): string
-    {
-        return $this->cardType;
-    }
-
-    public function setCardType(string $cardType): void
-    {
-        $this->cardType = $cardType;
-    }
-
-    public function getCardNumber(): string
-    {
-        return $this->cardNumber;
-    }
-
-    public function setCardNumber(string $cardNumber): void
-    {
-        $this->cardNumber = $cardNumber;
     }
 
     public function getFrom(): string
@@ -222,45 +142,4 @@ class TbkInscription
     {
         $this->commerceCode = $commerceCode;
     }
-
-    public function getTransbankResponse(): string
-    {
-        return $this->transbankResponse;
-    }
-
-    public function setTransbankResponse(string $transbankResponse): void
-    {
-        $this->transbankResponse = $transbankResponse;
-    }
-
-    public function getError(): string
-    {
-        return $this->error;
-    }
-
-    public function setError(string $error): void
-    {
-        $this->error = $error;
-    }
-
-    public function getDetailError(): string
-    {
-        return $this->detailError;
-    }
-
-    public function setDetailError(string $detailError): void
-    {
-        $this->detailError = $detailError;
-    }
-
-    public function getCreatedAt(): string
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(string $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
 }
