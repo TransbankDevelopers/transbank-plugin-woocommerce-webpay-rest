@@ -6,13 +6,13 @@ use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkInscription;
-use Transbank\Plugin\Exceptions\RecordCreateOnDatabaseException;
+use Transbank\Plugin\Exceptions\DatabaseRecordCreationException;
 
 class InscriptionService
 {
     private InscriptionRepositoryInterface $repository;
 
-    
+
     public function __construct(
         InscriptionRepositoryInterface $repository
     ) {
@@ -40,7 +40,7 @@ class InscriptionService
             'commerce_code' => $data->getCommerceCode()
         ]);
         if ($record === null) {
-            throw new RecordCreateOnDatabaseException("Problemas al crear el registro de Inscripción");
+            throw new DatabaseRecordCreationException("Problemas al crear el registro de Inscripción");
         }
         return new TbkInscription($record);
     }
@@ -57,7 +57,7 @@ class InscriptionService
         return $this->repository->update($inscriptionId, $data);
     }
 
-     /**
+    /**
      * Retrieve a inscription by token. Throws an exception if not found.
      *
      * @param string $token The inscription token.
