@@ -70,9 +70,10 @@ class OneclickAuthorizationService extends ProductBaseService
         try {
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
-            $this->log->logInfo('authorize => username: ' . $username . ' parentBuyOrder: '
-                . $parentBuyOrder . ' childBuyOrder: ' . $childBuyOrder . ', amount: ' . $amount .
-                ', txDate: ' . $txDate . ', txTime: ' . $txTime);
+            $logMessage = "authorize => username: {$username} parentBuyOrder: {$parentBuyOrder} "
+                . "childBuyOrder: {$childBuyOrder}, amount: {$amount}, "
+                . "txDate: {$txDate}, txTime: {$txTime}";
+            $this->log->logInfo($logMessage);
             $details = [
                 [
                     'commerce_code' => $this->getChildCommerceCode(),
