@@ -45,7 +45,6 @@ class FinishOneclickController
         $token->set_card_type($finishInscriptionResponse->getCardType());
         $token->set_user_id($inscription->user_id);
         $token->set_environment($inscription->environment);
-        // Save the new token to the database
         $token->save();
         return $token;
     }
@@ -93,8 +92,6 @@ class FinishOneclickController
                 $this->redirectUser($ins->from, BlocksHelper::ONECLICK_USER_CANCELED);
             }
 
-            //registro correcto
-            //flujo correcto
             $this->finishInscription($ins, $token);
         } catch (Exception $e) {
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
@@ -123,8 +120,6 @@ class FinishOneclickController
             'from' => $from
         ]);
 
-        // Todo: guardar la información del usuario al momento de crear la inscripción y luego obtenerla en base al token,
-        // por si se pierde la sesión
         $userInfo = wp_get_current_user();
         if (!$userInfo) {
             $this->log->logError('You were logged out');
@@ -141,7 +136,6 @@ class FinishOneclickController
             'token_id' => $token->get_id(),
         ]);
 
-        // Set this token as the users new default token
         WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
 
         do_action('wc_transbank_oneclick_inscription_approved', [
