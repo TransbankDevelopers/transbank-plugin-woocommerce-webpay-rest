@@ -17,7 +17,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
     protected string $returnUrl;
 
     /**
-     * Constructor initializes the logger.
+     * Initializes the controller with the given gateway ID and return URL.
      */
     public function __construct(string $gatewayId, string $returnUrl)
     {

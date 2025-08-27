@@ -20,7 +20,7 @@ abstract class BaseAuthorizeOneclickController
     protected EcommerceService $ecommerceService;
 
     /**
-     * Constructor initializes the logger.
+     * Initializes the base controller.
      */
     public function __construct()
     {
