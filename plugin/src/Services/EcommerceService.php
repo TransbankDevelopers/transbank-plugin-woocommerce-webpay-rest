@@ -11,6 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Model\WebpayplusConfig;
+use Transbank\Plugin\Model\OneclickConfig;
 
 class EcommerceService
 {
@@ -24,18 +25,29 @@ class EcommerceService
      */
     protected $webpayDataMasker;
     /**
+     * @var MaskData
+     */
+    protected $oneclickDataMasker;
+    /**
      * @var WebpayplusConfig
      */
     protected $webpayConfig;
+    /**
+     * @var OneclickConfig
+     */
+    protected $oneclickConfig;
 
     public function __construct(
             $log,
             $webpayConfig,
+            $oneclickConfig
         )
     {
         $this->log = $log;
         $this->webpayConfig = $webpayConfig;
+        $this->oneclickConfig = $oneclickConfig;
         $this->webpayDataMasker = new MaskData($webpayConfig->isIntegration());
+        $this->oneclickDataMasker = new MaskData($oneclickConfig->isIntegration());
     }
 
     /**
@@ -210,6 +222,49 @@ class EcommerceService
         }
 
         $order->add_order_note($note);
+    }
+
+    /**
+     * Marks the given order as complete and updates its status if specified.
+     *
+     * This method sets the order's payment status to complete and then updates
+     * the order status based on the configured option 'oneclick_after_payment_order_status'.
+     * If no status is specified, the order is marked as complete without changing the status.
+     *
+     * @param WC_Order $order The order object to update.
+     */
+    public function completeOneclickOrder(WC_Order $order)
+    {
+        $status = $this->oneclickConfig->getStatusAfterPayment();
+        $this->setAfterPaymentOrderStatus($order, $status);
+    }
+
+            /**
+     * Sets the given order as failed and adds a note to the order.
+     *
+     * This method updates the status of the provided WC_Order object to 'failed' and adds a custom note to the order.
+     *
+     * @param WC_Order $order The order object to update.
+     * @param string $orderNotes The custom note to add to the order.
+     */
+    public function setOneclickOrderAsFailed(WC_Order $order, string $orderNotes)
+    {
+        $order->update_status('failed');
+        $order->add_order_note($orderNotes);
+    }
+
+    /**
+     * Retrieves the total amount from an order as an integer.
+     *
+     * This method takes a WC_Order object, gets its total amount, formats it to remove any decimal places,
+     * and then converts it to an integer.
+     *
+     * @param WC_Order $order The order object from which to retrieve the total amount.
+     * @return int The total amount of the order as an integer.
+     */
+    public function getTotalAmountFromOrder(WC_Order $order): int
+    {
+        return (int) number_format($order->get_total(), 0, ',', '');
     }
 
 }

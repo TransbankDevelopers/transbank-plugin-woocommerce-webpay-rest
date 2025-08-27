@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\Plugin\Services;
+namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -14,51 +14,32 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\Webpay\WebpayPlus\Transaction as WebpayPlusTransaction;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCommitException;
 use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
-use Transbank\Plugin\Helpers\ILogger;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\TbkConstants;
 
-class WebpayService
+class WebpayService extends ProductBaseService
 {
     const BUY_ORDER_FORMAT = 'wc-{random, length=8}-{orderId}';
-
-    /**
-     * @var Options
-     */
-    public $options;
-
-    /**
-     * @var ILogger
-     */
-    protected $log;
-    /**
-     * @var MaskData
-     */
-    public $dataMasker;
-    protected $buyOrderFormat;
-
     /**
      * @var WebpayPlusTransaction
      */
     protected $webpayplusTransaction;
 
-    
+
     public function __construct(
-            $log,
-            $config,
-        )
-    {
+        $log,
+        $config,
+    ) {
         $this->log = $log;
-        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION){
+        if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->webpayplusTransaction = WebpayPlusTransaction::buildForProduction(
                 $config->getApikey(),
                 $config->getCommerceCode()
             );
-        }
-        else {
+        } else {
             $this->webpayplusTransaction = WebpayPlusTransaction::buildForIntegration(
                 WebpayPlus::INTEGRATION_API_KEY,
                 WebpayPlus::INTEGRATION_COMMERCE_CODE
@@ -67,18 +48,11 @@ class WebpayService
         $this->options = $this->webpayplusTransaction->getOptions();
         $this->dataMasker = new MaskData($config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
-            $config->getBuyOrderFormat()) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
+            $config->getBuyOrderFormat()
+        ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
     }
 
-    public function getCommerceCode()
-    {
-        return $this->options->getCommerceCode();
-    }
 
-    public function getEnviroment()
-    {
-        return $this->options->getIntegrationType();
-    }
 
     /**
      * @param $orderId
@@ -94,7 +68,7 @@ class WebpayService
         try {
             $buyOrder = $this->generateBuyOrder($orderId);
             $randomNumber = uniqid();
-            $sessionId = 'wc:sessionId:'.$randomNumber.':'.$orderId;
+            $sessionId = 'wc:sessionId:' . $randomNumber . ':' . $orderId;
             $txDate = date('d-m-Y');
             $txTime = date('H:i:s');
             $this->log->logInfo("Creando transacción Webpay Plus. [Datos]:");
@@ -120,7 +94,7 @@ class WebpayService
                 $errorMessage = "Error creando la transacción para => buyOrder: {$buyOrder}, amount: {$amount}";
                 throw new CreateWebpayException($errorMessage);
             }
-            
+
         } catch (TransactionCreateException $e) {
             $errorMessage = "Error creando la transacción para =>
                 buyOrder: {$buyOrder}, amount: {$amount}, error: {$e->getMessage()}";
@@ -149,10 +123,6 @@ class WebpayService
         }
     }
 
-    protected function generateBuyOrder($orderId){
-        return BuyOrderHelper::generateFromFormat($this->buyOrderFormat, $orderId);
-    }
-
     /**
      * @param $token
      *
@@ -167,7 +137,7 @@ class WebpayService
         } catch (Exception $e) {
             $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
 
-            if(ErrorUtil::isMaxTimeError($e)) {
+            if (ErrorUtil::isMaxTimeError($e)) {
                 $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
             }
 

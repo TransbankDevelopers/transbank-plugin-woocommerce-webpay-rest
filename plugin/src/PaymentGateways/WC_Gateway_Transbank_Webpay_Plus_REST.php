@@ -9,7 +9,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\CreateWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
-use Transbank\Plugin\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
@@ -81,9 +81,10 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        return (new RefundWebpayController())->proccess(
+        return (new RefundWebpayController())->process(
             $order_id,
-            $amount
+            $amount,
+            $reason
         );
     }
 
@@ -181,7 +182,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
         ob_clean();
         header('HTTP/1.1 200 OK');
-        return (new CommitWebpayController())->proccess();
+        return (new CommitWebpayController())->process();
     }
 
     /**
@@ -189,7 +190,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      **/
     public function process_payment($order_id)
     {
-        return (new CreateWebpayController())->proccess($this->id, static::WOOCOMMERCE_API_SLUG, $order_id);
+        return (new CreateWebpayController())->process($this->id, static::WOOCOMMERCE_API_SLUG, $order_id);
     }
 
     /**

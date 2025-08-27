@@ -3,44 +3,31 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Throwable;
-use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
-use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
-class RefundWebpayController
+class RefundOneclickController
 {
-    /**
-     * @var ILogger
-     */
-    protected $log;
+    protected ILogger $log;
     protected TransactionService $transactionService;
-    protected WebpayService $webpayService;
+    protected OneclickAuthorizationService $oneclickAuthorizationService;
     protected EcommerceService $ecommerceService;
 
     public function __construct()
     {
         $this->log = TbkFactory::createLogger();
         $this->transactionService = TbkFactory::createTransactionService();
-        $this->webpayService = TbkFactory::createWebpayService();
+        $this->oneclickAuthorizationService = TbkFactory::createOneclickAuthorizationService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
-
-
-    /**
-     * Process refund.
-     *
-     * If the gateway declares 'refunds' support, this will allow it to refund.
-     * a passed in amount.
-     *
-     * @param  int        $orderId Order ID.
-     * @param  float|null $amount Refund amount.
-     * @param  string     $reason Refund reason.
-     * @return boolean True or false based on success, or a WP_Error object.
-     */
-    public function process($orderId, $amount = null, $reason = '')
+    public function process($orderId, $amount, $reason = '')
     {
+        if ($amount === null) {
+            throw new \InvalidArgumentException('El monto de la devolución no puede ser nulo.');
+        }
         $order = null;
         $response = null;
         $webpayTransaction = null;
@@ -56,14 +43,19 @@ class RefundWebpayController
                 $messageError = $messageError . 'No hay transacciones webpay para esta orden.';
                 $this->log->logError($messageError);
                 $order->add_order_note($messageError);
-                do_action('transbank_webpay_plus_refund_transaction_not_found', $order, null, $messageError);
+                do_action('transbank_oneclick_refund_transaction_not_found', $order, null, $messageError);
                 return false;
             }
-            $response = $this->webpayService->refund($webpayTransaction->token, round($amount));
+            $response = $this->oneclickAuthorizationService->refund(
+                $webpayTransaction->buy_order,
+                $webpayTransaction->child_commerce_code,
+                $webpayTransaction->child_buy_order,
+                round($amount)
+            );
             $this->transactionService->updateWithRefundResponse($webpayTransaction->id, $response);
             $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
-            do_action('transbank_webpay_plus_refund_completed', $order, $webpayTransaction, $jsonResponse);
+            do_action('transbank_oneclick_refund_completed', $order, $webpayTransaction, $jsonResponse);
             return true;
         } catch (Throwable $e) {
             $message = "<strong>Error en el reembolso:</strong><br />{$e->getMessage()}";
@@ -75,11 +67,8 @@ class RefundWebpayController
             if ($webpayTransaction) {
                 $this->transactionService->updateWithRefundResponseError($webpayTransaction->id, $message);
             }
-            do_action('transbank_webpay_plus_refund_failed', $order, $webpayTransaction, $message);
+            do_action('transbank_oneclick_refund_failed', $order, $webpayTransaction, $message);
             return false;
         }
     }
-
 }
-
-

@@ -4,14 +4,14 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Exception;
 use Throwable;
-use Transbank\Plugin\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use Transbank\Plugin\Helpers\ILogger;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\Plugin\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use WC_Order;
 
 
@@ -36,7 +36,7 @@ class CreateWebpayController
         $this->ecommerceService = TbkFactory::createEcommerceService();
     }
 
-    public function proccess($gatewayId, $apiSlug, $orderId)
+    public function process($gatewayId, $apiSlug, $orderId)
     {
         $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $gatewayId;
         try {
@@ -51,15 +51,13 @@ class CreateWebpayController
                 'result' => 'success',
                 'redirect' => $createResponse->getUrl() . '?token_ws=' . $createResponse->getToken()
             ];
-        }
-        catch (EcommerceException $e) {
+        } catch (EcommerceException $e) {
             $this->log->logError($e->getMessage());
             if (ErrorHelper::isGuzzleError($e)) {
                 $errorMessage = ErrorHelper::getGuzzleError();
                 do_action($errorHookName, new Exception($errorMessage), true);
                 BlocksHelper::addLegacyNotices(ErrorHelper::getGuzzleError(), 'error');
-            }
-            else {
+            } else {
                 $errorMessage = 'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.';
                 do_action($errorHookName, new Exception($errorMessage), true);
                 BlocksHelper::addLegacyNotices($errorMessage, 'error');

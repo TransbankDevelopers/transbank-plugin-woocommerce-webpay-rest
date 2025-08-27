@@ -3,8 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\BaseModel;
-
 
 require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
@@ -64,7 +62,7 @@ class DatabaseTableInstaller
         ) $charsetCollate";
 
         dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
     }
 
     public static function createTableInscription(): bool
@@ -103,10 +101,10 @@ class DatabaseTableInstaller
         ) $charsetCollate";
 
         dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
     }
 
-    public static function createTableProccessError($tableName, $wpdbError): bool
+    public static function createTableProcessError($tableName, $wpdbError): bool
     {
         $success = empty($wpdbError);
         if (!$success) {
@@ -130,12 +128,6 @@ class DatabaseTableInstaller
         return $successTransaction && $successInscription;
     }
 
-    public static function deleteTable()
-    {
-        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
-        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
-    }
-
     public static function deleteTableByName($tableName)
     {
         global $wpdb;
@@ -153,9 +145,25 @@ class DatabaseTableInstaller
         return null;
     }
 
+    public static function deleteTable()
+    {
+        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
+        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
+    }
+
     public static function deleteUnusedTable()
     {
-        static::deleteTableByName(BaseModel::getBaseTableName('transbank_api_service_log'));
-        static::deleteTableByName(BaseModel::getBaseTableName('transbank_execution_error_log'));
+        static::deleteTableByName(self::getBaseTableName('transbank_api_service_log'));
+        static::deleteTableByName(self::getBaseTableName('transbank_execution_error_log'));
+    }
+
+    public static function getBaseTableName($baseName): string
+    {
+        global $wpdb;
+        if (is_multisite()) {
+            return $wpdb->base_prefix.$baseName;
+        } else {
+            return $wpdb->prefix.$baseName;
+        }
     }
 }

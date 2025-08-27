@@ -1,16 +1,20 @@
 <?php
 
-namespace Transbank\Plugin\Services;
+namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
+use Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse;
+use Transbank\Webpay\Oneclick\Responses\MallTransactionRefundResponse;
+use Transbank\Plugin\Exceptions\DatabaseRecordCreationException;
 
 class TransactionService
 {
     private TransactionRepositoryInterface $repository;
 
-    
+
     public function __construct(
         TransactionRepositoryInterface $repository
     ) {
@@ -23,17 +27,20 @@ class TransactionService
      * @param TbkTransaction $data Transaction data to be stored.
      * @return mixed
      */
-    public function create(TbkTransaction $data): mixed
+    public function create(TbkTransaction $data): TbkTransaction
     {
         if ($data->getProduct() === TbkConstants::TRANSACTION_WEBPAY_PLUS) {
             $data->setChildBuyOrder('');
             $data->setChildCommerceCode('');
-        }
-        else {
+        } else {
             $data->setToken('');
             $data->setSessionId('');
         }
-        return $this->repository->create($data);
+        $record = $this->repository->create($data);
+        if ($record === null) {
+            throw new DatabaseRecordCreationException("Problemas al crear el registro de Transacción");
+        }
+        return new TbkTransaction($record);
     }
 
     /**
@@ -153,6 +160,40 @@ class TransactionService
     public function getTableName(): string
     {
         return $this->repository->getTableName();
+    }
+
+    public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp)
+    {
+        $this->update($transactionId, [
+            'last_refund_type' => $resp->getType(),
+            'last_refund_response' => json_encode($resp)
+        ]);
+    }
+
+    public function updateWithRefundResponseError(string $transactionId, $detailError)
+    {
+        $this->update($transactionId, [
+            'error' => 'Refund error',
+            'detail_error' => $detailError
+        ]);
+    }
+
+    public function updateWithAuthorizeResponse(string $transactionId, MallTransactionAuthorizeResponse $resp)
+    {
+        $this->update($transactionId, [
+            'status' => TbkConstants::TRANSACTION_STATUS_APPROVED,
+            'transbank_status' => $resp->getDetails()[0]->getStatus() ?? null,
+            'transbank_response' => json_encode($resp),
+        ]);
+    }
+
+    public function updateWithAuthorizeResponseError(string $transactionId, $error, $detailError)
+    {
+        $this->update($transactionId, [
+            'status' => TbkConstants::TRANSACTION_STATUS_FAILED,
+            'error' => $error,
+            'detail_error' => $detailError
+        ]);
     }
 
 }

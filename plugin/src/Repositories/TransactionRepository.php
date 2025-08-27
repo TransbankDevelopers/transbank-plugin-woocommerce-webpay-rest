@@ -9,7 +9,7 @@ use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class TransactionRepository extends BaseRepository implements TransactionRepositoryInterface
 {
-    const TRANSACTIONS_TABLE_NAME = 'webpay_rest_transactions';
+    const TABLE_NAME = 'webpay_rest_transactions';
 
     /**
      * Get the name of the transaction database table.
@@ -18,7 +18,7 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getTableName(): string
     {
-        return $this->getBaseTableName(static::TRANSACTIONS_TABLE_NAME);
+        return $this->getBaseTableName(static::TABLE_NAME);
     }
 
     /**
@@ -68,12 +68,12 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getByToken(string $token)
     {
-        $result = $this->findFirstByToken($token);
-        if (is_null($result)) {
-            throw new RecordNotFoundOnDatabaseException(
-                "Token no se encontró en la base de datos de transacciones");
-        }
-        return $result;
+        $transactionTable = $this->getTableName();
+        return $this->findFirst(
+            "SELECT * FROM $transactionTable WHERE `token` = '%s'",
+            "Token no se encontró en la base de datos de transacciones",
+            $token
+        );
     }
 
      /**
@@ -86,17 +86,12 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
     public function getByBuyOrder(string $buyOrder)
     {
         $transactionTable = $this->getTableName();
-        $result = $this->executeQuery(
+        return $this->getFirst(
             "SELECT * FROM $transactionTable WHERE buy_order = '%s'",
+            "BuyOrder no se encontró en la base de datos de transacciones",
             $buyOrder
         );
-        if (!is_array($result) || empty($result)) {
-            throw new RecordNotFoundOnDatabaseException(
-                "BuyOrder no se encontró en la base de datos de transacciones");
-        }
-        return $result[0];
     }
-
 
     /**
      * Retrieve the first approved transaction by orderId.
@@ -125,16 +120,12 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
     public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId)
     {
         $transactionTable = $this->getTableName();
-        $result = $this->executeQuery(
+        return $this->getFirst(
             "SELECT * FROM $transactionTable WHERE session_id = '%s' && buy_order='%s'",
+            "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso",
             $sessionId,
             $buyOrder
         );
-        if (!is_array($result) || empty($result)) {
-            throw new RecordNotFoundOnDatabaseException(
-                "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso");
-        }
-        return $result[0];
     }
 
     /**
