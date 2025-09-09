@@ -61,8 +61,7 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
+        return DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
     public static function createTableInscription(): bool
@@ -100,22 +99,44 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
+        return DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
-    public static function createTableProcessError($tableName, $wpdbError): bool
+    /**
+     * Creates a database table. Register errors if any occur.
+     *
+     * @param string $query     SQL query to create table.
+     * @param string $tableName Logical name or identifier of the table (used in logs and errors).
+     *
+     * @return bool `true` if the table was created successfully, `false` if an error occurred.
+     */
+    private static function createTable($query, $tableName): bool
     {
-        $success = empty($wpdbError);
-        if (!$success) {
-            $log = TbkFactory::createLogger();
-            $log->logError('Error creating transbank tables: '.$tableName);
-            $log->logError($wpdbError);
-
-            add_settings_error($tableName.'_table_error', '', 'Transbank Webpay: Error creando tabla '.$tableName.': '.$wpdbError, 'error');
-            settings_errors($tableName.'_table_error');
+        if (empty($query)) {
+            $logger = TbkFactory::createLogger();
+            $logger->logError('Empty query on create table: ' .  $tableName);
+            return false;
         }
-        return $success;
+
+        global $wpdb;
+        dbDelta($query);
+        $lastError = $wpdb->last_error;
+        if (empty($lastError)) {
+            return true;
+        }
+
+        $logger = TbkFactory::createLogger();
+        $logger->logError('Error creating transbank table: ' . $tableName);
+        $logger->logError($lastError);
+
+        add_settings_error(
+            $tableName . '_table_error',
+            '',
+            'Transbank Webpay: Error creando tabla ' . $tableName . ': ' . $lastError,
+            'error'
+        );
+        settings_errors($tableName . '_table_error');
+        return false;
     }
 
     public static function createTables(): bool
