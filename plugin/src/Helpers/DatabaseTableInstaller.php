@@ -14,11 +14,7 @@ class DatabaseTableInstaller
     public static function isUpgraded(): bool
     {
         $version = (int) get_site_option(static::TABLE_VERSION_OPTION_KEY, 0);
-        if ($version >= static::LATEST_TABLE_VERSION) {
-            return true;
-        }
-
-        return false;
+        return $version >= static::LATEST_TABLE_VERSION;
     }
 
     public static function install(): bool
