@@ -145,6 +145,12 @@ class DatabaseTableInstaller
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
 
+    /**
+     * Create tables if is necessary.
+     *
+     * @throws CreateTableException
+     * @throws \InvalidArgumentException
+     */
     public static function createTableIfNeeded()
     {
         if (!static::isUpgraded()) {
