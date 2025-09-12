@@ -46,7 +46,8 @@ $hposExists = $hposHelper->checkIfHposExists();
 
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
-add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
+// add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
+register_activation_hook( __FILE__, 'create_webpay_tables' );
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
@@ -228,9 +229,23 @@ function renderTransactionStatusMetaBox(int $orderId)
     (new Template())->render('admin/order/transaction-status.php', $viewData);
 }
 
-function on_transbank_rest_webpay_plugins_loaded()
+function create_webpay_tables()
 {
+    try {
     DatabaseTableInstaller::createTableIfNeeded();
+        DatabaseTableInstaller::checkTables();
+    } catch (Exception $e) {
+        $logger = TbkFactory::createLogger();
+        $logger->logError('Error en register_activation_hook: ' . $e->getMessage());
+        transbank_rest_set_admin_notice('error', $e->getMessage());
+        deactivate_plugins(plugin_basename(__FILE__));
+        wp_die(
+            'No se pudo activar el plugin. Error: ' . esc_html($e->getMessage()),
+            'Error de activación',
+            ['back_link' => true]
+        );
+    }
+}
 }
 
 function transbank_rest_remove_database()
