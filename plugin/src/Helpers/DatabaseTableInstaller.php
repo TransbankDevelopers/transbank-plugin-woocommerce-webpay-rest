@@ -19,13 +19,13 @@ class DatabaseTableInstaller
         return $version >= static::LATEST_TABLE_VERSION;
     }
 
-    public static function install(): bool
+    public static function install(): void
     {
         static::deleteUnusedTable();
-        return static::createTables();
+        static::createTables();
     }
 
-    public static function createTableTransaction(): bool
+    public static function createTableTransaction(): void
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
@@ -53,10 +53,10 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        return DatabaseTableInstaller::createTable($sql, $tableName);
+        DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
-    public static function createTableInscription(): bool
+    public static function createTableInscription(): void
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
@@ -86,7 +86,7 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        return DatabaseTableInstaller::createTable($sql, $tableName);
+        DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
     /**
@@ -134,9 +134,12 @@ class DatabaseTableInstaller
         }
         throw new CreateTableException("La tabla $fullTableName NO ha sido creada correctamente.");
     }
-            update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
-        }
-        return $successTransaction && $successInscription;
+
+    public static function createTables()
+    {
+        static::createTableTransaction();
+        static::createTableInscription();
+        update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
     }
 
     public static function deleteTableByName($tableName)
@@ -156,10 +159,8 @@ class DatabaseTableInstaller
     public static function createTableIfNeeded()
     {
         if (!static::isUpgraded()) {
-            return static::install();
+            static::install();
         }
-
-        return null;
     }
 
     public static function deleteTable()
