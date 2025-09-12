@@ -2,7 +2,9 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
+use Transbank\WooCommerce\WebpayRest\Exceptions\CreateTableException;
 
 require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
