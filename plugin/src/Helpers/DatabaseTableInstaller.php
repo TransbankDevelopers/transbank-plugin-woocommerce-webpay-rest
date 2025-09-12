@@ -109,13 +109,29 @@ class DatabaseTableInstaller
             throw new CreateTableException('Error al crear la tabla '. $tableName .  ' en la base de datos: ' . $lastError);
         }
     }
+
+     /**
+     * Check if a needed tables exists.
+     *
+     * @throws CreateTableException
+     */
+    public static function checkTables(): void
+    {
+        static::tableExists(TransactionRepository::TABLE_NAME);
+        static::tableExists(InscriptionRepository::TABLE_NAME);
     }
 
-    public static function createTables(): bool
+    private static function tableExists($tableName): void
     {
-        $successTransaction = static::createTableTransaction();
-        $successInscription = static::createTableInscription();
-        if ($successTransaction && $successInscription) {
+        global $wpdb;
+        $fullTableName = self::getBaseTableName($tableName);
+        $query = $wpdb->prepare("SHOW TABLES LIKE %s", $fullTableName);
+        $result = $wpdb->get_var($query);
+        if ($result === $fullTableName) {
+            return;
+        }
+        throw new CreateTableException("La tabla $fullTableName NO ha sido creada correctamente.");
+    }
             update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
         }
         return $successTransaction && $successInscription;
