@@ -99,40 +99,27 @@ class DatabaseTableInstaller
     }
 
     /**
-     * Creates a database table. Register errors if any occur.
+     * Creates a database table.
      *
      * @param string $query     SQL query to create table.
-     * @param string $tableName Logical name or identifier of the table (used in logs and errors).
+     * @param string $tableName Logical name or identifier of the table.
      *
-     * @return bool `true` if the table was created successfully, `false` if an error occurred.
+     * @throws CreateTableException
+     * @throws \InvalidArgumentException
      */
-    private static function createTable($query, $tableName): bool
+    private static function createTable($query, $tableName): void
     {
         if (empty($query)) {
-            $logger = TbkFactory::createLogger();
-            $logger->logError('Empty query on create table: ' .  $tableName);
-            return false;
+            throw new \InvalidArgumentException('La query para crear la tabla ' . $tableName . ' es obligatoria.');
         }
 
         global $wpdb;
         dbDelta($query);
         $lastError = $wpdb->last_error;
-        if (empty($lastError)) {
-            return true;
+        if (!empty($lastError)) {
+            throw new CreateTableException('Error al crear la tabla '. $tableName .  ' en la base de datos: ' . $lastError);
         }
-
-        $logger = TbkFactory::createLogger();
-        $logger->logError('Error creating transbank table: ' . $tableName);
-        $logger->logError($lastError);
-
-        add_settings_error(
-            $tableName . '_table_error',
-            '',
-            'Transbank Webpay: Error creando tabla ' . $tableName . ': ' . $lastError,
-            'error'
-        );
-        settings_errors($tableName . '_table_error');
-        return false;
+    }
     }
 
     public static function createTables(): bool
