@@ -27,13 +27,7 @@ class DatabaseTableInstaller
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Webpay Transactions Table
-        |--------------------------------------------------------------------------
-        */
-        $tableName = TbkFactory::createTransactionRepository()->getTableName();
+        $tableName = self::getBaseTableName(TransactionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
             `order_id`             varchar(60) NOT NULL,
@@ -64,12 +58,7 @@ class DatabaseTableInstaller
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-        /*
-        |--------------------------------------------------------------------------
-        | Oneclick inscriptions table
-        |--------------------------------------------------------------------------
-        */
-        $tableName = TbkFactory::createInscriptionRepository()->getTableName();
+        $tableName = self::getBaseTableName(InscriptionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
             `token`                 varchar(100) NOT NULL,
@@ -151,8 +140,8 @@ class DatabaseTableInstaller
 
     public static function deleteTable()
     {
-        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
-        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
+        static::deleteTableByName(self::getBaseTableName(TransactionRepository::TABLE_NAME));
+        static::deleteTableByName(self::getBaseTableName(InscriptionRepository::TABLE_NAME));
     }
 
     public static function deleteUnusedTable()
