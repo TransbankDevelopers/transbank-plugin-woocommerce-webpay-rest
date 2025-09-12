@@ -40,10 +40,8 @@ if (!defined('ABSPATH')) {
  */
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
-
 $hposHelper = new HposHelper();
 $hposExists = $hposHelper->checkIfHposExists();
-
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 // add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
@@ -51,6 +49,7 @@ register_activation_hook( __FILE__, 'create_webpay_tables' );
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
+add_action('admin_notices', 'transbank_rest_admin_notices');
 
 add_action('init', function () {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
@@ -232,7 +231,7 @@ function renderTransactionStatusMetaBox(int $orderId)
 function create_webpay_tables()
 {
     try {
-    DatabaseTableInstaller::createTableIfNeeded();
+        DatabaseTableInstaller::createTableIfNeeded();
         DatabaseTableInstaller::checkTables();
     } catch (Exception $e) {
         $logger = TbkFactory::createLogger();
@@ -246,6 +245,23 @@ function create_webpay_tables()
         );
     }
 }
+
+// TODO: move to NoticeHelper
+function transbank_rest_set_admin_notice(string $type, string $message): void {
+    update_option('transbank_rest_admin_notice', [
+        'type' => in_array($type, ['error','warning','success','info'], true) ? $type : 'info',
+        'message' => $message,
+        'ts' => time(),
+    ], false);
+}
+// TODO: move to NoticeHelper
+function transbank_rest_admin_notices(): void {
+    if (!current_user_can('manage_woocommerce')) return;
+    $notice = get_option('transbank_rest_admin_notice');
+    if (!$notice || empty($notice['message'])) return;
+    $class = 'notice notice-' . esc_attr($notice['type']) . ' is-dismissible';
+    echo '<div class="' . $class . '"><p>' . esc_html($notice['message']) . '</p></div>';
+    delete_option('transbank_rest_admin_notice');
 }
 
 function transbank_rest_remove_database()
