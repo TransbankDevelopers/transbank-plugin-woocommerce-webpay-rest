@@ -97,9 +97,17 @@ class TbkResponseUtil
         $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
 
         $buyOrder = $transactionResponse->buyOrder;
-        $cardNumber = "**** **** **** {$transactionResponse->cardNumber}";
         $transactionDate = $utcDate->format('d-m-Y');
         $transactionTime = $utcDate->format('H:i:s');
+        $cardNumber = "N/A";
+
+        if (isset($transactionResponse->cardNumber)) {
+            if (strlen($transactionResponse->cardNumber) === 4) {
+                $cardNumber = "**** **** **** {$transactionResponse->cardNumber}";
+            } else {
+                $cardNumber = $transactionResponse->cardNumber;
+            }
+        }
 
         return [
             'buyOrder' => $buyOrder,
@@ -174,9 +182,17 @@ class TbkResponseUtil
     {
         $utcDate = new DateTime($statusResponse->transactionDate, new DateTimeZone('UTC'));
         $utcDate->setTimeZone(new DateTimeZone(wc_timezone_string()));
+        $cardNumber = "N/A";
+
+        if (isset($statusResponse->cardNumber)) {
+            if (strlen($statusResponse->cardNumber) === 4) {
+                $cardNumber = "**** **** **** {$statusResponse->cardNumber}";
+            } else {
+                $cardNumber = $statusResponse->cardNumber;
+            }
+        }
 
         $buyOrder = $statusResponse->buyOrder;
-        $cardNumber = "**** **** **** {$statusResponse->cardNumber}";
         $transactionDate = $utcDate->format('d-m-Y');
         $transactionTime = $utcDate->format('H:i:s');
         $accountingDate = self::getAccountingDate($statusResponse->accountingDate);
@@ -202,8 +218,8 @@ class TbkResponseUtil
 
         $status = self::getStatus($statusResponse->status);
         $amount = self::getAmountFormatted($statusResponse->amount);
-        $paymentType = self::getPaymentType($statusResponse->paymentTypeCode);
-        $installmentType = self::getInstallmentType($statusResponse->paymentTypeCode);
+        $paymentType = self::getPaymentType($statusResponse->paymentTypeCode ?? 'N/A');
+        $installmentType = self::getInstallmentType($statusResponse->paymentTypeCode ?? 'N/A');
         $installmentNumber = $statusResponse->installmentsNumber;
         $installmentAmount = 'N/A';
         $balance = 'N/A';
@@ -221,7 +237,7 @@ class TbkResponseUtil
             'status' => $status,
             'responseCode' => $statusResponse->responseCode,
             'amount' => $amount,
-            'authorizationCode' => $statusResponse->authorizationCode,
+            'authorizationCode' => $statusResponse->authorizationCode ?? 'N/A',
             'accountingDate' => $commonFields['accountingDate'],
             'paymentType' => $paymentType,
             'installmentType' => $installmentType,
