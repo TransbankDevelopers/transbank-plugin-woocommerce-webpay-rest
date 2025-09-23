@@ -234,33 +234,13 @@ function activate_transbank_module()
         DatabaseTableInstaller::checkTables();
     } catch (Exception $e) {
         $logger = TbkFactory::createLogger();
-        $logger->logError('Error en register_activation_hook: ' . $e->getMessage());
-        transbank_rest_set_admin_notice('error', $e->getMessage());
-        deactivate_plugins(plugin_basename(__FILE__)); // TODO - Quitar esta linea, no tiene efecto.
+        $logger->logError('Error al activar el plugin de Transbank: ' . $e->getMessage());
         wp_die(
-            'No se pudo activar el plugin. Error: ' . esc_html($e->getMessage()),
+            'No se pudo activar el plugin de Transbank. Error: ' . esc_html($e->getMessage()),
             'Error de activación',
             ['back_link' => true]
         );
     }
-}
-
-// TODO: move to NoticeHelper
-function transbank_rest_set_admin_notice(string $type, string $message): void {
-    update_option('transbank_rest_admin_notice', [
-        'type' => in_array($type, ['error','warning','success','info'], true) ? $type : 'info',
-        'message' => $message,
-        'ts' => time(),
-    ], false);
-}
-// TODO: move to NoticeHelper
-function transbank_rest_admin_notices(): void {
-    if (!current_user_can('manage_woocommerce')) return;
-    $notice = get_option('transbank_rest_admin_notice');
-    if (!$notice || empty($notice['message'])) return;
-    $class = 'notice notice-' . esc_attr($notice['type']) . ' is-dismissible';
-    echo '<div class="' . $class . '"><p>' . esc_html($notice['message']) . '</p></div>';
-    delete_option('transbank_rest_admin_notice');
 }
 
 function transbank_rest_remove_database()
