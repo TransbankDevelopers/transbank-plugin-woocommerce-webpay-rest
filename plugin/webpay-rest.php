@@ -48,7 +48,6 @@ register_activation_hook(__FILE__, 'activate_transbank_module');
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
-add_action('admin_notices', 'transbank_rest_admin_notices');
 
 add_action('init', function () {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
