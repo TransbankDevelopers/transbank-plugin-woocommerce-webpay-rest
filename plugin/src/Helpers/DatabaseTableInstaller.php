@@ -2,7 +2,9 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
+use Transbank\WooCommerce\WebpayRest\Exceptions\CreateTableException;
 
 require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
@@ -14,30 +16,20 @@ class DatabaseTableInstaller
     public static function isUpgraded(): bool
     {
         $version = (int) get_site_option(static::TABLE_VERSION_OPTION_KEY, 0);
-        if ($version >= static::LATEST_TABLE_VERSION) {
-            return true;
-        }
-
-        return false;
+        return $version >= static::LATEST_TABLE_VERSION;
     }
 
-    public static function install(): bool
+    public static function install(): void
     {
         static::deleteUnusedTable();
-        return static::createTables();
+        static::createTables();
     }
 
-    public static function createTableTransaction(): bool
+    public static function createTableTransaction(): void
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Webpay Transactions Table
-        |--------------------------------------------------------------------------
-        */
-        $tableName = TbkFactory::createTransactionRepository()->getTableName();
+        $tableName = self::getBaseTableName(TransactionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
             `order_id`             varchar(60) NOT NULL,
@@ -61,20 +53,14 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
+        DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
-    public static function createTableInscription(): bool
+    public static function createTableInscription(): void
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-        /*
-        |--------------------------------------------------------------------------
-        | Oneclick inscriptions table
-        |--------------------------------------------------------------------------
-        */
-        $tableName = TbkFactory::createInscriptionRepository()->getTableName();
+        $tableName = self::getBaseTableName(InscriptionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
             `token`                 varchar(100) NOT NULL,
@@ -100,32 +86,60 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProcessError($tableName, $wpdb->last_error);
+        DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
-    public static function createTableProcessError($tableName, $wpdbError): bool
+    /**
+     * Creates a database table.
+     *
+     * @param string $query     SQL query to create table.
+     * @param string $tableName Logical name or identifier of the table.
+     *
+     * @throws CreateTableException
+     * @throws \InvalidArgumentException
+     */
+    private static function createTable($query, $tableName): void
     {
-        $success = empty($wpdbError);
-        if (!$success) {
-            $log = TbkFactory::createLogger();
-            $log->logError('Error creating transbank tables: '.$tableName);
-            $log->logError($wpdbError);
-
-            add_settings_error($tableName.'_table_error', '', 'Transbank Webpay: Error creando tabla '.$tableName.': '.$wpdbError, 'error');
-            settings_errors($tableName.'_table_error');
+        if (empty($query)) {
+            throw new \InvalidArgumentException('La query para crear la tabla ' . $tableName . ' es obligatoria.');
         }
-        return $success;
+
+        global $wpdb;
+        dbDelta($query);
+        $lastError = $wpdb->last_error;
+        if (!empty($lastError)) {
+            throw new CreateTableException('Error al crear la tabla '. $tableName .  ' en la base de datos: ' . $lastError);
+        }
     }
 
-    public static function createTables(): bool
+     /**
+     * Check if a needed tables exists.
+     *
+     * @throws CreateTableException
+     */
+    public static function checkTables(): void
     {
-        $successTransaction = static::createTableTransaction();
-        $successInscription = static::createTableInscription();
-        if ($successTransaction && $successInscription) {
-            update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
+        static::tableExists(TransactionRepository::TABLE_NAME);
+        static::tableExists(InscriptionRepository::TABLE_NAME);
+    }
+
+    private static function tableExists($tableName): void
+    {
+        global $wpdb;
+        $fullTableName = self::getBaseTableName($tableName);
+        $query = $wpdb->prepare("SHOW TABLES LIKE %s", $fullTableName);
+        $result = $wpdb->get_var($query);
+        if ($result === $fullTableName) {
+            return;
         }
-        return $successTransaction && $successInscription;
+        throw new CreateTableException("La tabla $fullTableName NO ha sido creada correctamente.");
+    }
+
+    public static function createTables()
+    {
+        static::createTableTransaction();
+        static::createTableInscription();
+        update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
     }
 
     public static function deleteTableByName($tableName)
@@ -136,19 +150,23 @@ class DatabaseTableInstaller
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
 
+    /**
+     * Create tables if is necessary.
+     *
+     * @throws CreateTableException
+     * @throws \InvalidArgumentException
+     */
     public static function createTableIfNeeded()
     {
         if (!static::isUpgraded()) {
-            return static::install();
+            static::install();
         }
-
-        return null;
     }
 
     public static function deleteTable()
     {
-        static::deleteTableByName(TbkFactory::createTransactionRepository()->getTableName());
-        static::deleteTableByName(TbkFactory::createInscriptionRepository()->getTableName());
+        static::deleteTableByName(self::getBaseTableName(TransactionRepository::TABLE_NAME));
+        static::deleteTableByName(self::getBaseTableName(InscriptionRepository::TABLE_NAME));
     }
 
     public static function deleteUnusedTable()
