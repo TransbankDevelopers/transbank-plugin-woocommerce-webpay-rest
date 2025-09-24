@@ -44,7 +44,7 @@ $hposHelper = new HposHelper();
 $hposExists = $hposHelper->checkIfHposExists();
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
-register_activation_hook(__FILE__, 'activate_transbank_module');
+register_activation_hook(__FILE__, 'activateTransbankModule');
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
@@ -226,7 +226,7 @@ function renderTransactionStatusMetaBox(int $orderId)
     (new Template())->render('admin/order/transaction-status.php', $viewData);
 }
 
-function activate_transbank_module()
+function activateTransbankModule()
 {
     try {
         DatabaseTableInstaller::createTableIfNeeded();
