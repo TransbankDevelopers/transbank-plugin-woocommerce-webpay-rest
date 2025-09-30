@@ -61,20 +61,20 @@ class MaskData
     private function mask(string $input, int $charsToKeep = 4): string
     {
         try{
-        if(is_null($input)) {
-            return '';
-        }
+            if(is_null($input)) {
+                return '';
+            }
 
-        $len = strlen($input);
+            $len = strlen($input);
             if ($len <= $charsToKeep * 2) {
                 return str_repeat("x", $len);
-        }
+            }
 
             $startString = substr($input, 0, $charsToKeep);
             $endString = substr($input, -$charsToKeep, $charsToKeep);
-        $charsToReplace = $len - (strlen($startString) + strlen($endString));
-        $replaceString = str_repeat("x", $charsToReplace);
-        return $startString . $replaceString . $endString;
+            $charsToReplace = $len - (strlen($startString) + strlen($endString));
+            $replaceString = str_repeat("x", $charsToReplace);
+            return $startString . $replaceString . $endString;
         } catch (\Throwable $e) {
             $this->logger->logError('Error al enmascarar: ' .$input . ' - ' . $e->getMessage());
             return $input;
@@ -122,11 +122,16 @@ class MaskData
      * @return string buy order masked.
      */
     public function maskBuyOrder($buyOrder)
-    {
-        if ($this->isIntegration) {
+    {   
+        try {
+            if ($this->isIntegration) {
+                return $buyOrder;
+            }
+            return $this->mask($buyOrder);
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar buyOrder: ' .$buyOrder . ' - ' . $e->getMessage());
             return $buyOrder;
         }
-        return $this->mask($buyOrder);
     }
 
     /**
@@ -138,12 +143,17 @@ class MaskData
      */
     public function maskSessionId($sessionId)
     {
-        if ($this->isIntegration) {
+        try {
+            if ($this->isIntegration) {
+                return $sessionId;
+            }
+            
+            $sessionIdPattern = 'wc:sessionId:';
+            return $this->maskWithPattern($sessionId, $sessionIdPattern);
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar sessionId: ' .$sessionId . ' - ' . $e->getMessage());
             return $sessionId;
         }
-
-        $sessionIdPattern = 'sessionId';
-        return $this->maskWithPattern($sessionId, $sessionIdPattern);
     }
 
     /**
@@ -189,7 +199,8 @@ class MaskData
                 }
             }
             return $newData;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar datos: ' . $e->getMessage());
             return $data;
         }
     }
