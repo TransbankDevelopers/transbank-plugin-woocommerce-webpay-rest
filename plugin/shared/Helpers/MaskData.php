@@ -1,6 +1,7 @@
 <?php
 
 namespace Transbank\Plugin\Helpers;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 
 class MaskData
 {
@@ -28,10 +29,12 @@ class MaskData
     ];
 
     protected $isIntegration;
+    protected $logger;
 
     public function __construct($isIntegration)
     {
         $this->isIntegration = $isIntegration;
+        $this->logger = TbkFactory::createLogger();
     }
 
     /**
