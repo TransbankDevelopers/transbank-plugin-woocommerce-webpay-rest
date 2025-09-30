@@ -60,25 +60,30 @@ class MaskData
      */
     private function mask(string $input, int $charsToKeep = 4): string
     {
-        try{
-            if(is_null($input)) {
-                return '';
+        $result = $input;
+        
+        try {
+            if (is_null($input)) {
+                $result = '';
+            } else {
+                $len = strlen($input);
+                
+                if ($len <= $charsToKeep * 2) {
+                    $result = str_repeat("x", $len);
+                } else {
+                    $startString = substr($input, 0, $charsToKeep);
+                    $endString = substr($input, -$charsToKeep, $charsToKeep);
+                    $charsToReplace = $len - (strlen($startString) + strlen($endString));
+                    $replaceString = str_repeat("x", $charsToReplace);
+                    $result = $startString . $replaceString . $endString;
+                }
             }
-
-            $len = strlen($input);
-            if ($len <= $charsToKeep * 2) {
-                return str_repeat("x", $len);
-            }
-
-            $startString = substr($input, 0, $charsToKeep);
-            $endString = substr($input, -$charsToKeep, $charsToKeep);
-            $charsToReplace = $len - (strlen($startString) + strlen($endString));
-            $replaceString = str_repeat("x", $charsToReplace);
-            return $startString . $replaceString . $endString;
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar: ' .$input . ' - ' . $e->getMessage());
-            return $input;
+            $this->logger->logError('Error al enmascarar: ' . $input . ' - ' . $e->getMessage());
+            $result = $input;
         }
+        
+        return $result;
     }
 
     /**
