@@ -98,19 +98,21 @@ class MaskData
      * Mask an input string maintaining a start pattern like wc:`pattern`.
      *
      * @param string $input An string to be masked.
-     * @param string $pattern A pattern to maintain, like `child` or `sessionId`.
+     * @param string $pattern A pattern to maintain on start.
      * @return string input masked.
      */
     private function maskWithPattern($input, $pattern)
     {
-        $regexPattern = "/(wc:($pattern:)?\w{2})\w+:(\w{2})/";
+        if ($input === '' || $input === null) {
+            return '';
+        }
+        $charsToKeep = 2;
+        if (strpos($input, $pattern) === 0) {
+            $rest = substr($input, strlen($pattern));
+            return $pattern . $this->mask($rest, $charsToKeep);
+        }
 
-        return preg_replace_callback($regexPattern, function ($matches) use ($input) {
-            $prefix = $matches[1];
-            $suffix = $matches[3];
-            $maskLength = strlen($input) - strlen($prefix) - strlen($suffix) - 1;
-            return $prefix . str_repeat('x', $maskLength) . $suffix;
-        }, $input);
+        return $this->mask($input);
     }
 
     /**
