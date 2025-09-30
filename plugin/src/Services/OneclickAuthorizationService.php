@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Services;
 
 use Exception;
 use Transbank\Webpay\Oneclick;
+use Transbank\Webpay\Options;
 use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\Plugin\Model\TbkTransaction;
@@ -44,7 +45,7 @@ class OneclickAuthorizationService extends ProductBaseService
             );
             $this->childCommerceCode = Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1;
         }
-
+        $this->options = $this->mallTransaction->getOptions();
         $this->dataMasker = new MaskData(isIntegration: $config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()
@@ -154,7 +155,7 @@ class OneclickAuthorizationService extends ProductBaseService
         $data->setChildBuyOrder($childBuyOrder);
         $data->setAmount($amount);
         $data->setOrderId($orderId);
-        $data->setEnvironment($this->getEnviroment());
+        $data->setEnvironment($this->getEnvironment());
         $data->setCommerceCode($this->getCommerceCode());
         $data->setChildCommerceCode($this->getChildCommerceCode());
         $data->setProduct(TbkConstants::TRANSACTION_WEBPAY_ONECLICK);
