@@ -55,32 +55,30 @@ class MaskData
      * Mask an input data, replacing some characters by 'x'.
      *
      * @param string $input data to be masked.
-     * @param string $pattern the pattern to maintain from original data.
      * @param int $charsToKeep number of original chars to keep at start and end.
      * @return string a string masked.
      */
-    private function mask($input, $pattern = null, $charsToKeep = 4)
+    private function mask(string $input, int $charsToKeep = 4): string
     {
+        try{
         if(is_null($input)) {
             return '';
         }
 
         $len = strlen($input);
-
-        if ($pattern != null) {
-            $patternPos = strpos($input, $pattern);
-            if ($patternPos === 0) {
-                $startString = $pattern;
-            } else {
-                $endString = $pattern;
-            }
+            if ($len <= $charsToKeep * 2) {
+                return str_repeat("x", $len);
         }
 
-        $startString = $startString ?? substr($input, 0, $charsToKeep);
-        $endString = $endString ?? substr($input, -$charsToKeep, $charsToKeep);
+            $startString = substr($input, 0, $charsToKeep);
+            $endString = substr($input, -$charsToKeep, $charsToKeep);
         $charsToReplace = $len - (strlen($startString) + strlen($endString));
         $replaceString = str_repeat("x", $charsToReplace);
         return $startString . $replaceString . $endString;
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar: ' .$input . ' - ' . $e->getMessage());
+            return $input;
+        }
     }
 
     /**
