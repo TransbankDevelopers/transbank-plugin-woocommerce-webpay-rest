@@ -1,6 +1,7 @@
 <?php
 
 namespace Transbank\Plugin\Helpers;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 
 class MaskData
 {
@@ -9,6 +10,8 @@ class MaskData
     private const ASSOCIATIVE_ARRAY = 1;
     private const OBJECT = 2;
     private const NO_ITERABLE = 3;
+    private const BLOCKS_TO_KEEP = 2;
+    private const START_POSITION = 0;
     private $keysToMask = [
         'child_commerce_code' => 'mask',
         'parentBuyOrder' => 'maskBuyOrder',
@@ -28,10 +31,12 @@ class MaskData
     ];
 
     protected $isIntegration;
+    protected $logger;
 
     public function __construct($isIntegration)
     {
         $this->isIntegration = $isIntegration;
+        $this->logger = TbkFactory::createLogger();
     }
 
     /**
@@ -52,32 +57,35 @@ class MaskData
      * Mask an input data, replacing some characters by 'x'.
      *
      * @param string $input data to be masked.
-     * @param string $pattern the pattern to maintain from original data.
      * @param int $charsToKeep number of original chars to keep at start and end.
      * @return string a string masked.
      */
-    private function mask($input, $pattern = null, $charsToKeep = 4)
+    private function mask(string $input, int $charsToKeep = 4): string
     {
-        if(is_null($input)) {
-            return '';
-        }
+        $result = $input;
 
-        $len = strlen($input);
-
-        if ($pattern != null) {
-            $patternPos = strpos($input, $pattern);
-            if ($patternPos === 0) {
-                $startString = $pattern;
+        try {
+            if (is_null($input)) {
+                $result = '';
             } else {
-                $endString = $pattern;
+                $len = strlen($input);
+                
+                if ($len <= $charsToKeep * self::BLOCKS_TO_KEEP) {
+                    $result = str_repeat("x", $len);
+                } else {
+                    $startString = substr($input, self::START_POSITION, $charsToKeep);
+                    $endString = substr($input, -$charsToKeep, $charsToKeep);
+                    $charsToReplace = $len - (strlen($startString) + strlen($endString));
+                    $replaceString = str_repeat("x", $charsToReplace);
+                    $result = $startString . $replaceString . $endString;
+                }
             }
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar: ' . $input . ' - ' . $e->getMessage());
+            $result = $input;
         }
-
-        $startString = $startString ?? substr($input, 0, $charsToKeep);
-        $endString = $endString ?? substr($input, -$charsToKeep, $charsToKeep);
-        $charsToReplace = $len - (strlen($startString) + strlen($endString));
-        $replaceString = str_repeat("x", $charsToReplace);
-        return $startString . $replaceString . $endString;
+        
+        return $result;
     }
 
     /**
@@ -97,19 +105,21 @@ class MaskData
      * Mask an input string maintaining a start pattern like wc:`pattern`.
      *
      * @param string $input An string to be masked.
-     * @param string $pattern A pattern to maintain, like `child` or `sessionId`.
+     * @param string $pattern A pattern to maintain on start.
      * @return string input masked.
      */
     private function maskWithPattern($input, $pattern)
     {
-        $regexPattern = "/(wc:($pattern:)?\w{2})\w+:(\w{2})/";
+        if ($input === '' || $input === null) {
+            return '';
+        }
+        $charsToKeep = 2;
+        if (strpos($input, $pattern) === self::START_POSITION) {
+            $rest = substr($input, strlen($pattern));
+            return $pattern . $this->mask($rest, $charsToKeep);
+        }
 
-        return preg_replace_callback($regexPattern, function ($matches) use ($input) {
-            $prefix = $matches[1];
-            $suffix = $matches[3];
-            $maskLength = strlen($input) - strlen($prefix) - strlen($suffix) - 1;
-            return $prefix . str_repeat('x', $maskLength) . $suffix;
-        }, $input);
+        return $this->mask($input);
     }
 
     /**
@@ -119,11 +129,16 @@ class MaskData
      * @return string buy order masked.
      */
     public function maskBuyOrder($buyOrder)
-    {
-        if ($this->isIntegration) {
+    {   
+        try {
+            if ($this->isIntegration) {
+                return $buyOrder;
+            }
+            return $this->mask($buyOrder);
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar buyOrder: ' .$buyOrder . ' - ' . $e->getMessage());
             return $buyOrder;
         }
-        return $this->mask($buyOrder);
     }
 
     /**
@@ -135,12 +150,17 @@ class MaskData
      */
     public function maskSessionId($sessionId)
     {
-        if ($this->isIntegration) {
+        try {
+            if ($this->isIntegration) {
+                return $sessionId;
+            }
+            
+            $sessionIdPattern = 'wc:sessionId:';
+            return $this->maskWithPattern($sessionId, $sessionIdPattern);
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar sessionId: ' .$sessionId . ' - ' . $e->getMessage());
             return $sessionId;
         }
-
-        $sessionIdPattern = 'sessionId';
-        return $this->maskWithPattern($sessionId, $sessionIdPattern);
     }
 
     /**
@@ -186,7 +206,8 @@ class MaskData
                 }
             }
             return $newData;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $this->logger->logError('Error al enmascarar datos: ' . $e->getMessage());
             return $data;
         }
     }
