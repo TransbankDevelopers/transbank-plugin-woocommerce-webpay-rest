@@ -10,6 +10,8 @@ class MaskData
     private const ASSOCIATIVE_ARRAY = 1;
     private const OBJECT = 2;
     private const NO_ITERABLE = 3;
+    private const BLOCKS_TO_KEEP = 2;
+    private const START_POSITION = 0;
     private $keysToMask = [
         'child_commerce_code' => 'mask',
         'parentBuyOrder' => 'maskBuyOrder',
@@ -61,17 +63,17 @@ class MaskData
     private function mask(string $input, int $charsToKeep = 4): string
     {
         $result = $input;
-        
+
         try {
             if (is_null($input)) {
                 $result = '';
             } else {
                 $len = strlen($input);
                 
-                if ($len <= $charsToKeep * 2) {
+                if ($len <= $charsToKeep * self::BLOCKS_TO_KEEP) {
                     $result = str_repeat("x", $len);
                 } else {
-                    $startString = substr($input, 0, $charsToKeep);
+                    $startString = substr($input, self::START_POSITION, $charsToKeep);
                     $endString = substr($input, -$charsToKeep, $charsToKeep);
                     $charsToReplace = $len - (strlen($startString) + strlen($endString));
                     $replaceString = str_repeat("x", $charsToReplace);
@@ -112,7 +114,7 @@ class MaskData
             return '';
         }
         $charsToKeep = 2;
-        if (strpos($input, $pattern) === 0) {
+        if (strpos($input, $pattern) === self::START_POSITION) {
             $rest = substr($input, strlen($pattern));
             return $pattern . $this->mask($rest, $charsToKeep);
         }
