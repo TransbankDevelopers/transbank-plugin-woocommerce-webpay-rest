@@ -49,7 +49,7 @@ class MaskData
     private function maskWithFormat($input)
     {
         return preg_replace_callback('/(?<=-).+(?=-)/', function ($matches) {
-            return str_repeat('x', strlen($matches[0]));
+            return str_repeat('*', strlen($matches[0]));
         }, $input);
     }
 
@@ -71,12 +71,12 @@ class MaskData
                 $len = strlen($input);
                 
                 if ($len <= $charsToKeep * self::BLOCKS_TO_KEEP) {
-                    $result = str_repeat("x", $len);
+                    $result = str_repeat("*", $len);
                 } else {
                     $startString = substr($input, self::START_POSITION, $charsToKeep);
                     $endString = substr($input, -$charsToKeep, $charsToKeep);
                     $charsToReplace = $len - (strlen($startString) + strlen($endString));
-                    $replaceString = str_repeat("x", $charsToReplace);
+                    $replaceString = str_repeat("*", $charsToReplace);
                     $result = $startString . $replaceString . $endString;
                 }
             }
@@ -96,7 +96,7 @@ class MaskData
     private function maskEmail($email)
     {
         return preg_replace_callback('/^(.{1,4})[^@]*(@.*)$/', function ($match) {
-            return $match[1] . str_repeat('x', strlen($match[0]) - strlen($match[1]) - strlen($match[2])) . $match[2];
+            return $match[1] . str_repeat('*', strlen($match[0]) - strlen($match[1]) - strlen($match[2])) . $match[2];
         }, $email);
     }
 
