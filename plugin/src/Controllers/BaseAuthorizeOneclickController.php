@@ -68,7 +68,7 @@ abstract class BaseAuthorizeOneclickController
         $responseCode = $details?->getResponseCode();
         $responseJson = json_encode($authorizeResponse);
 
-        $this->log->logError("Transacción con autorización rechazada", 
+        $this->log->logError("Transacción con autorización rechazada",
             ['parentBuyOrder' => $authorizeResponse->getBuyOrder(),
             'responseCode' => $responseCode]);
 
