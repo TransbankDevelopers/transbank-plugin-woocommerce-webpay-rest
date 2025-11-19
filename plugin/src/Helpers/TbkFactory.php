@@ -96,7 +96,6 @@ class TbkFactory
     public static function createEcommerceService()
     {
         return new EcommerceService(
-            static::createLogger(),
             static::getWebpayplusConfig(),
             static::getOneclickConfig()
         );
@@ -105,7 +104,6 @@ class TbkFactory
     public static function createWebpayService()
     {
         return new WebpayService(
-            static::createLogger(),
             static::getWebpayplusConfig()
         );
     }
@@ -113,7 +111,6 @@ class TbkFactory
     public static function createOneclickInscriptionService()
     {
         return new OneclickInscriptionService(
-            static::createLogger(),
             static::getOneclickConfig()
         );
     }
@@ -121,7 +118,6 @@ class TbkFactory
     public static function createOneclickAuthorizationService()
     {
         return new OneclickAuthorizationService(
-            static::createLogger(),
             static::getOneclickConfig()
         );
     }
