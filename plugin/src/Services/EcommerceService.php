@@ -5,29 +5,15 @@ namespace Transbank\WooCommerce\WebpayRest\Services;
 use DateTime;
 use DateTimeZone;
 use WC_Order;
-use Transbank\Plugin\Helpers\ILogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
-use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
 
 class EcommerceService
 {
 
-    /**
-     * @var ILogger
-     */
-    protected $log;
-    /**
-     * @var MaskData
-     */
-    protected $webpayDataMasker;
-    /**
-     * @var MaskData
-     */
-    protected $oneclickDataMasker;
     /**
      * @var WebpayplusConfig
      */
@@ -38,16 +24,12 @@ class EcommerceService
     protected $oneclickConfig;
 
     public function __construct(
-            $log,
             $webpayConfig,
             $oneclickConfig
         )
     {
-        $this->log = $log;
         $this->webpayConfig = $webpayConfig;
         $this->oneclickConfig = $oneclickConfig;
-        $this->webpayDataMasker = new MaskData($webpayConfig->isIntegration());
-        $this->oneclickDataMasker = new MaskData($oneclickConfig->isIntegration());
     }
 
     /**
@@ -154,11 +136,6 @@ class EcommerceService
             $webpayTransaction->token
         );
 
-        $maskedBuyOrder = $this->webpayDataMasker->maskBuyOrder($commitResponse->getBuyOrder());
-        $this->log->logInfo(
-            'Transacción con commit exitoso en Transbank y guardado => OC: ' . $maskedBuyOrder
-        );
-
         $this->setAfterPaymentOrderStatus($wooCommerceOrder, $this->webpayConfig->getStatusAfterPayment());
     }
 
@@ -184,9 +161,6 @@ class EcommerceService
                 $message,
                 $webpayTransaction->token
             );
-
-            $this->log->logError('C.5. Respuesta de tbk commit fallido => token: ' . $webpayTransaction->token);
-            $this->log->logError(json_encode($commitResponse));
         }
     }
 
