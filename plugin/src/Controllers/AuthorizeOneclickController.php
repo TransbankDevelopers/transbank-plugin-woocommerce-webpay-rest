@@ -95,7 +95,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
         $transaction = null;
         $orderNotes = '';
         try {
-            $this->log->logInfo('[Oneclick] Checkout: pagando con el token ID #' . $paymentTokenId);
+            $this->log->logInfo('Iniciando pago con Oneclick', ['tokenId' => $paymentTokenId]);
 
             $paymentToken = $this->getWcPaymentToken($paymentTokenId);
             $amount = $this->ecommerceService->getTotalAmountFromOrder($order);
@@ -118,7 +118,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
             $order->add_order_note($orderNotes);
 
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
-            $this->log->logInfo('Se ha autorizado el pago correctamente para la orden #' . $order->get_id());
+            $this->log->logInfo('Se ha autorizado el pago correctamente', ['orderId' => $order->get_id()]);
 
             return [
                 'result' => 'success',
@@ -127,7 +127,10 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
         } catch (\Exception $e) {
             $this->shouldThrowException = true;
             $this->ecommerceService->setOneclickOrderAsFailed($order, $orderNotes);
-            $this->log->logError('Error al autorizar: ' . $e->getMessage());
+            $this->log->logError('Error al autorizar', [
+                'orderId' => $order->get_id(),
+                'error' => $e->getMessage(),
+            ]);
             if ($transaction) {
                 $this->transactionService->updateWithAuthorizeResponseError(
                     $transaction->getId(),
