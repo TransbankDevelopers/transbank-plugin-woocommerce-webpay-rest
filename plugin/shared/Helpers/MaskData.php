@@ -15,8 +15,11 @@ class MaskData
     private $keysToMask = [
         'child_commerce_code' => 'mask',
         'parentBuyOrder' => 'maskBuyOrder',
+        'buyOrderMall' => 'maskBuyOrder',
         'childBuyOrder' => 'maskBuyOrder',
+        'buyOrderStore' => 'maskBuyOrder',
         'username' => 'mask',
+        'userName' => 'mask',
         'buyOrder' => 'maskBuyOrder',
         'commerceCode' => 'mask',
         'commerce_code' => 'mask',
