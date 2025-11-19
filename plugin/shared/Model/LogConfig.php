@@ -5,8 +5,11 @@ namespace Transbank\Plugin\Model;
 class LogConfig  {
     public $logDir = null;
 
-    public function __construct($logDir) {
+    private $maskingEnabled = false;
+
+    public function __construct($logDir, $maskingEnabled) {
         $this->logDir = $logDir;
+        $this->maskingEnabled = $maskingEnabled;
     }
 
     public function getLogDir()
@@ -17,5 +20,10 @@ class LogConfig  {
     public function setLogDir($logDir)
     {
         $this->logDir = $logDir;
+    }
+
+    public function maskingEnabled()
+    {
+        return $this->maskingEnabled;
     }
 }
