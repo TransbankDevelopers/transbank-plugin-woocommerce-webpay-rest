@@ -21,13 +21,13 @@ class StartOneclickController
 
     /**
      * Constructor initializes the logger.
-     */
+    */
     public function __construct()
     {
-        $this->log = TbkFactory::createLogger();
         $this->inscriptionService = TbkFactory::createInscriptionService();
         $this->oneclickInscriptionService = TbkFactory::createOneclickInscriptionService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
+        $this->log = TbkFactory::createOneclickLogger();
     }
 
     /**
@@ -63,6 +63,10 @@ class StartOneclickController
             $orderId,
             $from
         );
+        $this->log->logInfo('Iniciando inscripción', [
+            'username' => $inscription->username,
+            'email' => $inscription->email
+        ]);
         $response = $this->oneclickInscriptionService->startInscription(
             $inscription->username,
             $inscription->email,
