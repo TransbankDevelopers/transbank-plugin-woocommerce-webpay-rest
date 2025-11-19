@@ -59,7 +59,7 @@ class TransactionStatusController
         $params = ['orderId' => $orderId, 'buyOrder' => $buyOrder, 'token' => $token];
 
         $this->logger->logDebug("Request: method -> $requestMethod");
-        $this->logger->logDebug('Request: payload -> ' . json_encode($params));
+        $this->logger->logDebug('Request: payload', $params);
 
         try {
             $transaction = $this->transactionService->findFirstByOrderId($orderId);
@@ -76,8 +76,9 @@ class TransactionStatusController
 
             wp_send_json($response['body'], $response['code']);
         } catch (\Throwable $e) {
-            $this->logger->logError($e->getMessage());
-            $response['body']['message'] = $e->getMessage();
+            $errorMessage = ErrorUtil::getStatusErrorMessage($e);
+            $this->logger->logError($errorMessage);
+            $response['body']['message'] = $errorMessage;
             wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
@@ -105,9 +106,11 @@ class TransactionStatusController
         }
 
         $statusResponse = $this->getStatusForOneclickTransaction($transactionBuyOrder);
-
+        $oneclickLogger = TbkFactory::createOneclickLogger();
+        $formattedResponse = TbkResponseUtil::getOneclickStatusFormattedResponse($statusResponse);
+        $oneclickLogger->logDebug('Estado de la transacción Oneclick', $formattedResponse);
         return [
-            'body' => TbkResponseUtil::getOneclickStatusFormattedResponse($statusResponse),
+            'body' => $formattedResponse,
             'code' => self::HTTP_OK
         ];
     }
@@ -126,9 +129,11 @@ class TransactionStatusController
         }
 
         $statusResponse = $this->getStatusForWebpayTransaction($transactionToken);
-
+        $webpayLogger = TbkFactory::createWebpayPlusLogger();
+        $formattedResponse = TbkResponseUtil::getWebpayStatusFormattedResponse($statusResponse);
+        $webpayLogger->logDebug('Estado de la transacción Webpay Plus', $formattedResponse);
         return [
-            'body' => TbkResponseUtil::getWebpayStatusFormattedResponse($statusResponse),
+            'body' => $formattedResponse,
             'code' => self::HTTP_OK
         ];
     }
