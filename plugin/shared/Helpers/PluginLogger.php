@@ -48,6 +48,9 @@ final class PluginLogger implements ILogger
         $this->logger = new Logger('transbank');
         $this->logger->setTimezone($ecommerceTz);
         $this->logger->pushHandler($stream);
+
+        $masker = new MaskData($this->config->maskingEnabled());
+        $this->logger->pushProcessor(new LoggerMaskProcessor($masker));
     }
 
     private function getLogFilePath(): string
@@ -74,19 +77,19 @@ final class PluginLogger implements ILogger
         return $this->config;
     }
 
-    public function logDebug($msg)
+    public function logDebug(string $msg, array $context = [])
     {
-        $this->logger->debug($msg);
+        $this->logger->debug($msg, $context);
     }
 
-    public function logInfo($msg)
+    public function logInfo(string $msg, array $context = [])
     {
-        $this->logger->info($msg);
+        $this->logger->info($msg, $context);
     }
 
-    public function logError($msg)
+    public function logError(string $msg, array $context = [])
     {
-        $this->logger->error($msg);
+        $this->logger->error($msg, $context);
     }
 
     public function getInfo()
