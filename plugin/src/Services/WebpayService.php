@@ -17,7 +17,6 @@ use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
-use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\TbkConstants;
 
 class WebpayService extends ProductBaseService
@@ -30,10 +29,8 @@ class WebpayService extends ProductBaseService
 
 
     public function __construct(
-        $log,
         $config,
     ) {
-        $this->log = $log;
         if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->webpayplusTransaction = WebpayPlusTransaction::buildForProduction(
                 $config->getApikey(),
@@ -46,7 +43,6 @@ class WebpayService extends ProductBaseService
             );
         }
         $this->options = $this->webpayplusTransaction->getOptions();
-        $this->dataMasker = new MaskData($config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()
         ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
@@ -69,14 +65,7 @@ class WebpayService extends ProductBaseService
             $buyOrder = $this->generateBuyOrder($orderId);
             $randomNumber = uniqid();
             $sessionId = 'wc:sessionId:' . $randomNumber . ':' . $orderId;
-            $txDate = date('d-m-Y');
-            $txTime = date('H:i:s');
-            $this->log->logInfo("Creando transacción Webpay Plus. [Datos]:");
-            $this->log->logInfo("amount: {$amount} sessionId: {$sessionId} buyOrder: {$buyOrder} returnUrl: {$returnUrl} txDate: {$txDate} txTime: {$txTime}");
             $createResponse = $this->webpayplusTransaction->create($buyOrder, $sessionId, $amount, $returnUrl);
-            $this->log->logInfo("Transacción creada. [Respuesta]:");
-            $this->log->logInfo(json_encode($createResponse));
-
             if (isset($createResponse) && isset($createResponse->url) && isset($createResponse->token)) {
                 $result = new TbkTransaction();
                 $result->setToken($createResponse->token);
@@ -112,7 +101,6 @@ class WebpayService extends ProductBaseService
     public function commitTransaction(string $token): TransactionCommitResponse
     {
         try {
-            $this->log->logInfo("commitTransaction : token: {$token}");
             if (!isset($token)) {
                 throw new CommitWebpayException('El token webpay es requerido', $token);
             }
