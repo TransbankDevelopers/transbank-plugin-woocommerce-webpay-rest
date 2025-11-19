@@ -2,11 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Exception;
 use GuzzleHttp\Exception\GuzzleException;
-use Transbank\Plugin\Helpers\ErrorUtil;
-use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
 use Transbank\Webpay\Options;
@@ -114,52 +110,26 @@ class WebpayService extends ProductBaseService
     /**
      * @param $token
      *
-     * @throws StatusWebpayException
+     * @throws \Transbank\Webpay\WebpayPlus\Exceptions\TransactionStatusException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionStatusResponse
      */
     public function status($token)
     {
-        try {
-            return $this->webpayplusTransaction->status($token);
-        } catch (Exception $e) {
-            $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
-
-            if (ErrorUtil::isMaxTimeError($e)) {
-                $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
-            }
-
-            if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
-            }
-            throw new StatusWebpayException($errorMessage, $token, $e);
-        }
+        return $this->webpayplusTransaction->status($token);
     }
 
     /**
      * @param $token
      * @param $amount
      *
-     * @throws RefundWebpayException
+     * @throws \Transbank\Webpay\WebpayPlus\Exceptions\TransactionRefundException
      *
      * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse
      */
     public function refund($token, $amount)
     {
-        $errorMessageBase = 'Ocurrió un error al realizar la anulación en Webpay. ';
-        $refundInstructions = 'Intente realizar la anulación mediante su portal privado de Transbank.
-          Para mayor información del error revise los logs de la transacción.';
-        try {
-            $response = $this->webpayplusTransaction->refund($token, $amount);
-            if (($response->getType() === 'REVERSED' || $response->getType() === 'NULLIFIED') && (int) $response->getResponseCode() === 0) {
-                $this->log->logInfo('Rembolso realizado correctamente en Transbank');
-                return $response;
-            }
-            $errorMessage = 'Código de respuesta Transbank: ' . $response->getResponseCode();
-            throw new RefundWebpayException($errorMessage, $token);
-        } catch (Exception $e) {
-            $errorMessage = $errorMessageBase . $e->getMessage() . '. ' . $refundInstructions;
-            throw new RefundWebpayException($errorMessage, $token, $e);
-        }
+            return $this->webpayplusTransaction->refund($token, $amount);
     }
 }
