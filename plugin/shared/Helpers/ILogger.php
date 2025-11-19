@@ -3,9 +3,10 @@
 namespace Transbank\Plugin\Helpers;
 
 interface ILogger {
-    function logInfo($str);
-    function logError($str);
-    function logDebug($str);
+    function logInfo(string $msg, array $context = []);
+    function logError(string $msg, array $context = []);
+    function logDebug(string $msg, array $context = []);
     function getInfo();
     function getLogDetail($filename);
 }
+
