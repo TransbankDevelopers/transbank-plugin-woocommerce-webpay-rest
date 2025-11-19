@@ -1,7 +1,6 @@
 <?php
 
 namespace Transbank\Plugin\Helpers;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 
 class MaskData
 {
@@ -33,13 +32,11 @@ class MaskData
         'sessionId' => 'maskSessionId'
     ];
 
-    protected $isIntegration;
-    protected $logger;
+    protected $shouldMask;
 
-    public function __construct($isIntegration)
+    public function __construct($shouldMask)
     {
-        $this->isIntegration = $isIntegration;
-        $this->logger = TbkFactory::createLogger();
+        $this->shouldMask = $shouldMask;
     }
 
     /**
@@ -84,7 +81,6 @@ class MaskData
                 }
             }
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar: ' . $input . ' - ' . $e->getMessage());
             $result = $input;
         }
         
@@ -134,12 +130,11 @@ class MaskData
     public function maskBuyOrder($buyOrder)
     {   
         try {
-            if ($this->isIntegration) {
+            if (!$this->shouldMask) {
                 return $buyOrder;
             }
             return $this->mask($buyOrder);
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar buyOrder: ' .$buyOrder . ' - ' . $e->getMessage());
             return $buyOrder;
         }
     }
@@ -154,14 +149,13 @@ class MaskData
     public function maskSessionId($sessionId)
     {
         try {
-            if ($this->isIntegration) {
+            if (!$this->shouldMask) {
                 return $sessionId;
             }
             
             $sessionIdPattern = 'wc:sessionId:';
             return $this->maskWithPattern($sessionId, $sessionIdPattern);
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar sessionId: ' .$sessionId . ' - ' . $e->getMessage());
             return $sessionId;
         }
     }
@@ -187,7 +181,7 @@ class MaskData
     public function maskData($data)
     {
         try {
-            if ($this->isIntegration) {
+            if (!$this->shouldMask) {
                 return $data;
             }
             $newData = $this->copyWithSubArray($data);
@@ -210,7 +204,6 @@ class MaskData
             }
             return $newData;
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar datos: ' . $e->getMessage());
             return $data;
         }
     }
