@@ -36,7 +36,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             $this->get_option('webpay_rest_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
 
         $this->plugin_url = plugins_url('/', __FILE__);
-        $this->log = TbkFactory::createLogger();
+        $this->log = TbkFactory::createWebpayPlusLogger();
 
         $this->supports = [
             'products',
