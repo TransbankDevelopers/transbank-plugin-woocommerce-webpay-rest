@@ -52,9 +52,10 @@ class RefundOneclickController
                 $webpayTransaction->child_buy_order,
                 round($amount)
             );
-            $this->log->logInfo('Reembolso exitoso', ['orderId' => $orderId]);
+            $this->log->logInfo('Reembolso exitoso en Transbank', ['orderId' => $orderId]);
             $this->transactionService->updateWithRefundResponse($webpayTransaction->id, $response);
             $this->ecommerceService->addRefundOrderNote($response, $order, $amount);
+            $this->log->logInfo('Reembolso actualizado en Woocommerce', ['orderId' => $orderId]);
             $jsonResponse = json_encode($response, JSON_PRETTY_PRINT);
             do_action('transbank_oneclick_refund_completed', $order, $webpayTransaction, $jsonResponse);
             return true;
