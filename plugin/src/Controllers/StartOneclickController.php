@@ -64,7 +64,7 @@ class StartOneclickController
             $from
         );
         $this->log->logInfo('Iniciando inscripción', [
-            'username' => $inscription->username,
+            'userName' => $inscription->username,
             'email' => $inscription->email
         ]);
         $response = $this->oneclickInscriptionService->startInscription(
