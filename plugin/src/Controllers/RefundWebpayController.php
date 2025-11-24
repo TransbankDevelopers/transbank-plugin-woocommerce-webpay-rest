@@ -4,17 +4,14 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Throwable;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
 class RefundWebpayController
 {
-    /**
-     * @var ILogger
-     */
-    protected $log;
+    protected PluginLogger $log;
     protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;

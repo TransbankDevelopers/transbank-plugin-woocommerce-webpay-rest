@@ -3,7 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
@@ -36,11 +36,7 @@ class CommitWebpayController
         13 => 'El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.',
     ];
 
-
-    /**
-     * @var ILogger
-     */
-    protected $log;
+    protected PluginLogger $log;
     protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;

@@ -9,12 +9,12 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
 abstract class BaseAuthorizeOneclickController
 {
-    protected ILogger $log;
+    protected PluginLogger $log;
     protected TransactionService $transactionService;
     protected OneclickAuthorizationService $oneclickAuthorizationService;
     protected EcommerceService $ecommerceService;

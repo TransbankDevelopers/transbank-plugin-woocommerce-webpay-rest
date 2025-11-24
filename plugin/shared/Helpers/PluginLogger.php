@@ -8,7 +8,7 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
 use Transbank\Plugin\Model\LogConfig;
 
-final class PluginLogger implements ILogger
+final class PluginLogger
 {
 
     const CACHE_LOG_NAME = 'transbank_log_file_name';

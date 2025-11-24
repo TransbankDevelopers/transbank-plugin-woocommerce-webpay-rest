@@ -9,14 +9,14 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
 
 class FinishOneclickController
 {
-    protected ILogger $log;
+    protected PluginLogger $log;
     protected InscriptionService $inscriptionService;
     protected OneclickInscriptionService $oneclickInscriptionService;
     protected EcommerceService $ecommerceService;

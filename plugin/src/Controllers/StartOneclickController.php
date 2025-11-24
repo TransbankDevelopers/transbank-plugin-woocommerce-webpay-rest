@@ -8,13 +8,13 @@ use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
 class StartOneclickController
 {
     const WOOCOMMERCE_API_RETURN_ADD_PAYMENT = 'wc_gateway_transbank_oneclick_return_payments';
-    protected ILogger $log;
+    protected PluginLogger $log;
     protected InscriptionService $inscriptionService;
     protected OneclickInscriptionService $oneclickInscriptionService;
     protected EcommerceService $ecommerceService;

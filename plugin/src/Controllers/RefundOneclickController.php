@@ -5,13 +5,13 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use Throwable;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
 class RefundOneclickController
 {
-    protected ILogger $log;
+    protected PluginLogger $log;
     protected TransactionService $transactionService;
     protected OneclickAuthorizationService $oneclickAuthorizationService;
     protected EcommerceService $ecommerceService;

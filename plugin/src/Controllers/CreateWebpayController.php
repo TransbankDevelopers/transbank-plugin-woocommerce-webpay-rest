@@ -5,7 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use Exception;
 use Throwable;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
@@ -17,10 +17,7 @@ use WC_Order;
 
 class CreateWebpayController
 {
-    /**
-     * @var ILogger
-     */
-    protected $log;
+    protected PluginLogger $log;
     protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
