@@ -49,7 +49,7 @@ final class PluginLogger implements ILogger
         $this->logger->setTimezone($ecommerceTz);
         $this->logger->pushHandler($stream);
 
-        $masker = new MaskData($this->config->maskingEnabled());
+        $masker = new MaskData($this->config->isMaskingEnabled());
         $this->logger->pushProcessor(new LoggerMaskProcessor($masker));
     }
 
