@@ -13,23 +13,20 @@ class MaskData
     private const START_POSITION = 0;
     private $keysToMask = [
         'child_commerce_code' => 'mask',
-        'parentBuyOrder' => 'maskBuyOrder',
-        'buyOrderMall' => 'maskBuyOrder',
-        'childBuyOrder' => 'maskBuyOrder',
-        'buyOrderStore' => 'maskBuyOrder',
-        'username' => 'mask',
-        'userName' => 'mask',
-        'buyOrder' => 'maskBuyOrder',
-        'commerceCode' => 'mask',
+        'parent_buy_order' => 'maskBuyOrder',
+        'buy_order_mall' => 'maskBuyOrder',
+        'child_buy_order' => 'maskBuyOrder',
+        'buy_order_store' => 'maskBuyOrder',
+        'user_name' => 'mask',
+        'buy_order' => 'maskBuyOrder',
         'commerce_code' => 'mask',
         'email' => 'maskEmail',
-        'tbkUser' => 'maskWithFormat',
+        'tbk_user' => 'maskWithFormat',
         'buy_order' => 'maskBuyOrder',
         'session_id' => 'maskSessionId',
-        'TBK_ORDEN_COMPRA' => 'maskBuyOrder',
-        'TBK_ID_SESION' => 'maskSessionId',
-        'params' => 'mask',
-        'sessionId' => 'maskSessionId'
+        'tbk_orden_compra' => 'maskBuyOrder',
+        'tbk_id_sesion' => 'maskSessionId',
+        'params' => 'mask'
     ];
 
     protected $shouldMask;
@@ -243,10 +240,11 @@ class MaskData
      */
     private function getMaskedValue($key, $value)
     {
-        $keyExists = array_key_exists($key, $this->keysToMask);
+        $normalizedKey = $this->normalizeKey($key);
+        $keyExists = array_key_exists($normalizedKey, $this->keysToMask);
 
         if ($keyExists) {
-            return call_user_func([$this, $this->keysToMask[$key]], $value);
+            return call_user_func([$this, $this->keysToMask[$normalizedKey]], $value);
         }
 
         return $value;
@@ -323,5 +321,17 @@ class MaskData
             }
         }
         return $array;
+    }
+
+    /**
+     * Normalizes a key by converting camelCase to snake_case.
+     *
+     * @param string $key the key to normalize.
+     * @return string normalized key.
+     */
+    private function normalizeKey(string $key): string
+    {
+        $key = preg_replace('/([a-z])([A-Z])/', '$1_$2', $key);
+        return strtolower($key);
     }
 }
