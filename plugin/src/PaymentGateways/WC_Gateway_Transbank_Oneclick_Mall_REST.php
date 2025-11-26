@@ -75,7 +75,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->init_form_fields();
         $this->init_settings();
 
-        $this->logger = TbkFactory::createLogger();
+        $this->logger = TbkFactory::createOneclickLogger();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
 

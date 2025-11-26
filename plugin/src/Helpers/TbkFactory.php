@@ -25,12 +25,26 @@ define(
 
 class TbkFactory
 {
+
     const WEBPAY_OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
     const ONECLICK_OPTION_KEY = 'woocommerce_transbank_oneclick_mall_rest_settings';
-    public static function createLogger()
+
+    public static function createLogger(bool $shouldMask = true)
     {
-        $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS . '/logs');
+        $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS . '/logs', $shouldMask);
         return new PluginLogger($config);
+    }
+
+    public static function createOneclickLogger()
+    {
+        $shouldMask = !static::getOneclickConfig()->isIntegration();
+        return static::createLogger($shouldMask);
+    }
+
+    public static function createWebpayPlusLogger()
+    {
+        $shouldMask = !static::getWebpayplusConfig()->isIntegration();
+        return static::createLogger($shouldMask);
     }
 
     public static function getWebpayplusConfig(): WebpayplusConfig
@@ -82,7 +96,6 @@ class TbkFactory
     public static function createEcommerceService()
     {
         return new EcommerceService(
-            static::createLogger(),
             static::getWebpayplusConfig(),
             static::getOneclickConfig()
         );
@@ -91,7 +104,6 @@ class TbkFactory
     public static function createWebpayService()
     {
         return new WebpayService(
-            static::createLogger(),
             static::getWebpayplusConfig()
         );
     }
@@ -99,7 +111,6 @@ class TbkFactory
     public static function createOneclickInscriptionService()
     {
         return new OneclickInscriptionService(
-            static::createLogger(),
             static::getOneclickConfig()
         );
     }
@@ -107,7 +118,6 @@ class TbkFactory
     public static function createOneclickAuthorizationService()
     {
         return new OneclickAuthorizationService(
-            static::createLogger(),
             static::getOneclickConfig()
         );
     }

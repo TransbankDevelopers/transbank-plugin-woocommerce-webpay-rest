@@ -2,18 +2,12 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Exception;
 use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
-use Transbank\Plugin\Helpers\MaskData;
-use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\Webpay\Oneclick\MallTransaction;
-use Transbank\Plugin\Exceptions\Oneclick\AuthorizeOneclickException;
-use Transbank\Plugin\Exceptions\Oneclick\RefundOneclickException;
-use Transbank\Plugin\Exceptions\Oneclick\StatusOneclickException;
 
 class OneclickAuthorizationService extends ProductBaseService
 {
@@ -28,10 +22,8 @@ class OneclickAuthorizationService extends ProductBaseService
     private $childCommerceCode;
 
     public function __construct(
-        $log,
         $config
     ) {
-        $this->log = $log;
         if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->mallTransaction = MallTransaction::buildForProduction(
                 $config->getApikey(),
@@ -46,7 +38,6 @@ class OneclickAuthorizationService extends ProductBaseService
             $this->childCommerceCode = Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1;
         }
         $this->options = $this->mallTransaction->getOptions();
-        $this->dataMasker = new MaskData(isIntegration: $config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()
         ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
@@ -62,88 +53,49 @@ class OneclickAuthorizationService extends ProductBaseService
      * @param $childBuyOrder
      * @param $amount
      *
-     * @throws AuthorizeOneclickException
+     * @throws \Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse
      */
     public function authorize($username, $tbkUser, $parentBuyOrder, $childBuyOrder, $amount)
     {
-        try {
-            $txDate = date('d-m-Y');
-            $txTime = date('H:i:s');
-            $logMessage = "authorize => username: {$username} parentBuyOrder: {$parentBuyOrder} "
-                . "childBuyOrder: {$childBuyOrder}, amount: {$amount}, "
-                . "txDate: {$txDate}, txTime: {$txTime}";
-            $this->log->logInfo($logMessage);
-            $details = [
-                [
-                    'commerce_code' => $this->getChildCommerceCode(),
-                    'buy_order' => $childBuyOrder,
-                    'amount' => $amount,
-                    'installments_number' => 1,
-                ],
-            ];
-            $resp = $this->mallTransaction->authorize($username, $tbkUser, $parentBuyOrder, $details);
-            $this->log->logInfo('authorize - resp: ' . json_encode($resp));
-            return $resp;
-        } catch (Exception $e) {
-            $errorMessage = "Error al autorizar el pago para => userName:
-                {$username}, buyOrder: {$parentBuyOrder}, error: {$e->getMessage()}";
-            $this->log->logError($errorMessage);
-            throw new AuthorizeOneclickException($errorMessage, $e);
-        }
+        $details = [
+            [
+                'commerce_code' => $this->getChildCommerceCode(),
+                'buy_order' => $childBuyOrder,
+                'amount' => $amount,
+                'installments_number' => 1,
+            ],
+        ];
+        return $this->mallTransaction->authorize($username, $tbkUser, $parentBuyOrder, $details);
     }
 
     /**
      * @param $buyOrder
      *
-     * @throws StatusOneclickException
+     * @throws \Transbank\Webpay\Oneclick\Exceptions\MallTransactionStatusException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Transbank\Webpay\Oneclick\Responses\MallTransactionStatusResponse
      */
     public function status($buyOrder)
     {
-        try {
-            return $this->mallTransaction->status($buyOrder);
-        } catch (Exception $e) {
-            $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
-
-            if (ErrorUtil::isMaxTimeError($e)) {
-                $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
-            }
-
-            if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
-            }
-            throw new StatusOneclickException($errorMessage, $buyOrder, $e);
-        }
+        return $this->mallTransaction->status($buyOrder);
     }
 
     /**
      * @param $token
      * @param $amount
      *
-     * @throws RefundOneclickException
-     *
+     * @throws \Transbank\Webpay\Oneclick\Exceptions\MallRefundTransactionException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * 
      * @return \Transbank\Webpay\Oneclick\Responses\MallTransactionRefundResponse
      */
     public function refund($buyOrder, $childCommerceCode, $childBuyOrder, $amount)
     {
-        $errorMessageBase = 'Ocurrió un error al realizar la anulación en Webpay. ';
-        $refundInstructions = 'Intente realizar la anulación mediante su portal privado de Transbank.
-          Para mayor información del error revise los logs de la transacción.';
-        try {
-            $response = $this->mallTransaction->refund($buyOrder, $childCommerceCode, $childBuyOrder, $amount);
-            if (($response->getType() === 'REVERSED' || $response->getType() === 'NULLIFIED') && (int) $response->getResponseCode() === 0) {
-                $this->log->logInfo('Rembolso realizado correctamente en Transbank');
-                return $response;
-            }
-            $errorMessage = 'Código de respuesta Transbank: ' . $response->getResponseCode();
-            throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder);
-        } catch (Exception $e) {
-            $errorMessage = $errorMessageBase . $e->getMessage() . '. ' . $refundInstructions;
-            throw new RefundOneclickException($errorMessage, $buyOrder, $childBuyOrder, $e);
-        }
+            return $this->mallTransaction->refund($buyOrder, $childCommerceCode, $childBuyOrder, $amount);
     }
 
     public function prepareTransaction($orderId, $amount): TbkTransaction

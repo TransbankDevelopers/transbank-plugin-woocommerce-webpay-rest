@@ -8,7 +8,7 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
 use Transbank\Plugin\Model\LogConfig;
 
-final class PluginLogger implements ILogger
+final class PluginLogger
 {
 
     const CACHE_LOG_NAME = 'transbank_log_file_name';
@@ -36,7 +36,7 @@ final class PluginLogger implements ILogger
         $ecommerceTz = new DateTimeZone(wc_timezone_string());
         $dateFormat = "Y-m-d H:i:s P";
         $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
-        $formatter = new LineFormatter($output, $dateFormat);
+        $formatter = new LineFormatter($output, $dateFormat, true, true);
 
         $stream = new RotatingFileHandler(
             $logFilePath,
@@ -48,6 +48,9 @@ final class PluginLogger implements ILogger
         $this->logger = new Logger('transbank');
         $this->logger->setTimezone($ecommerceTz);
         $this->logger->pushHandler($stream);
+
+        $masker = new MaskData($this->config->isMaskingEnabled());
+        $this->logger->pushProcessor(new LoggerMaskProcessor($masker));
     }
 
     private function getLogFilePath(): string
@@ -74,19 +77,19 @@ final class PluginLogger implements ILogger
         return $this->config;
     }
 
-    public function logDebug($msg)
+    public function logDebug(string $msg, array $context = [])
     {
-        $this->logger->debug($msg);
+        $this->logger->debug($msg, $context);
     }
 
-    public function logInfo($msg)
+    public function logInfo(string $msg, array $context = [])
     {
-        $this->logger->info($msg);
+        $this->logger->info($msg, $context);
     }
 
-    public function logError($msg)
+    public function logError(string $msg, array $context = [])
     {
-        $this->logger->error($msg);
+        $this->logger->error($msg, $context);
     }
 
     public function getInfo()

@@ -9,12 +9,12 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
 abstract class BaseAuthorizeOneclickController
 {
-    protected ILogger $log;
+    protected PluginLogger $log;
     protected TransactionService $transactionService;
     protected OneclickAuthorizationService $oneclickAuthorizationService;
     protected EcommerceService $ecommerceService;
@@ -24,10 +24,10 @@ abstract class BaseAuthorizeOneclickController
      */
     public function __construct()
     {
-        $this->log = TbkFactory::createLogger();
         $this->transactionService = TbkFactory::createTransactionService();
         $this->oneclickAuthorizationService = TbkFactory::createOneclickAuthorizationService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
+        $this->log = TbkFactory::createOneclickLogger();
     }
 
     protected function authorizeTransaction($orderId, $amount, $paymentToken): MallTransactionAuthorizeResponse
@@ -37,7 +37,14 @@ abstract class BaseAuthorizeOneclickController
             $amount
         );
         $transaction = $this->transactionService->create($transactionData);
-
+        
+        $this->log->logInfo('Autorizando transacción', [
+            'userName' => $paymentToken->get_username(),
+            'tbkUser' => $paymentToken->get_token(),
+            'buyOrder' => $transaction->getBuyOrder(),
+            'childBuyOrder' => $transaction->getChildBuyOrder(),
+            'amount' => $transaction->getAmount()
+        ]);
         $authorizeResponse = $this->oneclickAuthorizationService->authorize(
             $paymentToken->get_username(),
             $paymentToken->get_token(),
@@ -45,6 +52,10 @@ abstract class BaseAuthorizeOneclickController
             $transaction->getChildBuyOrder(),
             $transaction->getAmount()
         );
+
+        $this->log->logInfo('Respuesta autorizacion Tbk', ['status' => $authorizeResponse->getDetails()[0]->getStatus()]);
+
+
 
         $this->transactionService->updateWithAuthorizeResponse($transaction->getId(), $authorizeResponse);
         return $authorizeResponse;
@@ -57,8 +68,9 @@ abstract class BaseAuthorizeOneclickController
         $responseCode = $details?->getResponseCode();
         $responseJson = json_encode($authorizeResponse);
 
-        $this->log->logError("Transacción con autorización rechazada => parentBuyOrder: {$transaction->getBuyOrder()}, childBuyOrder: {$transaction->getChildBuyOrder()}");
-        $this->log->logError($responseJson);
+        $this->log->logError("Transacción con autorización rechazada",
+            ['parentBuyOrder' => $authorizeResponse->getBuyOrder(),
+            'responseCode' => $responseCode]);
 
         $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago rechazado');
         $order->add_order_note($orderNotes);

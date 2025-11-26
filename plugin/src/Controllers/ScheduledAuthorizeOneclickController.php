@@ -28,7 +28,7 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
         $orderNotes = '';
         try {
 
-            $this->log->logInfo('Autorizando suscripción para la orden #' . $order->get_id());
+            $this->log->logInfo('Autorizando suscripción', ['order' => $order->get_id()]);
             $customerId = $this->getCustomerIdOrFail($order);
             $paymentToken = $this->getDefaultPaymentTokenOrFail($customerId);
 
@@ -43,10 +43,10 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
             $order->add_order_note($orderNotes);
             do_action('wc_transbank_oneclick_transaction_approved', ['order' => $order->get_data()]);
             $this->ecommerceService->completeOneclickOrder($order);
-            $this->log->logInfo('Suscripción autorizada correctamente para la orden #' . $order->get_id());
+            $this->log->logInfo('Suscripción autorizada correctamente', ['order' => $order->get_id()]);
 
         } catch (Throwable $e) {
-            $this->log->logError("Error al procesar suscripción: " . $e->getMessage());
+            $this->log->logError("Error al procesar suscripción", ['error' => $e->getMessage()]);
             $logsUrl = admin_url('admin.php?page=transbank_webpay_plus_rest&tbk_tab=logs');
             $this->ecommerceService->setOneclickOrderAsFailed($order, 'Error al procesar suscripción, para más detalles revisar el archivo de <a href=" ' . $logsUrl . '">logs</a>.');
             if ($transaction) {
@@ -74,7 +74,7 @@ class ScheduledAuthorizeOneclickController extends BaseAuthorizeOneclickControll
         /** @var WC_Payment_Token_Oneclick|null $token */
         $token = WC_Payment_Tokens::get_customer_default_token($customerId);
         if (!$token) {
-            $this->log->logError("No se encontró token por defecto para cliente #{$customerId}");
+            $this->log->logError('No se encontró token por defecto', ['client' => $customerId]);
             throw new EcommerceException('No se encontró un método de pago activo para la suscripción.');
         }
         return $token;

@@ -48,5 +48,20 @@ class ErrorUtil {
         $position = strpos($error, 'date has passed max time');
         return $position !== false;
     }
+
+    public static function getStatusErrorMessage(\Throwable $e): string
+    {
+        $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
+
+        if (ErrorUtil::isMaxTimeError($e)) {
+            $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
+        }
+
+        if (ErrorUtil::isApiMismatchError($e)) {
+            $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
+        }
+
+        return $errorMessage;
+    }
 }
 

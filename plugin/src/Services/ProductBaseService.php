@@ -2,10 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Exception;
 use Transbank\Webpay\Options;
-use Transbank\Plugin\Helpers\ILogger;
-use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
 
 class ProductBaseService
@@ -15,14 +12,6 @@ class ProductBaseService
      */
     public $options;
 
-    /**
-     * @var ILogger
-     */
-    protected $log;
-    /**
-     * @var MaskData
-     */
-    public $dataMasker;
     protected $buyOrderFormat;
 
     public function getCommerceCode()

@@ -1,7 +1,6 @@
 <?php
 
 namespace Transbank\Plugin\Helpers;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 
 class MaskData
 {
@@ -13,30 +12,28 @@ class MaskData
     private const BLOCKS_TO_KEEP = 2;
     private const START_POSITION = 0;
     private $keysToMask = [
-        'child_commerce_code' => 'mask',
-        'parentBuyOrder' => 'maskBuyOrder',
-        'childBuyOrder' => 'maskBuyOrder',
+        'childcommercecode' => 'mask',
+        'parentbuyorder' => 'maskBuyOrder',
+        'buyordermall' => 'maskBuyOrder',
+        'childbuyorder' => 'maskBuyOrder',
+        'buyorderstore' => 'maskBuyOrder',
         'username' => 'mask',
-        'buyOrder' => 'maskBuyOrder',
-        'commerceCode' => 'mask',
-        'commerce_code' => 'mask',
+        'buyorder' => 'maskBuyOrder',
+        'commercecode' => 'mask',
         'email' => 'maskEmail',
-        'tbkUser' => 'maskWithFormat',
-        'buy_order' => 'maskBuyOrder',
-        'session_id' => 'maskSessionId',
-        'TBK_ORDEN_COMPRA' => 'maskBuyOrder',
-        'TBK_ID_SESION' => 'maskSessionId',
-        'params' => 'mask',
-        'sessionId' => 'maskSessionId'
+        'tbkuser' => 'maskWithFormat',
+        'buyorder' => 'maskBuyOrder',
+        'sessionid' => 'maskSessionId',
+        'tbkordencompra' => 'maskBuyOrder',
+        'tbkidsesion' => 'maskSessionId',
+        'params' => 'mask'
     ];
 
-    protected $isIntegration;
-    protected $logger;
+    protected $shouldMask;
 
-    public function __construct($isIntegration)
+    public function __construct($shouldMask)
     {
-        $this->isIntegration = $isIntegration;
-        $this->logger = TbkFactory::createLogger();
+        $this->shouldMask = $shouldMask;
     }
 
     /**
@@ -49,7 +46,7 @@ class MaskData
     private function maskWithFormat($input)
     {
         return preg_replace_callback('/(?<=-).+(?=-)/', function ($matches) {
-            return str_repeat('x', strlen($matches[0]));
+            return str_repeat('*', strlen($matches[0]));
         }, $input);
     }
 
@@ -71,17 +68,16 @@ class MaskData
                 $len = strlen($input);
                 
                 if ($len <= $charsToKeep * self::BLOCKS_TO_KEEP) {
-                    $result = str_repeat("x", $len);
+                    $result = str_repeat("*", $len);
                 } else {
                     $startString = substr($input, self::START_POSITION, $charsToKeep);
                     $endString = substr($input, -$charsToKeep, $charsToKeep);
                     $charsToReplace = $len - (strlen($startString) + strlen($endString));
-                    $replaceString = str_repeat("x", $charsToReplace);
+                    $replaceString = str_repeat("*", $charsToReplace);
                     $result = $startString . $replaceString . $endString;
                 }
             }
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar: ' . $input . ' - ' . $e->getMessage());
             $result = $input;
         }
         
@@ -97,7 +93,7 @@ class MaskData
     private function maskEmail($email)
     {
         return preg_replace_callback('/^(.{1,4})[^@]*(@.*)$/', function ($match) {
-            return $match[1] . str_repeat('x', strlen($match[0]) - strlen($match[1]) - strlen($match[2])) . $match[2];
+            return $match[1] . str_repeat('*', strlen($match[0]) - strlen($match[1]) - strlen($match[2])) . $match[2];
         }, $email);
     }
 
@@ -131,12 +127,11 @@ class MaskData
     public function maskBuyOrder($buyOrder)
     {   
         try {
-            if ($this->isIntegration) {
+            if (!$this->shouldMask) {
                 return $buyOrder;
             }
             return $this->mask($buyOrder);
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar buyOrder: ' .$buyOrder . ' - ' . $e->getMessage());
             return $buyOrder;
         }
     }
@@ -151,14 +146,13 @@ class MaskData
     public function maskSessionId($sessionId)
     {
         try {
-            if ($this->isIntegration) {
+            if (!$this->shouldMask) {
                 return $sessionId;
             }
             
             $sessionIdPattern = 'wc:sessionId:';
             return $this->maskWithPattern($sessionId, $sessionIdPattern);
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar sessionId: ' .$sessionId . ' - ' . $e->getMessage());
             return $sessionId;
         }
     }
@@ -184,7 +178,7 @@ class MaskData
     public function maskData($data)
     {
         try {
-            if ($this->isIntegration) {
+            if (!$this->shouldMask) {
                 return $data;
             }
             $newData = $this->copyWithSubArray($data);
@@ -207,7 +201,6 @@ class MaskData
             }
             return $newData;
         } catch (\Throwable $e) {
-            $this->logger->logError('Error al enmascarar datos: ' . $e->getMessage());
             return $data;
         }
     }
@@ -247,10 +240,11 @@ class MaskData
      */
     private function getMaskedValue($key, $value)
     {
-        $keyExists = array_key_exists($key, $this->keysToMask);
+        $normalizedKey = $this->normalizeKey($key);
+        $keyExists = array_key_exists($normalizedKey, $this->keysToMask);
 
         if ($keyExists) {
-            return call_user_func([$this, $this->keysToMask[$key]], $value);
+            return call_user_func([$this, $this->keysToMask[$normalizedKey]], $value);
         }
 
         return $value;
@@ -327,5 +321,18 @@ class MaskData
             }
         }
         return $array;
+    }
+
+    /**
+     * Normalizes a key by converting input to lowercase without separators.
+     *
+     * @param string $key the key to normalize.
+     * @return string normalized key.
+     */
+    private function normalizeKey(string $key): string
+    {
+        $key = preg_replace('/([a-z])([A-Z])/', '$1_$2', $key);
+        $key = preg_replace('/[^a-zA-Z0-9]/', '', $key);
+        return strtolower($key);
     }
 }

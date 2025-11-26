@@ -2,11 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Exception;
 use GuzzleHttp\Exception\GuzzleException;
-use Transbank\Plugin\Helpers\ErrorUtil;
-use Transbank\Plugin\Exceptions\Webpay\StatusWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\CommitWebpayException;
 use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
 use Transbank\Webpay\Options;
@@ -17,7 +13,6 @@ use Transbank\Webpay\WebpayPlus\Exceptions\TransactionCreateException;
 use Transbank\Webpay\WebpayPlus;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
-use Transbank\Plugin\Helpers\MaskData;
 use Transbank\Plugin\Helpers\TbkConstants;
 
 class WebpayService extends ProductBaseService
@@ -30,10 +25,8 @@ class WebpayService extends ProductBaseService
 
 
     public function __construct(
-        $log,
         $config,
     ) {
-        $this->log = $log;
         if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->webpayplusTransaction = WebpayPlusTransaction::buildForProduction(
                 $config->getApikey(),
@@ -46,7 +39,6 @@ class WebpayService extends ProductBaseService
             );
         }
         $this->options = $this->webpayplusTransaction->getOptions();
-        $this->dataMasker = new MaskData($config->isIntegration());
         $this->buyOrderFormat = BuyOrderHelper::isValidFormat(
             $config->getBuyOrderFormat()
         ) ? $config->getBuyOrderFormat() : self::BUY_ORDER_FORMAT;
@@ -69,14 +61,7 @@ class WebpayService extends ProductBaseService
             $buyOrder = $this->generateBuyOrder($orderId);
             $randomNumber = uniqid();
             $sessionId = 'wc:sessionId:' . $randomNumber . ':' . $orderId;
-            $txDate = date('d-m-Y');
-            $txTime = date('H:i:s');
-            $this->log->logInfo("Creando transacción Webpay Plus. [Datos]:");
-            $this->log->logInfo("amount: {$amount} sessionId: {$sessionId} buyOrder: {$buyOrder} returnUrl: {$returnUrl} txDate: {$txDate} txTime: {$txTime}");
             $createResponse = $this->webpayplusTransaction->create($buyOrder, $sessionId, $amount, $returnUrl);
-            $this->log->logInfo("Transacción creada. [Respuesta]:");
-            $this->log->logInfo(json_encode($createResponse));
-
             if (isset($createResponse) && isset($createResponse->url) && isset($createResponse->token)) {
                 $result = new TbkTransaction();
                 $result->setToken($createResponse->token);
@@ -112,7 +97,6 @@ class WebpayService extends ProductBaseService
     public function commitTransaction(string $token): TransactionCommitResponse
     {
         try {
-            $this->log->logInfo("commitTransaction : token: {$token}");
             if (!isset($token)) {
                 throw new CommitWebpayException('El token webpay es requerido', $token);
             }
@@ -126,52 +110,26 @@ class WebpayService extends ProductBaseService
     /**
      * @param $token
      *
-     * @throws StatusWebpayException
+     * @throws \Transbank\Webpay\WebpayPlus\Exceptions\TransactionStatusException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionStatusResponse
      */
     public function status($token)
     {
-        try {
-            return $this->webpayplusTransaction->status($token);
-        } catch (Exception $e) {
-            $errorMessage = ErrorUtil::DEFAULT_STATUS_ERROR_MESSAGE;
-
-            if (ErrorUtil::isMaxTimeError($e)) {
-                $errorMessage = ErrorUtil::EXPIRED_TRANSACTION_ERROR_MESSAGE;
-            }
-
-            if (ErrorUtil::isApiMismatchError($e)) {
-                $errorMessage = ErrorUtil::API_MISMATCH_ERROR_MESSAGE;
-            }
-            throw new StatusWebpayException($errorMessage, $token, $e);
-        }
+        return $this->webpayplusTransaction->status($token);
     }
 
     /**
      * @param $token
      * @param $amount
      *
-     * @throws RefundWebpayException
+     * @throws \Transbank\Webpay\WebpayPlus\Exceptions\TransactionRefundException
      *
      * @return \Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse
      */
     public function refund($token, $amount)
     {
-        $errorMessageBase = 'Ocurrió un error al realizar la anulación en Webpay. ';
-        $refundInstructions = 'Intente realizar la anulación mediante su portal privado de Transbank.
-          Para mayor información del error revise los logs de la transacción.';
-        try {
-            $response = $this->webpayplusTransaction->refund($token, $amount);
-            if (($response->getType() === 'REVERSED' || $response->getType() === 'NULLIFIED') && (int) $response->getResponseCode() === 0) {
-                $this->log->logInfo('Rembolso realizado correctamente en Transbank');
-                return $response;
-            }
-            $errorMessage = 'Código de respuesta Transbank: ' . $response->getResponseCode();
-            throw new RefundWebpayException($errorMessage, $token);
-        } catch (Exception $e) {
-            $errorMessage = $errorMessageBase . $e->getMessage() . '. ' . $refundInstructions;
-            throw new RefundWebpayException($errorMessage, $token, $e);
-        }
+            return $this->webpayplusTransaction->refund($token, $amount);
     }
 }

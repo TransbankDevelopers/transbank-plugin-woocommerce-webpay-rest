@@ -3,19 +3,20 @@
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use \Exception;
+use Throwable;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
-use Transbank\Plugin\Helpers\ILogger;
+use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
 
 class FinishOneclickController
 {
-    protected ILogger $log;
+    protected PluginLogger $log;
     protected InscriptionService $inscriptionService;
     protected OneclickInscriptionService $oneclickInscriptionService;
     protected EcommerceService $ecommerceService;
@@ -28,10 +29,10 @@ class FinishOneclickController
     public function __construct($gatewayId)
     {
         $this->gatewayId = $gatewayId;
-        $this->log = TbkFactory::createLogger();
         $this->inscriptionService = TbkFactory::createInscriptionService();
         $this->oneclickInscriptionService = TbkFactory::createOneclickInscriptionService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
+        $this->log = TbkFactory::createOneclickLogger();
     }
 
     public function process()
@@ -43,6 +44,11 @@ class FinishOneclickController
             $token = isset($data["TBK_TOKEN"]) ? $data['TBK_TOKEN'] : null;
             $tbkSessionId = isset($data["TBK_ID_SESION"]) ? $data['TBK_ID_SESION'] : null;
             $tbkOrdenCompra = isset($data["TBK_ORDEN_COMPRA"]) ? $data['TBK_ORDEN_COMPRA'] : null;
+            $this->log->logInfo('Procesando retorno desde formulario Oneclick', [
+                'tbkOrdenCompra' => $tbkOrdenCompra,
+                'tbkSessionId' => $tbkSessionId,
+                'token' => $token
+            ]);
 
             if ($tbkOrdenCompra && $tbkSessionId && !$token) {
                 BlocksHelper::addLegacyNotices('La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.', 'error');
@@ -78,7 +84,7 @@ class FinishOneclickController
             }
 
             $this->finishInscription($ins, $token);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $this->redirectUser($ins->from, BlocksHelper::ONECLICK_FINISH_ERROR);
         }
@@ -87,16 +93,27 @@ class FinishOneclickController
     private function finishInscription($ins, $token)
     {
         try {
+            $this->log->logInfo('Finalizando inscripción', [
+                'token' => $token,
+                'userName' => $ins->username,
+                'email' => $ins->email
+            ]);
             $resp = $this->oneclickInscriptionService->finishInscription(
                 $token,
                 $ins->username,
                 $ins->email
             );
         } catch (Exception $e) {
+            $this->log->logError('Error al confirmar la inscripción', [
+                'token' => $token,
+                'userName' => $ins->username,
+                'email' => $ins->email,
+                'error' => $e->getMessage(),
+            ]);
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
             $this->redirectUser($ins->from, BlocksHelper::ONECLICK_FINISH_ERROR);
-        }
+        }        
         $this->inscriptionService->updateWithFinishResponse($ins->id, $resp);
         $order = $this->ecommerceService->getOrderById($ins->order_id);
         $from = $ins->from;
@@ -111,7 +128,6 @@ class FinishOneclickController
         }
         $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
         BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
-        $this->log->logInfo('[ONECLICK] Inscripción aprobada');
         $token = $this->savePaymentToken($ins, $resp);
         if ($order) {
             $order->add_order_note('Tarjeta inscrita satisfactoriamente');
@@ -128,7 +144,7 @@ class FinishOneclickController
             'transbankToken' => $token,
             'from' => $from
         ]);
-        $this->log->logInfo('Inscription finished successfully for user #' . $ins->user_id);
+        $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
         $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
     }
 
