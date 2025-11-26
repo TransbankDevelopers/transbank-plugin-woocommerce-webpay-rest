@@ -12,20 +12,20 @@ class MaskData
     private const BLOCKS_TO_KEEP = 2;
     private const START_POSITION = 0;
     private $keysToMask = [
-        'child_commerce_code' => 'mask',
-        'parent_buy_order' => 'maskBuyOrder',
-        'buy_order_mall' => 'maskBuyOrder',
-        'child_buy_order' => 'maskBuyOrder',
-        'buy_order_store' => 'maskBuyOrder',
-        'user_name' => 'mask',
-        'buy_order' => 'maskBuyOrder',
-        'commerce_code' => 'mask',
+        'childcommercecode' => 'mask',
+        'parentbuyorder' => 'maskBuyOrder',
+        'buyordermall' => 'maskBuyOrder',
+        'childbuyorder' => 'maskBuyOrder',
+        'buyorderstore' => 'maskBuyOrder',
+        'username' => 'mask',
+        'buyorder' => 'maskBuyOrder',
+        'commercecode' => 'mask',
         'email' => 'maskEmail',
-        'tbk_user' => 'maskWithFormat',
-        'buy_order' => 'maskBuyOrder',
-        'session_id' => 'maskSessionId',
-        'tbk_orden_compra' => 'maskBuyOrder',
-        'tbk_id_sesion' => 'maskSessionId',
+        'tbkuser' => 'maskWithFormat',
+        'buyorder' => 'maskBuyOrder',
+        'sessionid' => 'maskSessionId',
+        'tbkordencompra' => 'maskBuyOrder',
+        'tbkidsesion' => 'maskSessionId',
         'params' => 'mask'
     ];
 
@@ -324,7 +324,7 @@ class MaskData
     }
 
     /**
-     * Normalizes a key by converting camelCase to snake_case.
+     * Normalizes a key by converting input key to lowercase without separators.
      *
      * @param string $key the key to normalize.
      * @return string normalized key.
@@ -332,6 +332,7 @@ class MaskData
     private function normalizeKey(string $key): string
     {
         $key = preg_replace('/([a-z])([A-Z])/', '$1_$2', $key);
+        $key = preg_replace('/[^a-zA-Z0-9]/', '', $key);
         return strtolower($key);
     }
 }
