@@ -324,7 +324,7 @@ class MaskData
     }
 
     /**
-     * Normalizes a key by converting input key to lowercase without separators.
+     * Normalizes a key by converting input to lowercase without separators.
      *
      * @param string $key the key to normalize.
      * @return string normalized key.
