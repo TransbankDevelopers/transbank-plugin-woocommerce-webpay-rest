@@ -9,7 +9,7 @@
     "shutdownAction": "stopCompose",
     "postCreateCommand": "/usr/local/bin/wp-setup.sh",
     "mounts": [
-      "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+        "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
     ],
     "features": {
         "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
@@ -96,22 +96,22 @@
                 "prettier.trailingComma": "none"
             },
             "extensions": [
-                "ms-vsliveshare.vsliveshare",
-                "ms-vscode.vscode-json",
-                "github.vscode-github-actions",
-                "fill-labs.dependi",
-                "usernamehw.errorlens",
-                "esbenp.prettier-vscode",
-                "editorconfig.editorconfig",
-                "kisstkondoros.vscode-gutter-preview",
-                "gruntfuggly.todo-tree",
-                "mtxr.sqltools",
-                "mtxr.sqltools-driver-mysql",
-                "DEVSENSE.phptools-vscode",
-                "bmewburn.vscode-intelephense-client",
-                "hakcorp.php-awesome-snippets",
-                "formulahendry.auto-rename-tag",
-                "bradgashler.htmltagwrap"
+                "ms-vsliveshare.vsliveshare", // Live Share
+                "ms-vscode.vscode-json", // JSON Support
+                "github.vscode-github-actions", // GitHub Actions
+                "fill-labs.dependi", // Dependi
+                "usernamehw.errorlens", // Error Lens
+                "esbenp.prettier-vscode", // Prettier
+                "editorconfig.editorconfig", // EditorConfig
+                "kisstkondoros.vscode-gutter-preview", // Gutter Preview
+                "gruntfuggly.todo-tree", // TODO Tree
+                "mtxr.sqltools", // SQLTools
+                "mtxr.sqltools-driver-mysql", // SQLTools MySQL Driver
+                "DEVSENSE.phptools-vscode", // PHP Tools
+                "bmewburn.vscode-intelephense-client", // Intelephense
+                "hakcorp.php-awesome-snippets", // PHP Awesome Snippets
+                "formulahendry.auto-rename-tag", // Auto Rename Tag
+                "bradgashler.htmltagwrap" // HTML Tag Wrap
             ]
         }
     }
