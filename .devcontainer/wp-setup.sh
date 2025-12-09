@@ -12,13 +12,13 @@ HTACCESS="${WORDPRESS_PATH}/.htaccess"
 # --- to the WordPress plugins directory
 if [ -d "$PLUGIN_SRC" ]; then
     if [ ! -e "$PLUGIN_DIR" ]; then
-        echo "[DEV] Creando symlink del plugin..."
+        echo "Creando symlink del plugin..."
         ln -s "$PLUGIN_SRC" "$PLUGIN_DIR"
     else
-        echo "[DEV] El destino $PLUGIN_DIR ya existe (directorio o symlink)."
+        echo "El destino $PLUGIN_DIR ya existe (directorio o symlink)."
     fi
 else
-    echo "[DEV] ADVERTENCIA: No existe carpeta de plugin en $PLUGIN_SRC"
+    echo "No existe carpeta de plugin en $PLUGIN_SRC"
 fi
 
 # --- Install dependencies for the plugin (composer + npm)
@@ -36,15 +36,15 @@ if [ -d "$PLUGIN_DIR" ]; then
 
   if [ -f "package.json" ] && [ ! -d "node_modules" ]; then
       echo "Ejecutando npm install y npm run build..."
-      npm install || echo "npm install falló. Revisa el log."
-      npm run build || echo "npm run build falló. Revisa el log."
+      npm install || echo "npm install falló."
+      npm run build || echo "npm run build falló."
   else
-    echo "node_modules ya existe, saltando npm install."
+    echo "node_modules ya existe, saltando npm run install y npm run build."
   fi
 
   cd -
 else
-  echo "ADVERTENCIA: No se encontró el plugin en ${PLUGIN_DIR}. No se instalarán dependencias."
+  echo "No se encontró el plugin en ${PLUGIN_DIR}. No se instalarán dependencias."
 fi
 
 # --- Create the .htaccess file in the WordPress directory
@@ -141,7 +141,7 @@ if [ -d "$PLUGIN_DIR" ]; then
   echo "Activando plugin ${PLUGIN_SLUG}..."
   wp plugin activate "${PLUGIN_SLUG}" --allow-root || true
 else
-  echo "ADVERTENCIA: No se encontró el plugin en ${PLUGIN_DIR} para activarlo."
+  echo "No se encontró el plugin en ${PLUGIN_DIR} para activarlo."
 fi
 
 echo "Setup de WordPress + WooCommerce + Transbank completado."
