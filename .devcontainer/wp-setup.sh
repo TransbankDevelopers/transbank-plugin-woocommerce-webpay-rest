@@ -119,9 +119,9 @@ fi
 
 # --- Configure shop options for WooCommerce
 wp option update woocommerce_currency "CLP" --allow-root
-wp option update woocommerce_store_address "General Bustamante 24" --allow-root
-wp option update woocommerce_store_address_2 "Of M, Piso 7" --allow-root
-wp option update woocommerce_store_city "Providencia" --allow-root
+wp option update woocommerce_store_address "Nueva Tajamar 481" --allow-root
+wp option update woocommerce_store_address_2 "Oficina 1704, Torre Sur" --allow-root
+wp option update woocommerce_store_city "Las Condes" --allow-root
 wp option update woocommerce_default_country "CL" --allow-root
 wp option update woocommerce_store_postcode "7500000" --allow-root
 wp option update woocommerce_price_num_decimals "0" --allow-root
@@ -138,10 +138,24 @@ wp config set WP_DEBUG_LOG "/var/log/wordpress/debug.log" --type=constant --allo
 
 # --- Activate Transbank plugin
 if [ -d "$PLUGIN_DIR" ]; then
-  echo "Activando plugin ${PLUGIN_SLUG}..."
-  wp plugin activate "${PLUGIN_SLUG}" --allow-root || true
+  if ! wp plugin is-active transbank-webpay-plus-rest --allow-root; then
+    echo "Activando plugin ${PLUGIN_SLUG}..."
+    wp plugin activate "${PLUGIN_SLUG}" --allow-root || true
+  else
+    echo "plugin de Transbank esta activo."
+  fi
 else
   echo "No se encontró el plugin en ${PLUGIN_DIR} para activarlo."
+fi
+
+# --- Activate Webpay Plus One Click
+STATUS_ONE_CLICK=$(wp wc payment_gateway get transbank_oneclick_mall_rest --allow-root --user=admin | awk '/enabled/ {print $2}')
+
+if [ "$STATUS_ONE_CLICK" = "false" ]; then
+  echo "Activando opción de One Click de Transbank plugin"
+  wp wc payment_gateway update transbank_oneclick_mall_rest --allow-root --user=admin --enabled=true
+else
+  echo "Ya se encuentra activa la opción de one click"
 fi
 
 echo "Setup de WordPress + WooCommerce + Transbank completado."
