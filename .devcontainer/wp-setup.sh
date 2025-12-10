@@ -36,7 +36,7 @@ if [ -d "$PLUGIN_DIR" ]; then
 
   if [ -f "package.json" ] && [ ! -d "node_modules" ]; then
       echo "Ejecutando npm install y npm run build..."
-      npm install || echo "npm install falló."
+      npm install --ignore-scripts || echo "npm install falló."
       npm run build || echo "npm run build falló."
   else
     echo "node_modules ya existe, saltando npm run install y npm run build."
