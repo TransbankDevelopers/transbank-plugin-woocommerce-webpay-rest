@@ -55,6 +55,7 @@ class FinishOneclickController
                 $params = ['transbank_status' => BlocksHelper::ONECLICK_TIMEOUT];
                 $redirectUrl = add_query_arg($params, wc_get_checkout_url());
                 wp_redirect($redirectUrl);
+                exit;
             }
 
             if (!isset($token)) {
@@ -62,6 +63,7 @@ class FinishOneclickController
                 BlocksHelper::addLegacyNotices('No se recibió el token de la inscripción.', 'error');
                 $redirectUrl = add_query_arg($params, wc_get_checkout_url());
                 wp_safe_redirect($redirectUrl);
+                exit;
             }
 
             $ins = $this->inscriptionService->getByToken($token);
@@ -79,6 +81,7 @@ class FinishOneclickController
                     $params = ['transbank_cancelled_order' => 1, 'transbank_status' => BlocksHelper::ONECLICK_USER_CANCELED];
                     $redirectUrl = add_query_arg($params, wc_get_checkout_url());
                     wp_safe_redirect($redirectUrl);
+                    exit;
                 }
                 $this->redirectUser($ins->from, BlocksHelper::ONECLICK_USER_CANCELED);
             }
@@ -174,6 +177,7 @@ class FinishOneclickController
                 $redirectUrl = add_query_arg($params, $redirectUrl);
             }
             wp_redirect($redirectUrl);
+            exit;
         }
     }
 
