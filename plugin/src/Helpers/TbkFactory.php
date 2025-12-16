@@ -55,7 +55,7 @@ class TbkFactory
         return new WebpayplusConfig([
             'environment' => $webpaySettings->get($webpaySettings::OPTION_ENVIRONMENT),
             'commerceCode' => $webpaySettings->get($webpaySettings::OPTION_COMMERCE_CODE),
-            'apiKey' => $webpaySettings->get($webpaySettings::OPTION_API_KEY),
+            'apikey' =>  $webpaySettings->get($webpaySettings::OPTION_API_KEY),
             'buyOrderFormat' => $webpaySettings->get($webpaySettings::OPTION_BUY_ORDER_FORMAT) ?? WebpayService::BUY_ORDER_FORMAT,
             'statusAfterPayment' => $webpaySettings->get($webpaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS) ?? ''
         ]);
@@ -68,7 +68,7 @@ class TbkFactory
         return new OneclickConfig([
             'environment' => $oneclickSettings->get($oneclickSettings::OPTION_ENVIRONMENT),
             'commerceCode' => $oneclickSettings->get($oneclickSettings::OPTION_COMMERCE_CODE),
-            'apiKey' => $oneclickSettings->get($oneclickSettings::OPTION_API_KEY),
+            'apikey' => $oneclickSettings->get($oneclickSettings::OPTION_API_KEY),
             'childCommerceCode' => $oneclickSettings->get($oneclickSettings::OPTION_CHILD_COMMERCE_CODE),
             'buyOrderFormat' => $oneclickSettings->get($oneclickSettings::OPTION_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
             'childBuyOrderFormat' => $oneclickSettings->get($oneclickSettings::OPTION_CHILD_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
