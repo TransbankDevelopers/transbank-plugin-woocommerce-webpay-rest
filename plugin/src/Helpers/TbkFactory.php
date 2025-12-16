@@ -8,6 +8,7 @@ use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
@@ -49,27 +50,29 @@ class TbkFactory
 
     public static function getWebpayplusConfig(): WebpayplusConfig
     {
-        $config = get_option(static::WEBPAY_OPTION_KEY) ?? [];
+        $webpaySettings = TransbankConfig::webpayPlus();
+
         return new WebpayplusConfig([
-            'environment' => $config['webpay_rest_environment'] ?? null,
-            'commerceCode' => $config['webpay_rest_commerce_code'] ?? null,
-            'apiKey' => $config['webpay_rest_api_key'] ?? null,
-            'buyOrderFormat' => $config['buy_order_format'] ?? WebpayService::BUY_ORDER_FORMAT,
-            'statusAfterPayment' => $config['webpay_rest_after_payment_order_status'] ?? ''
+            'environment' => $webpaySettings->get($webpaySettings::OPTION_ENVIRONMENT),
+            'commerceCode' => $webpaySettings->get($webpaySettings::OPTION_COMMERCE_CODE),
+            'apiKey' => $webpaySettings->get($webpaySettings::OPTION_API_KEY),
+            'buyOrderFormat' => $webpaySettings->get($webpaySettings::OPTION_BUY_ORDER_FORMAT) ?? WebpayService::BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $webpaySettings->get($webpaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS) ?? ''
         ]);
     }
 
     public static function getOneclickConfig(): OneclickConfig
     {
-        $config = get_option(static::ONECLICK_OPTION_KEY) ?? [];
+        $oneclickSettings = TransbankConfig::oneclickMall();
+
         return new OneclickConfig([
-            'environment' => $config['environment'] ?? null,
-            'commerceCode' => $config['commerce_code'] ?? null,
-            'apiKey' => $config['api_key'] ?? null,
-            'childCommerceCode' => $config['child_commerce_code'] ?? null,
-            'buyOrderFormat' => $config['buy_order_format'] ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
-            'childBuyOrderFormat' => $config['child_buy_order_format'] ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
-            'statusAfterPayment' => $config['oneclick_after_payment_order_status'] ?? ''
+            'environment' => $oneclickSettings->get($oneclickSettings::OPTION_ENVIRONMENT),
+            'commerceCode' => $oneclickSettings->get($oneclickSettings::OPTION_COMMERCE_CODE),
+            'apiKey' => $oneclickSettings->get($oneclickSettings::OPTION_API_KEY),
+            'childCommerceCode' => $oneclickSettings->get($oneclickSettings::OPTION_CHILD_COMMERCE_CODE),
+            'buyOrderFormat' => $oneclickSettings->get($oneclickSettings::OPTION_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
+            'childBuyOrderFormat' => $oneclickSettings->get($oneclickSettings::OPTION_CHILD_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $oneclickSettings->get($oneclickSettings::OPTION_AFTER_PAYMENT_ORDER_STATUS) ?? ''
         ]);
     }
 
@@ -145,7 +148,4 @@ class TbkFactory
             static::createInscriptionRepository()
         );
     }
-
 }
-
-
