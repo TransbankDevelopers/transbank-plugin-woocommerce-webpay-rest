@@ -1,11 +1,8 @@
 <?php
 
-use Transbank\WooCommerce\WebpayRest\Helpers\PluginInfoHelper;
 if (!defined('ABSPATH')) {
     return;
 }
-
-$trackinfo = PluginInfoHelper::getInfo();
 ?>
 
 <style>
