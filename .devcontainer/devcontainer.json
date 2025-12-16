@@ -111,7 +111,8 @@
                 "bmewburn.vscode-intelephense-client", // Intelephense
                 "hakcorp.php-awesome-snippets", // PHP Awesome Snippets
                 "formulahendry.auto-rename-tag", // Auto Rename Tag
-                "bradgashler.htmltagwrap" // HTML Tag Wrap
+                "bradgashler.htmltagwrap", // HTML Tag Wrap
+                "adpyke.codesnap" // CodeSnap
             ]
         }
     }
