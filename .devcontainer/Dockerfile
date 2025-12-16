@@ -14,6 +14,7 @@ ENV TZ=America/Santiago
 
 # install utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ssh \
     curl \
     less \
     git \
