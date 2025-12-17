@@ -10,6 +10,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\Plugin\Helpers\PluginLogger;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
@@ -22,6 +23,9 @@ class FinishOneclickController
     protected EcommerceService $ecommerceService;
     protected $gatewayId;
 
+    const ONECLICK_NORMAL_FLOW = 'normal';
+    const ONECLICK_ABORTED_FLOW = 'aborted';
+    const ONECLICK_ERROR_FLOW = 'error';
 
     /**
      * OneclickInscriptionResponseController constructor.
@@ -38,71 +42,131 @@ class FinishOneclickController
     public function process()
     {
         try {
+            $this->log->logInfo('Procesando retorno desde formulario Oneclick');
             $method = $_SERVER['REQUEST_METHOD'];
-
             $data = $method === 'GET' ? $_GET : $_POST;
-            $token = isset($data["TBK_TOKEN"]) ? $data['TBK_TOKEN'] : null;
-            $tbkSessionId = isset($data["TBK_ID_SESION"]) ? $data['TBK_ID_SESION'] : null;
-            $tbkOrdenCompra = isset($data["TBK_ORDEN_COMPRA"]) ? $data['TBK_ORDEN_COMPRA'] : null;
-            $this->log->logInfo('Procesando retorno desde formulario Oneclick', [
-                'tbkOrdenCompra' => $tbkOrdenCompra,
-                'tbkSessionId' => $tbkSessionId,
-                'token' => $token
+            $oneclickFlow = $this->getOneclickFlow($data);
+            $this->log->logInfo('Flujo de inscripción Oneclick:', [
+                'flow' => $oneclickFlow
             ]);
 
-            if ($tbkOrdenCompra && $tbkSessionId && !$token) {
-                BlocksHelper::addLegacyNotices('La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.', 'error');
-                $params = ['transbank_status' => BlocksHelper::ONECLICK_TIMEOUT];
-                $redirectUrl = add_query_arg($params, wc_get_checkout_url());
-                wp_redirect($redirectUrl);
+            if ($oneclickFlow === self::ONECLICK_ABORTED_FLOW) {
+                $this->handleAbortedFlow($data['TBK_TOKEN']);
+            }
+            if ($oneclickFlow === self::ONECLICK_NORMAL_FLOW) {
+                $this->handleNormalFlow($data['TBK_TOKEN']);
+            }
+            if ($oneclickFlow === self::ONECLICK_ERROR_FLOW) {
+                throw new EcommerceException('Parámetros inválidos recibidos desde el formulario Oneclick');
             }
 
-            if (!isset($token)) {
-                $params = ['transbank_status' => BlocksHelper::ONECLICK_WITHOUT_TOKEN];
-                BlocksHelper::addLegacyNotices('No se recibió el token de la inscripción.', 'error');
-                $redirectUrl = add_query_arg($params, wc_get_checkout_url());
-                wp_safe_redirect($redirectUrl);
-            }
-
-            $ins = $this->inscriptionService->getByToken($token);
-
-            if (isset($tbkOrdenCompra)) {//se abandono la inscripcion al haber presionado la opción 'Abandonar y volver al comercio'
-                BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'warning');
-                if ($ins != null) {
-                    $this->inscriptionService->update($ins->id, [
-                        'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED
-                    ]);
-                    $order = $this->ecommerceService->getOrderById($ins->order_id);
-                }
-                if ($order != null) {
-                    $order->add_order_note('El usuario canceló la inscripción en el formulario de pago');
-                    $params = ['transbank_cancelled_order' => 1, 'transbank_status' => BlocksHelper::ONECLICK_USER_CANCELED];
-                    $redirectUrl = add_query_arg($params, wc_get_checkout_url());
-                    wp_safe_redirect($redirectUrl);
-                }
-                $this->redirectUser($ins->from, BlocksHelper::ONECLICK_USER_CANCELED);
-            }
-
-            $this->finishInscription($ins, $token);
         } catch (Throwable $e) {
-            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
-            $this->redirectUser($ins->from, BlocksHelper::ONECLICK_FINISH_ERROR);
+            $this->log->logError('Error procesando el retorno de inscripción Oneclick', [
+                'error' => $e->getMessage(),
+            ]);
+            $this->redirectUser('checkout', BlocksHelper::ONECLICK_FINISH_ERROR);
         }
     }
 
-    private function finishInscription($ins, $token)
+    /**
+     * Determines the type of payment flow based on the request data.
+     *
+     * @param array $requestData The request data from the payment gateway.
+     * @return string The type of payment flow.
+     */
+    protected function getOneclickFlow(array $requestData): string
+    {
+        $token = isset($requestData["TBK_TOKEN"]);
+        $tbkSessionId = isset($requestData['TBK_ID_SESION']);
+        $tbkOrdenCompra = isset($requestData['TBK_ORDEN_COMPRA']);
+
+        $this->log->logInfo('Datos recibidos desde formulario Oneclick', [
+            'token' => $token ? $requestData["TBK_TOKEN"]: null,
+            'tbkSessionId' => $tbkSessionId ? $requestData['TBK_ID_SESION'] : null,
+            'tbkOrdenCompra' => $tbkOrdenCompra ? $requestData['TBK_ORDEN_COMPRA'] : null,
+        ]);
+
+        if($token && !$tbkSessionId && !$tbkOrdenCompra) {
+            return self::ONECLICK_NORMAL_FLOW;
+        }
+        if ($token && $tbkSessionId && $tbkOrdenCompra) {
+            return self::ONECLICK_ABORTED_FLOW;
+        }
+
+        return self::ONECLICK_ERROR_FLOW;
+    }
+
+    /**
+     * Processes the aborted inscription flow.
+     *
+     * @param string $token The inscription token.
+     * @return void
+     */
+    protected function handleAbortedFlow(string $token): void
+    {
+        $this->log->logInfo('Inscripcion abortada por el usuario desde el formulario Oneclick', [
+            'token' => $token
+        ]);
+        $ins = $this->inscriptionService->getByToken($token);
+        BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'warning');
+        $this->inscriptionService->update($ins->id, [
+            'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED
+        ]);
+        $order = $this->ecommerceService->getOrderById($ins->order_id);
+        $order->add_order_note('El usuario canceló la inscripción en el formulario de pago');
+
+        $this->redirectUser($ins->from, BlocksHelper::ONECLICK_USER_CANCELED);
+    }
+
+    /**
+     * Processes the normal inscription flow. The result of the inscription can be approved or rejected.
+     *
+     * @param string $token The inscription token.
+     * @return void
+     */
+    private function handleNormalFlow(string $token)
     {
         try {
+            $ins = $this->inscriptionService->getByToken($token);
             $this->log->logInfo('Finalizando inscripción', [
                 'token' => $token,
                 'userName' => $ins->username,
                 'email' => $ins->email
             ]);
             $resp = $this->oneclickInscriptionService->finishInscription(
-                $token,
-                $ins->username,
-                $ins->email
+                $token
             );
+            $this->inscriptionService->updateWithFinishResponse($ins->id, $resp);
+            $order = $this->ecommerceService->getOrderById($ins->order_id);
+            $from = $ins->from;
+            do_action('wc_transbank_oneclick_inscription_finished', [
+                'order' => $order->get_data(),
+                'from' => $from
+            ]);
+
+            $userInfo = wp_get_current_user();
+            if (!$userInfo) {
+                wc_transbank_oneclick_inscription_finishedlogError('You were logged out');
+            }
+            $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
+            BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
+            $token = $this->savePaymentToken($ins, $resp);
+            if ($order) {
+                $order->add_order_note('Tarjeta inscrita satisfactoriamente');
+            }
+            $this->inscriptionService->update($ins->id, [
+                'token_id' => $token->get_id(),
+            ]);
+
+            WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
+
+            do_action('wc_transbank_oneclick_inscription_approved', [
+                'transbankInscriptionResponse' => $resp,
+                'transbankToken' => $token,
+                'from' => $from
+            ]);
+            $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
+            $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
         } catch (Exception $e) {
             $this->log->logError('Error al confirmar la inscripción', [
                 'token' => $token,
@@ -113,41 +177,8 @@ class FinishOneclickController
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
             $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
             $this->redirectUser($ins->from, BlocksHelper::ONECLICK_FINISH_ERROR);
-        }        
-        $this->inscriptionService->updateWithFinishResponse($ins->id, $resp);
-        $order = $this->ecommerceService->getOrderById($ins->order_id);
-        $from = $ins->from;
-        do_action('wc_transbank_oneclick_inscription_finished', [
-            'order' => $order->get_data(),
-            'from' => $from
-        ]);
-
-        $userInfo = wp_get_current_user();
-        if (!$userInfo) {
-            $this->log->logError('You were logged out');
         }
-        $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
-        BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
-        $token = $this->savePaymentToken($ins, $resp);
-        if ($order) {
-            $order->add_order_note('Tarjeta inscrita satisfactoriamente');
-        }
-
-        $this->inscriptionService->update($ins->id, [
-            'token_id' => $token->get_id(),
-        ]);
-
-        WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
-
-        do_action('wc_transbank_oneclick_inscription_approved', [
-            'transbankInscriptionResponse' => $resp,
-            'transbankToken' => $token,
-            'from' => $from
-        ]);
-        $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
-        $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
     }
-
 
     /**
      * Redirect the user to the appropriate page based on the context.
@@ -155,26 +186,25 @@ class FinishOneclickController
      * @param string $from The context from which the user is being redirected.
      * @param string|null $errorCode Optional error code to include in the redirect.
      */
-    public function redirectUser($from, $errorCode = null): void
+    public function redirectUser($from = null, $errorCode = null): void
     {
-        $redirectUrl = null;
-        if ($from === 'checkout') {
-            $checkoutPageId = wc_get_page_id('checkout');
-            $redirectUrl = $checkoutPageId ? get_permalink($checkoutPageId) : null;
-        }
+
+        $checkoutPageId = wc_get_page_id('checkout');
+        $redirectUrl = $checkoutPageId ? get_permalink($checkoutPageId) : null;
+
         if ($from === 'my_account') {
             $redirectUrl = get_permalink(get_option('woocommerce_myaccount_page_id')) . '/' . get_option(
                 'woocommerce_myaccount_payment_methods_endpoint',
                 'payment-methods'
             );
         }
-        if ($redirectUrl) {
-            if (isset($errorCode)) {
-                $params = ['transbank_status' => $errorCode];
-                $redirectUrl = add_query_arg($params, $redirectUrl);
-            }
-            wp_redirect($redirectUrl);
+
+        if (isset($errorCode)) {
+            $params = ['transbank_status' => $errorCode];
+            $redirectUrl = add_query_arg($params, $redirectUrl);
         }
+        wp_redirect($redirectUrl);
+
     }
 
     private function savePaymentToken($inscription, $finishInscriptionResponse)

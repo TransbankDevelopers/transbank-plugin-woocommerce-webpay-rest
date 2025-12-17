@@ -57,7 +57,7 @@ class OneclickInscriptionService extends ProductBaseService
      *
      * @return \Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse
      */
-    public function finishInscription($token, $userName, $email)
+    public function finishInscription($token)
     {
             return $this->mallInscription->finish($token);
     }
