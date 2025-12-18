@@ -10,6 +10,7 @@ use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Onecli
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
+use Transbank\WooCommerce\WebpayRest\Setup\ConfigMigrator;
 use Transbank\WooCommerce\WebpayRest\Utils\ConnectionCheck;
 use Transbank\WooCommerce\WebpayRest\Utils\TableCheck;
 use Transbank\Plugin\Helpers\PluginLogger;
@@ -134,6 +135,8 @@ function registerPaymentGateways()
         $methods[] = WC_Gateway_Transbank_Oneclick_Mall_REST::class;
         return $methods;
     });
+
+    ConfigMigrator::maybeMigrate();
 }
 
 function registerAdminMenu()
@@ -234,6 +237,7 @@ function activateTransbankModule()
         DatabaseTableInstaller::createTableIfNeeded();
         DatabaseTableInstaller::checkTables();
         GatewaySettingsInstaller::installDefaultsIfMissing();
+        ConfigMigrator::maybeMigrate();
     } catch (Exception $e) {
         $logger = TbkFactory::createLogger();
         $logger->logError('Error al activar el plugin de Transbank: ' . $e->getMessage());
