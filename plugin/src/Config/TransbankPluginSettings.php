@@ -64,6 +64,11 @@ final class TransbankPluginSettings
         return $this->cache;
     }
 
+    /**
+     * Checks whether the review notice has been dismissed.
+     *
+     * @return bool
+     */
     public function isReviewNoticeDismissed(): bool
     {
         $settings = $this->getAll();
@@ -71,6 +76,13 @@ final class TransbankPluginSettings
         return (bool) ($settings[self::KEY_REVIEW_NOTICE_DISMISSED] ?? false);
     }
 
+    /**
+     * Sets the review notice dismissed flag.
+     *
+     * Persists under the canonical array option.
+     *
+     * @param bool $dismissed
+     */
     public function setReviewNoticeDismissed(bool $dismissed): void
     {
         $raw = $this->loadRaw();
