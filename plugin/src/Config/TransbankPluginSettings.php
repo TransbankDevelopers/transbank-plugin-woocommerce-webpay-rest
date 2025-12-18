@@ -35,7 +35,6 @@ final class TransbankPluginSettings
     public const LEGACY_WELCOME_ONECLICK_SUFFIX = '_showed_welcome_message';
 
     private ?array $cache = null;
-    private bool $dirty = false;
 
     /**
      * Returns the filtered (runtime) settings array.
