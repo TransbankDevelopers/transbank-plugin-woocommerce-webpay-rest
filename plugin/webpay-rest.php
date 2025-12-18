@@ -15,6 +15,7 @@ use Transbank\WooCommerce\WebpayRest\Utils\TableCheck;
 use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Utils\Template;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Transbank\WooCommerce\WebpayRest\Setup\GatewaySettingsInstaller;
 
 if (!defined('ABSPATH')) {
     return;
@@ -45,6 +46,7 @@ $hposExists = $hposHelper->checkIfHposExists();
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 register_activation_hook(__FILE__, 'activateTransbankModule');
+register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
@@ -231,6 +233,7 @@ function activateTransbankModule()
     try {
         DatabaseTableInstaller::createTableIfNeeded();
         DatabaseTableInstaller::checkTables();
+        GatewaySettingsInstaller::installDefaultsIfMissing();
     } catch (Exception $e) {
         $logger = TbkFactory::createLogger();
         $logger->logError('Error al activar el plugin de Transbank: ' . $e->getMessage());
@@ -246,8 +249,6 @@ function transbank_rest_remove_database()
 {
     DatabaseTableInstaller::deleteTable();
 }
-
-register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 
 
 
