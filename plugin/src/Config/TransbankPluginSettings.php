@@ -22,6 +22,7 @@ final class TransbankPluginSettings
 {
     public const OPTION_NAME = 'transbank_webpay_settings';
 
+    public const KEY_REVIEW_NOTICE_DISMISSED = 'review_notice_dismissed';
     public const KEY_WELCOME_MESSAGES = 'welcome_messages';
     public const KEY_LOGGING = 'logging';
 
@@ -62,6 +63,27 @@ final class TransbankPluginSettings
         $this->cache = $settings;
 
         return $this->cache;
+    }
+
+    public function isReviewNoticeDismissed(): bool
+    {
+        $settings = $this->getAll();
+
+        return (bool) ($settings[self::KEY_REVIEW_NOTICE_DISMISSED] ?? false);
+    }
+
+    public function setReviewNoticeDismissed(bool $dismissed): void
+    {
+        $raw = $this->loadRaw();
+
+        $raw[self::KEY_REVIEW_NOTICE_DISMISSED] = $dismissed;
+
+        $this->cache = null;
+        $this->dirty = true;
+
+        update_option(self::OPTION_NAME, $this->normalizeForStorage($raw));
+
+        $this->dirty = false;
     }
 
     /**
@@ -219,6 +241,7 @@ final class TransbankPluginSettings
     private function getDefaults(): array
     {
         return [
+            self::KEY_REVIEW_NOTICE_DISMISSED => false,
             self::KEY_WELCOME_MESSAGES => [
                 TransbankGatewayIds::WEBPAY_PLUS_REST => $this->getLegacyWelcomeMessageShown(TransbankGatewayIds::WEBPAY_PLUS_REST),
                 TransbankGatewayIds::ONECLICK_MALL_REST => $this->getLegacyWelcomeMessageShown(TransbankGatewayIds::ONECLICK_MALL_REST),
@@ -245,6 +268,8 @@ final class TransbankPluginSettings
     {
         $defaults = $this->getDefaults();
 
+        $notice = $settings[self::KEY_REVIEW_NOTICE_DISMISSED] ?? $defaults[self::KEY_REVIEW_NOTICE_DISMISSED];
+
         $welcome = $settings[self::KEY_WELCOME_MESSAGES] ?? $defaults[self::KEY_WELCOME_MESSAGES];
         if (!is_array($welcome)) {
             $welcome = $defaults[self::KEY_WELCOME_MESSAGES];
@@ -266,6 +291,7 @@ final class TransbankPluginSettings
         ];
 
         return [
+            self::KEY_REVIEW_NOTICE_DISMISSED => (bool) $notice,
             self::KEY_WELCOME_MESSAGES => $storedWelcome,
             self::KEY_LOGGING => $storedLogging,
         ];
