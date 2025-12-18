@@ -316,21 +316,17 @@ final class TransbankGatewaySettings
      */
     private function sanitize(string $key, mixed $value): mixed
     {
+        $result = $value;
+
         if ($key === self::OPTION_ENABLED) {
-            return $value === 'yes' ? 'yes' : 'no';
-        }
-
-        if ($key === self::OPTION_ENVIRONMENT) {
-            $value = strtoupper((string) $value);
-            return in_array($value, ['TEST', 'LIVE'], true) ? $value : 'TEST';
-        }
-
-        if ($key === self::OPTION_MAX_AMOUNT) {
+            $result = $value === 'yes' ? 'yes' : 'no';
+        } elseif ($key === self::OPTION_ENVIRONMENT) {
+            $env = strtoupper((string) $value);
+            $result = in_array($env, ['TEST', 'LIVE'], true) ? $env : 'TEST';
+        } elseif ($key === self::OPTION_MAX_AMOUNT) {
             $intValue = (int) $value;
-            return $intValue < 0 ? 0 : $intValue;
-        }
-
-        if (in_array($key, [
+            $result = $intValue < 0 ? 0 : $intValue;
+        } elseif (in_array($key, [
             self::OPTION_COMMERCE_CODE,
             self::OPTION_CHILD_COMMERCE_CODE,
             self::OPTION_API_KEY,
@@ -339,10 +335,10 @@ final class TransbankGatewaySettings
             self::OPTION_BUY_ORDER_FORMAT,
             self::OPTION_CHILD_BUY_ORDER_FORMAT,
         ], true)) {
-            return (string) $value;
+            $result = (string) $value;
         }
 
-        return $value;
+        return $result;
     }
 
     /**
