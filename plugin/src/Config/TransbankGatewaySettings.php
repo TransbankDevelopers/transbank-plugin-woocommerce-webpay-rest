@@ -65,16 +65,6 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * Capability flag for gateways that require child commerce settings (e.g. Oneclick Mall).
-     *
-     * @return bool True if this gateway supports/uses child settings.
-     */
-    public function supportsChildren(): bool
-    {
-        return $this->gatewayId === 'transbank_oneclick_mall_rest';
-    }
-
-    /**
      * Returns the filtered (runtime) settings array.
      *
      * Applies `transbank_gateway_settings_all` to allow external customization without persisting
