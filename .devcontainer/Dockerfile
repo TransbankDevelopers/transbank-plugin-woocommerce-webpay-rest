@@ -14,21 +14,22 @@ ENV TZ=America/Santiago
 
 # install utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    less \
-    git \
-    mariadb-client \
-    zip \
-    wget \
-    unzip \
     ca-certificates \
-    netcat-openbsd \
+    curl \
+    git \
     gnupg \
+    less \
     libjpeg-dev \
     libpng-dev \
     libwebp-dev \
-    libzip-dev \
     libxml2-dev \
+    libzip-dev \
+    mariadb-client \
+    netcat-openbsd \
+    ssh \
+    unzip \
+    wget \
+    zip \
  && docker-php-ext-install soap \
  && rm -rf /var/lib/apt/lists/*
 

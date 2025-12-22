@@ -148,14 +148,24 @@ else
   echo "No se encontró el plugin en ${PLUGIN_DIR} para activarlo."
 fi
 
-# --- Activate Webpay Plus One Click
-STATUS_ONE_CLICK=$(wp wc payment_gateway get transbank_oneclick_mall_rest --allow-root --user=admin | awk '/enabled/ {print $2}')
+# --- Activate Webpay Plus
+STATUS_WEBPAY=$(wp wc payment_gateway get transbank_webpay_plus_rest --allow-root --user=admin | awk '/enabled/ {print $2}')
 
-if [ "$STATUS_ONE_CLICK" = "false" ]; then
-  echo "Activando opción de One Click de Transbank plugin"
+if [ "$STATUS_WEBPAY" = "false" ]; then
+  echo "Activando opción de Webpay Plus de Transbank plugin"
+  wp wc payment_gateway update transbank_webpay_plus_rest --allow-root --user=admin --enabled=true
+else
+  echo "Ya se encuentra activa la opción de Webpay Plus"
+fi
+
+# --- Activate Webpay OneClick
+STATUS_ONECLICK=$(wp wc payment_gateway get transbank_oneclick_mall_rest --allow-root --user=admin | awk '/enabled/ {print $2}')
+
+if [ "$STATUS_ONECLICK" = "false" ]; then
+  echo "Activando opción de OneClick de Transbank plugin"
   wp wc payment_gateway update transbank_oneclick_mall_rest --allow-root --user=admin --enabled=true
 else
-  echo "Ya se encuentra activa la opción de one click"
+  echo "Ya se encuentra activa la opción de OneClick"
 fi
 
 echo "Setup de WordPress + WooCommerce + Transbank completado."

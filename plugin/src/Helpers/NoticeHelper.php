@@ -2,6 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use Transbank\WooCommerce\WebpayRest\Config\TransbankPluginSettings;
 use Transbank\WooCommerce\WebpayRest\Utils\Template;
 
 class NoticeHelper
@@ -34,13 +35,13 @@ class NoticeHelper
         $noticeId = $_POST['notice_id'] ?? '';
 
         if ($noticeId == self::NOTICE_REVIEW_ID) {
-            $success = update_site_option('tbk_review_notice_showed', true);
+            (new TransbankPluginSettings())->setReviewNoticeDismissed(true);
         }
     }
 
     public static function registerNoticesDismissHook()
     {
-        add_action('wp_ajax_dismiss_notice', NoticeHelper::class.'::dismissNoticesHandler');
+        add_action('wp_ajax_dismiss_notice', NoticeHelper::class . '::dismissNoticesHandler');
     }
 
     /**
@@ -49,7 +50,7 @@ class NoticeHelper
      */
     private static function shouldShowReviewNotice(): bool
     {
-        $reviewNoticeShowed = get_site_option('tbk_review_notice_showed');
+        $reviewNoticeShowed = (new TransbankPluginSettings())->isReviewNoticeDismissed();
         if ($reviewNoticeShowed) {
             return false;
         }
