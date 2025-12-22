@@ -35,11 +35,11 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Webpay Plus';
         $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::OPTION_DESCRIPTION,
+            $this->gatewaySettings::DESCRIPTION,
             self::PAYMENT_GW_DESCRIPTION
         );
         $this->method_description = $this->gatewaySettings->get(
-            $this->gatewaySettings::OPTION_DESCRIPTION,
+            $this->gatewaySettings::DESCRIPTION,
             self::PAYMENT_GW_DESCRIPTION
         );
 
@@ -116,13 +116,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
 
         $this->form_fields = [
-            $gatewaySettings::OPTION_ENABLED => [
+                $gatewaySettings::ENABLED => [
                 'title' => __('Activo', 'transbank_webpay_plus_rest'),
                 'type' => 'checkbox',
                 'label' => " ",
                 'default' => 'no',
             ],
-            $gatewaySettings::OPTION_ENVIRONMENT => [
+                $gatewaySettings::ENVIRONMENT => [
                 'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => $environmentDescription,
@@ -132,21 +132,21 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => 'TEST',
             ],
-            $gatewaySettings::OPTION_COMMERCE_CODE => [
+                $gatewaySettings::COMMERCE_CODE => [
                 'title' => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $commerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_API_KEY => [
+                $gatewaySettings::API_KEY => [
                 'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
                 'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip' => $apiKeyDescription,
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS => [
+                $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
                 'title' => __('Order Status', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
@@ -157,18 +157,18 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_DESCRIPTION => [
+                $gatewaySettings::DESCRIPTION => [
                 'title' => __('Descripción', 'transbank_webpay_plus_rest'),
                 'type' => 'textarea',
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
-            $gatewaySettings::OPTION_BUY_ORDER_FORMAT => [
-                'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
+                $gatewaySettings::BUY_ORDER_FORMAT => [
+                'title' => __('Formato de orden de compra', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . WebpayService::BUY_ORDER_FORMAT,
-                'desc_tip'    => $buyOrderDescription,
-                'type'        => 'text',
+                'desc_tip' => $buyOrderDescription,
+                'type' => 'text',
                 'default' => WebpayService::BUY_ORDER_FORMAT
             ]
         ];
@@ -206,7 +206,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         $tab = 'options';
         $environment = $this->gatewaySettings->get(
-            $this->gatewaySettings::OPTION_ENVIRONMENT
+            $this->gatewaySettings::ENVIRONMENT
         );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }

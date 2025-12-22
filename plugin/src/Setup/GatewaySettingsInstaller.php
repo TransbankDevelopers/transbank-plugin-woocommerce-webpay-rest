@@ -31,31 +31,31 @@ final class GatewaySettingsInstaller
     private static function getWebpayPlusDefaults(): array
     {
         return [
-            TransbankGatewaySettings::OPTION_ENABLED => 'no',
-            TransbankGatewaySettings::OPTION_ENVIRONMENT => Options::ENVIRONMENT_INTEGRATION,
-            TransbankGatewaySettings::OPTION_COMMERCE_CODE => WebpayPlus::INTEGRATION_COMMERCE_CODE,
-            TransbankGatewaySettings::OPTION_API_KEY => WebpayPlus::INTEGRATION_API_KEY,
-            TransbankGatewaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS => '',
-            TransbankGatewaySettings::OPTION_DESCRIPTION => 'Permite el pago de productos y/o servicios, ' .
+            TransbankGatewaySettings::ENABLED => 'no',
+            TransbankGatewaySettings::ENVIRONMENT => Options::ENVIRONMENT_INTEGRATION,
+            TransbankGatewaySettings::COMMERCE_CODE => WebpayPlus::INTEGRATION_COMMERCE_CODE,
+            TransbankGatewaySettings::API_KEY => WebpayPlus::INTEGRATION_API_KEY,
+            TransbankGatewaySettings::AFTER_PAYMENT_ORDER_STATUS => '',
+            TransbankGatewaySettings::DESCRIPTION => 'Permite el pago de productos y/o servicios, ' .
                 'con tarjetas de crédito, débito y prepago a través de Webpay Plus',
-            TransbankGatewaySettings::OPTION_BUY_ORDER_FORMAT => '{orderId}{random, length=8}',
+            TransbankGatewaySettings::BUY_ORDER_FORMAT => '{orderId}{random, length=8}',
         ];
     }
 
     private static function getOneclickMallDefaults(): array
     {
         return [
-            TransbankGatewaySettings::OPTION_ENABLED => 'no',
-            TransbankGatewaySettings::OPTION_ENVIRONMENT => Options::ENVIRONMENT_INTEGRATION,
-            TransbankGatewaySettings::OPTION_COMMERCE_CODE => Oneclick::INTEGRATION_COMMERCE_CODE,
-            TransbankGatewaySettings::OPTION_CHILD_COMMERCE_CODE => Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1,
-            TransbankGatewaySettings::OPTION_API_KEY => Oneclick::INTEGRATION_API_KEY,
-            TransbankGatewaySettings::OPTION_MAX_AMOUNT => 0,
-            TransbankGatewaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS => '',
-            TransbankGatewaySettings::OPTION_DESCRIPTION => 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga ' .
+            TransbankGatewaySettings::ENABLED => 'no',
+            TransbankGatewaySettings::ENVIRONMENT => Options::ENVIRONMENT_INTEGRATION,
+            TransbankGatewaySettings::COMMERCE_CODE => Oneclick::INTEGRATION_COMMERCE_CODE,
+            TransbankGatewaySettings::CHILD_COMMERCE_CODE => Oneclick::INTEGRATION_CHILD_COMMERCE_CODE_1,
+            TransbankGatewaySettings::API_KEY => Oneclick::INTEGRATION_API_KEY,
+            TransbankGatewaySettings::MAX_AMOUNT => 0,
+            TransbankGatewaySettings::AFTER_PAYMENT_ORDER_STATUS => '',
+            TransbankGatewaySettings::DESCRIPTION => 'Inscribe tu tarjeta de crédito, débito o prepago y luego paga ' .
                 'con un solo click a través de Webpay Oneclick',
-            TransbankGatewaySettings::OPTION_BUY_ORDER_FORMAT => 'wc-{random, length=8}-{orderId}',
-            TransbankGatewaySettings::OPTION_CHILD_BUY_ORDER_FORMAT => 'wc-child-{random, length=8}-{orderId}',
+            TransbankGatewaySettings::BUY_ORDER_FORMAT => 'wc-{random, length=8}-{orderId}',
+            TransbankGatewaySettings::CHILD_BUY_ORDER_FORMAT => 'wc-child-{random, length=8}-{orderId}',
         ];
     }
 }

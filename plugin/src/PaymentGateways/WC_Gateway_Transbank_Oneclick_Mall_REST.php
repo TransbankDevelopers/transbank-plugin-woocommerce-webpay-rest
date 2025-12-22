@@ -70,11 +70,11 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
         $this->description = $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::OPTION_DESCRIPTION,
+            $this->gatewaySettings::DESCRIPTION,
             self::PAYMENT_GW_DESCRIPTION
         );
         $this->method_description = $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::OPTION_DESCRIPTION,
+            $this->gatewaySettings::DESCRIPTION,
             self::PAYMENT_GW_DESCRIPTION
         );
 
@@ -163,24 +163,24 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
             $tab = 'options_oneclick';
             $environment = $this->gatewaySettings->get(
-                $this->gatewaySettings::OPTION_ENVIRONMENT
+                $this->gatewaySettings::ENVIRONMENT
             );
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
-?>
+            ?>
             <div class="inline error">
                 <p>
                     <strong><?php esc_html_e(
-                                'Gateway disabled',
-                                'woocommerce'
-                            ); ?></strong>: <?php esc_html_e(
-                                                'Oneclick no soporta la moneda configurada en tu tienda. ' .
-                                                    'Solo soporta CLP',
-                                                'transbank_wc_plugin'
-                                            ); ?>
+                        'Gateway disabled',
+                        'woocommerce'
+                    ); ?></strong>: <?php esc_html_e(
+                         'Oneclick no soporta la moneda configurada en tu tienda. ' .
+                         'Solo soporta CLP',
+                         'transbank_wc_plugin'
+                     ); ?>
                 </p>
             </div>
-<?php
+            <?php
         }
     }
 
@@ -295,13 +295,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
 
         $this->form_fields = [
-            $gatewaySettings::OPTION_ENABLED => [
+                $gatewaySettings::ENABLED => [
                 'title' => __('Activo', 'transbank_wc_plugin'),
                 'type' => 'checkbox',
                 'label' => " ",
                 'default' => 'no',
             ],
-            $gatewaySettings::OPTION_ENVIRONMENT => [
+                $gatewaySettings::ENVIRONMENT => [
                 'title' => __('Ambiente', 'transbank_wc_plugin'),
                 'type' => 'select',
                 'desc_tip' => $environmentDescription,
@@ -311,35 +311,35 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 ],
                 'default' => Options::ENVIRONMENT_INTEGRATION,
             ],
-            $gatewaySettings::OPTION_COMMERCE_CODE => [
+                $gatewaySettings::COMMERCE_CODE => [
                 'title' => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $commerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_CHILD_COMMERCE_CODE => [
+                $gatewaySettings::CHILD_COMMERCE_CODE => [
                 'title' => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $childCommerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_API_KEY => [
+                $gatewaySettings::API_KEY => [
                 'title' => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
                 'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip' => $apiKeyDescription,
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_MAX_AMOUNT => [
+                $gatewaySettings::MAX_AMOUNT => [
                 'title' => __('Monto máximo de transacción permitido', 'transbank_wc_plugin'),
                 'type' => 'number',
                 'options' => ['step' => 100],
                 'default' => '0',
                 'desc_tip' => $maxAmountDescription,
             ],
-            $gatewaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS => [
+                $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
                 'title' => __('Order Status', 'transbank_wc_plugin'),
                 'type' => 'select',
                 'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
@@ -350,14 +350,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 ],
                 'default' => '',
             ],
-            $gatewaySettings::OPTION_DESCRIPTION => [
+                $gatewaySettings::DESCRIPTION => [
                 'title' => __('Descripción', 'transbank_wc_plugin'),
                 'type' => 'textarea',
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
-            $gatewaySettings::OPTION_BUY_ORDER_FORMAT => [
+                $gatewaySettings::BUY_ORDER_FORMAT => [
                 'title' => __(
                     'Formato personalizado de orden de compra principal',
                     'transbank_wc_plugin'
@@ -367,7 +367,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'type' => 'text',
                 'default' => OneclickAuthorizationService::BUY_ORDER_FORMAT
             ],
-            $gatewaySettings::OPTION_CHILD_BUY_ORDER_FORMAT => [
+                $gatewaySettings::CHILD_BUY_ORDER_FORMAT => [
                 'title' => __('Formato personalizado de orden de compra hija', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
                 'desc_tip' => $childBuyOrderDescription,

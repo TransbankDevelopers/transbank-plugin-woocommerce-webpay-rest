@@ -47,13 +47,13 @@ final class ConfigMigrator
         $changed = false;
 
         $map = [
-            'webpay_rest_environment' => TransbankGatewaySettings::OPTION_ENVIRONMENT,
-            'webpay_rest_commerce_code' => TransbankGatewaySettings::OPTION_COMMERCE_CODE,
-            'webpay_rest_api_key' => TransbankGatewaySettings::OPTION_API_KEY,
-            'webpay_rest_after_payment_order_status' => TransbankGatewaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS,
-            'webpay_rest_payment_gateway_description' => TransbankGatewaySettings::OPTION_DESCRIPTION,
-            'oneclick_after_payment_order_status' => TransbankGatewaySettings::OPTION_AFTER_PAYMENT_ORDER_STATUS,
-            'oneclick_payment_gateway_description' => TransbankGatewaySettings::OPTION_DESCRIPTION,
+            'webpay_rest_environment' => TransbankGatewaySettings::ENVIRONMENT,
+            'webpay_rest_commerce_code' => TransbankGatewaySettings::COMMERCE_CODE,
+            'webpay_rest_api_key' => TransbankGatewaySettings::API_KEY,
+            'webpay_rest_after_payment_order_status' => TransbankGatewaySettings::AFTER_PAYMENT_ORDER_STATUS,
+            'webpay_rest_payment_gateway_description' => TransbankGatewaySettings::DESCRIPTION,
+            'oneclick_after_payment_order_status' => TransbankGatewaySettings::AFTER_PAYMENT_ORDER_STATUS,
+            'oneclick_payment_gateway_description' => TransbankGatewaySettings::DESCRIPTION,
         ];
 
         foreach ($map as $legacyKey => $canonicalKey) {

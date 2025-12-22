@@ -22,16 +22,16 @@ namespace Transbank\WooCommerce\WebpayRest\Config;
  */
 final class TransbankGatewaySettings
 {
-    public const OPTION_ENABLED = 'enabled';
-    public const OPTION_ENVIRONMENT = 'environment';
-    public const OPTION_COMMERCE_CODE = 'commerce_code';
-    public const OPTION_CHILD_COMMERCE_CODE = 'child_commerce_code';
-    public const OPTION_API_KEY = 'api_key';
-    public const OPTION_MAX_AMOUNT = 'max_amount';
-    public const OPTION_AFTER_PAYMENT_ORDER_STATUS = 'after_payment_order_status';
-    public const OPTION_DESCRIPTION = 'payment_gateway_description';
-    public const OPTION_BUY_ORDER_FORMAT = 'buy_order_format';
-    public const OPTION_CHILD_BUY_ORDER_FORMAT = 'child_buy_order_format';
+    public const ENABLED = 'enabled';
+    public const ENVIRONMENT = 'environment';
+    public const COMMERCE_CODE = 'commerce_code';
+    public const CHILD_COMMERCE_CODE = 'child_commerce_code';
+    public const API_KEY = 'api_key';
+    public const MAX_AMOUNT = 'max_amount';
+    public const AFTER_PAYMENT_ORDER_STATUS = 'after_payment_order_status';
+    public const DESCRIPTION = 'payment_gateway_description';
+    public const BUY_ORDER_FORMAT = 'buy_order_format';
+    public const CHILD_BUY_ORDER_FORMAT = 'child_buy_order_format';
 
     private string $gatewayId;
     private ?array $cache = null;
@@ -61,7 +61,7 @@ final class TransbankGatewaySettings
      */
     public function isEnabled(): bool
     {
-        return $this->get(self::OPTION_ENABLED, 'no') === 'yes';
+        return $this->get(self::ENABLED, 'no') === 'yes';
     }
 
     /**
@@ -234,16 +234,16 @@ final class TransbankGatewaySettings
     private function getDefaults(): array
     {
         return [
-            self::OPTION_ENABLED => 'no',
-            self::OPTION_ENVIRONMENT => 'TEST',
-            self::OPTION_COMMERCE_CODE => '',
-            self::OPTION_CHILD_COMMERCE_CODE => '',
-            self::OPTION_API_KEY => '',
-            self::OPTION_MAX_AMOUNT => 0,
-            self::OPTION_AFTER_PAYMENT_ORDER_STATUS => '',
-            self::OPTION_DESCRIPTION => '',
-            self::OPTION_BUY_ORDER_FORMAT => '',
-            self::OPTION_CHILD_BUY_ORDER_FORMAT => '',
+            self::ENABLED => 'no',
+            self::ENVIRONMENT => 'TEST',
+            self::COMMERCE_CODE => '',
+            self::CHILD_COMMERCE_CODE => '',
+            self::API_KEY => '',
+            self::MAX_AMOUNT => 0,
+            self::AFTER_PAYMENT_ORDER_STATUS => '',
+            self::DESCRIPTION => '',
+            self::BUY_ORDER_FORMAT => '',
+            self::CHILD_BUY_ORDER_FORMAT => '',
         ];
     }
 
@@ -255,16 +255,16 @@ final class TransbankGatewaySettings
     private function getAllowedKeys(): array
     {
         return [
-            self::OPTION_ENABLED,
-            self::OPTION_ENVIRONMENT,
-            self::OPTION_COMMERCE_CODE,
-            self::OPTION_CHILD_COMMERCE_CODE,
-            self::OPTION_API_KEY,
-            self::OPTION_MAX_AMOUNT,
-            self::OPTION_AFTER_PAYMENT_ORDER_STATUS,
-            self::OPTION_DESCRIPTION,
-            self::OPTION_BUY_ORDER_FORMAT,
-            self::OPTION_CHILD_BUY_ORDER_FORMAT,
+            self::ENABLED,
+            self::ENVIRONMENT,
+            self::COMMERCE_CODE,
+            self::CHILD_COMMERCE_CODE,
+            self::API_KEY,
+            self::MAX_AMOUNT,
+            self::AFTER_PAYMENT_ORDER_STATUS,
+            self::DESCRIPTION,
+            self::BUY_ORDER_FORMAT,
+            self::CHILD_BUY_ORDER_FORMAT,
         ];
     }
 
@@ -276,32 +276,32 @@ final class TransbankGatewaySettings
      */
     private function normalizeKeys(array $raw): array
     {
-        if (isset($raw['webpay_rest_environment']) && !isset($raw[self::OPTION_ENVIRONMENT])) {
-            $raw[self::OPTION_ENVIRONMENT] = $raw['webpay_rest_environment'];
+        if (isset($raw['webpay_rest_environment']) && !isset($raw[self::ENVIRONMENT])) {
+            $raw[self::ENVIRONMENT] = $raw['webpay_rest_environment'];
         }
 
-        if (isset($raw['webpay_rest_commerce_code']) && !isset($raw[self::OPTION_COMMERCE_CODE])) {
-            $raw[self::OPTION_COMMERCE_CODE] = $raw['webpay_rest_commerce_code'];
+        if (isset($raw['webpay_rest_commerce_code']) && !isset($raw[self::COMMERCE_CODE])) {
+            $raw[self::COMMERCE_CODE] = $raw['webpay_rest_commerce_code'];
         }
 
-        if (isset($raw['webpay_rest_api_key']) && !isset($raw[self::OPTION_API_KEY])) {
-            $raw[self::OPTION_API_KEY] = $raw['webpay_rest_api_key'];
+        if (isset($raw['webpay_rest_api_key']) && !isset($raw[self::API_KEY])) {
+            $raw[self::API_KEY] = $raw['webpay_rest_api_key'];
         }
 
-        if (isset($raw['webpay_rest_after_payment_order_status']) && !isset($raw[self::OPTION_AFTER_PAYMENT_ORDER_STATUS])) {
-            $raw[self::OPTION_AFTER_PAYMENT_ORDER_STATUS] = $raw['webpay_rest_after_payment_order_status'];
+        if (isset($raw['webpay_rest_after_payment_order_status']) && !isset($raw[self::AFTER_PAYMENT_ORDER_STATUS])) {
+            $raw[self::AFTER_PAYMENT_ORDER_STATUS] = $raw['webpay_rest_after_payment_order_status'];
         }
 
-        if (isset($raw['webpay_rest_payment_gateway_description']) && !isset($raw[self::OPTION_DESCRIPTION])) {
-            $raw[self::OPTION_DESCRIPTION] = $raw['webpay_rest_payment_gateway_description'];
+        if (isset($raw['webpay_rest_payment_gateway_description']) && !isset($raw[self::DESCRIPTION])) {
+            $raw[self::DESCRIPTION] = $raw['webpay_rest_payment_gateway_description'];
         }
 
-        if (isset($raw['oneclick_after_payment_order_status']) && !isset($raw[self::OPTION_AFTER_PAYMENT_ORDER_STATUS])) {
-            $raw[self::OPTION_AFTER_PAYMENT_ORDER_STATUS] = $raw['oneclick_after_payment_order_status'];
+        if (isset($raw['oneclick_after_payment_order_status']) && !isset($raw[self::AFTER_PAYMENT_ORDER_STATUS])) {
+            $raw[self::AFTER_PAYMENT_ORDER_STATUS] = $raw['oneclick_after_payment_order_status'];
         }
 
-        if (isset($raw['oneclick_payment_gateway_description']) && !isset($raw[self::OPTION_DESCRIPTION])) {
-            $raw[self::OPTION_DESCRIPTION] = $raw['oneclick_payment_gateway_description'];
+        if (isset($raw['oneclick_payment_gateway_description']) && !isset($raw[self::DESCRIPTION])) {
+            $raw[self::DESCRIPTION] = $raw['oneclick_payment_gateway_description'];
         }
 
         return $raw;
@@ -318,23 +318,25 @@ final class TransbankGatewaySettings
     {
         $result = $value;
 
-        if ($key === self::OPTION_ENABLED) {
+        if ($key === self::ENABLED) {
             $result = $value === 'yes' ? 'yes' : 'no';
-        } elseif ($key === self::OPTION_ENVIRONMENT) {
+        } elseif ($key === self::ENVIRONMENT) {
             $env = strtoupper((string) $value);
             $result = in_array($env, ['TEST', 'LIVE'], true) ? $env : 'TEST';
-        } elseif ($key === self::OPTION_MAX_AMOUNT) {
+        } elseif ($key === self::MAX_AMOUNT) {
             $intValue = (int) $value;
             $result = $intValue < 0 ? 0 : $intValue;
-        } elseif (in_array($key, [
-            self::OPTION_COMMERCE_CODE,
-            self::OPTION_CHILD_COMMERCE_CODE,
-            self::OPTION_API_KEY,
-            self::OPTION_AFTER_PAYMENT_ORDER_STATUS,
-            self::OPTION_DESCRIPTION,
-            self::OPTION_BUY_ORDER_FORMAT,
-            self::OPTION_CHILD_BUY_ORDER_FORMAT,
-        ], true)) {
+        } elseif (
+            in_array($key, [
+                self::COMMERCE_CODE,
+                self::CHILD_COMMERCE_CODE,
+                self::API_KEY,
+                self::AFTER_PAYMENT_ORDER_STATUS,
+                self::DESCRIPTION,
+                self::BUY_ORDER_FORMAT,
+                self::CHILD_BUY_ORDER_FORMAT,
+            ], true)
+        ) {
             $result = (string) $value;
         }
 
