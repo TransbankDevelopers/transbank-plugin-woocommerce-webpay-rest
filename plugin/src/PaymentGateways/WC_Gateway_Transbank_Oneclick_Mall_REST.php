@@ -12,6 +12,7 @@ use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewayIds;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Controllers\AuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ScheduledAuthorizeOneclickController;
 use Transbank\WooCommerce\WebpayRest\Controllers\RefundOneclickController;
@@ -163,7 +164,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
             $tab = 'options_oneclick';
             $environment = $this->gatewaySettings->get(
-                $this->gatewaySettings::ENVIRONMENT
+                TransbankGatewaySettings::ENVIRONMENT
             );
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {

@@ -11,6 +11,7 @@ use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewayIds;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use WC_Payment_Gateway;
 
@@ -206,7 +207,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
         $tab = 'options';
         $environment = $this->gatewaySettings->get(
-            $this->gatewaySettings::ENVIRONMENT
+            TransbankGatewaySettings::ENVIRONMENT
         );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }
