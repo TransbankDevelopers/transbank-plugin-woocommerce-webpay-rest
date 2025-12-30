@@ -17,5 +17,9 @@
             "Transbank\\WooCommerce\\WebpayRest\\": "src/",
             "Transbank\\Plugin\\": "shared/"
         }
+    },
+    "require-dev": {
+        "php-stubs/wordpress-stubs": "^6.9",
+        "php-stubs/woocommerce-stubs": "^10.4"
     }
 }
