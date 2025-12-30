@@ -3,7 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
-use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class InscriptionRepository extends BaseRepository implements InscriptionRepositoryInterface
