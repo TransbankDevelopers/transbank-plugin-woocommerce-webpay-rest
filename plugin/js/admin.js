@@ -305,7 +305,7 @@ const generateBuyOrderPreview = (format) => {
     return format
         .replace(/\{orderId\}/gi, orderId.toString())
         .replace(/\{random(?:, length=\d+)?\}/gi, (_, length) =>
-            generateRandomString(length ? parseInt(length, 10) : 6),
+            generateRandomString(length ? Number.parseInt(length, 10) : 6),
         );
 };
 
