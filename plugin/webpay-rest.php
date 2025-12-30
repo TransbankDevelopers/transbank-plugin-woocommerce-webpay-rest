@@ -126,6 +126,7 @@ function woocommerceTransbankInit()
     registerPluginActionLinks();
     NoticeHelper::registerNoticesDismissHook();
     NoticeHelper::handleReviewNotice();
+    registerAdminNotice();
 }
 
 function registerPaymentGateways()
@@ -145,7 +146,7 @@ function registerAdminMenu()
         add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
             $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_DEFAULT) ?? '';
             $tab = htmlspecialchars($tab, ENT_QUOTES, 'UTF-8');
-            if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
+            if (!in_array($tab, ['healthcheck', 'logs', 'transactions', 'inscriptions'])) {
                 wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
             }
 
@@ -271,6 +272,37 @@ function transbank_rest_check_cancelled_checkout()
     if ($cancelledOrder) {
         wc_print_notice(__('Cancelaste la inscripción durante el formulario de Webpay.', 'transbank_wc_plugin'), 'error');
     }
+}
+
+function registerAdminNotice()
+{
+    add_action('admin_notices', function () {
+        $page = isset($_GET['page']) ? (string) $_GET['page'] : '';
+        $section = isset($_GET['section']) ? (string) $_GET['section'] : '';
+
+        if ($page !== 'transbank_webpay_plus_rest' && $section !== 'transbank_webpay_plus_rest') {
+            return;
+        }
+
+        $type = isset($_GET['tbk_notice_type']) ? (string) $_GET['tbk_notice_type'] : '';
+        $msg = isset($_GET['tbk_notice_msg']) ? (string) $_GET['tbk_notice_msg'] : '';
+        $id = isset($_GET['tbk_notice_id']) ? (string) $_GET['tbk_notice_id'] : '';
+
+        if ($type === '' || $msg === '') {
+            return;
+        }
+
+        (new Template())->render('admin/components/notice.php', [
+            'id' => 'tbk-inscription-delete-notice',
+            'type' => $type,
+            'title' => $msg,
+            'description' => '',
+            'logoUrl' => sprintf('%s%s', plugin_dir_url(__FILE__), './images/tbk-logo.png'),
+            'logoAlt' => 'Transbank Logo',
+            'logoHeight' => 50,
+            'isDismissible' => true,
+        ]);
+    });
 }
 
 function noticeMissingWoocommerce()
