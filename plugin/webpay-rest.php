@@ -293,7 +293,7 @@ function registerAdminNotice()
         }
 
         (new Template())->render('admin/components/notice.php', [
-            'id' => 'tbk-inscription-delete-notice',
+            'id' => $id,
             'type' => $type,
             'title' => $msg,
             'description' => '',
