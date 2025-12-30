@@ -123,8 +123,8 @@ jQuery(function ($) {
                     fieldValue.textContent = value;
 
                     if (key == "status") {
-                        fieldValue.classList.add("tbk-badge");
                         fieldValue.classList.add(
+                            "tbk-badge",
                             getBadgeColorFromStatus(value),
                         );
                     }
