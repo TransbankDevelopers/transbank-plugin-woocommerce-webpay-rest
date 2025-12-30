@@ -505,7 +505,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!href) return;
 
             if (typeof swal !== "function") {
-                window.location.href = href;
+                globalThis.location.href = href;
                 return;
             }
 
@@ -527,7 +527,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 dangerMode: true,
             }).then(function (ok) {
-                if (ok) window.location.href = href;
+                if (ok) globalThis.location.href = href;
             });
         },
         true,
