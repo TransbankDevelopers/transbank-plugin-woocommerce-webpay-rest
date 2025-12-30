@@ -84,12 +84,12 @@ else
   echo "WooCommerce ya instalado y activo."
 fi
 
-# --- Install Storefront theme
-if ! wp theme is-installed storefront --allow-root; then
-  echo "Instalando tema Storefront..."
-  wp theme install storefront --activate --allow-root || true
+# --- Install Spectra One theme
+if ! wp theme is-installed spectra-one --allow-root; then
+  echo "Instalando tema Spectra One..."
+  wp theme install spectra-one --activate --allow-root || true
 else
-  echo "Storefront ya instalado y activo."
+  echo "Spectra One ya instalado y activo."
 fi
 
 
@@ -139,10 +139,6 @@ wp config set WPS_DEBUG true --type=constant --allow-root --raw --add
 wp config set WPS_DEBUG_SCRIPTS true --type=constant --allow-root --raw --add
 wp config set WPS_DEBUG_STYLES true --type=constant --allow-root --raw --add
 wp config set WP_DEBUG_LOG "/var/log/wordpress/debug.log" --type=constant --allow-root
-
-# --- Install theme Spectra One
-echo "Instalando tema Spectra One..."
-wp theme install spectra-one --activate --allow-root
 
 # --- Activate Transbank plugin
 if [ -d "$PLUGIN_DIR" ]; then
