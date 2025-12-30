@@ -59,7 +59,6 @@ class FinishOneclickController
             if ($oneclickFlow === self::ONECLICK_ERROR_FLOW) {
                 throw new EcommerceException('Parámetros inválidos recibidos desde el formulario Oneclick');
             }
-
         } catch (Throwable $e) {
             $this->log->logError('Error procesando el retorno de inscripción Oneclick', [
                 'error' => $e->getMessage(),
@@ -81,12 +80,12 @@ class FinishOneclickController
         $tbkOrdenCompra = isset($requestData['TBK_ORDEN_COMPRA']);
 
         $this->log->logInfo('Datos recibidos desde formulario Oneclick', [
-            'token' => $token ? $requestData["TBK_TOKEN"]: null,
+            'token' => $token ? $requestData["TBK_TOKEN"] : null,
             'tbkSessionId' => $tbkSessionId ? $requestData['TBK_ID_SESION'] : null,
             'tbkOrdenCompra' => $tbkOrdenCompra ? $requestData['TBK_ORDEN_COMPRA'] : null,
         ]);
 
-        if($token && !$tbkSessionId && !$tbkOrdenCompra) {
+        if ($token && !$tbkSessionId && !$tbkOrdenCompra) {
             return self::ONECLICK_NORMAL_FLOW;
         }
         if ($token && $tbkSessionId && $tbkOrdenCompra) {
@@ -146,7 +145,7 @@ class FinishOneclickController
 
             $userInfo = wp_get_current_user();
             if (!$userInfo) {
-                wc_transbank_oneclick_inscription_finishedlogError('You were logged out');
+                throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
             }
             $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
             BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
@@ -188,23 +187,21 @@ class FinishOneclickController
      */
     public function redirectUser($from = null, $errorCode = null): void
     {
-
-        $checkoutPageId = wc_get_page_id('checkout');
-        $redirectUrl = $checkoutPageId ? get_permalink($checkoutPageId) : null;
+        $redirectUrl = wc_get_checkout_url();
 
         if ($from === 'my_account') {
-            $redirectUrl = get_permalink(get_option('woocommerce_myaccount_page_id')) . '/' . get_option(
-                'woocommerce_myaccount_payment_methods_endpoint',
-                'payment-methods'
+            $redirectUrl = wc_get_endpoint_url(
+                get_option('woocommerce_myaccount_payment_methods_endpoint', 'payment-methods'),
+                '',
+                wc_get_page_permalink('myaccount')
             );
         }
 
-        if (isset($errorCode)) {
-            $params = ['transbank_status' => $errorCode];
-            $redirectUrl = add_query_arg($params, $redirectUrl);
+        if ($errorCode !== null) {
+            $redirectUrl = add_query_arg(['transbank_status' => $errorCode], $redirectUrl);
         }
-        wp_redirect($redirectUrl);
 
+        wp_safe_redirect($redirectUrl);
     }
 
     private function savePaymentToken($inscription, $finishInscriptionResponse)

@@ -3,7 +3,6 @@
 namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
-use Transbank\WooCommerce\WebpayRest\Models\Inscription;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class InscriptionRepository extends BaseRepository implements InscriptionRepositoryInterface
@@ -43,7 +42,7 @@ class InscriptionRepository extends BaseRepository implements InscriptionReposit
         return $this->updateBase($inscriptionId, $data);
     }
 
-     /**
+    /**
      * Retrieve a inscription by token. Throws an exception if not found.
      *
      * @param string $token The inscription token.
@@ -56,6 +55,25 @@ class InscriptionRepository extends BaseRepository implements InscriptionReposit
         return $this->getFirst(
             "SELECT * FROM $inscriptionTableName WHERE `token` = '%s'",
             "Token no se encontró en la base de datos de inscripciones",
-            $token);
+            $token
+        );
+    }
+
+    /**
+     * Retrieve a inscription by ID. Throws an exception if not found.
+     *
+     * @param string $id The inscription ID.
+     * @return object Inscription object
+     *
+     * @throws RecordNotFoundOnDatabaseException
+     */
+    public function getById(string $id): object
+    {
+        $inscriptionTableName = $this->getTableName();
+        return $this->getFirst(
+            "SELECT * FROM $inscriptionTableName WHERE `id` = '%s'",
+            "No se encontró inscripción con el ID proporcionado",
+            $id
+        );
     }
 }

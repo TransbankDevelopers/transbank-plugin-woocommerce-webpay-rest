@@ -36,13 +36,13 @@ class TbkFactory
         return new PluginLogger($config);
     }
 
-    public static function createOneclickLogger()
+    public static function createOneclickLogger(): PluginLogger
     {
         $shouldMask = !static::getOneclickConfig()->isIntegration();
         return static::createLogger($shouldMask);
     }
 
-    public static function createWebpayPlusLogger()
+    public static function createWebpayPlusLogger(): PluginLogger
     {
         $shouldMask = !static::getWebpayplusConfig()->isIntegration();
         return static::createLogger($shouldMask);

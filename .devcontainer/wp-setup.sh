@@ -84,12 +84,12 @@ else
   echo "WooCommerce ya instalado y activo."
 fi
 
-# --- Install Storefront theme
-if ! wp theme is-installed storefront --allow-root; then
-  echo "Instalando tema Storefront..."
-  wp theme install storefront --activate --allow-root || true
+# --- Install Spectra One theme
+if ! wp theme is-installed spectra-one --allow-root; then
+  echo "Instalando tema Spectra One..."
+  wp theme install spectra-one --activate --allow-root || true
 else
-  echo "Storefront ya instalado y activo."
+  echo "Spectra One ya instalado y activo."
 fi
 
 
@@ -127,6 +127,10 @@ wp option update woocommerce_store_postcode "7500000" --allow-root
 wp option update woocommerce_price_num_decimals "0" --allow-root
 wp option update woocommerce_price_thousand_sep "." --allow-root
 wp option update woocommerce_price_decimal_sep "," --allow-root
+wp option update woocommerce_coming_soon no --allow-root
+wp option update woocommerce_feature_site_visibility_badge_enabled no --allow-root
+wp option update woocommerce_enable_myaccount_registration yes --allow-root
+wp option update woocommerce_enable_signup_and_login_from_checkout yes --allow-root
 
 # --- Set debug options for WooCommerce
 wp config set WP_DEBUG true --type=constant --allow-root --raw

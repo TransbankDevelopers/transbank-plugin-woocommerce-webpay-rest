@@ -44,7 +44,7 @@ class OneclickInscriptionService extends ProductBaseService
      */
     public function startInscription($userName, $email, $returnUrl)
     {
-            return $this->mallInscription->start($userName, $email, $returnUrl);
+        return $this->mallInscription->start($userName, $email, $returnUrl);
     }
 
     /**
@@ -59,7 +59,7 @@ class OneclickInscriptionService extends ProductBaseService
      */
     public function finishInscription($token)
     {
-            return $this->mallInscription->finish($token);
+        return $this->mallInscription->finish($token);
     }
 
     private function generateUsername($userId)
@@ -95,5 +95,10 @@ class OneclickInscriptionService extends ProductBaseService
         $data->environment = $this->getEnvironment();
         $data->commerceCode = $this->getCommerceCode();
         return $data;
+    }
+
+    public function deleteInscription(string $tbkUser, string $username)
+    {
+        $this->mallInscription->delete($tbkUser, $username);
     }
 }
