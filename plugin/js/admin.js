@@ -195,19 +195,6 @@ jQuery(function ($) {
         return fieldNameDictionary[fieldKey] ?? fieldKey;
     }
 
-    function createErrorContainer(errorMessage) {
-        const errorContainer = document.createElement("div");
-        errorContainer.classList.add("tbk-status", "tbk-status-error");
-        const icon = document.createElement("i");
-        icon.classList.add("fa", "fa-times");
-        const paragraph = document.createElement("p");
-        paragraph.textContent = errorMessage;
-
-        errorContainer.appendChild(icon);
-        errorContainer.appendChild(paragraph);
-        return errorContainer;
-    }
-
     $("#mainform").on("click", ".notice-dismiss", function () {
         let noticeId = $(this).closest(".notice").attr("id");
 
@@ -284,6 +271,19 @@ jQuery(function ($) {
         });
     });
 });
+
+const createErrorContainer = (errorMessage) => {
+    const errorContainer = document.createElement("div");
+    errorContainer.classList.add("tbk-status", "tbk-status-error");
+    const icon = document.createElement("i");
+    icon.classList.add("fa", "fa-times");
+    const paragraph = document.createElement("p");
+    paragraph.textContent = errorMessage;
+
+    errorContainer.appendChild(icon);
+    errorContainer.appendChild(paragraph);
+    return errorContainer;
+};
 
 const generateRandomString = (length = 6) => {
     const characters =
