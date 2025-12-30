@@ -145,7 +145,7 @@ class FinishOneclickController
 
             $userInfo = wp_get_current_user();
             if (!$userInfo) {
-                wc_transbank_oneclick_inscription_finishedlogError('You were logged out');
+                throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
             }
             $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
             BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
