@@ -129,6 +129,8 @@ wp option update woocommerce_price_thousand_sep "." --allow-root
 wp option update woocommerce_price_decimal_sep "," --allow-root
 wp option update woocommerce_coming_soon no --allow-root
 wp option update woocommerce_feature_site_visibility_badge_enabled no --allow-root
+wp option update woocommerce_enable_myaccount_registration yes --allow-root
+wp option update woocommerce_enable_signup_and_login_from_checkout yes --allow-root
 
 # --- Set debug options for WooCommerce
 wp config set WP_DEBUG true --type=constant --allow-root --raw
