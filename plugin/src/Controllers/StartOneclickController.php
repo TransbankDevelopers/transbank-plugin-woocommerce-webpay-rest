@@ -21,7 +21,7 @@ class StartOneclickController
 
     /**
      * Constructor initializes the logger.
-    */
+     */
     public function __construct()
     {
         $this->inscriptionService = TbkFactory::createInscriptionService();
@@ -34,15 +34,15 @@ class StartOneclickController
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InscriptionStartException
      */
-    public function process()
+    public function process(): bool
     {
-        $response = $this->start(null, 'my_account');
+        $response = $this->start(0, 'my_account');
         return wp_redirect($response->getRedirectUrl());
     }
 
 
     /**
-     * @param int|null $orderId
+     * @param int $orderId
      * @param string   $from
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -51,7 +51,7 @@ class StartOneclickController
      * @return InscriptionStartResponse
      */
     private function start(
-        int $orderId = null,
+        int $orderId,
         string $from = 'checkout'
     ) {
         // The user selected Oneclick, Pay with new card and choosed to save it in their account.
@@ -104,6 +104,4 @@ class StartOneclickController
             'redirect' => $response->getRedirectUrl(),
         ];
     }
-
-
 }
