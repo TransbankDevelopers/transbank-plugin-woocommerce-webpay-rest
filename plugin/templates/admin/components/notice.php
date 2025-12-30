@@ -48,7 +48,10 @@ if (!empty($isDismissible)) {
             <?php endif; ?>
 
             <?php if ($actionHref !== '' && $actionText !== ''): ?>
-                <a class="<?= esc_attr($actionClass) ?>" href="<?= esc_url($actionHref) ?>">
+                <a
+                    class="<?= esc_attr($actionClass) ?>"
+                    href="<?= esc_url($actionHref) ?>"
+                    aria-label="<?= esc_attr($actionText) ?>">
                     <?= esc_html($actionText) ?>
                 </a>
             <?php endif; ?>
