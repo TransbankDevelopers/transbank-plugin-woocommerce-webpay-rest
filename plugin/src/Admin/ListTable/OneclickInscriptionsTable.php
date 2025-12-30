@@ -24,7 +24,7 @@ class OneclickInscriptionsTable extends WP_List_Table
 
         $config = TbkFactory::getOneclickConfig();
         $this->environment = $config->getEnvironment();
-        $this->logger = TbkFactory::createLogger(true);
+        $this->logger = TbkFactory::createOneclickLogger();
     }
 
     public function get_columns()
