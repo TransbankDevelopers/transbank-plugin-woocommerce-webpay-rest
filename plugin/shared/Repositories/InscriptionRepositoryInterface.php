@@ -9,4 +9,5 @@ interface InscriptionRepositoryInterface
     public function update(string $transactionId, array $data);
     public function getByToken(string $token);
     public function checkExistTable(): array;
+    public function getById(string $id);
 }
