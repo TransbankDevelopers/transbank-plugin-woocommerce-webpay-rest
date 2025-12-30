@@ -138,6 +138,10 @@ wp config set WPS_DEBUG_SCRIPTS true --type=constant --allow-root --raw --add
 wp config set WPS_DEBUG_STYLES true --type=constant --allow-root --raw --add
 wp config set WP_DEBUG_LOG "/var/log/wordpress/debug.log" --type=constant --allow-root
 
+# --- Install theme Spectra One
+echo "Instalando tema Spectra One..."
+wp theme install spectra-one --activate --allow-root
+
 # --- Activate Transbank plugin
 if [ -d "$PLUGIN_DIR" ]; then
   if ! wp plugin is-active transbank-webpay-plus-rest --allow-root; then
