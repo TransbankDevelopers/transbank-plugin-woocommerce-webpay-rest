@@ -202,7 +202,6 @@ class FinishOneclickController
         }
 
         wp_safe_redirect($redirectUrl);
-        exit;
     }
 
     private function savePaymentToken($inscription, $finishInscriptionResponse)
