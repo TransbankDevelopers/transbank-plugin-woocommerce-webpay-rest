@@ -303,8 +303,8 @@ const generateBuyOrderPreview = (format) => {
     crypto.getRandomValues(array);
     const orderId = 10000 + (array[0] % 90000);
     return format
-        .replace(/\{orderId\}/gi, orderId.toString())
-        .replace(/\{random(?:, length=\d+)?\}/gi, (_, length) =>
+        .replaceAll(/\{orderId\}/gi, orderId.toString())
+        .replaceAll(/\{random(?:, length=\d+)?\}/gi, (_, length) =>
             generateRandomString(length ? Number.parseInt(length, 10) : 6),
         );
 };
@@ -312,8 +312,8 @@ const generateBuyOrderPreview = (format) => {
 const isValidFormat = (format) => {
     const allowedCharsRegex = /^[A-Za-z0-9-_:]*$/;
     const formatWithoutPlaceholders = format
-        .replace(/\{orderId\}/gi, "")
-        .replace(/\{random(?:, length=\d+)?\}/gi, "");
+        .replaceAll(/\{orderId\}/gi, "")
+        .replaceAll(/\{random(?:, length=\d+)?\}/gi, "");
     if (!allowedCharsRegex.test(formatWithoutPlaceholders)) {
         return false;
     }
