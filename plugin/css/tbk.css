@@ -313,11 +313,7 @@
     gap: 15px;
 }
 
-.tbk-notice > div:last-of-type {
-    flex: 1;
-}
-
-.tbk-notice > a.button {
+.tbk-notice > .button {
     margin-left: auto;
     white-space: nowrap;
 }
