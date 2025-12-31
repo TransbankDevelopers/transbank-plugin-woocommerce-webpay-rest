@@ -310,6 +310,12 @@
 .tbk-notice {
     display: flex;
     align-items: center;
+    gap: 15px;
+}
+
+.tbk-notice > .button {
+    margin-left: auto;
+    white-space: nowrap;
 }
 
 .button.tbk-button-primary {
@@ -440,7 +446,7 @@
     }
 }
 
-.tbk-notice .tbk-review-text {
+.tbk-notice .tbk-notice-content {
     max-width: 65%;
 }
 
@@ -448,7 +454,7 @@
     margin-left: auto;
 }
 
-.tbk-notice .tbk-review-title {
+.tbk-notice .tbk-notice-title {
     font-size: 18px;
     font-weight: 500;
 }
