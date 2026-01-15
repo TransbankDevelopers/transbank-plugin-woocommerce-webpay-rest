@@ -4,12 +4,21 @@ namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
-class TransactionRepository extends BaseRepository implements TransactionRepositoryInterface
+use Transbank\WooCommerce\WebpayRest\Helpers\WpdbTableHelper;
+
+class TransactionRepository
 {
     const TABLE_NAME = 'webpay_rest_transactions';
+
+
+    private WpdbTableHelper $db;
+
+    public function __construct(WpdbTableHelper $wpdb)
+    {
+        $this->db = $wpdb;
+    }
 
     /**
      * Get the name of the transaction database table.
@@ -18,8 +27,20 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getTableName(): string
     {
-        return $this->getBaseTableName(static::TABLE_NAME);
+        return $this->db->getTableName();
     }
+
+
+    /**
+     * Get the name of the transaction without prefix database table.
+     *
+     * @return string The name of the table used to store transactions.
+     */
+    public function getRawTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
+
 
     /**
      * Create a transaction record.
@@ -30,21 +51,29 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
     public function create(TbkTransaction $data)
     {
         $transaction = [
-                'order_id'    => $data->getOrderId(),
-                'buy_order'   => $data->getBuyOrder(),
-                'amount'      => $data->getAmount(),
-                'environment' => $data->getEnvironment(),
-                'commerce_code'  => $data->getCommerceCode(),
-                'product'     => $data->getProduct(),
-                'status'      => $data->getStatus(),
+            'order_id'    => $data->getOrderId(),
+            'buy_order'   => $data->getBuyOrder(),
+            'amount'      => $data->getAmount(),
+            'environment' => $data->getEnvironment(),
+            'commerce_code'  => $data->getCommerceCode(),
+            'product'     => $data->getProduct(),
+            'status'      => $data->getStatus(),
 
-                'token'       => $data->getToken(),
-                'session_id'  => $data->getSessionId(),
+            'token'       => $data->getToken(),
+            'session_id'  => $data->getSessionId(),
 
-                'child_buy_order' => $data->getChildBuyOrder(),
-                'child_commerce_code' => $data->getChildCommerceCode()
-            ];
-        return $this->insertBase($transaction);
+            'child_buy_order' => $data->getChildBuyOrder(),
+            'child_commerce_code' => $data->getChildCommerceCode()
+        ];
+
+
+        $inserted = $this->db->insert($transaction);
+        return $this->db->getOneOrFail(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE id = %d",
+            ['id' => $inserted],
+            'No se pudo recuperar el registro insertado en la tabla ',
+            true,
+        );
     }
 
     /**
@@ -56,27 +85,24 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function update(string $transactionId, array $data)
     {
-        return $this->updateBase($transactionId, $data);
+        return $this->db->update(['id' => $transactionId], $data);
     }
 
-     /**
+    /**
      * Retrieve a transaction by token. Throws an exception if not found.
      *
      * @param string $token The transaction token.
      * @return mixed
-     * @throws RecordNotFoundOnDatabaseException
      */
     public function getByToken(string $token)
     {
-        $transactionTable = $this->getTableName();
-        return $this->findFirst(
-            "SELECT * FROM $transactionTable WHERE `token` = '%s'",
-            "Token no se encontró en la base de datos de transacciones",
-            $token
+        return $this->db->getOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `token` = %s",
+            ['token' => $token],
         );
     }
 
-     /**
+    /**
      * Retrieve a transaction by buyOrder. Throws an exception if not found.
      *
      * @param string $buyOrder The buy order associated with the transaction.
@@ -85,11 +111,11 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getByBuyOrder(string $buyOrder)
     {
-        $transactionTable = $this->getTableName();
-        return $this->getFirst(
-            "SELECT * FROM $transactionTable WHERE buy_order = '%s'",
-            "BuyOrder no se encontró en la base de datos de transacciones",
-            $buyOrder
+
+        return $this->db->getOneOrFail(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `buy_order` = %s",
+            ['buy_order' => $buyOrder],
+            'BuyOrder no se encontró en la base de datos de transacciones'
         );
     }
 
@@ -101,11 +127,13 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function findFirstApprovedByOrderId(string $orderId)
     {
-        $transactionTable = $this->getTableName();
         $statusApproved = TbkConstants::TRANSACTION_STATUS_APPROVED;
-        return $this->findFirst(
-            "SELECT * FROM $transactionTable WHERE status = '$statusApproved' AND order_id = '%s'",
-            $orderId
+        return $this->db->getOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `status` = %s AND `order_id` = %d",
+            [
+                'status' => $statusApproved,
+                'order_id' => (int)$orderId,
+            ],
         );
     }
 
@@ -119,12 +147,14 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId)
     {
-        $transactionTable = $this->getTableName();
-        return $this->getFirst(
-            "SELECT * FROM $transactionTable WHERE session_id = '%s' && buy_order='%s'",
-            "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso",
-            $sessionId,
-            $buyOrder
+
+        return $this->db->getOneOrFail(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `session_id` = %s AND `buy_order`= %s",
+            [
+                'session_id' => $sessionId,
+                'buy_order' => $buyOrder,
+            ],
+            "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso"
         );
     }
 
@@ -136,16 +166,29 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function findFirstByOrderId($orderId): ?object
     {
-        return $this->getTransactionsByConditions(['order_id' => $orderId], 'id')[0] ?? null;
-    }
-
-    public function findFirstByToken($token): ?object
-    {
-        $transactionTable = $this->getTableName();
-        return $this->findFirst(
-            "SELECT * FROM $transactionTable WHERE `token` = '%s'",
-            $token
+        return $this->db->getOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `order_id` = %s ORDER BY id DESC",
+            [
+                'order_id' => $orderId,
+            ],
         );
     }
 
+   /**
+     * Checks whether the database table exists.
+     *
+     * @return bool True if the table exists, false otherwise.
+     */
+    public function checkExistTable(): bool
+    {
+        return $this->db->tableExists();
+    }
+
+    /**
+     * Returns the last database error generated by the most recent query.
+     * @return string The last database error message, or an empty string if none.
+     */
+    public function getLastQueryError () : string {
+        return $this->db->getLastQueryError();
+    }
 }

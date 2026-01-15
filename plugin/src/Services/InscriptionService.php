@@ -2,7 +2,7 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkInscription;
@@ -10,11 +10,11 @@ use Transbank\Plugin\Exceptions\DatabaseRecordCreationException;
 
 class InscriptionService
 {
-    private InscriptionRepositoryInterface $repository;
+    private InscriptionRepository $repository;
 
 
     public function __construct(
-        InscriptionRepositoryInterface $repository
+        InscriptionRepository $repository
     ) {
         $this->repository = $repository;
     }
@@ -74,21 +74,31 @@ class InscriptionService
     /**
      * Check if the transaction table exists in the database.
      *
-     * @return array
+     * @return bool
      */
-    public function existsTransactionTable(): array
+    public function existsTransactionTable(): bool
     {
         return $this->repository->checkExistTable();
     }
 
     /**
-     * Returns the name of the table associated with the repository.
+     * Returns the name of the table with prefix associated with the repository.
      *
      * @return string Name of the database table.
      */
     public function getTableName(): string
     {
         return $this->repository->getTableName();
+    }
+
+    /**
+     * Returns the name of the table without prefix associated with the repository.
+     *
+     * @return string Name of the database table.
+     */
+    public function getRawTableName(): string
+    {
+        return $this->repository->getRawTableName();
     }
 
     public function updateWithFinishResponse(string $inscriptionId, InscriptionFinishResponse $resp)
@@ -104,7 +114,7 @@ class InscriptionService
         ]);
     }
 
-    public function updateWithFinishResponseError(string $inscriptionId, $error, $detailError)
+    public function updateWithFinishResponseError(string $inscriptionId, string $error, string $detailError)
     {
         $this->update($inscriptionId, [
             'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED,
@@ -112,6 +122,4 @@ class InscriptionService
             'detail_error' => $detailError
         ]);
     }
-
 }
-

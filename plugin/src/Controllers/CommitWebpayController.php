@@ -141,12 +141,12 @@ class CommitWebpayController
     protected function handleNormalFlow(string $token): void
     {
         $this->log->logInfo("Procesando transacción por flujo Normal", ['token' => $token]);
-        
+
         if ($this->transactionService->checkIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
             return;
         }
-        
+
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
         $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
         $commitResponse = $this->webpayService->commitTransaction($token);
@@ -158,7 +158,7 @@ class CommitWebpayController
                 $commitResponse
             );
         } else {
-           $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
+            $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
         }
     }
 
@@ -221,7 +221,8 @@ class CommitWebpayController
     protected function handleFlowError(string $token): void
     {
         $this->log->logInfo(
-            "Procesando transacción por flujo de error en formulario de pago", ['token' => $token]
+            "Procesando transacción por flujo de error en formulario de pago",
+            ['token' => $token]
         );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
@@ -273,7 +274,8 @@ class CommitWebpayController
             'wc_transbank_webpay_plus_transaction_approved',
             $wooCommerceOrder,
             $webpayTransaction,
-            $commitResponse);
+            $commitResponse
+        );
         $this->redirect($wooCommerceOrder->get_checkout_order_received_url());
     }
 
@@ -362,7 +364,9 @@ class CommitWebpayController
         $response = null
     ): void {
         $this->log->logInfo(
-            "Error al procesar transacción por Transbank", ['Token' => $webpayTransaction->token]);
+            "Error al procesar transacción por Transbank",
+            ['Token' => $webpayTransaction->token]
+        );
 
         $data = [
             'status' => $status,
@@ -374,22 +378,24 @@ class CommitWebpayController
             $data['transbank_status'] = $response->getStatus();
         }
 
-        $this->transactionService->update($webpayTransaction->id,$data);
+        $this->transactionService->update($webpayTransaction->id, $data);
 
         $this->doAction(
             $action,
             $wooCommerceOrder,
             $webpayTransaction,
-            $response);
+            $response
+        );
 
         $this->setPaymentErrorPage($errorCode);
     }
-    
 
-    protected function setPaymentErrorPage($errorCode){
+
+    protected function setPaymentErrorPage($errorCode)
+    {
         $this->doAction('transbank_webpay_plus_unexpected_error');
         $this->log->logError(self::ERROR_MESSAGES[$errorCode]);
-        $this->redirect($this->getCheckoutUrlWithError( $errorCode));
+        $this->redirect($this->getCheckoutUrlWithError($errorCode));
     }
 
     protected function redirect($url)
@@ -422,7 +428,4 @@ class CommitWebpayController
     {
         return $status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
     }
-
 }
-
-

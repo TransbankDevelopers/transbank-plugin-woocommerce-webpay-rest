@@ -2,21 +2,22 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionRefundResponse;
 use Transbank\Plugin\Exceptions\DatabaseRecordCreationException;
+use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class TransactionService
 {
-    private TransactionRepositoryInterface $repository;
+    private TransactionRepository $repository;
 
 
     public function __construct(
-        TransactionRepositoryInterface $repository
+        TransactionRepository $repository
     ) {
         $this->repository = $repository;
     }
@@ -59,12 +60,19 @@ class TransactionService
      * Retrieve a transaction by token. Throws an exception if not found.
      *
      * @param string $token The transaction token.
-     * @return mixed
-     * @throws \Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException
+     * @return object
+     * @throws RecordNotFoundOnDatabaseException
      */
+
     public function getByToken(string $token): object
     {
-        return $this->repository->getByToken($token);
+        $transaction = $this->repository->getByToken($token);
+
+        if (is_null($transaction)) {
+            throw new RecordNotFoundOnDatabaseException('Token no se encontró en la base de datos de transacciones');
+        }
+
+        return $transaction;
     }
 
     /**
@@ -73,9 +81,9 @@ class TransactionService
      * @param mixed $token
      * @return object|null
      */
-    public function findFirstByToken(string $token): object
+    public function findFirstByToken(string $token): ?object
     {
-        return $this->repository->findFirstByToken($token);
+        return $this->repository->getByToken($token);
     }
 
     /**
@@ -135,7 +143,7 @@ class TransactionService
      */
     public function checkIsAlreadyProcessed(string $token): bool
     {
-        $result = $this->repository->findFirstByToken($token);
+        $result = $this->repository->getByToken($token);
         if (is_null($result)) {
             return false;
         }
@@ -145,21 +153,32 @@ class TransactionService
     /**
      * Check if the transaction table exists in the database.
      *
-     * @return array
+     * @return bool
      */
-    public function existsTransactionTable(): array
+    public function existsTransactionTable(): bool
     {
         return $this->repository->checkExistTable();
     }
 
     /**
-     * Returns the name of the table associated with the repository.
+     * Returns the name of the table with prefix associated with the repository.
      *
      * @return string Name of the database table.
      */
     public function getTableName(): string
     {
         return $this->repository->getTableName();
+    }
+
+    /**
+     * Returns the name of the table without prefix associated with the repository.
+     *
+     * @return string Name of the database table.
+     */
+
+    public function getRawTableName(): string
+    {
+        return $this->repository->getRawTableName();
     }
 
     public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp)
@@ -170,7 +189,7 @@ class TransactionService
         ]);
     }
 
-    public function updateWithRefundResponseError(string $transactionId, $detailError)
+    public function updateWithRefundResponseError(string $transactionId, string $detailError)
     {
         $this->update($transactionId, [
             'error' => 'Refund error',
@@ -187,7 +206,7 @@ class TransactionService
         ]);
     }
 
-    public function updateWithAuthorizeResponseError(string $transactionId, $error, $detailError)
+    public function updateWithAuthorizeResponseError(string $transactionId, string $error, string $detailError)
     {
         $this->update($transactionId, [
             'status' => TbkConstants::TRANSACTION_STATUS_FAILED,
@@ -195,5 +214,4 @@ class TransactionService
             'detail_error' => $detailError
         ]);
     }
-
 }
