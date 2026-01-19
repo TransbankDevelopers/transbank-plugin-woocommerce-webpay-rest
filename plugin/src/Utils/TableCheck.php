@@ -11,13 +11,13 @@ class TableCheck
     public static function check()
     {
         $logger = TbkFactory::createLogger();
-        $transactionRepository = TbkFactory::createTransactionRepository();
-        $inscriptionRepository = TbkFactory::createInscriptionRepository();
+        $transactionRepository = TbkFactory::createTransactionService();
+        $inscriptionRepository = TbkFactory::createInscriptionService();
         try {
-            $existTransactionTable = $transactionRepository->checkExistTable();
+            $existTransactionTable = $transactionRepository->existsTransactionTable();
 
             if ($existTransactionTable) {
-                $existInscriptionTable = $inscriptionRepository->checkExistTable();
+                $existInscriptionTable = $inscriptionRepository->existsTransactionTable();
 
                 if (!$existInscriptionTable) {
                     DatabaseTableInstaller::createTableInscription();
@@ -26,13 +26,13 @@ class TableCheck
                 $resp = self::handleResponse(
                     !$existInscriptionTable,
                     $inscriptionRepository->getRawTableName(),
-                    $inscriptionRepository->getLastQueryError(),
+                    $inscriptionRepository->getLastPersistenceError(),
                 );
             } else {
                 $resp = self::handleResponse(
                     true,
                     $transactionRepository->getRawTableName(),
-                    $transactionRepository->getLastQueryError(),
+                    $transactionRepository->getLastPersistenceError(),
                 );
                 DatabaseTableInstaller::createTableTransaction();
             }

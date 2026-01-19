@@ -41,7 +41,7 @@ final class WpdbTableHelper
         $this->assertIdentifier($baseTableName);
 
         $prefix = is_multisite() ? $db->base_prefix : $db->prefix;
-        $prefix = preg_replace('/[^A-Za-z0-9_]/', '', (string) $prefix);
+        $prefix = preg_replace('/\W/', '', (string) $prefix);
 
         $this->table = $prefix . $baseTableName;
 
@@ -199,14 +199,19 @@ final class WpdbTableHelper
     private function castArgs(array $args): array
     {
         return array_map(function ($v) {
-            if ($v === null)
-                return null;
-            if (is_bool($v))
-                return (int)$v;
-            if (is_int($v) || is_float($v))
-                return $v;
+            if (is_array($v) || is_object($v)) {
+                throw new InvalidArgumentException('Only scalar values or null are allowed.');
+            }
 
-            return (string)$v;
+            $out = $v;
+
+            if (is_bool($v)) {
+                $out = (int) $v;
+            } elseif ($v !== null && !is_int($v) && !is_float($v)) {
+                $out = (string) $v;
+            }
+
+            return $out;
         }, array_values($args));
     }
 
@@ -223,7 +228,7 @@ final class WpdbTableHelper
     {
         $placeholders = [];
 
-        preg_match_all('/(?<!%)%(?:s|d|f)/', $query, $placeholders);
+        preg_match_all('/(?<!%)%[sdf]/', $query, $placeholders);
 
         $placeholderCount = count($placeholders[0]);
         $argsCount = count($args);
@@ -258,8 +263,11 @@ final class WpdbTableHelper
      */
     private function assertIdentifier(string $name): void
     {
-        if ($name === '' || !preg_match('/^[A-Za-z0-9_]+$/', $name)) {
-            throw new InvalidArgumentException("Invalid identifier: {$name}");
+        if ($name === '' || !preg_match('/^\w+$/', $name)) {
+            throw new InvalidArgumentException(sprintf(
+                'Invalid identifier: %s',
+                $name
+            ));
         }
     }
 
@@ -302,22 +310,16 @@ final class WpdbTableHelper
      */
     private function sanitizeValueByKey(string $key, mixed $value): mixed
     {
+        $out = $value;
+
         if (isset($this->jsonFields[$key])) {
-            return $value;
+            return $out;
+        } elseif (is_bool($value)) {
+            $out = (int) $value;
+        } elseif (is_string($value)) {
+            $out = sanitize_text_field($value);
         }
 
-        if ($value === null) {
-            return null;
-        }
-
-        if (is_bool($value)) {
-            return (int) $value;
-        }
-
-        if (is_string($value)) {
-            return sanitize_text_field($value);
-        }
-
-        return $value;
+        return $out;
     }
 }

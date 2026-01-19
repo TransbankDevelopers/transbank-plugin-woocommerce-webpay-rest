@@ -181,6 +181,16 @@ class TransactionService
         return $this->repository->getRawTableName();
     }
 
+    /**
+     * Returns the last persistence-layer error produced during a repository operation.
+     *
+     * @return string The last persistence error message, or an empty string if none.
+     */
+    public function getLastPersistenceError(): string
+    {
+        return $this->repository->getLastQueryError();
+    }
+
     public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp)
     {
         $this->update($transactionId, [
