@@ -6,7 +6,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\WpdbTableHelper;
+use Transbank\WooCommerce\WebpayRest\Repositories\WpdbTableHelper;
 
 class TransactionRepository
 {

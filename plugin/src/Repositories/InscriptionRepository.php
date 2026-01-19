@@ -4,7 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
-use Transbank\WooCommerce\WebpayRest\Helpers\WpdbTableHelper;
+use Transbank\WooCommerce\WebpayRest\Repositories\WpdbTableHelper;
 use InvalidArgumentException;
 
 class InscriptionRepository

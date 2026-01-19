@@ -15,7 +15,7 @@ use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
-use Transbank\WooCommerce\WebpayRest\Helpers\WpdbTableHelper;
+use Transbank\WooCommerce\WebpayRest\Repositories\WpdbTableHelper;
 
 
 define(

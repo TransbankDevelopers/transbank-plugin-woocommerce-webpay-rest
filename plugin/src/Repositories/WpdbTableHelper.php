@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Helpers;
+namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use InvalidArgumentException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
