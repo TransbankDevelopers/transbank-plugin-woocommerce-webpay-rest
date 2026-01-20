@@ -2,10 +2,11 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Exceptions\CreateTableException;
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 
-require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+require_once ABSPATH.'wp-admin/includes/upgrade.php';
 
 class DatabaseTableInstaller
 {
@@ -28,7 +29,7 @@ class DatabaseTableInstaller
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-        $tableName = TbkFactory::createTransactionService()->getTableName();
+        $tableName = self::getBaseTableName(TransactionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
             `order_id`             varchar(60) NOT NULL,
@@ -59,7 +60,7 @@ class DatabaseTableInstaller
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-        $tableName = TbkFactory::createInscriptionService()->getTableName();
+        $tableName = self::getBaseTableName(InscriptionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
             `token`                 varchar(100) NOT NULL,
@@ -107,21 +108,19 @@ class DatabaseTableInstaller
         dbDelta($query);
         $lastError = $wpdb->last_error;
         if (!empty($lastError)) {
-            throw new CreateTableException('Error al crear la tabla ' . $tableName .  ' en la base de datos: ' . $lastError);
+            throw new CreateTableException('Error al crear la tabla '. $tableName .  ' en la base de datos: ' . $lastError);
         }
     }
 
-    /**
+     /**
      * Check if a needed tables exists.
      *
      * @throws CreateTableException
      */
     public static function checkTables(): void
     {
-        $transactionRawTableName = TbkFactory::createTransactionService()->getRawTableName();
-        $inscriptionRawTableName = TbkFactory::createInscriptionService()->getRawTableName();
-        static::tableExists($transactionRawTableName);
-        static::tableExists($inscriptionRawTableName);
+        static::tableExists(TransactionRepository::TABLE_NAME);
+        static::tableExists(InscriptionRepository::TABLE_NAME);
     }
 
     private static function tableExists($tableName): void
@@ -180,9 +179,9 @@ class DatabaseTableInstaller
     {
         global $wpdb;
         if (is_multisite()) {
-            return $wpdb->base_prefix . $baseName;
+            return $wpdb->base_prefix.$baseName;
         } else {
-            return $wpdb->prefix . $baseName;
+            return $wpdb->prefix.$baseName;
         }
     }
 }

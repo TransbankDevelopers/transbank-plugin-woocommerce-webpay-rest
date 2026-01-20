@@ -57,25 +57,6 @@ class TransactionService
     }
 
     /**
-     * Retrieve a transaction by token. Throws an exception if not found.
-     *
-     * @param string $token The transaction token.
-     * @return object
-     * @throws RecordNotFoundOnDatabaseException
-     */
-
-    public function getByToken(string $token): object
-    {
-        $transaction = $this->repository->getByToken($token);
-
-        if (is_null($transaction)) {
-            throw new RecordNotFoundOnDatabaseException('Token no se encontró en la base de datos de transacciones');
-        }
-
-        return $transaction;
-    }
-
-    /**
      * Retrieve the first transaction by token.
      *
      * @param mixed $token
@@ -111,19 +92,6 @@ class TransactionService
     }
 
     /**
-     * Retrieve a transaction by buyOrder and sessionId. Throws if not found.
-     *
-     * @param string $buyOrder
-     * @param string $sessionId
-     * @return mixed
-     * @throws \Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException
-     */
-    public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId): object
-    {
-        return $this->repository->getByBuyOrderAndSessionId($buyOrder, $sessionId);
-    }
-
-    /**
      * Retrieve the first transaction by orderId.
      *
      * @param mixed $orderId
@@ -148,47 +116,6 @@ class TransactionService
             return false;
         }
         return $result->status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
-    }
-
-    /**
-     * Check if the transaction table exists in the database.
-     *
-     * @return bool
-     */
-    public function existsTransactionTable(): bool
-    {
-        return $this->repository->checkExistTable();
-    }
-
-    /**
-     * Returns the name of the table with prefix associated with the repository.
-     *
-     * @return string Name of the database table.
-     */
-    public function getTableName(): string
-    {
-        return $this->repository->getTableName();
-    }
-
-    /**
-     * Returns the name of the table without prefix associated with the repository.
-     *
-     * @return string Name of the database table.
-     */
-
-    public function getRawTableName(): string
-    {
-        return $this->repository->getRawTableName();
-    }
-
-    /**
-     * Returns the last persistence-layer error produced during a repository operation.
-     *
-     * @return string The last persistence error message, or an empty string if none.
-     */
-    public function getLastPersistenceError(): string
-    {
-        return $this->repository->getLastQueryError();
     }
 
     public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp)

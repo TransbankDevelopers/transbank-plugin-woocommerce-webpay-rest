@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Admin\ListTable;
 
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use WP_List_Table;
 
 class OneclickInscriptionsTable extends WP_List_Table
@@ -52,7 +53,7 @@ class OneclickInscriptionsTable extends WP_List_Table
 
         global $wpdb;
 
-        $inscriptionsTable = TbkFactory::createInscriptionService()->getTableName();
+        $inscriptionsTable = $wpdb->prefix . InscriptionRepository::TABLE_NAME;
         $usersTable = $wpdb->users;
 
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
@@ -262,7 +263,7 @@ class OneclickInscriptionsTable extends WP_List_Table
     ): void {
         global $wpdb;
 
-        $inscriptionsTable = TbkFactory::createInscriptionService()->getTableName();
+        $inscriptionsTable = $wpdb->prefix . InscriptionRepository::TABLE_NAME;
         $tokensTable = $wpdb->prefix . 'woocommerce_payment_tokens';
         $metaTable = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
 
