@@ -4,16 +4,15 @@ namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
-use Transbank\WooCommerce\WebpayRest\Repositories\WpdbTableHelper;
-use InvalidArgumentException;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
 
 class InscriptionRepository
 {
     const TABLE_NAME = 'transbank_inscriptions';
 
-    private WpdbTableHelper $db;
+    private WpdbTableGateway $db;
 
-    public function __construct(WpdbTableHelper $wpdb)
+    public function __construct(WpdbTableGateway $wpdb)
     {
         $this->db = $wpdb;
     }
@@ -29,26 +28,21 @@ class InscriptionRepository
         return self::TABLE_NAME;
     }
     /**
-     * Create a inscription record.
+     * Create a inscription record and return id.
      *
      * @param array $data Inscription data to be stored.
-     * @return object
+     * @return int
      * @throws RecordNotFoundOnDatabaseException
+     * @throws \InvalidArgumentException
      * @throws DatabaseInsertException
      */
-    public function create(array $data)
+    public function insert(array $data): int
     {
         if (empty($data)) {
-            throw new InvalidArgumentException('No se proporcionaron datos para insertar.');
+            throw new \InvalidArgumentException('No se proporcionaron datos para insertar.');
         }
 
-        $inserted = $this->db->insert($data, 'Error al insertar en la tabla ');
-        return $this->db->getOneOrFail(
-            "SELECT * FROM `{$this->db->getTableName()}` WHERE id = %d",
-            ['id' => $inserted],
-            'No se pudo recuperar el registro insertado en la tabla ',
-            true,
-        );
+        return $this->db->insert($data, 'Error al insertar en la tabla ');
     }
 
     /**
@@ -56,9 +50,9 @@ class InscriptionRepository
      *
      * @param string $inscriptionId Token identifying the inscription.
      * @param array $data New data to update the transaction with.
-     * @return int|false Number of rows updated or false on failure.
+     * @return int|bool Number of rows updated or false on failure.
      */
-    public function update(string $inscriptionId, array $data)
+    public function update(string $inscriptionId, array $data): int|bool
     {
         return $this->db->update(['id' => $inscriptionId], $data);
     }
@@ -69,31 +63,43 @@ class InscriptionRepository
      * @param string $token The inscription token.
      * @return object Inscription object
      * @throws RecordNotFoundOnDatabaseException
+     * @throws \InvalidArgumentException
      */
-    public function getByToken(string $token)
+    public function getByToken(string $token): object
     {
-        return $this->db->getOneOrFail(
+        return $this->db->getOne(
             "SELECT * FROM `{$this->db->getTableName()}` WHERE `token` = %s",
-            ['token' => $token],
-            'Token no se encontró en la base de datos de inscripciones'
+            [$token],
+            'Registro no encontrado'
         );
     }
 
     /**
-     * Retrieve a inscription by ID. Throws an exception if not found.
+     * Retrieve a inscription by token. return null if not found.
      *
-     * @param string $id The inscription ID.
-     * @return object Inscription object
-     *
-     * @throws RecordNotFoundOnDatabaseException
+     * @param string $token The inscription token.
+     * @return object|null Inscription object
      */
-    public function getById(string $id): object
+    public function findByToken(string $token): ?object
     {
-        $id = (int) $id;
-        return $this->db->getOneOrFail(
+        try {
+            return $this->getByToken($token);
+        } catch (RecordNotFoundOnDatabaseException | \InvalidArgumentException) {
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve a inscription by ID. return null if not found.
+     *
+     * @param int $id The inscription ID.
+     * @return object|null Inscription object
+     */
+    public function findById(int $id): ?object
+    {
+        return $this->db->findOne(
             "SELECT * FROM `{$this->db->getTableName()}` WHERE `id` = %d",
-            ['id' => $id],
-            'No se encontró inscripción con el ID proporcionado'
+            [$id],
         );
     }
 

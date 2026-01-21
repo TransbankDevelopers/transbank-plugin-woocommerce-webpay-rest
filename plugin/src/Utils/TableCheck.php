@@ -59,16 +59,18 @@ class TableCheck
      * @param string|null $exceptionMessage Optional exception message.
      * @param string|null $errorMessage Optional human-readable error message.
      *
+     *
      * @return array{
      *     ok: bool,
-     *     msg: string|null,
+     *     msg: string|null
+     * }|array{
      *     error: string,
      *     exception: string|null
      * }
      */
 
     private static function handleResponse(
-        bool $error = false,
+        bool $hasError = false,
         string $tableName = '',
         string $exceptionMessage = null,
         string $errorMessage = null,
@@ -76,14 +78,13 @@ class TableCheck
         $response = array(
             'ok' => true,
             'msg' => "La tabla '{$tableName}' existe.",
-            'error' => '',
-            'exception' => '',
         );
 
-        if ($error) {
-            $response['msg'] = null;
-            $response['error'] = $errorMessage ?? "La tabla '{$tableName}' no se encontró en la base de datos.";
-            $response['exception'] = $exceptionMessage;
+        if ($hasError) {
+            $response = array(
+                'error' => $errorMessage ?? "La tabla '{$tableName}' no se encontró en la base de datos.",
+                'exception' => $exceptionMessage,
+            );
         }
 
         return $response;

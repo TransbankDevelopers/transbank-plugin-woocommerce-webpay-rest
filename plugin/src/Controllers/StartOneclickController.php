@@ -73,7 +73,7 @@ class StartOneclickController
             $returnUrl
         );
         $inscription->token = $response->getToken();
-        $this->inscriptionService->create($inscription);
+        $this->inscriptionService->createAndGet($inscription);
         return $response;
     }
 

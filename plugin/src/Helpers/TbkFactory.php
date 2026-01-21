@@ -15,7 +15,7 @@ use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
-use Transbank\WooCommerce\WebpayRest\Repositories\WpdbTableHelper;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
 
 
 define(
@@ -83,13 +83,13 @@ class TbkFactory
     public static function createTransactionRepository(): TransactionRepository
     {
         global $wpdb;
-        $helper = new WpdbTableHelper(
+        $tableGateway = new WpdbTableGateway(
             $wpdb,
             TransactionRepository::TABLE_NAME,
             ['transbank_response', 'last_refund_response']
         );
 
-        return new TransactionRepository($helper);
+        return new TransactionRepository($tableGateway);
     }
 
     /**
@@ -100,12 +100,12 @@ class TbkFactory
     public static function createInscriptionRepository(): InscriptionRepository
     {
         global $wpdb;
-        $helper = new WpdbTableHelper(
+        $tableGateway = new WpdbTableGateway(
             $wpdb,
             InscriptionRepository::TABLE_NAME,
             ['transbank_response']
         );
-        return new InscriptionRepository($helper);
+        return new InscriptionRepository($tableGateway);
     }
 
     public static function createEcommerceService()

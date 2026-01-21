@@ -106,7 +106,7 @@ class FinishOneclickController
         $this->log->logInfo('Inscripcion abortada por el usuario desde el formulario Oneclick', [
             'token' => $token
         ]);
-        $ins = $this->inscriptionService->getByToken($token);
+        $ins = $this->inscriptionService->findByToken($token);
         BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'warning');
         $this->inscriptionService->update($ins->id, [
             'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED

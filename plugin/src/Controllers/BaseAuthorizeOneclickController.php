@@ -36,8 +36,8 @@ abstract class BaseAuthorizeOneclickController
             $orderId,
             $amount
         );
-        $transaction = $this->transactionService->create($transactionData);
-        
+        $transaction = $this->transactionService->createAndGet($transactionData);
+
         $this->log->logInfo('Autorizando transacción', [
             'userName' => $paymentToken->get_username(),
             'tbkUser' => $paymentToken->get_token(),
@@ -68,9 +68,13 @@ abstract class BaseAuthorizeOneclickController
         $responseCode = $details?->getResponseCode();
         $responseJson = json_encode($authorizeResponse);
 
-        $this->log->logError("Transacción con autorización rechazada",
-            ['parentBuyOrder' => $authorizeResponse->getBuyOrder(),
-            'responseCode' => $responseCode]);
+        $this->log->logError(
+            "Transacción con autorización rechazada",
+            [
+                'parentBuyOrder' => $authorizeResponse->getBuyOrder(),
+                'responseCode' => $responseCode
+            ]
+        );
 
         $orderNotes = $this->getOrderNotesFromAuthorizeResponse($authorizeResponse, 'Oneclick: Pago rechazado');
         $order->add_order_note($orderNotes);
@@ -117,5 +121,4 @@ abstract class BaseAuthorizeOneclickController
             </div>
         ";
     }
-
 }

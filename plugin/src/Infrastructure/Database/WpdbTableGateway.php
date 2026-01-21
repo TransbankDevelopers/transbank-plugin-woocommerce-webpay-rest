@@ -1,6 +1,6 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Repositories;
+namespace Transbank\WooCommerce\WebpayRest\Infrastructure\Database;
 
 use InvalidArgumentException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
@@ -8,13 +8,12 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 use wpdb;
 
 /**
- * Small helper around WordPress $wpdb for a specific table.
  *
  * - Builds the full table name using WP prefix/base_prefix (multisite aware).
  * - Provides strict prepare() usage when args are provided.
  * - Sanitizes values before insert/update.
  */
-final class WpdbTableHelper
+final class WpdbTableGateway
 {
     /** Full table name including WP prefix. */
     private string $table;
@@ -60,13 +59,15 @@ final class WpdbTableHelper
      * @param string $sql  SQL with optional placeholders (%s/%d/%f).
      * @param array<int,mixed> $args Values for placeholders.
      * @return array<int,object>
-     *
-     * @throws InvalidArgumentException If args are provided but SQL has no placeholders.
      */
-    public function get(string $sql, array $args = []): array
+    public function find(string $sql, array $args = []): array
     {
-        $query = $this->prepareStrict($sql, $args);
-        return $this->db->get_results($query) ?: [];
+        try {
+            $query = $this->prepareStrict($sql, $args);
+            return $this->db->get_results($query) ?: [];
+        } catch (\Exception) {
+            return [];
+        }
     }
 
     /**
@@ -75,17 +76,19 @@ final class WpdbTableHelper
      * @param string $sql  SQL with optional placeholders (%s/%d/%f).
      * @param array $args Values for placeholders.
      * @return object|null
-     *
-     * @throws InvalidArgumentException If args are provided but SQL has no placeholders.
      */
-    public function getOne(string $sql, array $args = []): ?object
+    public function findOne(string $sql, array $args = []): ?object
     {
-        $query = $this->prepareStrict($sql, $args);
-        return $this->db->get_row($query) ?: null;
+        try {
+            $query = $this->prepareStrict($sql, $args);
+            return $this->db->get_row($query) ?: null;
+        } catch (\Exception) {
+            return null;
+        }
     }
 
     /**
-     * Same as getOne(), but throws if the row is not found.
+     * Same as findOne(), but throws if the row is not found.
      *
      * @param string $sql
      * @param array $args
@@ -96,13 +99,13 @@ final class WpdbTableHelper
      * @throws InvalidArgumentException If args are provided but SQL has no placeholders.
      * @throws RecordNotFoundOnDatabaseException When no row is found.
      */
-    public function getOneOrFail(
+    public function getOne(
         string $sql,
         array $args = [],
         ?string $error = null,
         bool $addSqlError = false
     ): object {
-        $row = $this->getOne($sql, $args);
+        $row = $this->findOne($sql, $args);
 
         if (!$row) {
             $errorMessage = $error ?? '';
@@ -145,9 +148,9 @@ final class WpdbTableHelper
      *
      * @param array<string,mixed> $where Where clause (Column => value).
      * @param array<string,mixed> $data  Column => value.
-     * @return int|false Number of updated rows, or false on error.
+     * @return int|bool Number of updated rows, or false on error.
      */
-    public function update(array $where, array $data): int|false
+    public function update(array $where, array $data): int|bool
     {
         return $this->db->update(
             $this->table,
@@ -212,7 +215,7 @@ final class WpdbTableHelper
             }
 
             return $out;
-        }, array_values($args));
+        }, $args);
     }
 
     /**

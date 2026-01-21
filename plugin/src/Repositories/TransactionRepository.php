@@ -6,16 +6,17 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
-use Transbank\WooCommerce\WebpayRest\Repositories\WpdbTableHelper;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
+use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 
 class TransactionRepository
 {
     const TABLE_NAME = 'webpay_rest_transactions';
 
 
-    private WpdbTableHelper $db;
+    private WpdbTableGateway $db;
 
-    public function __construct(WpdbTableHelper $wpdb)
+    public function __construct(WpdbTableGateway $wpdb)
     {
         $this->db = $wpdb;
     }
@@ -43,12 +44,13 @@ class TransactionRepository
 
 
     /**
-     * Create a transaction record.
+     * Create a transaction record and return id.
      *
      * @param TbkTransaction $data Transaction data to be stored.
-     * @return mixed
+     * @throws DatabaseInsertException
+     * @return int
      */
-    public function create(TbkTransaction $data)
+    public function insert(TbkTransaction $data): int
     {
         $transaction = [
             'order_id'    => $data->getOrderId(),
@@ -67,13 +69,7 @@ class TransactionRepository
         ];
 
 
-        $inserted = $this->db->insert($transaction);
-        return $this->db->getOneOrFail(
-            "SELECT * FROM `{$this->db->getTableName()}` WHERE id = %d",
-            ['id' => $inserted],
-            'No se pudo recuperar el registro insertado en la tabla ',
-            true,
-        );
+        return $this->db->insert($transaction);
     }
 
     /**
@@ -81,9 +77,9 @@ class TransactionRepository
      *
      * @param string $transactionId Token identifying the transaction.
      * @param array $data New data to update the transaction with.
-     * @return mixed
+     * @return int|bool
      */
-    public function update(string $transactionId, array $data)
+    public function update(string $transactionId, array $data): int|bool
     {
         return $this->db->update(['id' => $transactionId], $data);
     }
@@ -92,13 +88,13 @@ class TransactionRepository
      * Retrieve a transaction by token. Throws an exception if not found.
      *
      * @param string $token The transaction token.
-     * @return mixed
+     * @return object|null
      */
-    public function getByToken(string $token)
+    public function findByToken(string $token): ?object
     {
-        return $this->db->getOne(
+        return $this->db->findOne(
             "SELECT * FROM `{$this->db->getTableName()}` WHERE `token` = %s",
-            ['token' => $token],
+            [$token],
         );
     }
 
@@ -106,16 +102,17 @@ class TransactionRepository
      * Retrieve a transaction by buyOrder. Throws an exception if not found.
      *
      * @param string $buyOrder The buy order associated with the transaction.
-     * @return mixed
+     * @return object
      * @throws RecordNotFoundOnDatabaseException
+     * @throws \InvalidArgumentException
      */
-    public function getByBuyOrder(string $buyOrder)
+    public function getByBuyOrder(string $buyOrder): object
     {
 
-        return $this->db->getOneOrFail(
+        return $this->db->getOne(
             "SELECT * FROM `{$this->db->getTableName()}` WHERE `buy_order` = %s",
-            ['buy_order' => $buyOrder],
-            'BuyOrder no se encontró en la base de datos de transacciones'
+            [$buyOrder],
+            'Registro no encontrado'
         );
     }
 
@@ -123,16 +120,16 @@ class TransactionRepository
      * Retrieve the first approved transaction by orderId.
      *
      * @param string $orderId
-     * @return mixed|null
+     * @return object|null
      */
-    public function findFirstApprovedByOrderId(string $orderId)
+    public function findFirstApprovedByOrderId(string $orderId): ?object
     {
         $statusApproved = TbkConstants::TRANSACTION_STATUS_APPROVED;
-        return $this->db->getOne(
+        return $this->db->findOne(
             "SELECT * FROM `{$this->db->getTableName()}` WHERE `status` = %s AND `order_id` = %d",
             [
-                'status' => $statusApproved,
-                'order_id' => (int)$orderId,
+                $statusApproved,
+                (int)$orderId,
             ],
         );
     }
@@ -140,15 +137,15 @@ class TransactionRepository
     /**
      * Retrieve the first transaction by orderId.
      *
-     * @param mixed $orderId
+     * @param string $orderId
      * @return object|null
      */
-    public function findFirstByOrderId($orderId): ?object
+    public function findFirstByOrderId(string $orderId): ?object
     {
-        return $this->db->getOne(
-            "SELECT * FROM `{$this->db->getTableName()}` WHERE `order_id` = %s ORDER BY id DESC",
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `order_id` = %d ORDER BY id DESC",
             [
-                'order_id' => $orderId,
+                (int)$orderId,
             ],
         );
     }
@@ -170,5 +167,19 @@ class TransactionRepository
     public function getLastQueryError(): string
     {
         return $this->db->getLastQueryError();
+    }
+
+    /**
+     * Retrieve a transaction by ID. return null if not found.
+     *
+     * @param int $id The transaction ID.
+     * @return object|null transaction object
+     */
+    public function findById(int $id): ?object
+    {
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `id` = %d",
+            [$id],
+        );
     }
 }

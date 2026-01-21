@@ -168,7 +168,7 @@ class OneclickInscriptionsTable extends WP_List_Table
         try {
             $this->logger->logInfo('Eliminando inscripción Oneclick', ['inscription_id' => $id]);
             $repository = TbkFactory::createInscriptionRepository();
-            $inscription = $repository->getById($id);
+            $inscription = $repository->findById($id);
 
             if (!$inscription) {
                 $this->logger->logError('Inscripción no encontrada para eliminar', ['inscription_id' => $id]);
