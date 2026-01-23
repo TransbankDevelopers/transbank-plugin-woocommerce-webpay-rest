@@ -57,40 +57,6 @@ jQuery(function ($) {
         });
     });
 
-    $(".check_exist_tables").on("click", function (e) {
-        if (!blockButton(e, "check_exist_tables", "Verificando ...")) {
-            return;
-        }
-        showElement("tbk-tbl-response-title");
-        showElement("tbl_response_status_text");
-        hideElement("div_tables_status_result");
-        hideElement("div_tables_error");
-
-        post("check_exist_tables", {}, (resp) => {
-            showElement("div_tables_status");
-            if (!resp.error) {
-                $("#tbl_response_status_text").addClass("label-success");
-                $("#tbl_response_status_text").text("OK");
-                $("#tbl_response_result_text").text(resp.msg);
-                $("#tbl_response_status_text").show();
-                showElement("div_tables_status_result");
-            } else {
-                $("#tbl_response_status_text").addClass("label-danger");
-                $("#tbl_response_status_text").text("ERROR");
-                $("#tbl_response_status_text").show();
-                $("#tbl_error_message_text").html(
-                    '<code style="display: block; padding: 10px">' +
-                        resp.error +
-                        " Exception: " +
-                        resp.exception +
-                        "</code>",
-                );
-                showElement("div_tables_error");
-            }
-            releaseButton("check_exist_tables", "Verificar Tablas");
-        });
-    });
-
     $(".get-transaction-status").on("click", function (e) {
         e.preventDefault();
         if (!blockButton(e, "get-transaction-status", "Consultando estado")) {
