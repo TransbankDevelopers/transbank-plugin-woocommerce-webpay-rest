@@ -6,8 +6,6 @@ use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Model\LogConfig;
 use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
-use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
@@ -17,6 +15,7 @@ use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
 
 
 define(
@@ -79,21 +78,34 @@ class TbkFactory
     /**
      * Create and return an instance of the TransactionRepository.
      *
-     * @return TransactionRepositoryInterface
+     * @return TransactionRepository
      */
-    public static function createTransactionRepository(): TransactionRepositoryInterface
+    public static function createTransactionRepository(): TransactionRepository
     {
-        return new TransactionRepository();
+        global $wpdb;
+        $tableGateway = new WpdbTableGateway(
+            $wpdb,
+            TransactionRepository::TABLE_NAME,
+            ['transbank_response', 'last_refund_response']
+        );
+
+        return new TransactionRepository($tableGateway);
     }
 
     /**
      * Create and return an instance of the InscriptionRepository.
      *
-     * @return InscriptionRepositoryInterface
+     * @return InscriptionRepository
      */
-    public static function createInscriptionRepository(): InscriptionRepositoryInterface
+    public static function createInscriptionRepository(): InscriptionRepository
     {
-        return new InscriptionRepository();
+        global $wpdb;
+        $tableGateway = new WpdbTableGateway(
+            $wpdb,
+            InscriptionRepository::TABLE_NAME,
+            ['transbank_response']
+        );
+        return new InscriptionRepository($tableGateway);
     }
 
     public static function createEcommerceService()

@@ -2,32 +2,47 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
-use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
 
-class InscriptionRepository extends BaseRepository implements InscriptionRepositoryInterface
+class InscriptionRepository
 {
     const TABLE_NAME = 'transbank_inscriptions';
 
-    /**
-     * Get the name of the inscription database table.
-     *
-     * @return string The name of the table used to store inscriptions.
-     */
-    public function getTableName(): string
+    private WpdbTableGateway $db;
+
+    public function __construct(WpdbTableGateway $wpdb)
     {
-        return $this->getBaseTableName(static::TABLE_NAME);
+        $this->db = $wpdb;
     }
 
     /**
-     * Create a inscription record.
+     * Get the name of the inscription database table without prefix.
+     *
+     * @return string The name of the table used to store inscriptions.
+     */
+
+    public function getRawTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
+    /**
+     * Create a inscription record and return id.
      *
      * @param array $data Inscription data to be stored.
-     * @return mixed
+     * @return int
+     * @throws RecordNotFoundOnDatabaseException
+     * @throws \InvalidArgumentException
+     * @throws DatabaseInsertException
      */
-    public function create(array $data)
+    public function insert(array $data): int
     {
-        return $this->insertBase($data);
+        if (empty($data)) {
+            throw new \InvalidArgumentException('No se proporcionaron datos para insertar.');
+        }
+
+        return $this->db->insert($data, 'Error al insertar en la tabla ');
     }
 
     /**
@@ -35,45 +50,75 @@ class InscriptionRepository extends BaseRepository implements InscriptionReposit
      *
      * @param string $inscriptionId Token identifying the inscription.
      * @param array $data New data to update the transaction with.
-     * @return mixed
+     * @return int|bool Number of rows updated or false on failure.
      */
-    public function update(string $inscriptionId, array $data)
+    public function update(string $inscriptionId, array $data): int|bool
     {
-        return $this->updateBase($inscriptionId, $data);
+        return $this->db->update(['id' => $inscriptionId], $data);
     }
 
     /**
      * Retrieve a inscription by token. Throws an exception if not found.
      *
      * @param string $token The inscription token.
-     * @return mixed
+     * @return object Inscription object
      * @throws RecordNotFoundOnDatabaseException
+     * @throws \InvalidArgumentException
      */
-    public function getByToken(string $token)
+    public function getByToken(string $token): object
     {
-        $inscriptionTableName = $this->getTableName();
-        return $this->getFirst(
-            "SELECT * FROM $inscriptionTableName WHERE `token` = '%s'",
-            "Token no se encontró en la base de datos de inscripciones",
-            $token
+        return $this->db->getOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `token` = %s",
+            [$token],
+            'Registro no encontrado'
         );
     }
 
     /**
-     * Retrieve a inscription by ID. Throws an exception if not found.
+     * Retrieve a inscription by token. return null if not found.
      *
-     * @param string $id The inscription ID.
-     * @return object Inscription object
-     *
-     * @throws RecordNotFoundOnDatabaseException
+     * @param string $token The inscription token.
+     * @return object|null Inscription object
      */
-    public function getById(string $id): object
+    public function findByToken(string $token): ?object
     {
-        $inscriptionTableName = $this->getTableName();
-        return $this->getFirst(
-            "SELECT * FROM $inscriptionTableName WHERE `id` = '%s'",
-            "No se encontró inscripción con el ID proporcionado",
-            $id
+        try {
+            return $this->getByToken($token);
+        } catch (RecordNotFoundOnDatabaseException | \InvalidArgumentException) {
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve a inscription by ID. return null if not found.
+     *
+     * @param int $id The inscription ID.
+     * @return object|null Inscription object
+     */
+    public function findById(int $id): ?object
+    {
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `id` = %d",
+            [$id],
         );
+    }
+
+    /**
+     * Checks whether the database table exists.
+     *
+     * @return bool True if the table exists, false otherwise.
+     */
+    public function checkExistTable(): bool
+    {
+        return $this->db->tableExists();
+    }
+
+    /**
+     * Returns the last database error generated by the most recent query.
+     * @return string The last database error message, or an empty string if none.
+     */
+    public function getLastQueryError(): string
+    {
+        return $this->db->getLastQueryError();
     }
 }

@@ -2,19 +2,20 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Transbank\Plugin\Repositories\InscriptionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\Webpay\Oneclick\Responses\InscriptionFinishResponse;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkInscription;
 use Transbank\Plugin\Exceptions\DatabaseRecordCreationException;
+use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class InscriptionService
 {
-    private InscriptionRepositoryInterface $repository;
+    private InscriptionRepository $repository;
 
 
     public function __construct(
-        InscriptionRepositoryInterface $repository
+        InscriptionRepository $repository
     ) {
         $this->repository = $repository;
     }
@@ -23,12 +24,14 @@ class InscriptionService
      * Create a inscription record.
      *
      * @param TbkInscription $data Inscription data to be stored.
+     * @throws RecordNotFoundOnDatabaseException
+     * @throws DatabaseRecordCreationException
      * @return mixed
      */
-    public function create(TbkInscription $data): TbkInscription
+    public function createAndGet(TbkInscription $data): TbkInscription
     {
         try {
-            $record = $this->repository->create([
+            $id = $this->repository->insert([
                 'token' => $data->token,
                 'username' => $data->username,
                 'order_id' => $data->orderId,
@@ -41,8 +44,13 @@ class InscriptionService
                 'commerce_code' => $data->commerceCode
             ]);
 
+            $record = $this->repository->findById($id);
+            if (!$record) {
+                throw new RecordNotFoundOnDatabaseException('inscripción recien creada no fue encontrada');
+            }
+
             return new TbkInscription($record);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             throw new DatabaseRecordCreationException("Error al crear el registro de Inscripción");
         }
     }
@@ -52,9 +60,9 @@ class InscriptionService
      *
      * @param string $inscriptionId Token identifying the inscription.
      * @param array $data New data to update the transaction with.
-     * @return mixed
+     * @return int|bool
      */
-    public function update(string $inscriptionId, array $data)
+    public function update(string $inscriptionId, array $data): int|bool
     {
         return $this->repository->update($inscriptionId, $data);
     }
@@ -63,35 +71,27 @@ class InscriptionService
      * Retrieve a inscription by token. Throws an exception if not found.
      *
      * @param string $token The inscription token.
-     * @return mixed
+     * @return object
      * @throws \Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException
      */
-    public function getByToken(string $token)
+    public function getByToken(string $token): object
     {
         return $this->repository->getByToken($token);
     }
 
-    /**
-     * Check if the transaction table exists in the database.
-     *
-     * @return array
-     */
-    public function existsTransactionTable(): array
-    {
-        return $this->repository->checkExistTable();
-    }
 
     /**
-     * Returns the name of the table associated with the repository.
+     * Retrieve a inscription by token. return null if not found.
      *
-     * @return string Name of the database table.
+     * @param string $token The inscription token.
+     * @return object|null
      */
-    public function getTableName(): string
+    public function findByToken(string $token): ?object
     {
-        return $this->repository->getTableName();
+        return $this->repository->findByToken($token);
     }
 
-    public function updateWithFinishResponse(string $inscriptionId, InscriptionFinishResponse $resp)
+    public function updateWithFinishResponse(string $inscriptionId, InscriptionFinishResponse $resp): void
     {
         $this->update($inscriptionId, [
             'finished' => true,
@@ -104,7 +104,7 @@ class InscriptionService
         ]);
     }
 
-    public function updateWithFinishResponseError(string $inscriptionId, $error, $detailError)
+    public function updateWithFinishResponseError(string $inscriptionId, string $error, string $detailError): void
     {
         $this->update($inscriptionId, [
             'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED,
@@ -112,6 +112,4 @@ class InscriptionService
             'detail_error' => $detailError
         ]);
     }
-
 }
-

@@ -4,12 +4,22 @@ namespace Transbank\WooCommerce\WebpayRest\Repositories;
 
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
-class TransactionRepository extends BaseRepository implements TransactionRepositoryInterface
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
+use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
+
+class TransactionRepository
 {
     const TABLE_NAME = 'webpay_rest_transactions';
+
+
+    private WpdbTableGateway $db;
+
+    public function __construct(WpdbTableGateway $wpdb)
+    {
+        $this->db = $wpdb;
+    }
 
     /**
      * Get the name of the transaction database table.
@@ -18,33 +28,48 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      */
     public function getTableName(): string
     {
-        return $this->getBaseTableName(static::TABLE_NAME);
+        return $this->db->getTableName();
     }
 
+
     /**
-     * Create a transaction record.
+     * Get the name of the transaction without prefix database table.
+     *
+     * @return string The name of the table used to store transactions.
+     */
+    public function getRawTableName(): string
+    {
+        return self::TABLE_NAME;
+    }
+
+
+    /**
+     * Create a transaction record and return id.
      *
      * @param TbkTransaction $data Transaction data to be stored.
-     * @return mixed
+     * @throws DatabaseInsertException
+     * @return int
      */
-    public function create(TbkTransaction $data)
+    public function insert(TbkTransaction $data): int
     {
         $transaction = [
-                'order_id'    => $data->getOrderId(),
-                'buy_order'   => $data->getBuyOrder(),
-                'amount'      => $data->getAmount(),
-                'environment' => $data->getEnvironment(),
-                'commerce_code'  => $data->getCommerceCode(),
-                'product'     => $data->getProduct(),
-                'status'      => $data->getStatus(),
+            'order_id'    => $data->getOrderId(),
+            'buy_order'   => $data->getBuyOrder(),
+            'amount'      => $data->getAmount(),
+            'environment' => $data->getEnvironment(),
+            'commerce_code'  => $data->getCommerceCode(),
+            'product'     => $data->getProduct(),
+            'status'      => $data->getStatus(),
 
-                'token'       => $data->getToken(),
-                'session_id'  => $data->getSessionId(),
+            'token'       => $data->getToken(),
+            'session_id'  => $data->getSessionId(),
 
-                'child_buy_order' => $data->getChildBuyOrder(),
-                'child_commerce_code' => $data->getChildCommerceCode()
-            ];
-        return $this->insertBase($transaction);
+            'child_buy_order' => $data->getChildBuyOrder(),
+            'child_commerce_code' => $data->getChildCommerceCode()
+        ];
+
+
+        return $this->db->insert($transaction);
     }
 
     /**
@@ -52,44 +77,42 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      *
      * @param string $transactionId Token identifying the transaction.
      * @param array $data New data to update the transaction with.
-     * @return mixed
+     * @return int|bool
      */
-    public function update(string $transactionId, array $data)
+    public function update(string $transactionId, array $data): int|bool
     {
-        return $this->updateBase($transactionId, $data);
+        return $this->db->update(['id' => $transactionId], $data);
     }
 
-     /**
+    /**
      * Retrieve a transaction by token. Throws an exception if not found.
      *
      * @param string $token The transaction token.
-     * @return mixed
-     * @throws RecordNotFoundOnDatabaseException
+     * @return object|null
      */
-    public function getByToken(string $token)
+    public function findByToken(string $token): ?object
     {
-        $transactionTable = $this->getTableName();
-        return $this->findFirst(
-            "SELECT * FROM $transactionTable WHERE `token` = '%s'",
-            "Token no se encontró en la base de datos de transacciones",
-            $token
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `token` = %s",
+            [$token],
         );
     }
 
-     /**
+    /**
      * Retrieve a transaction by buyOrder. Throws an exception if not found.
      *
      * @param string $buyOrder The buy order associated with the transaction.
-     * @return mixed
+     * @return object
      * @throws RecordNotFoundOnDatabaseException
+     * @throws \InvalidArgumentException
      */
-    public function getByBuyOrder(string $buyOrder)
+    public function getByBuyOrder(string $buyOrder): object
     {
-        $transactionTable = $this->getTableName();
-        return $this->getFirst(
-            "SELECT * FROM $transactionTable WHERE buy_order = '%s'",
-            "BuyOrder no se encontró en la base de datos de transacciones",
-            $buyOrder
+
+        return $this->db->getOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `buy_order` = %s",
+            [$buyOrder],
+            'Registro no encontrado'
         );
     }
 
@@ -97,55 +120,66 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
      * Retrieve the first approved transaction by orderId.
      *
      * @param string $orderId
-     * @return mixed|null
+     * @return object|null
      */
-    public function findFirstApprovedByOrderId(string $orderId)
+    public function findFirstApprovedByOrderId(string $orderId): ?object
     {
-        $transactionTable = $this->getTableName();
         $statusApproved = TbkConstants::TRANSACTION_STATUS_APPROVED;
-        return $this->findFirst(
-            "SELECT * FROM $transactionTable WHERE status = '$statusApproved' AND order_id = '%s'",
-            $orderId
-        );
-    }
-
-    /**
-     * Retrieve a transaction by buyOrder and sessionId. Throws if not found.
-     *
-     * @param string $buyOrder
-     * @param string $sessionId
-     * @return mixed
-     * @throws RecordNotFoundOnDatabaseException
-     */
-    public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId)
-    {
-        $transactionTable = $this->getTableName();
-        return $this->getFirst(
-            "SELECT * FROM $transactionTable WHERE session_id = '%s' && buy_order='%s'",
-            "BuyOrder '{$buyOrder}' y SessionId '{$sessionId}' no se encontró en la base de datos de transacciones, por lo que no se puede completar el proceso",
-            $sessionId,
-            $buyOrder
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `status` = %s AND `order_id` = %d",
+            [
+                $statusApproved,
+                (int)$orderId,
+            ],
         );
     }
 
     /**
      * Retrieve the first transaction by orderId.
      *
-     * @param mixed $orderId
+     * @param string $orderId
      * @return object|null
      */
-    public function findFirstByOrderId($orderId): ?object
+    public function findFirstByOrderId(string $orderId): ?object
     {
-        return $this->getTransactionsByConditions(['order_id' => $orderId], 'id')[0] ?? null;
-    }
-
-    public function findFirstByToken($token): ?object
-    {
-        $transactionTable = $this->getTableName();
-        return $this->findFirst(
-            "SELECT * FROM $transactionTable WHERE `token` = '%s'",
-            $token
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `order_id` = %d ORDER BY id DESC",
+            [
+                (int)$orderId,
+            ],
         );
     }
 
+    /**
+     * Checks whether the database table exists.
+     *
+     * @return bool True if the table exists, false otherwise.
+     */
+    public function checkExistTable(): bool
+    {
+        return $this->db->tableExists();
+    }
+
+    /**
+     * Returns the last database error generated by the most recent query.
+     * @return string The last database error message, or an empty string if none.
+     */
+    public function getLastQueryError(): string
+    {
+        return $this->db->getLastQueryError();
+    }
+
+    /**
+     * Retrieve a transaction by ID. return null if not found.
+     *
+     * @param int $id The transaction ID.
+     * @return object|null transaction object
+     */
+    public function findById(int $id): ?object
+    {
+        return $this->db->findOne(
+            "SELECT * FROM `{$this->db->getTableName()}` WHERE `id` = %d",
+            [$id],
+        );
+    }
 }

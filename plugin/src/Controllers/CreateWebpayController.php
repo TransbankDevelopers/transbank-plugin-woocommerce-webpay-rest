@@ -44,7 +44,7 @@ class CreateWebpayController
             $this->log->logInfo("Creando transacción Webpay Plus", ['orderId' => $order->get_id(), 'amount' => $amount, 'returnUrl' => $returnUrl]);
             $createResponse = $this->webpayService->createTransaction($order->get_id(), $amount, $returnUrl);
             $this->log->logInfo("Transacción Webpay Plus creada", ['token' => $createResponse->getToken(), 'url' => $createResponse->getUrl()]);
-            $this->transactionService->create($createResponse);
+            $this->transactionService->createAndGet($createResponse);
             do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->getToken());
             return [
                 'result' => 'success',
@@ -66,6 +66,4 @@ class CreateWebpayController
             throw new EcommerceException($e->getMessage(), $e);
         }
     }
-
 }
-

@@ -2,21 +2,22 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Services;
 
-use Transbank\Plugin\Repositories\TransactionRepositoryInterface;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Model\TbkTransaction;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionAuthorizeResponse;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionRefundResponse;
 use Transbank\Webpay\Oneclick\Responses\MallTransactionRefundResponse;
 use Transbank\Plugin\Exceptions\DatabaseRecordCreationException;
+use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 
 class TransactionService
 {
-    private TransactionRepositoryInterface $repository;
+    private TransactionRepository $repository;
 
 
     public function __construct(
-        TransactionRepositoryInterface $repository
+        TransactionRepository $repository
     ) {
         $this->repository = $repository;
     }
@@ -27,7 +28,7 @@ class TransactionService
      * @param TbkTransaction $data Transaction data to be stored.
      * @return mixed
      */
-    public function create(TbkTransaction $data): TbkTransaction
+    public function createAndGet(TbkTransaction $data): TbkTransaction
     {
         if ($data->getProduct() === TbkConstants::TRANSACTION_WEBPAY_PLUS) {
             $data->setChildBuyOrder('');
@@ -36,11 +37,18 @@ class TransactionService
             $data->setToken('');
             $data->setSessionId('');
         }
-        $record = $this->repository->create($data);
-        if ($record === null) {
+        try {
+            $id = $this->repository->insert($data);
+
+            $record = $this->repository->findById($id);
+            if (!$record) {
+                throw new RecordNotFoundOnDatabaseException('Transacción no encontrada');
+            }
+
+            return new TbkTransaction($record);
+        } catch (\Exception) {
             throw new DatabaseRecordCreationException("Problemas al crear el registro de Transacción");
         }
-        return new TbkTransaction($record);
     }
 
     /**
@@ -48,23 +56,11 @@ class TransactionService
      *
      * @param string $transactionId Token identifying the transaction.
      * @param array $data New data to update the transaction with.
-     * @return mixed
+     * @return int|bool
      */
-    public function update(string $transactionId, array $data): mixed
+    public function update(string $transactionId, array $data): int|bool
     {
         return $this->repository->update($transactionId, $data);
-    }
-
-    /**
-     * Retrieve a transaction by token. Throws an exception if not found.
-     *
-     * @param string $token The transaction token.
-     * @return mixed
-     * @throws \Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException
-     */
-    public function getByToken(string $token): object
-    {
-        return $this->repository->getByToken($token);
     }
 
     /**
@@ -73,9 +69,9 @@ class TransactionService
      * @param mixed $token
      * @return object|null
      */
-    public function findFirstByToken(string $token): object
+    public function findFirstByToken(string $token): ?object
     {
-        return $this->repository->findFirstByToken($token);
+        return $this->repository->findByToken($token);
     }
 
     /**
@@ -103,25 +99,12 @@ class TransactionService
     }
 
     /**
-     * Retrieve a transaction by buyOrder and sessionId. Throws if not found.
-     *
-     * @param string $buyOrder
-     * @param string $sessionId
-     * @return mixed
-     * @throws \Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException
-     */
-    public function getByBuyOrderAndSessionId(string $buyOrder, string $sessionId): object
-    {
-        return $this->repository->getByBuyOrderAndSessionId($buyOrder, $sessionId);
-    }
-
-    /**
      * Retrieve the first transaction by orderId.
      *
-     * @param mixed $orderId
+     * @param string $orderId
      * @return object|null
      */
-    public function findFirstByOrderId($orderId): ?object
+    public function findFirstByOrderId(string $orderId): ?object
     {
         return $this->repository->findFirstByOrderId($orderId);
     }
@@ -135,34 +118,14 @@ class TransactionService
      */
     public function checkIsAlreadyProcessed(string $token): bool
     {
-        $result = $this->repository->findFirstByToken($token);
+        $result = $this->repository->findByToken($token);
         if (is_null($result)) {
             return false;
         }
         return $result->status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
     }
 
-    /**
-     * Check if the transaction table exists in the database.
-     *
-     * @return array
-     */
-    public function existsTransactionTable(): array
-    {
-        return $this->repository->checkExistTable();
-    }
-
-    /**
-     * Returns the name of the table associated with the repository.
-     *
-     * @return string Name of the database table.
-     */
-    public function getTableName(): string
-    {
-        return $this->repository->getTableName();
-    }
-
-    public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp)
+    public function updateWithRefundResponse(string $transactionId, TransactionRefundResponse|MallTransactionRefundResponse $resp): void
     {
         $this->update($transactionId, [
             'last_refund_type' => $resp->getType(),
@@ -170,7 +133,7 @@ class TransactionService
         ]);
     }
 
-    public function updateWithRefundResponseError(string $transactionId, $detailError)
+    public function updateWithRefundResponseError(string $transactionId, string $detailError): void
     {
         $this->update($transactionId, [
             'error' => 'Refund error',
@@ -178,7 +141,7 @@ class TransactionService
         ]);
     }
 
-    public function updateWithAuthorizeResponse(string $transactionId, MallTransactionAuthorizeResponse $resp)
+    public function updateWithAuthorizeResponse(string $transactionId, MallTransactionAuthorizeResponse $resp): void
     {
         $this->update($transactionId, [
             'status' => TbkConstants::TRANSACTION_STATUS_APPROVED,
@@ -187,7 +150,7 @@ class TransactionService
         ]);
     }
 
-    public function updateWithAuthorizeResponseError(string $transactionId, $error, $detailError)
+    public function updateWithAuthorizeResponseError(string $transactionId, string $error, string $detailError): void
     {
         $this->update($transactionId, [
             'status' => TbkConstants::TRANSACTION_STATUS_FAILED,
@@ -195,5 +158,4 @@ class TransactionService
             'detail_error' => $detailError
         ]);
     }
-
 }
