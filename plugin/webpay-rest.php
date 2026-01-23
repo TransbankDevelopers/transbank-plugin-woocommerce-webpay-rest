@@ -60,7 +60,6 @@ add_action('add_meta_boxes', function () use ($hposExists) {
 
 add_action('init', function () {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
-    add_action('wp_ajax_check_exist_tables', TableCheck::class . '::check');
     add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
     add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 });

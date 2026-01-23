@@ -5,8 +5,9 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Exceptions\CreateTableException;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
 
-require_once ABSPATH.'wp-admin/includes/upgrade.php';
+require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 class DatabaseTableInstaller
 {
@@ -108,31 +109,35 @@ class DatabaseTableInstaller
         dbDelta($query);
         $lastError = $wpdb->last_error;
         if (!empty($lastError)) {
-            throw new CreateTableException('Error al crear la tabla '. $tableName .  ' en la base de datos: ' . $lastError);
+            throw new CreateTableException('Error al crear la tabla ' . $tableName .  ' en la base de datos: ' . $lastError);
         }
     }
 
-     /**
+    /**
      * Check if a needed tables exists.
      *
      * @throws CreateTableException
      */
     public static function checkTables(): void
     {
-        static::tableExists(TransactionRepository::TABLE_NAME);
-        static::tableExists(InscriptionRepository::TABLE_NAME);
+        $tables = [
+            TransactionRepository::TABLE_NAME,
+            InscriptionRepository::TABLE_NAME
+        ];
+
+        foreach ($tables as $tableName) {
+            if (!static::tableExists($tableName)) {
+                throw new CreateTableException(
+                    "La tabla " . self::getBaseTableName($tableName) . " NO ha sido creada correctamente."
+                );
+            }
+        }
     }
 
-    private static function tableExists($tableName): void
+    private static function tableExists($tableName): bool
     {
         global $wpdb;
-        $fullTableName = self::getBaseTableName($tableName);
-        $query = $wpdb->prepare("SHOW TABLES LIKE %s", $fullTableName);
-        $result = $wpdb->get_var($query);
-        if ($result === $fullTableName) {
-            return;
-        }
-        throw new CreateTableException("La tabla $fullTableName NO ha sido creada correctamente.");
+        return (new WpdbTableGateway($wpdb, $tableName))->tableExists();
     }
 
     public static function createTables()
@@ -179,9 +184,9 @@ class DatabaseTableInstaller
     {
         global $wpdb;
         if (is_multisite()) {
-            return $wpdb->base_prefix.$baseName;
+            return $wpdb->base_prefix . $baseName;
         } else {
-            return $wpdb->prefix.$baseName;
+            return $wpdb->prefix . $baseName;
         }
     }
 }
