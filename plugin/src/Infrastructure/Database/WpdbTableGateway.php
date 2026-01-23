@@ -191,14 +191,6 @@ final class WpdbTableGateway
         return $this->table;
     }
 
-    /**
-     * Returns the last database error produced by $wpdb.
-     */
-    public function getLastQueryError(): string
-    {
-        return (string) $this->db->last_error;
-    }
-
     private function castArgs(array $args): array
     {
         return array_map(function ($v) {
