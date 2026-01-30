@@ -265,16 +265,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function on_payment_token_deleted($token_id)
     {
         $inscription = null;
-        $inscriptionRepository = TbkFactory::createInscriptionRepository();
         $this->logger->logInfo('Iniciando ejecucción de hook on_payment_token_deleted', ['token_id' => $token_id]);
         try {
-            $inscription = $inscriptionRepository->findByPaymentTokenId($token_id);
-
-            if (!$inscription) {
-                throw new \Exception('No se encontró inscripción asociada al token de pago.');
-            }
-
-            $this->logger->logInfo('Eliminando inscripción Oneclick asociada al token de pago', [
+            $inscription = $this->inscriptionService->deleteByPaymentTokenId((int) $token_id);
+            $this->logger->logInfo('Inscripción Oneclick eliminada asociada al token de pago', [
                 'token_id' => $token_id,
                 'inscription_id' => $inscription->id,
                 'user_id' => $inscription->userId,
@@ -282,9 +276,6 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'email' => $inscription->email,
                 'environment' => $inscription->environment,
             ]);
-
-            $this->inscriptionService->deleteInscription($inscription->tbkUser, $inscription->username);
-            $inscriptionRepository->deleteById($inscription->id);
 
             $this->logger->logInfo('Ejecucción de hook on_payment_token_deleted finalizada correctamente.', [
                 'token_id' => $token_id,

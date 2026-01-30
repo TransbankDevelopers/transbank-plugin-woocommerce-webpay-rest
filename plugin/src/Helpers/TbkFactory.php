@@ -9,6 +9,7 @@ use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\PaymentTokenRepository;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
@@ -108,6 +109,12 @@ class TbkFactory
         return new InscriptionRepository($tableGateway);
     }
 
+    public static function createPaymentTokenRepository(): PaymentTokenRepository
+    {
+        global $wpdb;
+        return new PaymentTokenRepository($wpdb);
+    }
+
     public static function createEcommerceService()
     {
         return new EcommerceService(
@@ -126,7 +133,9 @@ class TbkFactory
     public static function createOneclickInscriptionService()
     {
         return new OneclickInscriptionService(
-            static::getOneclickConfig()
+            static::getOneclickConfig(),
+            static::createInscriptionRepository(),
+            static::createPaymentTokenRepository()
         );
     }
 
