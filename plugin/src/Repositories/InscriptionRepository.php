@@ -6,16 +6,19 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 use Transbank\Plugin\Model\TbkInscription;
 use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableNames;
 
 class InscriptionRepository
 {
     const TABLE_NAME = 'transbank_inscriptions';
 
     private WpdbTableGateway $db;
+    private WpdbTableNames $tableNames;
 
-    public function __construct(WpdbTableGateway $wpdb)
+    public function __construct(WpdbTableGateway $wpdb, WpdbTableNames $tableNames)
     {
         $this->db = $wpdb;
+        $this->tableNames = $tableNames;
     }
 
     /**
@@ -148,7 +151,7 @@ class InscriptionRepository
         return $this->db->find(
             "SELECT i.*, u.user_login AS user
              FROM `{$this->db->getTableName()}` i
-             LEFT JOIN `{$this->db->getUsersTableName()}` u ON u.ID = i.user_id
+             LEFT JOIN `{$this->tableNames->getUsersTableName()}` u ON u.ID = i.user_id
              WHERE i.finished = 1 AND i.response_code = 0 AND i.environment = %s
              LIMIT %d, %d",
             [$environment, $offset, $limit]

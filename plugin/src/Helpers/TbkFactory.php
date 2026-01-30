@@ -17,6 +17,7 @@ use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableNames;
 
 
 define(
@@ -106,7 +107,8 @@ class TbkFactory
             InscriptionRepository::TABLE_NAME,
             ['transbank_response']
         );
-        return new InscriptionRepository($tableGateway);
+        $tableNames = new WpdbTableNames($wpdb);
+        return new InscriptionRepository($tableGateway, $tableNames);
     }
 
     public static function createPaymentTokenRepository(): PaymentTokenRepository
