@@ -191,6 +191,11 @@ final class WpdbTableGateway
         return $this->table;
     }
 
+    public function getUsersTableName(): string
+    {
+        return $this->db->users;
+    }
+
     private function castArgs(array $args): array
     {
         return array_map(function ($v) {

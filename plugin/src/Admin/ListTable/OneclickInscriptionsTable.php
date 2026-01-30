@@ -51,33 +51,17 @@ class OneclickInscriptionsTable extends WP_List_Table
     {
         $this->process_actions();
 
-        global $wpdb;
-
-        $inscriptionsTable = $wpdb->prefix . InscriptionRepository::TABLE_NAME;
-        $usersTable = $wpdb->users;
-
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
         $paged = $paged > 0 ? $paged : 1;
 
         $perPage = 20;
         $offset = ($paged - 1) * $perPage;
 
-        $totalItems = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$inscriptionsTable} WHERE finished = 1 AND response_code = 0");
+        $repository = TbkFactory::createInscriptionRepository();
+        $totalItems = $repository->countFinishedByEnvironment($this->environment);
         $totalPages = (int) ceil($totalItems / $perPage);
 
-        $itemsQuery = "
-            SELECT
-                i.*,
-                u.user_login AS user
-            FROM {$inscriptionsTable} i
-            LEFT JOIN {$usersTable} u ON u.ID = i.user_id
-            WHERE i.finished = 1 AND i.response_code = 0 AND i.environment = %s
-            LIMIT %d, %d
-        ";
-
-        $this->items = $wpdb->get_results(
-            $wpdb->prepare($itemsQuery, $this->environment, $offset, $perPage)
-        );
+        $this->items = $repository->listFinishedByEnvironment($this->environment, $offset, $perPage);
 
         $this->set_pagination_args([
             'total_items' => $totalItems,

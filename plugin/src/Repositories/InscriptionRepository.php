@@ -134,4 +134,42 @@ class InscriptionRepository
 
         return new TbkInscription($record);
     }
+
+    /**
+     * List finished inscriptions by environment with pagination.
+     *
+     * @param string $environment
+     * @param int $offset
+     * @param int $limit
+     * @return array<int,object>
+     */
+    public function listFinishedByEnvironment(string $environment, int $offset, int $limit): array
+    {
+        return $this->db->find(
+            "SELECT i.*, u.user_login AS user
+             FROM `{$this->db->getTableName()}` i
+             LEFT JOIN `{$this->db->getUsersTableName()}` u ON u.ID = i.user_id
+             WHERE i.finished = 1 AND i.response_code = 0 AND i.environment = %s
+             LIMIT %d, %d",
+            [$environment, $offset, $limit]
+        );
+    }
+
+    /**
+     * Count finished inscriptions by environment.
+     *
+     * @param string $environment
+     * @return int
+     */
+    public function countFinishedByEnvironment(string $environment): int
+    {
+        $row = $this->db->findOne(
+            "SELECT COUNT(*) AS total
+             FROM `{$this->db->getTableName()}`
+             WHERE finished = 1 AND response_code = 0 AND environment = %s",
+            [$environment]
+        );
+
+        return (int) ($row->total ?? 0);
+    }
 }
