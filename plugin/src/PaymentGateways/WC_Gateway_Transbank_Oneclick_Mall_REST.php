@@ -265,7 +265,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function on_payment_token_deleted($token_id)
     {
         $inscription = null;
-        $this->logger->logInfo('Iniciando ejecucción de hook on_payment_token_deleted', ['token_id' => $token_id]);
+        $this->logger->logInfo('Iniciando ejecución de hook on_payment_token_deleted', ['token_id' => $token_id]);
         try {
             $inscription = $this->inscriptionService->deleteByPaymentTokenId((int) $token_id);
             $this->logger->logInfo('Inscripción Oneclick eliminada asociada al token de pago', [
@@ -277,12 +277,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'environment' => $inscription->environment,
             ]);
 
-            $this->logger->logInfo('Ejecucción de hook on_payment_token_deleted finalizada correctamente.', [
+            $this->logger->logInfo('ejecución de hook on_payment_token_deleted finalizada correctamente.', [
                 'token_id' => $token_id,
                 'inscription_id' => $inscription?->id,
             ]);
         } catch (\Throwable $e) {
-            $this->logger->logError('Ejecucción de hook on_payment_token_deleted fallida.', [
+            $this->logger->logError('ejecución de hook on_payment_token_deleted fallida.', [
                 'token_id' => $token_id,
                 'user_id' => $inscription?->userId,
                 'username' => $inscription?->username,
