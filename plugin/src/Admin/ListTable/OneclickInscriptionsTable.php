@@ -51,33 +51,17 @@ class OneclickInscriptionsTable extends WP_List_Table
     {
         $this->process_actions();
 
-        global $wpdb;
-
-        $inscriptionsTable = $wpdb->prefix . InscriptionRepository::TABLE_NAME;
-        $usersTable = $wpdb->users;
-
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
         $paged = $paged > 0 ? $paged : 1;
 
         $perPage = 20;
         $offset = ($paged - 1) * $perPage;
 
-        $totalItems = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$inscriptionsTable} WHERE finished = 1 AND response_code = 0");
+        $repository = TbkFactory::createInscriptionRepository();
+        $totalItems = $repository->countFinishedByEnvironment($this->environment);
         $totalPages = (int) ceil($totalItems / $perPage);
 
-        $itemsQuery = "
-            SELECT
-                i.*,
-                u.user_login AS user
-            FROM {$inscriptionsTable} i
-            LEFT JOIN {$usersTable} u ON u.ID = i.user_id
-            WHERE i.finished = 1 AND i.response_code = 0 AND i.environment = %s
-            LIMIT %d, %d
-        ";
-
-        $this->items = $wpdb->get_results(
-            $wpdb->prepare($itemsQuery, $this->environment, $offset, $perPage)
-        );
+        $this->items = $repository->listFinishedByEnvironment($this->environment, $offset, $perPage);
 
         $this->set_pagination_args([
             'total_items' => $totalItems,
@@ -167,43 +151,19 @@ class OneclickInscriptionsTable extends WP_List_Table
 
         try {
             $this->logger->logInfo('Eliminando inscripción Oneclick', ['inscription_id' => $id]);
-            $repository = TbkFactory::createInscriptionRepository();
-            $inscription = $repository->findById($id);
-
-            if (!$inscription) {
-                $this->logger->logError('Inscripción no encontrada para eliminar', ['inscription_id' => $id]);
-                $this->redirectWithNotice('error', 'Inscripción no encontrada.');
-            }
-
-            $paymentTokenId = $this->getPaymentTokenIdByUserAndUsername(
-                (int) $inscription->user_id,
-                $inscription->username
-            );
-
-            if ($paymentTokenId === null) {
-                $this->logger->logError('Payment token no encontrado para eliminar', ['inscription_id' => $id]);
-                $this->redirectWithNotice('error', 'Inscripción no encontrada.');
-            }
-
-            $inscriptionResponse = json_decode($inscription->transbank_response);
-
             $oneclickService = TbkFactory::createOneclickInscriptionService();
-            $oneclickService->deleteInscription(
-                $inscriptionResponse->tbkUser,
-                $inscription->username
-            );
-
-            $this->deleteInscriptionLocalAndWooTokenAtomically(
-                $paymentTokenId,
-                $id,
-            );
+            $oneclickService->deleteByInscriptionId($id);
 
             $this->logger->logInfo('Inscripción Oneclick eliminada correctamente', ['inscription_id' => $id]);
 
             $this->redirectWithNotice('success', 'Inscripción eliminada correctamente');
         } catch (\Exception $e) {
             $this->logger->logError('Error al eliminar inscripción Oneclick', ['inscription_id' => $id, 'error' => $e->getMessage()]);
-            $this->redirectWithNotice('error', 'Error al eliminar la inscripción.');
+            $noticeMessage = $e->getMessage() === 'Inscripción no encontrada.'
+                || $e->getMessage() === 'Payment token no encontrado para eliminar.'
+                ? 'Inscripción no encontrada.'
+                : 'Error al eliminar la inscripción.';
+            $this->redirectWithNotice('error', $noticeMessage);
         }
 
         wp_safe_redirect(remove_query_arg(['action', 'inscription_id', '_wpnonce']));
@@ -222,62 +182,5 @@ class OneclickInscriptionsTable extends WP_List_Table
 
         wp_safe_redirect($url);
         exit;
-    }
-
-    private function getPaymentTokenIdByUserAndUsername(
-        int $userId,
-        string $oneclickUsername,
-    ): ?int {
-        global $wpdb;
-
-        $tokensTable = $wpdb->prefix . 'woocommerce_payment_tokens';
-        $metaTable = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-
-        $sql = "
-        SELECT t.token_id
-        FROM {$tokensTable} t
-        INNER JOIN {$metaTable} m
-            ON m.payment_token_id = t.token_id
-        WHERE t.user_id = %d
-          AND m.meta_key = 'username'
-          AND m.meta_value = %s
-        LIMIT 1
-    ";
-
-        $tokenId = $wpdb->get_var(
-            $wpdb->prepare($sql, $userId, $oneclickUsername)
-        );
-
-        if ($tokenId === null) {
-            return null;
-        }
-
-        $tokenId = (int) $tokenId;
-
-        return $tokenId > 0 ? $tokenId : null;
-    }
-
-    private function deleteInscriptionLocalAndWooTokenAtomically(
-        int $paymentTokenId,
-        string $inscriptionId,
-    ): void {
-        global $wpdb;
-
-        $inscriptionsTable = $wpdb->prefix . InscriptionRepository::TABLE_NAME;
-        $tokensTable = $wpdb->prefix . 'woocommerce_payment_tokens';
-        $metaTable = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-
-        $wpdb->query('START TRANSACTION');
-
-        try {
-            $wpdb->delete($metaTable, ['payment_token_id' => $paymentTokenId], ['%d']);
-            $wpdb->delete($tokensTable, ['token_id' => $paymentTokenId], ['%d']);
-            $wpdb->delete($inscriptionsTable, ['id' => $inscriptionId], ['%d']);
-
-            $wpdb->query('COMMIT');
-        } catch (\Throwable $e) {
-            $wpdb->query('ROLLBACK');
-            throw $e;
-        }
     }
 }

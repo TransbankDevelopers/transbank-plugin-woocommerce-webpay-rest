@@ -7,6 +7,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Controllers\FinishOneclickController;
 use Transbank\Plugin\Helpers\BuyOrderHelper;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use Transbank\Webpay\Oneclick\Exceptions\MallTransactionAuthorizeException;
 use Transbank\Webpay\Oneclick\Exceptions\InscriptionStartException;
@@ -44,6 +45,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
      */
     private $shouldThrowException;
     private $gatewaySettings;
+
+    /** @var \Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService */
+    private $inscriptionService;
 
     /**
      * WC_Gateway_Transbank_Oneclick_Mall_REST constructor.
@@ -86,6 +90,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->init_settings();
 
         $this->logger = TbkFactory::createOneclickLogger();
+        $this->inscriptionService = TbkFactory::createOneclickInscriptionService();
 
         $this->max_amount = $this->get_option('max_amount') ?? 100000;
 
@@ -100,9 +105,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             'process',
         ]);
 
+        add_action('woocommerce_payment_token_deleted', [$this, 'on_payment_token_deleted'], 10, 1);
+        add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
         add_filter('woocommerce_payment_methods_list_item', [$this, 'methods_list_item_oneclick'], null, 2);
         add_filter('woocommerce_payment_token_class', [$this, 'getOneclickPaymentTokenClass']);
-        add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
         add_filter('woocommerce_saved_payment_methods_list', [$this, 'get_saved_payment_methods_list'], 10, 2);
     }
 
@@ -168,20 +174,20 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             );
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
-            ?>
+?>
             <div class="inline error">
                 <p>
                     <strong><?php esc_html_e(
-                        'Gateway disabled',
-                        'woocommerce'
-                    ); ?></strong>: <?php esc_html_e(
-                         'Oneclick no soporta la moneda configurada en tu tienda. ' .
-                         'Solo soporta CLP',
-                         'transbank_wc_plugin'
-                     ); ?>
+                                'Gateway disabled',
+                                'woocommerce'
+                            ); ?></strong>: <?php esc_html_e(
+                                                'Oneclick no soporta la moneda configurada en tu tienda. ' .
+                                                    'Solo soporta CLP',
+                                                'transbank_wc_plugin'
+                                            ); ?>
                 </p>
             </div>
-            <?php
+<?php
         }
     }
 
@@ -256,6 +262,37 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         return $item;
     }
 
+    public function on_payment_token_deleted($token_id)
+    {
+        $inscription = null;
+        $this->logger->logInfo('Iniciando ejecución de hook on_payment_token_deleted', ['token_id' => $token_id]);
+        try {
+            $inscription = $this->inscriptionService->deleteByPaymentTokenId((int) $token_id);
+            $this->logger->logInfo('Inscripción Oneclick eliminada asociada al token de pago', [
+                'token_id' => $token_id,
+                'inscription_id' => $inscription->id,
+                'user_id' => $inscription->userId,
+                'username' => $inscription->username,
+                'email' => $inscription->email,
+                'environment' => $inscription->environment,
+            ]);
+
+            $this->logger->logInfo('ejecución de hook on_payment_token_deleted finalizada correctamente.', [
+                'token_id' => $token_id,
+                'inscription_id' => $inscription?->id,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->logError('ejecución de hook on_payment_token_deleted fallida.', [
+                'token_id' => $token_id,
+                'user_id' => $inscription?->userId,
+                'username' => $inscription?->username,
+                'email' => $inscription?->email,
+                'environment' => $inscription?->environment,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     /**
      * Inicializar campos de formulario.
      **/
@@ -296,13 +333,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
 
         $this->form_fields = [
-                $gatewaySettings::ENABLED => [
+            $gatewaySettings::ENABLED => [
                 'title' => __('Activo', 'transbank_wc_plugin'),
                 'type' => 'checkbox',
                 'label' => " ",
                 'default' => 'no',
             ],
-                $gatewaySettings::ENVIRONMENT => [
+            $gatewaySettings::ENVIRONMENT => [
                 'title' => __('Ambiente', 'transbank_wc_plugin'),
                 'type' => 'select',
                 'desc_tip' => $environmentDescription,
@@ -312,35 +349,35 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 ],
                 'default' => Options::ENVIRONMENT_INTEGRATION,
             ],
-                $gatewaySettings::COMMERCE_CODE => [
+            $gatewaySettings::COMMERCE_CODE => [
                 'title' => __('Código de Comercio Mall Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $commerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-                $gatewaySettings::CHILD_COMMERCE_CODE => [
+            $gatewaySettings::CHILD_COMMERCE_CODE => [
                 'title' => __('Código de Comercio Tienda Producción', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $childCommerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-                $gatewaySettings::API_KEY => [
+            $gatewaySettings::API_KEY => [
                 'title' => __('API Key (llave secreta) producción', 'transbank_wc_plugin'),
                 'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip' => $apiKeyDescription,
                 'default' => '',
             ],
-                $gatewaySettings::MAX_AMOUNT => [
+            $gatewaySettings::MAX_AMOUNT => [
                 'title' => __('Monto máximo de transacción permitido', 'transbank_wc_plugin'),
                 'type' => 'number',
                 'options' => ['step' => 100],
                 'default' => '0',
                 'desc_tip' => $maxAmountDescription,
             ],
-                $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
+            $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
                 'title' => __('Order Status', 'transbank_wc_plugin'),
                 'type' => 'select',
                 'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
@@ -351,14 +388,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 ],
                 'default' => '',
             ],
-                $gatewaySettings::DESCRIPTION => [
+            $gatewaySettings::DESCRIPTION => [
                 'title' => __('Descripción', 'transbank_wc_plugin'),
                 'type' => 'textarea',
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
-                $gatewaySettings::BUY_ORDER_FORMAT => [
+            $gatewaySettings::BUY_ORDER_FORMAT => [
                 'title' => __(
                     'Formato personalizado de orden de compra principal',
                     'transbank_wc_plugin'
@@ -368,7 +405,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 'type' => 'text',
                 'default' => OneclickAuthorizationService::BUY_ORDER_FORMAT
             ],
-                $gatewaySettings::CHILD_BUY_ORDER_FORMAT => [
+            $gatewaySettings::CHILD_BUY_ORDER_FORMAT => [
                 'title' => __('Formato personalizado de orden de compra hija', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
                 'desc_tip' => $childBuyOrderDescription,

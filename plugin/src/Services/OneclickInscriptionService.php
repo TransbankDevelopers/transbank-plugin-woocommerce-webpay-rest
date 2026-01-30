@@ -7,6 +7,9 @@ use Transbank\Webpay\Oneclick;
 use Transbank\Webpay\Options;
 use Transbank\Plugin\Model\TbkInscription;
 use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\Plugin\Exceptions\EcommerceException;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\PaymentTokenRepository;
 
 class OneclickInscriptionService extends ProductBaseService
 {
@@ -15,8 +18,13 @@ class OneclickInscriptionService extends ProductBaseService
      */
     protected $mallInscription;
 
+    private InscriptionRepository $inscriptionRepository;
+    private PaymentTokenRepository $paymentTokenRepository;
+
     public function __construct(
-        $config
+        $config,
+        InscriptionRepository $inscriptionRepository,
+        PaymentTokenRepository $paymentTokenRepository
     ) {
         if ($config->getEnvironment() == Options::ENVIRONMENT_PRODUCTION) {
             $this->mallInscription = MallInscription::buildForProduction(
@@ -30,6 +38,8 @@ class OneclickInscriptionService extends ProductBaseService
             );
         }
         $this->options = $this->mallInscription->getOptions();
+        $this->inscriptionRepository = $inscriptionRepository;
+        $this->paymentTokenRepository = $paymentTokenRepository;
     }
 
     /**
@@ -100,5 +110,77 @@ class OneclickInscriptionService extends ProductBaseService
     public function deleteInscription(string $tbkUser, string $username)
     {
         $this->mallInscription->delete($tbkUser, $username);
+    }
+
+    /**
+     * Delete an inscription by its WooCommerce payment token id.
+     *
+     * @param int $paymentTokenId
+     * @return TbkInscription
+     * @throws EcommerceException
+     */
+    public function deleteByPaymentTokenId(int $paymentTokenId): TbkInscription
+    {
+        $inscription = $this->inscriptionRepository->findByPaymentTokenId($paymentTokenId);
+
+        if (!$inscription) {
+            throw new EcommerceException('No se encontró inscripción asociada al token de pago.');
+        }
+
+        $this->deleteInscription($inscription->tbkUser, $inscription->username);
+        $this->inscriptionRepository->deleteById($inscription->id);
+
+        return $inscription;
+    }
+
+    /**
+     * Delete an inscription by its id and remove the related payment token when available.
+     *
+     * Falls back to lookup by user id + username if the inscription is missing token_id.
+     *
+     * @param int $inscriptionId
+     * @return void
+     * @throws EcommerceException
+     */
+    public function deleteByInscriptionId(int $inscriptionId): void
+    {
+        $record = $this->inscriptionRepository->findById($inscriptionId);
+
+        if (!$record) {
+            throw new EcommerceException('Inscripción no encontrada.');
+        }
+
+        $inscription = new TbkInscription($record);
+        $paymentTokenId = $inscription->tokenId;
+
+        if ($paymentTokenId <= 0) {
+            $paymentTokenId = $this->paymentTokenRepository->findTokenIdByUserAndUsername(
+                $inscription->userId,
+                $inscription->username
+            );
+        }
+
+        if (!$paymentTokenId) {
+            throw new EcommerceException('Payment token no encontrado para eliminar.');
+        }
+
+        $this->deleteInscription($inscription->tbkUser, $inscription->username);
+        $this->deleteLocalInscriptionAndToken($paymentTokenId, $inscription->id);
+    }
+
+    /**
+     * Delete local inscription record and WooCommerce payment token in a transaction.
+     *
+     * @param int $paymentTokenId
+     * @param int $inscriptionId
+     * @return void
+     * @throws \Throwable
+     */
+    private function deleteLocalInscriptionAndToken(int $paymentTokenId, int $inscriptionId): void
+    {
+        $this->inscriptionRepository->runInTransaction(function () use ($paymentTokenId, $inscriptionId) {
+            $this->paymentTokenRepository->deleteById($paymentTokenId);
+            $this->inscriptionRepository->deleteById($inscriptionId);
+        });
     }
 }

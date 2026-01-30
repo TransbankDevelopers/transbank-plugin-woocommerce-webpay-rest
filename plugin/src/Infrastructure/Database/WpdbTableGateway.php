@@ -191,6 +191,26 @@ final class WpdbTableGateway
         return $this->table;
     }
 
+    /**
+     * Run a callback within a database transaction.
+     *
+     * @param callable $callback
+     * @return void
+     * @throws \Throwable
+     */
+    public function runInTransaction(callable $callback): void
+    {
+        $this->db->query('START TRANSACTION');
+
+        try {
+            $callback();
+            $this->db->query('COMMIT');
+        } catch (\Throwable $e) {
+            $this->db->query('ROLLBACK');
+            throw $e;
+        }
+    }
+
     private function castArgs(array $args): array
     {
         return array_map(function ($v) {
