@@ -191,9 +191,24 @@ final class WpdbTableGateway
         return $this->table;
     }
 
-    public function getUsersTableName(): string
+    /**
+     * Run a callback within a database transaction.
+     *
+     * @param callable $callback
+     * @return void
+     * @throws \Throwable
+     */
+    public function runInTransaction(callable $callback): void
     {
-        return $this->db->users;
+        $this->db->query('START TRANSACTION');
+
+        try {
+            $callback();
+            $this->db->query('COMMIT');
+        } catch (\Throwable $e) {
+            $this->db->query('ROLLBACK');
+            throw $e;
+        }
     }
 
     private function castArgs(array $args): array

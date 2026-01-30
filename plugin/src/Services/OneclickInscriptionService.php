@@ -178,17 +178,9 @@ class OneclickInscriptionService extends ProductBaseService
      */
     private function deleteLocalInscriptionAndToken(int $paymentTokenId, int $inscriptionId): void
     {
-        global $wpdb;
-
-        $wpdb->query('START TRANSACTION');
-
-        try {
+        $this->inscriptionRepository->runInTransaction(function () use ($paymentTokenId, $inscriptionId) {
             $this->paymentTokenRepository->deleteById($paymentTokenId);
             $this->inscriptionRepository->deleteById($inscriptionId);
-            $wpdb->query('COMMIT');
-        } catch (\Throwable $e) {
-            $wpdb->query('ROLLBACK');
-            throw $e;
-        }
+        });
     }
 }

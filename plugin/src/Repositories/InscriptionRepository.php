@@ -172,4 +172,16 @@ class InscriptionRepository
 
         return (int) ($row->total ?? 0);
     }
+
+    /**
+     * Run a callback within a database transaction.
+     *
+     * @param callable $callback
+     * @return void
+     * @throws \Throwable
+     */
+    public function runInTransaction(callable $callback): void
+    {
+        $this->db->runInTransaction($callback);
+    }
 }
