@@ -7,6 +7,7 @@ class TbkInscription
     public int $id;
     public string $token;
     public string $username;
+    public ?string $tbkUser;
     public string $email;
     public int $userId;
     public int $tokenId;
@@ -50,6 +51,13 @@ class TbkInscription
             $this->error = $record->error ?? '';
             $this->detailError = $record->detail_error ?? '';
             $this->createdAt = $record->created_at ?? '';
+            $this->tbkUser = $this->extractTbkUserFromResponse($record->transbank_response ?? '');
         }
+    }
+
+    private function extractTbkUserFromResponse(string $response): ?string
+    {
+        $data = json_decode($response, true);
+        return $data['tbkUser'] ?? null;
     }
 }
