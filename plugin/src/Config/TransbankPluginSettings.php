@@ -90,11 +90,8 @@ final class TransbankPluginSettings
         $raw[self::KEY_REVIEW_NOTICE_DISMISSED] = $dismissed;
 
         $this->cache = null;
-        $this->dirty = true;
 
         update_option(self::OPTION_NAME, $this->normalizeForStorage($raw));
-
-        $this->dirty = false;
     }
 
     /**
@@ -133,11 +130,8 @@ final class TransbankPluginSettings
         $raw[self::KEY_WELCOME_MESSAGES][$gatewayKey] = $shown;
 
         $this->cache = null;
-        $this->dirty = true;
 
         update_option(self::OPTION_NAME, $this->normalizeForStorage($raw));
-
-        $this->dirty = false;
     }
 
     /**
@@ -168,11 +162,8 @@ final class TransbankPluginSettings
         $raw[self::KEY_LOGGING][self::KEY_LOGGING_ENABLED] = $enabled;
 
         $this->cache = null;
-        $this->dirty = true;
 
         update_option(self::OPTION_NAME, $this->normalizeForStorage($raw));
-
-        $this->dirty = false;
     }
 
     /**
@@ -205,11 +196,8 @@ final class TransbankPluginSettings
         $raw[self::KEY_LOGGING][self::KEY_LOGGING_LEVEL] = $this->sanitizeLogLevel($level);
 
         $this->cache = null;
-        $this->dirty = true;
 
         update_option(self::OPTION_NAME, $this->normalizeForStorage($raw));
-
-        $this->dirty = false;
     }
 
     /**
@@ -220,7 +208,6 @@ final class TransbankPluginSettings
     public function refresh(): void
     {
         $this->cache = null;
-        $this->dirty = false;
     }
 
     /**
