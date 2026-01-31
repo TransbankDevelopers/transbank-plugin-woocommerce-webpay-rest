@@ -9,6 +9,8 @@ use WP_List_Table;
 
 class OneclickInscriptionsTable extends WP_List_Table
 {
+    private const PER_PAGE_DEFAULT = 15;
+    private const PER_PAGE_OPTIONS = [10, 15, 20, 50, 100];
     /** @var string */
     private $environment;
     /** @var \Transbank\Plugin\Helpers\PluginLogger */
@@ -54,7 +56,10 @@ class OneclickInscriptionsTable extends WP_List_Table
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
         $paged = $paged > 0 ? $paged : 1;
 
-        $perPage = 20;
+        $perPage = isset($_GET['per_page']) ? absint($_GET['per_page']) : self::PER_PAGE_DEFAULT;
+        if (!in_array($perPage, self::PER_PAGE_OPTIONS, true)) {
+            $perPage = self::PER_PAGE_DEFAULT;
+        }
         $offset = ($paged - 1) * $perPage;
 
         $repository = TbkFactory::createInscriptionRepository();
