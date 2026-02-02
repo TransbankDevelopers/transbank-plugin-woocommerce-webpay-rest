@@ -4,10 +4,11 @@ if (!defined('ABSPATH')) {
 }
 $table = new \Transbank\WooCommerce\WebpayRest\Admin\ListTable\OneclickInscriptionsTable();
 $table->prepare_items();
-$perPage = isset($_GET['per_page']) ? absint($_GET['per_page']) : 15;
+$defaultPerPage = 15;
+$perPage = isset($_GET['per_page']) ? absint($_GET['per_page']) : $defaultPerPage;
 $perPageOptions = [10, 15, 20, 50, 100];
 if (!in_array($perPage, $perPageOptions, true)) {
-    $perPage = 15;
+    $perPage = $defaultPerPage;
 }
 ?>
 <div class="tbk-box">
