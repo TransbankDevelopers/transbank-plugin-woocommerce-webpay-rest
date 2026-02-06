@@ -175,13 +175,19 @@ final class PluginLogger
         set_transient(self::CACHE_LOG_NAME, $logFileName, $expireTime);
     }
 
-    private static function fileExistsInFolder($fileName, $folderPath)
+    private static function getAllowedLogFilePaths(string $folderPath): array
     {
-        $filesInFolder = array_filter(scandir($folderPath), function ($file) use ($folderPath) {
-            return is_file($folderPath . '/' . $file);
-        });
+        $files = glob(trailingslashit($folderPath) . '*.log');
+        if (!$files) {
+            return [];
+        }
 
-        return in_array($fileName, array_values($filesInFolder));
+        $allowed = [];
+        foreach ($files as $filePath) {
+            $allowed[basename($filePath)] = $filePath;
+        }
+
+        return $allowed;
     }
 
     public static function checkCanDownloadLogFile()
@@ -194,16 +200,70 @@ final class PluginLogger
             wp_send_json_error(['error' => 'No tienes permisos para descargar']);
         }
 
+        if (!check_ajax_referer('my-ajax-nonce', 'nonce', false)) {
+            wp_send_json_error(['error' => 'Nonce inválido']);
+        }
+
         $baseUploadDir = wp_upload_dir();
         $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
         $logName = sanitize_text_field($_POST['file']);
+        $nonce = sanitize_text_field($_POST['nonce'] ?? '');
         $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
-        $fileExists = self::fileExistsInFolder($logName, $folderPath);
+        $allowedFiles = self::getAllowedLogFilePaths($folderPath);
+        $filePath = $allowedFiles[$logName] ?? '';
 
-        if (!$fileExists) {
+        if ($filePath === '') {
             wp_send_json_error(['error' => 'No existe el archivo solicitado']);
         }
 
-        wp_send_json_success(['downloadUrl' => $baseUploadDir['baseurl'] . $tbkLogsFolder . $logName]);
+        $downloadUrl = admin_url(
+            'admin-ajax.php?action=download_log_file&file=' .
+                rawurlencode($logName) .
+                '&nonce=' .
+                rawurlencode($nonce)
+        );
+        wp_send_json_success(['downloadUrl' => $downloadUrl]);
+    }
+
+    public static function downloadLogFile()
+    {
+        if (!is_user_logged_in()) {
+            wp_die('Debes iniciar sesión para poder descargar', 403);
+        }
+
+        if (!current_user_can('manage_options')) {
+            wp_die('No tienes permisos para descargar', 403);
+        }
+
+        if (!check_ajax_referer('my-ajax-nonce', 'nonce', false)) {
+            wp_die('Nonce inválido', 403);
+        }
+
+        $baseUploadDir = wp_upload_dir();
+        $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
+        $logName = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
+
+        if ($logName === '') {
+            wp_die('Archivo no especificado', 400);
+        }
+
+        $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
+        $allowedFiles = self::getAllowedLogFilePaths($folderPath);
+        $filePath = $allowedFiles[$logName] ?? '';
+
+        if ($filePath === '' || !is_readable($filePath)) {
+            wp_die('No existe el archivo solicitado', 404);
+        }
+
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        nocache_headers();
+        header('Content-Type: text/plain; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . basename($logName) . '"');
+        header('Content-Length: ' . filesize($filePath));
+        readfile($filePath);
+        exit;
     }
 }

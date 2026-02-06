@@ -171,11 +171,12 @@ jQuery(function ($) {
 
     function checkPermission(fileToDownload) {
         return $.ajax({
-            url: ajaxurl,
+            url: ajax_object.ajax_url,
             type: "POST",
             data: {
                 action: "check_can_download_file",
                 file: fileToDownload,
+                nonce: ajax_object.nonce,
             },
         })
             .then(function (response) {
