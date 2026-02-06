@@ -194,6 +194,21 @@ final class PluginLogger
         return array_values(array_map('basename', $files));
     }
 
+    private static function getAllowedLogFilePaths(string $folderPath): array
+    {
+        $files = glob(trailingslashit($folderPath) . '*.log');
+        if (!$files) {
+            return [];
+        }
+
+        $allowed = [];
+        foreach ($files as $filePath) {
+            $allowed[basename($filePath)] = $filePath;
+        }
+
+        return $allowed;
+    }
+
     public static function checkCanDownloadLogFile()
     {
         if (!is_user_logged_in()) {
@@ -213,10 +228,10 @@ final class PluginLogger
         $logName = sanitize_text_field($_POST['file']);
         $nonce = sanitize_text_field($_POST['nonce'] ?? '');
         $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
-        $allowedFiles = self::getAllowedLogFiles($folderPath);
-        $fileExists = in_array($logName, $allowedFiles, true);
+        $allowedFiles = self::getAllowedLogFilePaths($folderPath);
+        $filePath = $allowedFiles[$logName] ?? '';
 
-        if (!$fileExists) {
+        if ($filePath === '') {
             wp_send_json_error(['error' => 'No existe el archivo solicitado']);
         }
 
@@ -252,11 +267,10 @@ final class PluginLogger
         }
 
         $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
-        $filePath = $folderPath . $logName;
-        $allowedFiles = self::getAllowedLogFiles($folderPath);
-        $fileExists = in_array($logName, $allowedFiles, true);
+        $allowedFiles = self::getAllowedLogFilePaths($folderPath);
+        $filePath = $allowedFiles[$logName] ?? '';
 
-        if (!$fileExists || !is_readable($filePath)) {
+        if ($filePath === '' || !is_readable($filePath)) {
             wp_die('No existe el archivo solicitado', 404);
         }
 
