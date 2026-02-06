@@ -184,16 +184,6 @@ final class PluginLogger
         return in_array($fileName, array_values($filesInFolder));
     }
 
-    private static function getAllowedLogFiles(string $folderPath): array
-    {
-        $files = glob(trailingslashit($folderPath) . '*.log');
-        if (!$files) {
-            return [];
-        }
-
-        return array_values(array_map('basename', $files));
-    }
-
     private static function getAllowedLogFilePaths(string $folderPath): array
     {
         $files = glob(trailingslashit($folderPath) . '*.log');
@@ -237,9 +227,9 @@ final class PluginLogger
 
         $downloadUrl = admin_url(
             'admin-ajax.php?action=download_log_file&file=' .
-            rawurlencode($logName) .
-            '&nonce=' .
-            rawurlencode($nonce)
+                rawurlencode($logName) .
+                '&nonce=' .
+                rawurlencode($nonce)
         );
         wp_send_json_success(['downloadUrl' => $downloadUrl]);
     }
