@@ -175,15 +175,6 @@ final class PluginLogger
         set_transient(self::CACHE_LOG_NAME, $logFileName, $expireTime);
     }
 
-    private static function fileExistsInFolder($fileName, $folderPath)
-    {
-        $filesInFolder = array_filter(scandir($folderPath), function ($file) use ($folderPath) {
-            return is_file($folderPath . '/' . $file);
-        });
-
-        return in_array($fileName, array_values($filesInFolder));
-    }
-
     private static function getAllowedLogFilePaths(string $folderPath): array
     {
         $files = glob(trailingslashit($folderPath) . '*.log');
