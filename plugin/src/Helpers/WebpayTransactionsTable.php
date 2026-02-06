@@ -47,8 +47,7 @@ class WebpayTransactionsTable extends WP_List_Table
             'order_id' => ['order_id', false],
             'product' => ['product', false],
             'status' => ['status', false],
-            'environment' => ['environment', false],
-            'transaction_date' => ['transaction_date', false],
+            'environment' => ['environment', false]
         ];
     }
 
