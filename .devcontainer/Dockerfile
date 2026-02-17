@@ -1,12 +1,12 @@
 ############################
 # image with
-# WordPress 6.8.3
-# Woocomerce 10.3.6
+# WordPress 6.9.1
+# Woocomerce 10.5.2
 # Node 20.x
 # Wordpress Cli lasted
 # Composer 2.9.2
 ############################
-FROM wordpress:6.8.3-php8.2-apache
+FROM wordpress:6.9.1-php8.2-apache
 
 ENV WORDPRESS_ROOT=/var/www/html
 ENV COMPOSER_VERSION=2.9.2

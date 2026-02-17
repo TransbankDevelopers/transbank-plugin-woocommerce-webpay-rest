@@ -79,7 +79,7 @@ fi
 # --- Install WooCommerce
 if ! wp plugin is-installed woocommerce --allow-root; then
   echo "Instalando WooCommerce..."
-  wp plugin install woocommerce --version=10.3.6 --activate --allow-root || true
+  wp plugin install woocommerce --version=10.5.2 --activate --allow-root || true
 else
   echo "WooCommerce ya instalado y activo."
 fi
