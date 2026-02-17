@@ -26,14 +26,14 @@ Para poder operar con dinero real (ambiente de **producción**), debes completar
 A continuación, encontrarás información necesaria para el desarrollo de este plugin. 
 
 ## Requisitos 
-* PHP 7.4 o superior
+* PHP 8.2 o superior
 * Woocommerce 7.0 o superior
 
 ## Dependencias
 
 El plugin depende de las siguientes librerías:
 
-* transbank/transbank-sdk:~4.0
+* transbank/transbank-sdk:~5.0
 * monolog/monolog
 
 Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.org), e instalarlas con el comando `composer install`.
