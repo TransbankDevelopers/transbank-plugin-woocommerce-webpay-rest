@@ -56,11 +56,12 @@ class TransactionService
      *
      * @param string $transactionId Token identifying the transaction.
      * @param array $data New data to update the transaction with.
-     * @return int|bool
+     *
+     * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseUpdateException if update fails.
      */
-    public function update(string $transactionId, array $data): int|bool
+    public function update(string $transactionId, array $data): void
     {
-        return $this->repository->update($transactionId, $data);
+        $this->repository->update($transactionId, $data);
     }
 
     /**

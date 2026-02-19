@@ -54,11 +54,12 @@ class InscriptionRepository
      *
      * @param string $inscriptionId Token identifying the inscription.
      * @param array $data New data to update the transaction with.
-     * @return int|bool Number of rows updated or false on failure.
+     *
+     * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseUpdateException if update fails.
      */
-    public function update(string $inscriptionId, array $data): int|bool
+    public function update(string $inscriptionId, array $data): void
     {
-        return $this->db->update(['id' => $inscriptionId], $data);
+        $this->db->update(['id' => $inscriptionId], $data);
     }
 
     /**
