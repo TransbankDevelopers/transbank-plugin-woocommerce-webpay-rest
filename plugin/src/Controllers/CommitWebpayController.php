@@ -60,7 +60,7 @@ class CommitWebpayController
             $this->log->logInfo('Procesando retorno desde formulario de Webpay.');
             $this->log->logInfo("Request method: {$requestMethod}");
             $this->log->logInfo("Request payload", $request);
-            $this->handleRequest($request);
+            $this->handleFormReturn($request);
         } catch (\Exception | \Error $e) {
             $this->log->logError('Error en el proceso de validación de pago', ['error' => $e->getMessage()]);
             $this->setPaymentErrorPage(self::WEBPAY_EXCEPTION_FLOW_MESSAGE);
@@ -75,7 +75,7 @@ class CommitWebpayController
      * @throws EcommerceException If the payment flow is not recognized.
      * @return void
      */
-    protected function handleRequest(array $request): void
+    protected function handleFormReturn(array $request): void
     {
         $webpayFlow = $this->getWebpayFlow($request);
 
