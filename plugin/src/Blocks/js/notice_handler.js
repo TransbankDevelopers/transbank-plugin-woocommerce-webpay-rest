@@ -72,7 +72,7 @@ const webPayNoticeNoticeData = {
     message:
       "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.",
     type: noticeTypes.ERROR
-  },
+  }
 };
 
 export const noticeHandler = (productId) => {
