@@ -270,12 +270,11 @@ class CommitWebpayController
             ]
         );
         $this->ecommerceService->completeWebpayOrder($wooCommerceOrder, $commitResponse, $webpayTransaction);
-        $this->doAction(
-            'wc_transbank_webpay_plus_transaction_approved',
-            $wooCommerceOrder,
-            $webpayTransaction,
-            $commitResponse
-        );
+        do_action('wc_transbank_webpay_plus_transaction_approved', [
+            'order' => $wooCommerceOrder->get_data(),
+            'transbankTransaction' => $webpayTransaction,
+            'transbankResponse' => $commitResponse
+        ]);
         $this->redirect($wooCommerceOrder->get_checkout_order_received_url());
     }
 
@@ -380,12 +379,11 @@ class CommitWebpayController
 
         $this->transactionService->update($webpayTransaction->id, $data);
 
-        $this->doAction(
-            $action,
-            $wooCommerceOrder,
-            $webpayTransaction,
-            $response
-        );
+        do_action($action, [
+            'order' => $wooCommerceOrder ? $wooCommerceOrder->get_data() : null,
+            'transbankTransaction' => $webpayTransaction,
+            'transbankResponse' => $response
+        ]);
 
         $this->setPaymentErrorPage($errorCode);
     }
@@ -393,7 +391,11 @@ class CommitWebpayController
 
     protected function setPaymentErrorPage($errorCode)
     {
-        $this->doAction('transbank_webpay_plus_unexpected_error');
+        do_action('transbank_webpay_plus_unexpected_error', [
+            'order' => null,
+            'transbankTransaction' => null,
+            'transbankResponse' => null
+        ]);
         $this->log->logError(self::ERROR_MESSAGES[$errorCode]);
         $this->redirect($this->getCheckoutUrlWithError($errorCode));
     }
@@ -408,14 +410,6 @@ class CommitWebpayController
         return add_query_arg(['transbank_status' => $errorCode], wc_get_checkout_url());
     }
 
-    protected function doAction($name, $wooCommerceOrder = null, $webpayTransaction = null, $response = null)
-    {
-        do_action($name, [
-            'order' => $wooCommerceOrder ? $wooCommerceOrder->get_data() : null,
-            'transbankTransaction' => $webpayTransaction,
-            'transbankResponse' => $response
-        ]);
-    }
 
     /**
      * Checks if the transaction is already processed by the status.
