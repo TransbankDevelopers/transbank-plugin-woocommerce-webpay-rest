@@ -13,7 +13,7 @@ class NoticeRenderer
         $this->pluginFile = $pluginFile;
     }
 
-    public function render(array $data): void
+    public function display(array $data): void
     {
         $defaults = [
             'id' => 'message',

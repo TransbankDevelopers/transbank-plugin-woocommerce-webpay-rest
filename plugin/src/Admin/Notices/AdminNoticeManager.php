@@ -20,7 +20,7 @@ class AdminNoticeManager
     {
         foreach ($this->notices as $notice) {
             if ($notice->shouldRender()) {
-                $notice->render();
+                $notice->renderNotice();
             }
         }
     }

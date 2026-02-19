@@ -26,13 +26,13 @@ class NoticeInscriptionDelete implements NoticeInterface
         return $type !== '' && $msg !== '';
     }
 
-    public function render(): void
+    public function renderNotice(): void
     {
         $type = (string) ($_GET['tbk_notice_type'] ?? '');
         $msg = (string) ($_GET['tbk_notice_msg'] ?? '');
         $id = (string) ($_GET['tbk_notice_id'] ?? 'tbk-inscription-delete-notice');
 
-        $this->renderer->render([
+        $this->renderer->display([
             'id' => $id !== '' ? $id : 'tbk-inscription-delete-notice',
             'type' => $type,
             'title' => $msg,

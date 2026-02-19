@@ -29,9 +29,9 @@ class ReviewNotice implements NoticeInterface
         return $page === 'wc-settings' && $section !== '' && strpos($section, 'transbank') !== false;
     }
 
-    public function render(): void
+    public function renderNotice(): void
     {
-        $this->renderer->render([
+        $this->renderer->display([
             'id' => self::NOTICE_ID,
             'type' => 'info',
             'title' => 'Tu opinión es importante para nosotros',
