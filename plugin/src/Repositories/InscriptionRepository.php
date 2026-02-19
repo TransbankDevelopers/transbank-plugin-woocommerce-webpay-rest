@@ -40,7 +40,7 @@ class InscriptionRepository
      * @throws \InvalidArgumentException
      * @throws DatabaseInsertException
      */
-    public function insert(array $data): int
+    public function create(array $data): int
     {
         if (empty($data)) {
             throw new \InvalidArgumentException('No se proporcionaron datos para insertar.');

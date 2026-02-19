@@ -31,7 +31,7 @@ class InscriptionService
     public function createAndGet(TbkInscription $data): TbkInscription
     {
         try {
-            $id = $this->repository->insert([
+            $id = $this->repository->create([
                 'token' => $data->token,
                 'username' => $data->username,
                 'order_id' => $data->orderId,
