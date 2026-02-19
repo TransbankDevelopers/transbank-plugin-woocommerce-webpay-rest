@@ -264,6 +264,6 @@ final class PluginLogger
         header('Content-Disposition: attachment; filename="' . basename($logName) . '"');
         header('Content-Length: ' . filesize($filePath));
         readfile($filePath);
-        exit;
+        ExitHelper::terminate();
     }
 }

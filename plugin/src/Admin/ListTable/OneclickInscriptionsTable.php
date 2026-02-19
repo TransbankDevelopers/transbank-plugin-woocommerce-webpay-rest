@@ -4,7 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Admin\ListTable;
 
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\Plugin\Helpers\ExitHelper;
 use WP_List_Table;
 
 class OneclickInscriptionsTable extends WP_List_Table
@@ -170,9 +170,6 @@ class OneclickInscriptionsTable extends WP_List_Table
                 : 'Error al eliminar la inscripción.';
             $this->redirectWithNotice('error', $noticeMessage);
         }
-
-        wp_safe_redirect(remove_query_arg(['action', 'inscription_id', '_wpnonce']));
-        exit;
     }
 
     private function redirectWithNotice(string $type, string $message): void
@@ -186,6 +183,6 @@ class OneclickInscriptionsTable extends WP_List_Table
         ], $url);
 
         wp_safe_redirect($url);
-        exit;
+        ExitHelper::terminate();
     }
 }
