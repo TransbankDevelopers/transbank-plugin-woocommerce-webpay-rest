@@ -69,7 +69,9 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
      */
     private function handleOneclickPayment(array $request, WC_Order $order)
     {
-        $paymentTokenId = wc_clean($request["wc-{$this->gatewayId}-payment-token"]) ?? null;
+        $paymentTokenId = isset($request["wc-{$this->gatewayId}-payment-token"])
+            ? wc_clean($request["wc-{$this->gatewayId}-payment-token"])
+            : null;
 
         if ($paymentTokenId === 'new' || is_null($paymentTokenId)) {
             return (new StartOneclickController())->handleInscription($order);
@@ -200,7 +202,7 @@ class AuthorizeOneclickController extends BaseAuthorizeOneclickController
             $this->log->logInfo('El usuario debe tener una cuenta creada para poder inscribir una tarjeta.');
             $errorMessage = __(
                 'Webpay Oneclick: Debes crear o tener una cuenta en el sitio para poder inscribir ' .
-                'tu tarjeta y usar este método de pago.',
+                    'tu tarjeta y usar este método de pago.',
                 'transbank_wc_plugin'
             );
 
