@@ -76,7 +76,7 @@ jQuery(function ($) {
             {
                 order_id: $(".get-transaction-status").data("order-id"),
                 buy_order: $(".get-transaction-status").data("buy-order"),
-                token: $(".get-transaction-status").data("token"),
+                token: $(".get-transaction-status").data("token")
             },
             (resp) => {
                 for (const [key, value] of Object.entries(resp)) {
@@ -130,7 +130,7 @@ jQuery(function ($) {
             Fallida: "tbk-badge-error",
             Anulada: "tbk-badge-info",
             Reversada: "tbk-badge-info",
-            "Parcialmente anulada": "tbk-badge-info",
+            "Parcialmente anulada": "tbk-badge-info"
         };
 
         return statusColorsDictionary[status] ?? "tbk-badge-default";
@@ -155,7 +155,7 @@ jQuery(function ($) {
             cardNumber: "Número de tarjeta",
             transactionDate: "Fecha transacción",
             transactionTime: "Hora transacción",
-            balance: "Balance",
+            balance: "Balance"
         };
 
         return fieldNameDictionary[fieldKey] ?? fieldKey;
@@ -165,7 +165,7 @@ jQuery(function ($) {
         let noticeId = $(this).closest(".notice").attr("id");
 
         post("dismiss_notice", {
-            notice_id: noticeId,
+            notice_id: noticeId
         });
     });
 
@@ -176,8 +176,8 @@ jQuery(function ($) {
             data: {
                 action: "check_can_download_file",
                 file: fileToDownload,
-                nonce: ajax_object.nonce,
-            },
+                nonce: ajax_object.nonce
+            }
         })
             .then(function (response) {
                 return response;
@@ -188,8 +188,8 @@ jQuery(function ($) {
                     data: {
                         error:
                             error.message ||
-                            "Error en la solicitud de descarga",
-                    },
+                            "Error en la solicitud de descarga"
+                    }
                 };
             });
     }
@@ -484,15 +484,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     cancel: {
                         text: "Cancelar",
                         visible: true,
-                        closeModal: true,
+                        closeModal: true
                     },
                     confirm: {
                         text: "Eliminar",
                         value: true,
-                        closeModal: true,
-                    },
+                        closeModal: true
+                    }
                 },
-                dangerMode: true,
+                dangerMode: true
             }).then(function (ok) {
                 if (ok) globalThis.location.href = href;
             });

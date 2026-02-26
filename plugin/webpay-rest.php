@@ -123,11 +123,6 @@ add_action('init', function () {
 
 function woocommerceTransbankInit()
 {
-    if (!class_exists('WC_Payment_Gateway')) {
-        noticeMissingWoocommerce();
-        return;
-    }
-
     registerAdminMenu();
     registerPluginActionLinks();
 
@@ -252,7 +247,7 @@ function activateTransbankModule()
         DatabaseTableInstaller::checkTables();
         GatewaySettingsInstaller::installDefaultsIfMissing();
         ConfigMigrator::maybeMigrate();
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $logger = TbkFactory::createLogger();
         $logger->logError('Error al activar el plugin de Transbank: ' . $e->getMessage());
         wp_die(

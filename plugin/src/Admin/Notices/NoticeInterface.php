@@ -6,5 +6,5 @@ interface NoticeInterface
 {
     public function shouldRender(): bool;
 
-    public function render(): void;
+    public function renderNotice(): void;
 }

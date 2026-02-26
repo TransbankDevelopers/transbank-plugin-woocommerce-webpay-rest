@@ -17,7 +17,7 @@ class TbkTransaction
     private string $product;
     private string $status;
     private string $orderId;
-    
+
     private string $transbankStatus;
     private string $transbankResponse;
     private string $lastRefundType;
@@ -181,76 +181,4 @@ class TbkTransaction
     {
         $this->orderId = $orderId;
     }
-
-    public function getTransbankStatus(): string
-    {
-        return $this->transbankStatus;
-    }
-
-    public function setTransbankStatus(string $transbankStatus): void
-    {
-        $this->transbankStatus = $transbankStatus;
-    }
-
-    public function getTransbankResponse(): string
-    {
-        return $this->transbankResponse;
-    }
-
-    public function setTransbankResponse(string $transbankResponse): void
-    {
-        $this->transbankResponse = $transbankResponse;
-    }
-
-    public function getLastRefundType(): string
-    {
-        return $this->lastRefundType;
-    }
-
-    public function setLastRefundType(string $lastRefundType): void
-    {
-        $this->lastRefundType = $lastRefundType;
-    }
-
-    public function getLastRefundResponse(): string
-    {
-        return $this->lastRefundResponse;
-    }
-
-    public function setLastRefundResponse(string $lastRefundResponse): void
-    {
-        $this->lastRefundResponse = $lastRefundResponse;
-    }
-
-    public function getError(): string
-    {
-        return $this->error;
-    }
-
-    public function setError(string $error): void
-    {
-        $this->error = $error;
-    }
-
-    public function getDetailError(): string
-    {
-        return $this->detailError;
-    }
-
-    public function setDetailError(string $detailError): void
-    {
-        $this->detailError = $detailError;
-    }
-
-    public function getCreatedAt(): string
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(string $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-
 }

@@ -5,6 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Infrastructure\Database;
 use InvalidArgumentException;
 use Transbank\Plugin\Exceptions\RecordNotFoundOnDatabaseException;
 use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseInsertException;
+use Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseUpdateException;
 use wpdb;
 
 /**
@@ -148,15 +149,24 @@ final class WpdbTableGateway
      *
      * @param array<string,mixed> $where Where clause (Column => value).
      * @param array<string,mixed> $data  Column => value.
-     * @return int|bool Number of updated rows, or false on error.
+     * @param string|null $error Custom error prefix.
+     *
+     * @throws DatabaseUpdateException If update fails.
      */
-    public function update(array $where, array $data): int|bool
+    public function update(array $where, array $data, ?string $error = null): void
     {
-        return $this->db->update(
+        $result = $this->db->update(
             $this->table,
             $this->sanitizeData($data),
             $this->sanitizeData($where)
         );
+
+        if ($result === false) {
+            $errorMessage = $error ?? '';
+            $errorMessage .= $this->db->last_error;
+
+            throw new DatabaseUpdateException($errorMessage);
+        }
     }
 
     /**

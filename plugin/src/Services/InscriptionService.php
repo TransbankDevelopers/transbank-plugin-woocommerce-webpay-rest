@@ -31,7 +31,7 @@ class InscriptionService
     public function createAndGet(TbkInscription $data): TbkInscription
     {
         try {
-            $id = $this->repository->insert([
+            $id = $this->repository->create([
                 'token' => $data->token,
                 'username' => $data->username,
                 'order_id' => $data->orderId,
@@ -60,11 +60,12 @@ class InscriptionService
      *
      * @param string $inscriptionId Token identifying the inscription.
      * @param array $data New data to update the transaction with.
-     * @return int|bool
+     *
+     * @throws \Transbank\WooCommerce\WebpayRest\Exceptions\DatabaseUpdateException if update fails.
      */
-    public function update(string $inscriptionId, array $data): int|bool
+    public function update(string $inscriptionId, array $data): void
     {
-        return $this->repository->update($inscriptionId, $data);
+        $this->repository->update($inscriptionId, $data);
     }
 
     /**

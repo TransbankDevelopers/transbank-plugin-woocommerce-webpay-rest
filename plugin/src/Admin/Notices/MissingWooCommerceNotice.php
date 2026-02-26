@@ -20,7 +20,7 @@ class MissingWooCommerceNotice implements NoticeInterface
         return current_user_can('install_plugins') || current_user_can('activate_plugins');
     }
 
-    public function render(): void
+    public function renderNotice(): void
     {
         $isWooInstalled = false;
         $isWooActivated = false;
@@ -60,7 +60,7 @@ class MissingWooCommerceNotice implements NoticeInterface
             ];
         }
 
-        $this->renderer->render([
+        $this->renderer->display([
             'id' => 'tbk-missing-woocommerce',
             'type' => 'error',
             'title' => $description,
