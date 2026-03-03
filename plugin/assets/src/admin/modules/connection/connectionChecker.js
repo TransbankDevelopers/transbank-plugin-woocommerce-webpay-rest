@@ -1,4 +1,4 @@
-import { setInnerHtmlElement } from "../../utils/setInnerHtmlElement";
+import { setElement } from "../../utils/setElement";
 import { setText } from "../../utils/setText";
 import { elementFactory } from "../../utils/elementFactory";
 
@@ -55,17 +55,17 @@ export class ConnectionChecker {
 
     showSuccess(data) {
         setText(this.dom.responseUrl, data?.url ?? "");
-        setInnerHtmlElement(this.dom.responseToken, "pre", null, [data?.token ?? ""]);
+        setElement(this.dom.responseToken, "pre", null, [data?.token ?? ""]);
 
         this.visibilityManager.show(this.dom.successContainer);
     }
 
     showError(data) {
         setText(this.dom.errorResponse, data?.error ?? "");
-        setInnerHtmlElement(
+        setElement(
             this.dom.errorDetail,
             "code",
-            { className: "check-conection-code" },
+            { className: "check-connection-code" },
             [data?.detail ?? ""],
         );
 

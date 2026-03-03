@@ -1,6 +1,6 @@
 import { elementFactory } from "./elementFactory";
 
-export function setInnerHtmlElement(selector, element, props, children = []) {
+export function setElement(selector, element, props, children = []) {
     const container =
         typeof selector === "string"
             ? document.querySelector(selector)
