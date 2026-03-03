@@ -9,7 +9,7 @@ export class LogDownloader {
 
     init() {
         const button = document.querySelector(this.buttonSelector);
-        button.addEventListener('click', (e) => {
+        button?.addEventListener('click', (e) => {
             e.preventDefault();
             this.download();
         });
@@ -42,7 +42,7 @@ export class LogDownloader {
                 return;
             }
 
-            window.location.href = permissionResponse.data.downloadUrl;
+            globalThis.location.href = permissionResponse.data.downloadUrl;
 
         } catch (error) {
             this.noticeManager.renderNotice({

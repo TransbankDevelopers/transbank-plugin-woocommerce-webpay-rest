@@ -25,7 +25,12 @@ export class ApiService {
 
         try {
             parsedBody = rawText ? JSON.parse(rawText) : null;
-        } catch {
+        } catch (e) {
+            parsedBody = {
+                _parseError: true,
+                raw: rawText,
+                error: e?.message
+            };
         }
 
         if (!response.ok) {
@@ -33,13 +38,24 @@ export class ApiService {
                 parsedBody?.data?.error ||
                 parsedBody?.data?.message ||
                 parsedBody?.message ||
-                parsedBody ||
+                parsedBody?.raw ||
+                rawText ||
                 `HTTP Error ${response.status}`;
 
             const error = new Error(String(message));
             error.status = response.status;
             error.body = parsedBody;
 
+            throw error;
+        }
+
+        if(parsedBody?._parseError) {
+            const preview = String(parsedBody.raw || "").slice(0, 300);
+            const error = new Error(
+                `Invalid JSON response from server (status ${response.status}). Preview: ${preview}`
+            );
+            error.status = response.status;
+            error.body = parsedBody;
             throw error;
         }
 

@@ -78,33 +78,26 @@ export class NoticeManager {
             return;
 
         noticeElement.dataset.removing = '1';
-        const handler = this.handleTransitionEnd.bind(this, noticeElement);
+        
+        noticeElement.addEventListener("transitionend", this.handleTransitionEnd);
 
-        noticeElement._tbkTransitionHandler = handler;
-        noticeElement.addEventListener('transitionend', handler);
-
-        noticeElement.classList.add('tbk-admin-notice--fade-out');
+        noticeElement.classList.add("tbk-admin-notice--fade-out");
 
         setTimeout(() => {
             if (noticeElement.isConnected) {
-                noticeElement.removeEventListener('transitionend', handler);
+                noticeElement.removeEventListener("transitionend", this.handleTransitionEnd);
                 noticeElement.remove();
             }
         }, 350);
     };
 
-    handleTransitionEnd(noticeElement, event) {
-        if (event.propertyName && event.propertyName !== 'opacity')
+    handleTransitionEnd(event) {
+        if (event.propertyName && event.propertyName !== "opacity")
             return;
 
-        const handler = noticeElement._tbkTransitionHandler;
-
-        if (handler) {
-            noticeElement.removeEventListener('transitionend', handler);
-            delete noticeElement._tbkTransitionHandler;
-        }
-
-        noticeElement.remove();
+        const el = event.currentTarget;
+        el.removeEventListener("transitionend", this.handleTransitionEnd);
+        el.remove();
     }
 
     async dismiss(noticeId) {
