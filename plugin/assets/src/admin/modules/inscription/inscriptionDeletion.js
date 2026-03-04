@@ -23,7 +23,7 @@ export class InscriptionDeletion {
             return;
 
         if (typeof swal !== 'function') {
-            window.location.href = href;
+            globalThis.location.href = href;
             return;
         }
 
