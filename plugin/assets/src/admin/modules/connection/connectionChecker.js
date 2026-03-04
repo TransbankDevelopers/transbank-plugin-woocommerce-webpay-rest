@@ -65,7 +65,7 @@ export class ConnectionChecker {
         setElement(
             this.dom.errorDetail,
             "code",
-            { className: "check-connection-code" },
+            null,
             [data?.detail ?? ""],
         );
 
