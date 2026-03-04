@@ -51,10 +51,10 @@ RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
  && a2enconf servername
 
 # Install node 20.x
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+RUN curl --proto "=https" -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get update \
  && apt-get install -y --no-install-recommends nodejs \
- && npm install -g npm@latest \
+ && npm install --ignore-scripts -g npm@latest \
  && rm -rf /var/lib/apt/lists/*
 
 # Install composer 2.9.2
