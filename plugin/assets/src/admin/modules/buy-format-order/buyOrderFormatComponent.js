@@ -5,6 +5,10 @@ export class BuyOrderFormatComponent {
     }
 
     attach(inputId, defaultFormat, options = {}) {
+        if (this.instances.has(inputId)) {
+            this.destroy(inputId);
+        }
+
         const input = document.querySelector(inputId);
         if (!input) {
             return;
@@ -22,6 +26,7 @@ export class BuyOrderFormatComponent {
             onChange: typeof options.onChange === "function" ? options.onChange : null,
             getOtherFormat:
                 typeof options.getOtherFormat === "function" ? options.getOtherFormat : null,
+            inputHandler: null,
         };
 
         this.createUI(instance);
@@ -30,15 +35,34 @@ export class BuyOrderFormatComponent {
         this.refresh(inputId);
     }
 
+    destroy(inputId) {
+        const instance = this.instances.get(inputId);
+        if (!instance) {
+            return;
+        }
+
+        this.unbind(instance);
+        this.instances.delete(inputId);
+    }
+
+    unbind(instance) {
+        if (!instance?.input || !instance?.inputHandler) {
+            return;
+        }
+
+        instance.input.removeEventListener("input", instance.inputHandler);
+        instance.input.removeEventListener("change", instance.inputHandler);
+        instance.inputHandler = null;
+    }
+
     refresh(inputId) {
         const instance = this.instances.get(inputId);
-        if (!instance)
+        if (!instance) {
             return;
+        }
 
         const format = instance.input.value;
-
         const otherFormat = instance.getOtherFormat ? instance.getOtherFormat() : null;
-
         const result = this.service.validateAndPreview(format, otherFormat);
 
         if (!result.valid) {
@@ -54,9 +78,9 @@ export class BuyOrderFormatComponent {
 
     reset(inputId) {
         const instance = this.instances.get(inputId);
-
-        if (!instance)
+        if (!instance) {
             return;
+        }
 
         instance.input.value = instance.defaultFormat;
         this.refresh(inputId);
@@ -74,15 +98,17 @@ export class BuyOrderFormatComponent {
         const refreshBtn = this.createButton("Refrescar", "primary", (e) => {
             e.preventDefault();
             this.refresh(instance.inputId);
-            if (instance.onChange)
+            if (instance.onChange) {
                 instance.onChange(instance.input.value);
+            }
         });
 
         const resetBtn = this.createButton("Restablecer", "secondary", (e) => {
             e.preventDefault();
             this.reset(instance.inputId);
-            if (instance.onChange)
+            if (instance.onChange) {
                 instance.onChange(instance.input.value);
+            }
         });
 
         wrapper.appendChild(refreshBtn);
@@ -142,9 +168,11 @@ export class BuyOrderFormatComponent {
     bind(instance) {
         const handler = this.debounce(() => {
             this.refresh(instance.inputId);
-            if (instance.onChange)
+            if (instance.onChange) {
                 instance.onChange(instance.input.value);
+            }
         }, 200);
+        instance.inputHandler = handler;
 
         instance.input.addEventListener("input", handler);
         instance.input.addEventListener("change", handler);
@@ -178,7 +206,9 @@ export class BuyOrderFormatComponent {
     debounce(fn, ms) {
         let t = null;
         return (...args) => {
-            if (t) clearTimeout(t);
+            if (t) {
+                clearTimeout(t);
+            }
             t = setTimeout(() => fn(...args), ms);
         };
     }

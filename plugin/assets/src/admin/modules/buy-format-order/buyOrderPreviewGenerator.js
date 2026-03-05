@@ -4,7 +4,7 @@ export class BuyOrderPreviewGenerator {
     }
 
     generate(format) {
-        return String(format).replace(
+        return String(format).replaceAll(
             /\{(orderId|random(?:,\s*length=\d+)?)\}/gi,
             (_, token) => {
                 const t = token.toLowerCase();
@@ -13,12 +13,12 @@ export class BuyOrderPreviewGenerator {
                     const array = new Uint16Array(1);
                     crypto.getRandomValues(array);
                     const orderId = 10000 + (array[0] % 90000);
-                    return orderId;
+                    return String(orderId);
                 }
 
                 const lengthMatch = token.match(/length=(\d+)/i);
                 const length = lengthMatch
-                    ? parseInt(lengthMatch[1], 10)
+                    ? Number.parseInt(lengthMatch[1], 10)
                     : this.defaultRandomLength;
 
                 return this.generateRandomString(length);
