@@ -2,7 +2,7 @@
 Contributors: TransbankDevelopers
 Tags: transbank, webpay_plus, webpay_oneclick
 Requires at least: 5.3
-Tested up to: 6.8.1
+Tested up to: 6.9.1
 Requires PHP: 8.2
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
@@ -59,7 +59,19 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 4. Página de logs
 
 == Changelog ==
+= 1.12.1 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+¡Importante! La versión mínima soportada de PHP ahora es 8.2
+
+__Actualiza:__
+
+* Ahora es requisito utilizar PHP 8.2
+
 = 1.12.0 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+¡Importante! La versión mínima soportada de PHP ahora es 8.2
 
 __Agrega:__
 
@@ -76,6 +88,7 @@ __Actualiza:__
 * Gestión de notificaciones del plugin.
 * Refina el flujo para eliminar inscripciones.
 * Refina el flujo de manejo de logs.
+* Ahora es requisito utilizar PHP 8.2
 
 __Elimina:__
 
@@ -142,24 +155,21 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se corrige el formato de la nota de reembolso de pedidos.
 * Se corrige un bug en la generación de la orden de compra.
 
-= 1.7.0 =
-* Se corrige el funcionamiento de los webhooks implementados para desarrollo de terceros.
-* Se ofuscan datos sensibles en el log cuando el entorno es producción.
-* Se implementan mejoras en el manejo de logs.
-* Se agrega compatibilidad con el checkout por bloques.
-* Se agrega compatibilidad con HPOS.
-* Se remueve el servicio para recolectar datos del plugin.
-* Se corrige la consulta de status a través de Oneclick.
-* se registran estados de operaciones en base de datos.
-* Se agregan columnas de error en la vista de transacciones.
-* Se agregan mejoras en seguridad.
-* Corrección de bugs menores.
-
-= 1.6.8 =
-* Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
 == Upgrade Notice ==
+= 1.12.1 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+¡Importante! La versión mínima soportada de PHP ahora es 8.2
+
+__Actualiza:__
+
+* Ahora es requisito utilizar PHP 8.2
+
 = 1.12.0 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+¡Importante! La versión mínima soportada de PHP ahora es 8.2
 
 __Agrega:__
 
@@ -176,6 +186,7 @@ __Actualiza:__
 * Gestión de notificaciones del plugin.
 * Refina el flujo para eliminar inscripciones.
 * Refina el flujo de manejo de logs.
+* Ahora es requisito utilizar PHP 8.2
 
 __Elimina:__
 
@@ -242,18 +253,3 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se corrige el formato de la nota de reembolso de pedidos.
 * Se corrige un bug en la generación de la orden de compra.
 
-= 1.7.0 =
-* Se corrige el funcionamiento de los webhooks implementados para desarrollo de terceros.
-* Se ofuscan datos sensibles en el log cuando el entorno es producción.
-* Se implementan mejoras en el manejo de logs.
-* Se agrega compatibilidad con el checkout por bloques.
-* Se agrega compatibilidad con HPOS.
-* Se remueve el servicio para recolectar datos del plugin.
-* Se corrige la consulta de status a través de Oneclick.
-* se registran estados de operaciones en base de datos.
-* Se agregan columnas de error en la vista de transacciones.
-* Se agregan mejoras en seguridad.
-* Corrección de bugs menores.
-
-= 1.6.8 =
-* Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
