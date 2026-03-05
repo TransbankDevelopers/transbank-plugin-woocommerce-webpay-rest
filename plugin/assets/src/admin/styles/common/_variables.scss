@@ -1,0 +1,17 @@
+$tbk-red: #d5006c;
+$tbk-red-2: #c00063;
+$tbk-success: #28a745;
+$tbk-info: #007bff;
+$tbk-warning: #fd7e14;
+$tbk-error: #dc3545;
+$tbk-default: #6c757d;
+
+:root {
+    --tbk-red: #{$tbk-red};
+    --tbk-red-2: #{$tbk-red-2};
+    --tbk-success: #{$tbk-success};
+    --tbk-info: #{$tbk-info};
+    --tbk-warning: #{$tbk-warning};
+    --tbk-error: #{$tbk-error};
+    --tbk-default: #{$tbk-default};
+}

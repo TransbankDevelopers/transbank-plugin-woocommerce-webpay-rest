@@ -1,0 +1,57 @@
+@use "../common/variables";
+
+@mixin tbk-button-base($bg, $border, $color: white) {
+    background: $bg;
+    border-color: $border;
+    color: $color;
+    transition: background-color 0.3s ease;
+
+    &:hover,
+    &:focus {
+        background: variables.$tbk-red-2;
+        border-color: variables.$tbk-red-2;
+        color: $color;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.button {
+    &.tbk-button-primary {
+        @include tbk-button-base(variables.$tbk-red, variables.$tbk-red);
+    }
+
+    &.tbk-button-secondary {
+        background: white;
+        border-color: variables.$tbk-red;
+        color: variables.$tbk-red;
+        transition: background-color 0.3s ease;
+
+        &:hover,
+        &:focus {
+            background: white;
+            border-color: variables.$tbk-red-2;
+            color: variables.$tbk-red-2;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    &.tbk-button-danger {
+        background: variables.$tbk-red;
+        border-color: variables.$tbk-red;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        &:hover,
+        &:focus {
+            background: variables.$tbk-red-2;
+            border-color: variables.$tbk-red-2;
+            color: #fff;
+        }
+
+        i {
+            line-height: 1;
+        }
+    }
+}

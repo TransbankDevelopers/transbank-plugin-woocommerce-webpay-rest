@@ -1,0 +1,36 @@
+.tbk-notice-container {
+    padding: 0;
+}
+
+.tbk-notice {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    > .button {
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
+    .tbk-notice-content {
+        max-width: 65%;
+    }
+
+    .tbk-button-primary {
+        margin-left: auto;
+    }
+
+    .tbk-notice-title {
+        font-size: 18px;
+        font-weight: 500;
+    }
+}
+
+.tbk-admin-notice {
+    opacity: 1;
+    transition: opacity 300ms ease;
+
+    &--fade-out {
+        opacity: 0;
+    }
+}
