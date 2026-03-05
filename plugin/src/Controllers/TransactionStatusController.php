@@ -2,10 +2,11 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\ErrorUtil;
+use Transbank\Plugin\Helpers\ErrorUtil;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
+use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
 class TransactionStatusController
 {
@@ -20,6 +21,7 @@ class TransactionStatusController
      * @var \Transbank\Plugin\Helpers\PluginLogger
      */
     private $logger;
+    protected TransactionService $transactionService;
 
     /**
      * Controller for status requests.
@@ -27,6 +29,7 @@ class TransactionStatusController
     public function __construct()
     {
         $this->logger = TbkFactory::createLogger();
+        $this->transactionService = TbkFactory::createTransactionService();
     }
 
     public function getStatus(): void
@@ -56,10 +59,10 @@ class TransactionStatusController
         $params = ['orderId' => $orderId, 'buyOrder' => $buyOrder, 'token' => $token];
 
         $this->logger->logDebug("Request: method -> $requestMethod");
-        $this->logger->logDebug('Request: payload -> ' . json_encode($params));
+        $this->logger->logDebug('Request: payload', $params);
 
         try {
-            $transaction = Transaction::getByOrderId($orderId);
+            $transaction = $this->transactionService->findFirstByOrderId($orderId);
 
             if (!$transaction) {
                 $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
@@ -69,27 +72,27 @@ class TransactionStatusController
             }
 
             $this->logger->logInfo('Transacción encontrada.');
-            $response = $this->handleGetStatus($transaction, $orderId, $buyOrder, $token);
+            $response = $this->handleGetStatus($transaction, $buyOrder, $token);
 
             wp_send_json($response['body'], $response['code']);
         } catch (\Throwable $e) {
-            $this->logger->logError($e->getMessage());
-            $response['body']['message'] = $e->getMessage();
+            $errorMessage = ErrorUtil::getStatusErrorMessage($e);
+            $this->logger->logError($errorMessage);
+            $response['body']['message'] = $errorMessage;
             wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
-    private function handleGetStatus(object $transaction, string $orderId, string $buyOrder, string $token): array
+    private function handleGetStatus(object $transaction, string $buyOrder, string $token): array
     {
-        if ($transaction->product == Transaction::PRODUCT_WEBPAY_ONECLICK) {
-            return $this->handleOneclickStatus($orderId, $buyOrder, $transaction->buy_order);
+        if ($transaction->product == TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
+            return $this->handleOneclickStatus($buyOrder, $transaction->buy_order);
         }
 
-        return $this->handleWebpayStatus($orderId, $token, $transaction->token);
+        return $this->handleWebpayStatus($token, $transaction->token);
     }
 
     private function handleOneclickStatus(
-        string $orderId,
         string $requestBuyOrder,
         string $transactionBuyOrder
     ): array {
@@ -102,16 +105,17 @@ class TransactionStatusController
             ];
         }
 
-        $statusResponse = $this->getStatusForOneclickTransaction($orderId, $transactionBuyOrder);
-
+        $statusResponse = $this->getStatusForOneclickTransaction($transactionBuyOrder);
+        $oneclickLogger = TbkFactory::createOneclickLogger();
+        $formattedResponse = TbkResponseUtil::getOneclickStatusFormattedResponse($statusResponse);
+        $oneclickLogger->logDebug('Estado de la transacción Oneclick', $formattedResponse);
         return [
-            'body' => TbkResponseUtil::getOneclickStatusFormattedResponse($statusResponse),
+            'body' => $formattedResponse,
             'code' => self::HTTP_OK
         ];
     }
 
     private function handleWebpayStatus(
-        string $orderId,
         string $requestToken,
         string $transactionToken
     ): array {
@@ -124,24 +128,26 @@ class TransactionStatusController
             ];
         }
 
-        $statusResponse = $this->getStatusForWebpayTransaction($orderId, $transactionToken);
-
+        $statusResponse = $this->getStatusForWebpayTransaction($transactionToken);
+        $webpayLogger = TbkFactory::createWebpayPlusLogger();
+        $formattedResponse = TbkResponseUtil::getWebpayStatusFormattedResponse($statusResponse);
+        $webpayLogger->logDebug('Estado de la transacción Webpay Plus', $formattedResponse);
         return [
-            'body' => TbkResponseUtil::getWebpayStatusFormattedResponse($statusResponse),
+            'body' => $formattedResponse,
             'code' => self::HTTP_OK
         ];
     }
 
-    private function getStatusForWebpayTransaction(string $orderId, string $token)
+    private function getStatusForWebpayTransaction(string $token)
     {
-        $webpayTransbankSDK = TbkFactory::createWebpayplusTransbankSdk();
-        return $webpayTransbankSDK->status($orderId, $token);
+        $service = TbkFactory::createWebpayService();
+        return $service->status($token);
     }
 
-    private function getStatusForOneclickTransaction(string $orderId, string $buyOrder)
+    private function getStatusForOneclickTransaction(string $buyOrder)
     {
-        $oneclickTransbankSDK = TbkFactory::createOneclickTransbankSdk();
-        return $oneclickTransbankSDK->status($orderId, $buyOrder);
+        $service = TbkFactory::createOneclickAuthorizationService();
+        return $service->status($buyOrder);
     }
 
     private function getSecureInputValue(string $varName): string

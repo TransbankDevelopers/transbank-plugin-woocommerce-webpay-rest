@@ -2,31 +2,22 @@
 
 namespace Transbank\WooCommerce\WebpayRest\PaymentGateways;
 
-use Exception;
-use Throwable;
-use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\Webpay\WebpayPlus;
-use Transbank\WooCommerce\WebpayRest\Controllers\ResponseController;
+use Transbank\WooCommerce\WebpayRest\Controllers\CommitWebpayController;
+use Transbank\WooCommerce\WebpayRest\Controllers\CreateWebpayController;
+use Transbank\WooCommerce\WebpayRest\Controllers\RefundWebpayController;
 use Transbank\WooCommerce\WebpayRest\Controllers\ThankYouPageController;
-use Transbank\WooCommerce\WebpayRest\Helpers\ErrorHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\BuyOrderHelper;
-use Transbank\WooCommerce\WebpayRest\PaymentGateways\TransbankRESTPaymentGateway;
-use Transbank\Plugin\Exceptions\Webpay\CreateWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\GetTransactionWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\NotFoundTransactionWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\RefundWebpayException;
-use Transbank\Plugin\Exceptions\Webpay\RejectedRefundWebpayException;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
-use WC_Order;
+use Transbank\Plugin\Helpers\BuyOrderHelper;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewayIds;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
-    use TransbankRESTPaymentGateway;
-
-    const ID = 'transbank_webpay_plus_rest';
+    const ID = TransbankGatewayIds::WEBPAY_PLUS_REST;
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 
     const PAYMENT_GW_DESCRIPTION = 'Permite el pago de productos y/o servicios, ' .
@@ -35,40 +26,30 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 
     protected $plugin_url;
     protected $log;
-    protected $config;
-
-    /**
-     * @var WebpayplusTransbankSdk
-     */
-    protected $webpayplusTransbankSdk;
+    private $gatewaySettings;
 
     public function __construct()
     {
-        $this->webpayplusTransbankSdk = TbkFactory::createWebpayplusTransbankSdk();
+        $this->gatewaySettings = TransbankConfig::webpayPlus();
         $this->id = self::ID;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Webpay Plus';
-        $this->description = $this->get_option('webpay_rest_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
-        $this->method_description =
-            $this->get_option('webpay_rest_payment_gateway_description', self::PAYMENT_GW_DESCRIPTION);
+        $this->description = $this->gatewaySettings->get(
+            $this->gatewaySettings::DESCRIPTION,
+            self::PAYMENT_GW_DESCRIPTION
+        );
+        $this->method_description = $this->gatewaySettings->get(
+            $this->gatewaySettings::DESCRIPTION,
+            self::PAYMENT_GW_DESCRIPTION
+        );
 
         $this->plugin_url = plugins_url('/', __FILE__);
-        $this->log = TbkFactory::createLogger();
+        $this->log = TbkFactory::createWebpayPlusLogger();
 
         $this->supports = [
             'products',
             'refunds',
-        ];
-
-        $this->config = [
-            'MODO' => trim($this->get_option('webpay_rest_environment', 'TEST')),
-            'COMMERCE_CODE' => trim(
-                $this->get_option('webpay_rest_commerce_code', WebpayPlus::DEFAULT_COMMERCE_CODE)
-            ),
-            'API_KEY' => $this->get_option('webpay_rest_api_key', WebpayPlus::DEFAULT_API_KEY),
-            'ECOMMERCE' => 'woocommerce',
-            'STATUS_AFTER_PAYMENT' => $this->get_option('webpay_rest_after_payment_order_status', ''),
         ];
 
         /**
@@ -99,46 +80,11 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        $order = null;
-        try {
-            $order = new WC_Order($order_id);
-            $resp = $this->webpayplusTransbankSdk->refundTransaction($order->get_id(), round($amount));
-            $refundResponse = $resp['refundResponse'];
-            $transaction = $resp['transaction'];
-            $jsonResponse = json_encode($refundResponse, JSON_PRETTY_PRINT);
-            $this->addRefundOrderNote($refundResponse, $order, $amount);
-            do_action('transbank_webpay_plus_refund_completed', $order, $transaction, $jsonResponse);
-            return true;
-        } catch (GetTransactionWebpayException $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
-        } catch (NotFoundTransactionWebpayException $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_transaction_not_found', null, null);
-        } catch (RefundWebpayException $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', $e->getTransaction(), null);
-        } catch (RejectedRefundWebpayException $e) {
-            $this->processRefundError(
-                $order,
-                $e,
-                'transbank_webpay_plus_refund_failed',
-                $e->getTransaction(),
-                $e->getRefundResponse()
-            );
-        } catch (Throwable $e) {
-            $this->processRefundError($order, $e, 'transbank_webpay_plus_refund_failed', null, null);
-        }
-        return false;
-    }
-
-    private function processRefundError($order, $exception, $action, $tx, $response)
-    {
-        $messageError = '<strong>Error en el reembolso:</strong><br />';
-        $messageError = $messageError . $exception->getMessage();
-        if (isset($response)) {
-            $messageError = $messageError . "\n\n" . json_encode($exception->getRefundResponse(), JSON_PRETTY_PRINT);
-        }
-        $order->add_order_note($messageError);
-        do_action($action, $order, $tx, $exception->getMessage());
-        throw new EcommerceException($messageError);
+        return (new RefundWebpayController())->process(
+            $order_id,
+            $amount,
+            $reason
+        );
     }
 
     /**
@@ -154,6 +100,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      **/
     public function init_form_fields()
     {
+        $gatewaySettings = $this->gatewaySettings;
         $environmentDescription = 'Define si el plugin operará en el ambiente de pruebas (integración) o en el ' .
             'ambiente real (producción). <br/><br/>Si defines el ambiente como "Integración" <strong>no</strong> ' .
             'se usarán el código de comercio y llave secreta que tengas configurado abajo, ya que se usará el código ' .
@@ -170,12 +117,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
 
         $this->form_fields = [
-            'enabled' => [
-                'title' => __('Activar/Desactivar', 'transbank_webpay_plus_rest'),
+                $gatewaySettings::ENABLED => [
+                'title' => __('Activo', 'transbank_webpay_plus_rest'),
                 'type' => 'checkbox',
-                'default' => 'yes',
+                'label' => " ",
+                'default' => 'no',
             ],
-            'webpay_rest_environment' => [
+                $gatewaySettings::ENVIRONMENT => [
                 'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => $environmentDescription,
@@ -185,21 +133,21 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => 'TEST',
             ],
-            'webpay_rest_commerce_code' => [
+                $gatewaySettings::COMMERCE_CODE => [
                 'title' => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $commerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-            'webpay_rest_api_key' => [
+                $gatewaySettings::API_KEY => [
                 'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
                 'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip' => $apiKeyDescription,
                 'default' => '',
             ],
-            'webpay_rest_after_payment_order_status' => [
+                $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
                 'title' => __('Order Status', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
@@ -210,19 +158,19 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => '',
             ],
-            'webpay_rest_payment_gateway_description' => [
+                $gatewaySettings::DESCRIPTION => [
                 'title' => __('Descripción', 'transbank_webpay_plus_rest'),
                 'type' => 'textarea',
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
-            'buy_order_format' => [
-                'title'       => __('Formato de orden de compra', 'transbank_wc_plugin'),
-                'placeholder' => 'Ej: ' . WebpayplusTransbankSdk::BUY_ORDER_FORMAT,
-                'desc_tip'    => $buyOrderDescription,
-                'type'        => 'text',
-                'default' => WebpayplusTransbankSdk::BUY_ORDER_FORMAT
+                $gatewaySettings::BUY_ORDER_FORMAT => [
+                'title' => __('Formato de orden de compra', 'transbank_wc_plugin'),
+                'placeholder' => 'Ej: ' . WebpayService::BUY_ORDER_FORMAT,
+                'desc_tip' => $buyOrderDescription,
+                'type' => 'text',
+                'default' => WebpayService::BUY_ORDER_FORMAT
             ]
         ];
     }
@@ -234,46 +182,15 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
         ob_clean();
         header('HTTP/1.1 200 OK');
-        $requestMethod = $_SERVER['REQUEST_METHOD'];
-        $params = ($requestMethod === 'GET') ? $_GET : $_POST;
-
-        return (new ResponseController($this->config))->response($requestMethod, $params);
+        return (new CommitWebpayController())->process();
     }
-
-
-
 
     /**
      * Procesar pago y retornar resultado.
      **/
     public function process_payment($order_id)
     {
-        $errorHookName = 'wc_gateway_transbank_process_payment_error_' . $this->id;
-        try {
-            $order = new WC_Order($order_id);
-            do_action('transbank_webpay_plus_starting_transaction', $order);
-            $amount = (int) number_format($order->get_total(), 0, ',', '');
-            $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_SLUG, home_url('/'));
-            $createResponse = $this->webpayplusTransbankSdk->createTransaction($order->get_id(), $amount, $returnUrl);
-            do_action('transbank_webpay_plus_transaction_started', $order, $createResponse->token);
-            return [
-                'result' => 'success',
-                'redirect' => $createResponse->url . '?token_ws=' . $createResponse->token,
-            ];
-        } catch (CreateWebpayException $e) {
-            if (ErrorHelper::isGuzzleError($e)) {
-                $errorMessage = ErrorHelper::getGuzzleError();
-                do_action($errorHookName, new Exception($errorMessage), true);
-                BlocksHelper::addLegacyNotices(ErrorHelper::getGuzzleError(), 'error');
-                return;
-            }
-            $errorMessage = 'Ocurrió un error al intentar conectar con WebPay Plus. Por favor intenta mas tarde.';
-            do_action($errorHookName, new Exception($errorMessage), true);
-            BlocksHelper::addLegacyNotices($errorMessage, 'error');
-            return;
-        } catch (Throwable $e) {
-            throw new EcommerceException($e->getMessage(), $e);
-        }
+        return (new CreateWebpayController())->process($this->id, static::WOOCOMMERCE_API_SLUG, $order_id);
     }
 
     /**
@@ -281,22 +198,31 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
      **/
     public function admin_options()
     {
-        $showedWelcome = get_site_option('transbank_webpay_rest_showed_welcome_message');
-        update_site_option('transbank_webpay_rest_showed_welcome_message', true);
+        $pluginSettings = TransbankConfig::plugin();
+        $showedWelcome = $pluginSettings->isWelcomeMessageShown(self::ID);
+
+        if (!$showedWelcome) {
+            $pluginSettings->setWelcomeMessageShown(self::ID, true);
+        }
+
         $tab = 'options';
-        $environment = $this->config['MODO'];
+        $environment = $this->gatewaySettings->get(
+            TransbankGatewaySettings::ENVIRONMENT
+        );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }
 
-    public function process_admin_options() {
+    public function process_admin_options()
+    {
         $buyOrderFormat = isset($_POST[$this->get_field_key('buy_order_format')])
-            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])): '';
+            ? wc_clean(wp_unslash($_POST[$this->get_field_key('buy_order_format')])) : '';
 
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
-            \WC_Admin_Settings::add_error(__("El formato personalizado de orden de compra no es válido.",
-            'woocommerce'));
-        }
-        else  {
+            \WC_Admin_Settings::add_error(__(
+                "El formato personalizado de orden de compra no es válido.",
+                'woocommerce'
+            ));
+        } else {
             parent::process_admin_options();
         }
     }

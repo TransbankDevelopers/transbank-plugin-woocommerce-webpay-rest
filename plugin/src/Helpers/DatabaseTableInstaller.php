@@ -2,13 +2,12 @@
 
 namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
-use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\WooCommerce\WebpayRest\Models\Inscription;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
-use Transbank\WooCommerce\WebpayRest\Models\TransbankApiServiceLog;
-use Transbank\WooCommerce\WebpayRest\Models\TransbankExecutionErrorLog;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
+use Transbank\WooCommerce\WebpayRest\Exceptions\CreateTableException;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
 
-require_once ABSPATH.'wp-admin/includes/upgrade.php';
+require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 class DatabaseTableInstaller
 {
@@ -18,29 +17,20 @@ class DatabaseTableInstaller
     public static function isUpgraded(): bool
     {
         $version = (int) get_site_option(static::TABLE_VERSION_OPTION_KEY, 0);
-        if ($version >= static::LATEST_TABLE_VERSION) {
-            return true;
-        }
-
-        return false;
+        return $version >= static::LATEST_TABLE_VERSION;
     }
 
-    public static function install(): bool
+    public static function install(): void
     {
-        return static::createTables();
+        static::deleteUnusedTable();
+        static::createTables();
     }
 
-    public static function createTableTransaction(): bool
+    public static function createTableTransaction(): void
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Webpay Transactions Table
-        |--------------------------------------------------------------------------
-        */
-        $tableName = Transaction::getTableName();
+        $tableName = self::getBaseTableName(TransactionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                   bigint(20) NOT NULL AUTO_INCREMENT,
             `order_id`             varchar(60) NOT NULL,
@@ -64,20 +54,14 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
-    public static function createTableInscription(): bool
+    public static function createTableInscription(): void
     {
         global $wpdb;
         $charsetCollate = $wpdb->get_charset_collate();
-        /*
-        |--------------------------------------------------------------------------
-        | Oneclick inscriptions table
-        |--------------------------------------------------------------------------
-        */
-        $tableName = Inscription::getTableName();
+        $tableName = self::getBaseTableName(InscriptionRepository::TABLE_NAME);
         $sql = "CREATE TABLE `{$tableName}` (
             `id`                    bigint(20) NOT NULL AUTO_INCREMENT,
             `token`                 varchar(100) NOT NULL,
@@ -103,94 +87,64 @@ class DatabaseTableInstaller
             PRIMARY KEY (id)
         ) $charsetCollate";
 
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        DatabaseTableInstaller::createTable($sql, $tableName);
     }
 
-    public static function createTableTransbankExecutionErrorLog(): bool
+    /**
+     * Creates a database table.
+     *
+     * @param string $query     SQL query to create table.
+     * @param string $tableName Logical name or identifier of the table.
+     *
+     * @throws CreateTableException
+     * @throws \InvalidArgumentException
+     */
+    private static function createTable($query, $tableName): void
+    {
+        if (empty($query)) {
+            throw new \InvalidArgumentException('La query para crear la tabla ' . $tableName . ' es obligatoria.');
+        }
+
+        global $wpdb;
+        dbDelta($query);
+        $lastError = $wpdb->last_error;
+        if (!empty($lastError)) {
+            throw new CreateTableException('Error al crear la tabla ' . $tableName .  ' en la base de datos: ' . $lastError);
+        }
+    }
+
+    /**
+     * Check if a needed tables exists.
+     *
+     * @throws CreateTableException
+     */
+    public static function checkTables(): void
+    {
+        $tables = [
+            TransactionRepository::TABLE_NAME,
+            InscriptionRepository::TABLE_NAME
+        ];
+
+        foreach ($tables as $tableName) {
+            if (!static::tableExists($tableName)) {
+                throw new CreateTableException(
+                    "La tabla " . self::getBaseTableName($tableName) . " NO ha sido creada correctamente."
+                );
+            }
+        }
+    }
+
+    private static function tableExists($tableName): bool
     {
         global $wpdb;
-        $charsetCollate = $wpdb->get_charset_collate();
-        $tableName = TransbankExecutionErrorLog::getTableName();
-
-        $sql = "CREATE TABLE `{$tableName}` (
-            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
-            `order_id`         varchar(60) NOT NULL,
-            `service`          varchar(100) NOT NULL,
-            `product`          varchar(30) NOT NULL,
-            `enviroment`       varchar(20) NOT NULL,
-            `commerce_code`    varchar(60) NOT NULL,
-            `data`             LONGTEXT,
-            `error`            varchar(255),
-            `original_error`   LONGTEXT,
-            `custom_error`     LONGTEXT,
-            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
-            PRIMARY KEY (id)
-        ) $charsetCollate";
-
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
+        return (new WpdbTableGateway($wpdb, $tableName))->tableExists();
     }
 
-    public static function createTableTransbankApiServiceLog(): bool
+    public static function createTables()
     {
-        global $wpdb;
-        
-        $charsetCollate = $wpdb->get_charset_collate();
-        $tableName = TransbankApiServiceLog::getTableName();
-
-        $sql = "CREATE TABLE `{$tableName}` (
-            `id`               bigint(20) NOT NULL AUTO_INCREMENT,
-            `order_id`         varchar(60) NOT NULL,
-            `service`          varchar(100) NOT NULL,
-            `product`          varchar(30) NOT NULL,
-            `enviroment`       varchar(20) NOT NULL,
-            `commerce_code`    varchar(60) NOT NULL,
-            `input`            LONGTEXT,
-            `response`         LONGTEXT,
-            `error`            varchar(255),
-            `original_error`   LONGTEXT,
-            `custom_error`     LONGTEXT,
-            `created_at`       TIMESTAMP NOT NULL  DEFAULT NOW(),
-            PRIMARY KEY (id)
-        ) $charsetCollate";
-
-        dbDelta($sql);
-        return DatabaseTableInstaller::createTableProccessError($tableName, $wpdb->last_error);
-    }
-
-    public static function createTableProccessError($tableName, $wpdbError): bool
-    {
-        $success = empty($wpdbError);
-        if (!$success) {
-            $log = TbkFactory::createLogger();
-            $log->logError('Error creating transbank tables: '.$tableName);
-            $log->logError($wpdbError);
-
-            add_settings_error($tableName.'_table_error', '', 'Transbank Webpay: Error creando tabla '.$tableName.': '.$wpdbError, 'error');
-            settings_errors($tableName.'_table_error');
-        }
-        return $success;
-    }
-
-    public static function createTables(): bool
-    {
-        $successTransaction = static::createTableTransaction();
-        $successInscription = static::createTableInscription();
-        $successExecutionErrorLog = static::createTableTransbankExecutionErrorLog();
-        $successTransbankApiServiceLog = static::createTableTransbankApiServiceLog();
-        if ($successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog) {
-            update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
-        }
-        return $successTransaction && $successInscription && $successExecutionErrorLog && $successTransbankApiServiceLog;
-    }
-
-    public static function deleteTable()
-    {
-        static::deleteTableByName(Transaction::getTableName());
-        static::deleteTableByName(Inscription::getTableName());
-        static::deleteTableByName(TransbankApiServiceLog::getTableName());
-        static::deleteTableByName(TransbankExecutionErrorLog::getTableName());
+        static::createTableTransaction();
+        static::createTableInscription();
+        update_site_option(static::TABLE_VERSION_OPTION_KEY, static::LATEST_TABLE_VERSION);
     }
 
     public static function deleteTableByName($tableName)
@@ -201,12 +155,38 @@ class DatabaseTableInstaller
         delete_option(static::TABLE_VERSION_OPTION_KEY);
     }
 
+    /**
+     * Create tables if is necessary.
+     *
+     * @throws CreateTableException
+     * @throws \InvalidArgumentException
+     */
     public static function createTableIfNeeded()
     {
         if (!static::isUpgraded()) {
-            return static::install();
+            static::install();
         }
+    }
 
-        return null;
+    public static function deleteTable()
+    {
+        static::deleteTableByName(self::getBaseTableName(TransactionRepository::TABLE_NAME));
+        static::deleteTableByName(self::getBaseTableName(InscriptionRepository::TABLE_NAME));
+    }
+
+    public static function deleteUnusedTable()
+    {
+        static::deleteTableByName(self::getBaseTableName('transbank_api_service_log'));
+        static::deleteTableByName(self::getBaseTableName('transbank_execution_error_log'));
+    }
+
+    public static function getBaseTableName($baseName): string
+    {
+        global $wpdb;
+        if (is_multisite()) {
+            return $wpdb->base_prefix . $baseName;
+        } else {
+            return $wpdb->prefix . $baseName;
+        }
     }
 }

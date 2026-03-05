@@ -5,7 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 use DateTime;
 use DateTimeZone;
 use Transbank\Webpay\Options;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WP_List_Table;
 
@@ -47,8 +47,7 @@ class WebpayTransactionsTable extends WP_List_Table
             'order_id' => ['order_id', false],
             'product' => ['product', false],
             'status' => ['status', false],
-            'environment' => ['environment', false],
-            'transaction_date' => ['transaction_date', false],
+            'environment' => ['environment', false]
         ];
     }
 
@@ -57,6 +56,7 @@ class WebpayTransactionsTable extends WP_List_Table
      */
     public function prepare_items()
     {
+        $tableName = TbkFactory::createTransactionRepository()->getTableName();
         global $wpdb;
         $orderByColumns = $this->get_sortable_columns();
         $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
@@ -73,12 +73,12 @@ class WebpayTransactionsTable extends WP_List_Table
         $perPage = 20;
         $offset = ($paged - 1) * $perPage;
 
-        $totalItemsQuery = 'SELECT COUNT(*) FROM ' . esc_sql(Transaction::getTableName());
+        $totalItemsQuery = 'SELECT COUNT(*) FROM ' . esc_sql($tableName);
         $totalItems = $wpdb->get_var($totalItemsQuery);
 
         $totalPages = ceil($totalItems / $perPage);
 
-        $itemsQuery = "SELECT * FROM " . esc_sql(Transaction::getTableName()) . "
+        $itemsQuery = "SELECT * FROM " . esc_sql($tableName) . "
                    ORDER BY %i {$order}
                    LIMIT %d, %d";
 
@@ -123,7 +123,7 @@ class WebpayTransactionsTable extends WP_List_Table
 
     public function column_product($item)
     {
-        if ($item->product === Transaction::PRODUCT_WEBPAY_ONECLICK) {
+        if ($item->product === TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
             return 'Webpay Oneclick';
         }
 
@@ -132,7 +132,7 @@ class WebpayTransactionsTable extends WP_List_Table
 
     public function column_token($item)
     {
-        if ($item->product === Transaction::PRODUCT_WEBPAY_ONECLICK) {
+        if ($item->product === TbkConstants::TRANSACTION_WEBPAY_ONECLICK) {
             return '-';
         }
         return '<a href="#"
@@ -159,12 +159,12 @@ class WebpayTransactionsTable extends WP_List_Table
     public function column_status($item)
     {
         $statusDictionary = [
-            Transaction::STATUS_PREPARED => 'Preparada',
-            Transaction::STATUS_INITIALIZED => 'Inicializada',
-            Transaction::STATUS_APPROVED => 'Aprobada',
-            Transaction::STATUS_TIMEOUT => 'Timeout en formulario de pago',
-            Transaction::STATUS_ABORTED_BY_USER => 'Abortada por el usuario',
-            Transaction::STATUS_FAILED => 'Fallida',
+            TbkConstants::TRANSACTION_STATUS_PREPARED => 'Preparada',
+            TbkConstants::TRANSACTION_STATUS_INITIALIZED => 'Inicializada',
+            TbkConstants::TRANSACTION_STATUS_APPROVED => 'Aprobada',
+            TbkConstants::TRANSACTION_STATUS_TIMEOUT => 'Timeout en formulario de pago',
+            TbkConstants::TRANSACTION_STATUS_ABORTED_BY_USER => 'Abortada por el usuario',
+            TbkConstants::TRANSACTION_STATUS_FAILED => 'Fallida',
         ];
 
         return $statusDictionary[$item->status] ?? $item->status;

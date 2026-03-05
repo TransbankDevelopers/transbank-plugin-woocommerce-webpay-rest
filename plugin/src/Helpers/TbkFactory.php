@@ -4,8 +4,21 @@ namespace Transbank\WooCommerce\WebpayRest\Helpers;
 
 use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Model\LogConfig;
-use Transbank\WooCommerce\WebpayRest\OneclickTransbankSdk;
-use Transbank\WooCommerce\WebpayRest\WebpayplusTransbankSdk;
+use Transbank\Plugin\Model\WebpayplusConfig;
+use Transbank\Plugin\Model\OneclickConfig;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
+use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
+use Transbank\WooCommerce\WebpayRest\Repositories\PaymentTokenRepository;
+use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
+use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
+use Transbank\WooCommerce\WebpayRest\Services\OneclickAuthorizationService;
+use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
+use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableGateway;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Database\WpdbTableNames;
+
 
 define(
     'TRANSBANK_WEBPAY_REST_UPLOADS',
@@ -14,60 +27,148 @@ define(
 
 class TbkFactory
 {
-    public static function createLogger()
+
+    const WEBPAY_OPTION_KEY = 'woocommerce_transbank_webpay_plus_rest_settings';
+    const ONECLICK_OPTION_KEY = 'woocommerce_transbank_oneclick_mall_rest_settings';
+
+    public static function createLogger(bool $shouldMask = true)
     {
-        $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS .'/logs');
+        $config = new LogConfig(TRANSBANK_WEBPAY_REST_UPLOADS . '/logs', $shouldMask);
         return new PluginLogger($config);
     }
 
-    public static function createWebpayplusTransbankSdk()
+    public static function createOneclickLogger(): PluginLogger
     {
-        $config = get_option(WebpayplusTransbankSdk::OPTION_KEY);
-        if (!isset($config)){
-            $config = [];
-        }
-        $environment = isset($config['webpay_rest_environment']) ?
-            $config['webpay_rest_environment'] : null;
-        $commerceCode = isset($config['webpay_rest_commerce_code']) ?
-            $config['webpay_rest_commerce_code'] : null;
-        $apiKey = isset($config['webpay_rest_api_key']) ?
-            $config['webpay_rest_api_key'] : null;
-        $buyOrderFormat = isset($config['buy_order_format']) ?
-            $config['buy_order_format'] : WebpayplusTransbankSdk::BUY_ORDER_FORMAT;
-        return new WebpayplusTransbankSdk(static::createLogger(),
-            $environment,
-            $commerceCode,
-            $apiKey,
-            $buyOrderFormat
+        $shouldMask = !static::getOneclickConfig()->isIntegration();
+        return static::createLogger($shouldMask);
+    }
+
+    public static function createWebpayPlusLogger(): PluginLogger
+    {
+        $shouldMask = !static::getWebpayplusConfig()->isIntegration();
+        return static::createLogger($shouldMask);
+    }
+
+    public static function getWebpayplusConfig(): WebpayplusConfig
+    {
+        $webpaySettings = TransbankConfig::webpayPlus();
+
+        return new WebpayplusConfig([
+            'environment' => $webpaySettings->get($webpaySettings::ENVIRONMENT),
+            'commerceCode' => $webpaySettings->get($webpaySettings::COMMERCE_CODE),
+            'apikey' => $webpaySettings->get($webpaySettings::API_KEY),
+            'buyOrderFormat' => $webpaySettings->get($webpaySettings::BUY_ORDER_FORMAT) ?? WebpayService::BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $webpaySettings->get($webpaySettings::AFTER_PAYMENT_ORDER_STATUS) ?? ''
+        ]);
+    }
+
+    public static function getOneclickConfig(): OneclickConfig
+    {
+        $oneclickSettings = TransbankConfig::oneclickMall();
+
+        return new OneclickConfig([
+            'environment' => $oneclickSettings->get($oneclickSettings::ENVIRONMENT),
+            'commerceCode' => $oneclickSettings->get($oneclickSettings::COMMERCE_CODE),
+            'apikey' => $oneclickSettings->get($oneclickSettings::API_KEY),
+            'childCommerceCode' => $oneclickSettings->get($oneclickSettings::CHILD_COMMERCE_CODE),
+            'buyOrderFormat' => $oneclickSettings->get($oneclickSettings::BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
+            'childBuyOrderFormat' => $oneclickSettings->get($oneclickSettings::CHILD_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
+            'statusAfterPayment' => $oneclickSettings->get($oneclickSettings::AFTER_PAYMENT_ORDER_STATUS) ?? ''
+        ]);
+    }
+
+    /**
+     * Create and return an instance of the TransactionRepository.
+     *
+     * @return TransactionRepository
+     */
+    public static function createTransactionRepository(): TransactionRepository
+    {
+        global $wpdb;
+        $tableGateway = new WpdbTableGateway(
+            $wpdb,
+            TransactionRepository::TABLE_NAME,
+            ['transbank_response', 'last_refund_response']
+        );
+
+        return new TransactionRepository($tableGateway);
+    }
+
+    /**
+     * Create and return an instance of the InscriptionRepository.
+     *
+     * @return InscriptionRepository
+     */
+    public static function createInscriptionRepository(): InscriptionRepository
+    {
+        global $wpdb;
+        $tableGateway = new WpdbTableGateway(
+            $wpdb,
+            InscriptionRepository::TABLE_NAME,
+            ['transbank_response']
+        );
+        $tableNames = new WpdbTableNames($wpdb);
+        return new InscriptionRepository($tableGateway, $tableNames);
+    }
+
+    public static function createPaymentTokenRepository(): PaymentTokenRepository
+    {
+        global $wpdb;
+        return new PaymentTokenRepository($wpdb);
+    }
+
+    public static function createEcommerceService()
+    {
+        return new EcommerceService(
+            static::getWebpayplusConfig(),
+            static::getOneclickConfig()
         );
     }
 
-    public static function createOneclickTransbankSdk()
+    public static function createWebpayService()
     {
-        $config = get_option(OneclickTransbankSdk::OPTION_KEY);
-        if (!isset($config)){
-            $config = [];
-        }
-        $environment = isset($config['environment']) ?
-            $config['environment'] : null;
-        $commerceCode = isset($config['commerce_code']) ?
-            $config['commerce_code'] : null;
-        $apiKey = isset($config['api_key']) ?
-            $config['api_key'] : null;
-        $childCommerceCode = isset($config['child_commerce_code']) ?
-            $config['child_commerce_code'] : null;
-        $buyOrderFormat = isset($config['buy_order_format']) ?
-            $config['buy_order_format'] : OneclickTransbankSdk::BUY_ORDER_FORMAT;
-        $childBuyOrderFormat = isset($config['child_buy_order_format']) ?
-            $config['child_buy_order_format'] : OneclickTransbankSdk::CHILD_BUY_ORDER_FORMAT;
-        return new OneclickTransbankSdk(static::createLogger(),
-            $environment,
-            $commerceCode,
-            $apiKey,
-            $childCommerceCode,
-            $buyOrderFormat,
-            $childBuyOrderFormat
+        return new WebpayService(
+            static::getWebpayplusConfig()
         );
     }
 
+    public static function createOneclickInscriptionService()
+    {
+        return new OneclickInscriptionService(
+            static::getOneclickConfig(),
+            static::createInscriptionRepository(),
+            static::createPaymentTokenRepository()
+        );
+    }
+
+    public static function createOneclickAuthorizationService()
+    {
+        return new OneclickAuthorizationService(
+            static::getOneclickConfig()
+        );
+    }
+
+    /**
+     * Create and return an instance of the TransactionService.
+     *
+     * @return TransactionService
+     */
+    public static function createTransactionService()
+    {
+        return new TransactionService(
+            static::createTransactionRepository()
+        );
+    }
+
+    /**
+     * Create and return an instance of the InscriptionService.
+     *
+     * @return InscriptionService
+     */
+    public static function createInscriptionService()
+    {
+        return new InscriptionService(
+            static::createInscriptionRepository()
+        );
+    }
 }

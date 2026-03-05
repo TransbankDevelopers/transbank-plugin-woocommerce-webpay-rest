@@ -37,7 +37,26 @@
 }
 .swal-content {
     text-align: left;
-    -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-family: -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.swal-button--confirm {
+    background: var(--tbk-red) !important;
+    border-color: var(--tbk-red) !important;
+    box-shadow: none !important;
+}
+
+.swal-button--confirm:hover,
+.swal-button--confirm:focus {
+    background: var(--tbk-red-2) !important;
+    border-color: var(--tbk-red-2) !important;
+}
+
+.swal-button--cancel {
+    background: #fff !important;
+    color: var(--tbk-red) !important;
+    border: 1px solid var(--tbk-red) !important;
+    box-shadow: none !important;
 }
 
 #show-welcome-message {float: right}
@@ -165,7 +184,6 @@
     color: #6B1A6B;
 }
 .tbk-nav ul li a{
-    vertical-align: middle;
     display: block;
     color: #333;
     text-decoration: none;
@@ -292,6 +310,12 @@
 .tbk-notice {
     display: flex;
     align-items: center;
+    gap: 15px;
+}
+
+.tbk-notice > .button {
+    margin-left: auto;
+    white-space: nowrap;
 }
 
 .button.tbk-button-primary {
@@ -322,6 +346,50 @@
     border-color: var(--tbk-red-2);
     color: var(--tbk-red-2);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button.tbk-button-danger {
+    background: var(--tbk-red);
+    border-color: var(--tbk-red);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.button.tbk-button-danger:hover,
+.button.tbk-button-danger:focus {
+    background: var(--tbk-red-2);
+    border-color: var(--tbk-red-2);
+    color: #fff;
+}
+
+.button.tbk-button-danger i {
+    line-height: 1;
+}
+
+.wp-core-ui a.button.tbk-button-danger,
+.wp-core-ui .button.tbk-button-danger {
+    background: var(--tbk-red);
+    border-color: var(--tbk-red);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wp-core-ui a.button.tbk-button-danger:hover,
+.wp-core-ui .button.tbk-button-danger:hover,
+.wp-core-ui a.button.tbk-button-danger:focus,
+.wp-core-ui .button.tbk-button-danger:focus {
+    background: var(--tbk-red-2);
+    border-color: var(--tbk-red-2);
+    color: #fff;
+}
+
+.wp-core-ui a.button.tbk-button-danger i,
+.wp-core-ui .button.tbk-button-danger i {
+    line-height: 1;
 }
 
 .log-container {
@@ -378,7 +446,7 @@
     }
 }
 
-.tbk-notice .tbk-review-text {
+.tbk-notice .tbk-notice-content {
     max-width: 65%;
 }
 
@@ -386,7 +454,7 @@
     margin-left: auto;
 }
 
-.tbk-notice .tbk-review-title {
+.tbk-notice .tbk-notice-title {
     font-size: 18px;
     font-weight: 500;
 }
@@ -501,7 +569,7 @@
     font-size: 13px;
     color: red;
     display: none;
-    
+
 }
 
 .tbk-buy-order-format-help-text {

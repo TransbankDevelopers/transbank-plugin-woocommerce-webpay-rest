@@ -7,11 +7,6 @@ class TbkConstants
     const FLAG_ACTIVE = '1';
     const FLAG_INACTIVE = '2';
 
-    const TRANSACTION_TABLE_NAME = 'transbank_transaction';
-    const INSCRIPTIONS_TABLE_NAME = 'transbank_inscription';
-    const API_SERVICE_LOG_TABLE_NAME = 'transbank_api_service_log';
-    const EXECUTION_ERROR_LOG_TABLE_NAME = 'transbank_execution_error_log';
-
     const TRANSACTION_WEBPAY_PLUS = 'webpay_plus';
     const TRANSACTION_WEBPAY_PLUS_MALL = 'webpay_plus_mall';
     const TRANSACTION_WEBPAY_ONECLICK = 'webpay_oneclick';
@@ -29,7 +24,9 @@ class TbkConstants
     const TRANSACTION_STATUS_FAILED = 'failed';
     const TRANSACTION_STATUS_ABORTED_BY_USER = 'aborted_by_user';
     const TRANSACTION_STATUS_APPROVED = 'approved';
+    const TRANSACTION_STATUS_TIMEOUT = 'timeout';
     const TRANSACTION_STATUS_ECOMMERCE_APPROVED = 'ecommerce_approved';
+    const TRANSACTION_STATUS_ERROR = 'error';
 
     const INSCRIPTIONS_STATUS_INITIALIZED = 'initialized';
     const INSCRIPTIONS_STATUS_FAILED = 'failed';

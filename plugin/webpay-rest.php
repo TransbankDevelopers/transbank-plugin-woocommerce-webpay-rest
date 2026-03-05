@@ -1,20 +1,28 @@
 <?php
 
+use Transbank\WooCommerce\WebpayRest\Admin\Notices\DismissNoticeAjax;
+use Transbank\WooCommerce\WebpayRest\Admin\Notices\NoticeInscriptionDelete;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
 use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
-use Transbank\WooCommerce\WebpayRest\Helpers\NoticeHelper;
-use Transbank\WooCommerce\WebpayRest\Models\Transaction;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
+use Transbank\WooCommerce\WebpayRest\Setup\ConfigMigrator;
 use Transbank\WooCommerce\WebpayRest\Utils\ConnectionCheck;
 use Transbank\WooCommerce\WebpayRest\Utils\TableCheck;
 use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Utils\Template;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Transbank\WooCommerce\WebpayRest\Admin\Notices\AdminNoticeManager;
+use Transbank\WooCommerce\WebpayRest\Admin\Notices\MissingWooCommerceNotice;
+use Transbank\WooCommerce\WebpayRest\Admin\Notices\NoticeRenderer;
+use Transbank\WooCommerce\WebpayRest\Admin\Notices\ReviewNotice;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankPluginSettings;
+use Transbank\WooCommerce\WebpayRest\Setup\GatewaySettingsInstaller;
 
 if (!defined('ABSPATH')) {
     return;
@@ -36,25 +44,24 @@ if (!defined('ABSPATH')) {
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
  * WC requires at least: 7.0
- * WC tested up to: 9.8.5
+ * WC tested up to: 10.5.2
  */
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
-
 $hposHelper = new HposHelper();
 $hposExists = $hposHelper->checkIfHposExists();
-
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
-add_action('admin_init', 'on_transbank_rest_webpay_plugins_loaded');
+register_activation_hook(__FILE__, 'activateTransbankModule');
+register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
 
 add_action('init', function () {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
-    add_action('wp_ajax_check_exist_tables', TableCheck::class . '::check');
     add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
+    add_action('wp_ajax_download_log_file', PluginLogger::class . '::downloadLogFile');
     add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 });
 
@@ -116,15 +123,18 @@ add_action('init', function () {
 
 function woocommerceTransbankInit()
 {
-    if (!class_exists('WC_Payment_Gateway')) {
-        noticeMissingWoocommerce();
-        return;
-    }
-
     registerAdminMenu();
     registerPluginActionLinks();
-    NoticeHelper::registerNoticesDismissHook();
-    NoticeHelper::handleReviewNotice();
+
+    $setting = new TransbankPluginSettings();
+    $renderer = new NoticeRenderer(__FILE__);
+
+    (new DismissNoticeAjax($setting))->register();
+    (new AdminNoticeManager(
+        new MissingWooCommerceNotice($renderer),
+        new ReviewNotice($renderer, $setting),
+        new NoticeInscriptionDelete($renderer)
+    ))->register();
 }
 
 function registerPaymentGateways()
@@ -134,15 +144,17 @@ function registerPaymentGateways()
         $methods[] = WC_Gateway_Transbank_Oneclick_Mall_REST::class;
         return $methods;
     });
+
+    ConfigMigrator::maybeMigrate();
 }
 
 function registerAdminMenu()
 {
     add_action('admin_menu', function () {
         add_submenu_page('woocommerce', __('Configuración de Webpay Plus', 'transbank_wc_plugin'), 'Webpay Plus', 'administrator', 'transbank_webpay_plus_rest', function () {
-            $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_DEFAULT);
+            $tab = filter_input(INPUT_GET, 'tbk_tab', FILTER_DEFAULT) ?? '';
             $tab = htmlspecialchars($tab, ENT_QUOTES, 'UTF-8');
-            if (!in_array($tab, ['healthcheck', 'logs', 'transactions'])) {
+            if (!in_array($tab, ['healthcheck', 'logs', 'transactions', 'inscriptions'])) {
                 wp_redirect(admin_url('admin.php?page=wc-settings&tab=checkout&section=transbank_webpay_plus_rest&tbk_tab=options'));
             }
 
@@ -213,7 +225,7 @@ function addTransbankStatusMetaBox(bool $hPosExists)
 function renderTransactionStatusMetaBox(int $orderId)
 {
     $viewData = [];
-    $transaction = Transaction::getByOrderId($orderId);
+    $transaction = TbkFactory::createTransactionService()->findFirstByOrderId($orderId);
 
     if ($transaction) {
         $viewData = [
@@ -228,17 +240,28 @@ function renderTransactionStatusMetaBox(int $orderId)
     (new Template())->render('admin/order/transaction-status.php', $viewData);
 }
 
-function on_transbank_rest_webpay_plugins_loaded()
+function activateTransbankModule()
 {
-    DatabaseTableInstaller::createTableIfNeeded();
+    try {
+        DatabaseTableInstaller::createTableIfNeeded();
+        DatabaseTableInstaller::checkTables();
+        GatewaySettingsInstaller::installDefaultsIfMissing();
+        ConfigMigrator::maybeMigrate();
+    } catch (Throwable $e) {
+        $logger = TbkFactory::createLogger();
+        $logger->logError('Error al activar el plugin de Transbank: ' . $e->getMessage());
+        wp_die(
+            'No se pudo activar el plugin de Transbank. Error: ' . esc_html($e->getMessage()),
+            'Error de activación',
+            ['back_link' => true]
+        );
+    }
 }
 
 function transbank_rest_remove_database()
 {
     DatabaseTableInstaller::deleteTable();
 }
-
-register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 
 
 
@@ -257,57 +280,4 @@ function transbank_rest_check_cancelled_checkout()
     if ($cancelledOrder) {
         wc_print_notice(__('Cancelaste la inscripción durante el formulario de Webpay.', 'transbank_wc_plugin'), 'error');
     }
-}
-
-function noticeMissingWoocommerce()
-{
-    add_action(
-        'admin_notices',
-        function () {
-            $noticeDescription = "WooCommerce no se encuentra activo o no está instalado.";
-            $actionButton = [];
-            $isWooInstalled = false;
-            $isWooActivated = false;
-            $currentUserCanInstallPlugins = current_user_can('install_plugins');
-            $currentUserCanActivatePlugins = current_user_can('activate_plugins');
-
-            $tbkLogo = sprintf('%s%s', plugin_dir_url(__FILE__), './images/tbk-logo.png');
-
-            $activateLink = wp_nonce_url(
-                self_admin_url('plugins.php?action=activate&plugin=woocommerce/woocommerce.php&plugin_status=all'),
-                'activate-plugin_woocommerce/woocommerce.php'
-            );
-
-            $installLink = wp_nonce_url(
-                self_admin_url('update.php?action=install-plugin&plugin=woocommerce'),
-                'install-plugin_woocommerce'
-            );
-
-            if (function_exists('get_plugins')) {
-                $allPlugins = get_plugins();
-                $isWooInstalled = !empty($allPlugins['woocommerce/woocommerce.php']);
-            }
-
-            if (function_exists('is_plugin_active')) {
-                $isWooActivated = is_plugin_active('woocommerce/woocommerce.php');
-            }
-
-            $actionButton['text'] = 'Revisar Woocommerce';
-            $actionButton['action'] = 'https://wordpress.org/plugins/woocommerce/';
-
-            if (!$isWooInstalled && $currentUserCanInstallPlugins) {
-                $actionButton['text'] = 'Instalar Woocommerce';
-                $actionButton['action'] = esc_html($installLink);
-                $noticeDescription = "Woocommerce no se encuentra instalado.";
-            }
-
-            if ($isWooInstalled && !$isWooActivated && $currentUserCanActivatePlugins) {
-                $actionButton['text'] = 'Activar Woocommerce';
-                $actionButton['action'] = esc_html($activateLink);
-                $noticeDescription = "Woocommerce no se encuentra activado.";
-            }
-
-            include_once plugin_dir_path(__FILE__) . 'views/admin/components/notice-missing-woocommerce.php';
-        }
-    );
 }

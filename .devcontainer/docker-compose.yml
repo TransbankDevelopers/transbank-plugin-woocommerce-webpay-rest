@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  db:
+    platform: linux/x86_64
+    image: mysql:8.0
+    container_name: woocommerce-plugin-mysql
+    restart: on-failure:2
+    command: >
+      --default-time-zone='America/Santiago'
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pwordpress"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+
+  woocommerce:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    container_name: woocommerce-plugin-wordpress
+    restart: on-failure:2
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: "db:3306"
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_TABLE_PREFIX: "wp_"
+      WORDPRESS_DEBUG: "1"
+    ports:
+      - "8000:80"
+    volumes:
+      - wp_data:/var/www/html
+      - ..:/workspace:cached
+      - ./logs/apache2:/var/log/apache2
+      - ./logs/plugin:/var/www/html/wp-content/uploads/transbank_webpay_plus_rest/logs
+      - ./logs/wordpress:/var/log/wordpress
+      - ./logs/wc:/var/www/html/wp-content/uploads/wc-logs
+
+volumes:
+  db_data:
+  wp_data:

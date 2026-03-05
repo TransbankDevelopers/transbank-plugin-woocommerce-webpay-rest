@@ -11,15 +11,17 @@ class InfoUtil
      */
     public static function getValidatephp()
     {
-        if (version_compare(phpversion(), '8.1.8', '<=') &&
-                version_compare(phpversion(), '7.0.0', '>=')) {
+        if (
+            version_compare(phpversion(), '8.3.0', '<') &&
+            version_compare(phpversion(), '8.2.0', '>=')
+        ) {
             return [
-                'status'  => 'OK',
+                'status' => 'OK',
                 'version' => phpversion(),
             ];
         } else {
             return [
-                'status'  => 'WARN: El plugin no ha sido testeado con esta version',
+                'status' => 'WARN: El plugin no ha sido testeado con esta version',
                 'version' => phpversion(),
             ];
         }
@@ -38,19 +40,21 @@ class InfoUtil
                 $version = OPENSSL_VERSION_TEXT;
             } else {
                 $version = phpversion($extension);
-                if (empty($version) || $version == null
-                    || $version === false || $version == ' ' || $version == '') {
-                    $version = 'PHP Extension Compiled. ver:'.phpversion();
+                if (
+                    empty($version) || $version == null
+                    || $version === false || $version == ' ' || $version == ''
+                ) {
+                    $version = 'PHP Extension Compiled. ver:' . phpversion();
                 }
             }
             $status = 'OK';
             $result = [
-                'status'  => $status,
+                'status' => $status,
                 'version' => $version,
             ];
         } else {
             $result = [
-                'status'  => 'Error!',
+                'status' => 'Error!',
                 'version' => 'No Disponible',
             ];
         }
@@ -88,11 +92,12 @@ class InfoUtil
         return $_SERVER['SERVER_SOFTWARE'];
     }
 
-    public static function getSummary(){
+    public static function getSummary()
+    {
         return [
-            'server'          => InfoUtil::getServerResume(),
-            'phpExtensions'   => InfoUtil::getExtensionsValidate(),
-            'php'             => InfoUtil::getValidatephp()
+            'server' => InfoUtil::getServerResume(),
+            'phpExtensions' => InfoUtil::getExtensionsValidate(),
+            'php' => InfoUtil::getValidatephp()
         ];
     }
 }

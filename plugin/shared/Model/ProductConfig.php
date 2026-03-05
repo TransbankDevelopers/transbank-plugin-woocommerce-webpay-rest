@@ -1,54 +1,23 @@
 <?php
 
 namespace Transbank\Plugin\Model;
+use Transbank\Webpay\Options;
 
 abstract class ProductConfig {
-    public $active = false;
-    public $production = false;
     public $apikey = null;
     public $commerceCode = null;
-    public $orderStatusAfterPayment = null;
+    public $environment = null;
+    public $buyOrderFormat = null;
+    public $statusAfterPayment = null;
 
     public function __construct($data = null) {
-        if (!is_null($data)){
-            $this->setActive($data['active']);
-            $this->setProduction($data['production']);
-            $this->setCommerceCode($data['commerceCode']);
-            $this->setApikey($data['apikey']);
-            $this->setOrderStatusAfterPayment($data['orderStatusAfterPayment']);
+        if (!is_null($data)) {
+            $this->apikey = $data['apikey'] ?? null;
+            $this->commerceCode = $data['commerceCode'] ?? null;
+            $this->environment = $data['environment'] ?? null;
+            $this->buyOrderFormat = $data['buyOrderFormat'] ?? null;
+            $this->statusAfterPayment = $data['statusAfterPayment'] ?? null;
         }
-    }
-
-    /**
-     * @return bool
-    */
-    public function isActive()
-    {
-        return $this->active;
-    }
-
-    /**
-     * @param bool $active
-    */
-    public function setActive($active)
-    {
-        $this->active = $active;
-    }
-
-    /**
-     * @return bool
-    */
-    public function isProduction()
-    {
-        return $this->production;
-    }
-
-    /**
-     * @param bool $production
-    */
-    public function setProduction($production)
-    {
-        $this->production = $production;
     }
 
     public function getApikey()
@@ -56,28 +25,28 @@ abstract class ProductConfig {
         return $this->apikey;
     }
 
-    public function setApikey($apikey)
-    {
-        $this->apikey = $apikey;
-    }
-
     public function getCommerceCode()
     {
         return $this->commerceCode;
     }
 
-    public function setCommerceCode($commerceCode)
+    public function getEnvironment()
     {
-        $this->commerceCode = $commerceCode;
+        return $this->environment;
     }
 
-    public function getOrderStatusAfterPayment()
+    public function getBuyOrderFormat()
     {
-        return $this->orderStatusAfterPayment;
+        return $this->buyOrderFormat;
     }
 
-    public function setOrderStatusAfterPayment($orderStatusAfterPayment)
+    public function getStatusAfterPayment()
     {
-        $this->orderStatusAfterPayment = $orderStatusAfterPayment;
+        return $this->statusAfterPayment;
+    }
+
+    public function isIntegration()
+    {
+        return $this->getEnvironment() == Options::ENVIRONMENT_INTEGRATION;
     }
 }

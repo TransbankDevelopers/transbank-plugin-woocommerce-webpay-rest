@@ -3,7 +3,7 @@ Contributors: TransbankDevelopers
 Tags: transbank, webpay_plus, webpay_oneclick
 Requires at least: 5.3
 Tested up to: 6.8.1
-Requires PHP: 7.4
+Requires PHP: 8.2
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
 License URI: https://opensource.org/licenses/BSD-3-Clause
@@ -59,13 +59,35 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 4. Página de logs
 
 == Changelog ==
+= 1.12.0 =
+
+__Agrega:__
+
+* Administrador de inscripciones de Oneclick en el panel de administración.
+
+__Actualiza:__
+
+* Textos para los checkbox de activación de productos.
+* Dependencias necesarias para construir el plugin
+* Refina los flujos de pago para los productos Webpay Plus y Oneclick.
+* Refina la interpretación de los campos en la operación de status.
+* Rutina para la creación de tablas en la instalación del plugin.
+* Clases para la configuración del plugin.
+* Gestión de notificaciones del plugin.
+* Refina el flujo para eliminar inscripciones.
+* Refina el flujo de manejo de logs.
+
+__Elimina:__
+
+* Tablas deprecadas para el registro de eventos.
+
 = 1.11.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
- 
+
 __Agrega:__
 
 * Se agrega a la opción de utilizar un formato de orden de compra personalizado para las transacciones de Webpay Plus y Webpay Oneclick. Esto se puede realizar desde las opciones de configuración de cada producto.
- 
+
 __Actualiza:__
 
 * Se permite consultar el estado de las transacciones Webpay Plus y Webpay Oneclick para todas las órdenes que tenga una  transacción asociada. Antes solo se permitía si la transacción se encontraba aprobada previamente.
@@ -137,13 +159,35 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
 == Upgrade Notice ==
+= 1.12.0 =
+
+__Agrega:__
+
+* Administrador de inscripciones de Oneclick en el panel de administración.
+
+__Actualiza:__
+
+* Textos para los checkbox de activación de productos.
+* Dependencias necesarias para construir el plugin
+* Refina los flujos de pago para los productos Webpay Plus y Oneclick.
+* Refina la interpretación de los campos en la operación de status.
+* Rutina para la creación de tablas en la instalación del plugin.
+* Clases para la configuración del plugin.
+* Gestión de notificaciones del plugin.
+* Refina el flujo para eliminar inscripciones.
+* Refina el flujo de manejo de logs.
+
+__Elimina:__
+
+* Tablas deprecadas para el registro de eventos.
+
 = 1.11.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
- 
+
 __Agrega:__
 
 * Se agrega a la opción de utilizar un formato de orden de compra personalizado para las transacciones de Webpay Plus y Webpay Oneclick. Esto se puede realizar desde las opciones de configuración de cada producto.
- 
+
 __Actualiza:__
 
 * Se permite consultar el estado de las transacciones Webpay Plus y Webpay Oneclick para todas las órdenes que tenga una  transacción asociada. Antes solo se permitía si la transacción se encontraba aprobada previamente.
