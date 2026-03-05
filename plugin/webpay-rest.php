@@ -44,7 +44,7 @@ if (!defined('ABSPATH')) {
  * Author: TransbankDevelopers
  * Author URI: https://www.transbank.cl
  * WC requires at least: 7.0
- * WC tested up to: 9.8.5
+ * WC tested up to: 10.5.2
  */
 
 require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';

@@ -1,12 +1,12 @@
 ############################
 # image with
-# WordPress 6.8.3
-# Woocomerce 10.3.6
+# WordPress 6.9.1
+# Woocomerce 10.5.2
 # Node 20.x
 # Wordpress Cli lasted
 # Composer 2.9.2
 ############################
-FROM wordpress:6.8.3-php8.2-apache
+FROM wordpress:6.9.1-php8.2-apache
 
 ENV WORDPRESS_ROOT=/var/www/html
 ENV COMPOSER_VERSION=2.9.2
@@ -51,10 +51,10 @@ RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
  && a2enconf servername
 
 # Install node 20.x
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+RUN curl --proto "=https" -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get update \
  && apt-get install -y --no-install-recommends nodejs \
- && npm install -g npm@latest \
+ && npm install --ignore-scripts -g npm@latest \
  && rm -rf /var/lib/apt/lists/*
 
 # Install composer 2.9.2
