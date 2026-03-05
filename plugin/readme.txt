@@ -59,6 +59,28 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 4. Página de logs
 
 == Changelog ==
+= 1.12.0 =
+
+__Agrega:__
+
+* Administrador de inscripciones de Oneclick en el panel de administración.
+
+__Actualiza:__
+
+* Textos para los checkbox de activación de productos.
+* Dependencias necesarias para construir el plugin
+* Refina los flujos de pago para los productos Webpay Plus y Oneclick.
+* Refina la interpretación de los campos en la operación de status.
+* Rutina para la creación de tablas en la instalación del plugin.
+* Clases para la configuración del plugin.
+* Gestión de notificaciones del plugin.
+* Refina el flujo para eliminar inscripciones.
+* Refina el flujo de manejo de logs.
+
+__Elimina:__
+
+* Tablas deprecadas para el registro de eventos.
+
 = 1.11.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
@@ -137,6 +159,28 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se remueve la librería de PDF 'tecnickcom/tcpdf' para mejorar compatibilidad.
 
 == Upgrade Notice ==
+= 1.12.0 =
+
+__Agrega:__
+
+* Administrador de inscripciones de Oneclick en el panel de administración.
+
+__Actualiza:__
+
+* Textos para los checkbox de activación de productos.
+* Dependencias necesarias para construir el plugin
+* Refina los flujos de pago para los productos Webpay Plus y Oneclick.
+* Refina la interpretación de los campos en la operación de status.
+* Rutina para la creación de tablas en la instalación del plugin.
+* Clases para la configuración del plugin.
+* Gestión de notificaciones del plugin.
+* Refina el flujo para eliminar inscripciones.
+* Refina el flujo de manejo de logs.
+
+__Elimina:__
+
+* Tablas deprecadas para el registro de eventos.
+
 = 1.11.0 =
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
 
