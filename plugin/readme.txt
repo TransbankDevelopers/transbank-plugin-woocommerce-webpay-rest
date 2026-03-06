@@ -59,6 +59,16 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 4. Página de logs
 
 == Changelog ==
+= 1.12.2 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+Esta versión no tiene cambios de funcionalidades en el plugin, solo cambia el proceso de empaquetado.
+¡Importante! La versión mínima soportada de PHP ahora es 8.2
+
+__Actualiza:__
+
+* Se refina el flujo de empaquetado del plugin.
+
 = 1.12.1 =
 
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
@@ -150,13 +160,19 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
 * Se cambia el capo API Key para que sea de tipo password.
 * Se agrega un notice invitando a los usuarios a dejar su review del plugin.
-
-= 1.7.1 =
-* Se corrige el formato de la nota de reembolso de pedidos.
-* Se corrige un bug en la generación de la orden de compra.
 
 
 == Upgrade Notice ==
+= 1.12.2 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+Esta versión no tiene cambios de funcionalidades en el plugin, solo cambia el proceso de empaquetado.
+¡Importante! La versión mínima soportada de PHP ahora es 8.2
+
+__Actualiza:__
+
+* Se refina el flujo de empaquetado del plugin.
+
 = 1.12.1 =
 
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
@@ -248,8 +264,4 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 * Se agrega la funcionalidad para cambiar la descripción de los medios de pago desde la configuración del plugin.
 * Se cambia el capo API Key para que sea de tipo password.
 * Se agrega un notice invitando a los usuarios a dejar su review del plugin.
-
-= 1.7.1 =
-* Se corrige el formato de la nota de reembolso de pedidos.
-* Se corrige un bug en la generación de la orden de compra.
 
