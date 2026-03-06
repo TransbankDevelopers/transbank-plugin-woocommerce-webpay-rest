@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 
+set -Eeuo pipefail
+
+on_error() {
+	local exit_code=$?
+	local line_no="${1:-unknown}"
+	echo "ERROR: deployment failed at line ${line_no} with exit code ${exit_code}" 1>&2
+	exit "${exit_code}"
+}
+
+require_command() {
+	local cmd="$1"
+	if ! command -v "${cmd}" >/dev/null 2>&1; then
+		echo "Missing required command: ${cmd}" 1>&2
+		exit 1
+	fi
+}
+
+trap 'on_error $LINENO' ERR
+
 if [[ -z "$GITHUB_ACTIONS" ]]; then
 	echo "Script is only to be run by GitHub Actions" 1>&2
 	exit 1
@@ -12,16 +31,21 @@ fi
 
 if [[ -z "$TAG" ]]; then
 	echo "Build branch is required and must be a tag" 1>&2
-	exit 0
+	exit 1
 fi
 
 WP_ORG_USERNAME="transbankdevelopers"
 PLUGIN="transbank-webpay-plus-rest"
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 PLUGIN_BUILDS_PATH="$PROJECT_ROOT/builds"
-PLUGIN_BUILD_CONFIG_PATH="$PROJECT_ROOT/build-cfg"
 VERSION=$TAG
 ZIP_FILE="$PROJECT_ROOT/$PLUGIN.zip"
+
+require_command svn
+require_command rsync
+require_command unzip
+require_command find
+require_command xargs
 
 # Ensure the zip file for the current version has been built
 if [ ! -f "$ZIP_FILE" ]; then
@@ -32,9 +56,7 @@ fi
 mkdir -p $PLUGIN_BUILDS_PATH
 
 # Check if the tag exists for the version we are building
-TAG=$(svn ls "https://plugins.svn.wordpress.org/$PLUGIN/tags/$VERSION")
-error=$?
-if [ $error == 0 ]; then
+if svn ls "https://plugins.svn.wordpress.org/$PLUGIN/tags/$VERSION" >/dev/null 2>&1; then
     # Tag exists, don't deploy
     echo "Tag already exists for version $VERSION, aborting deployment"
     exit 1
@@ -89,9 +111,14 @@ mkdir svn/tags/$VERSION
 rsync -r -p $PLUGIN/* svn/tags/$VERSION
 
 # Add new files to SVN
-svn stat svn | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
+while IFS= read -r path; do
+    svn add "${path}@"
+done < <(svn stat svn | awk '/^\?/ {print $2}')
+
 # Remove deleted files from SVN
-svn stat svn | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
+while IFS= read -r path; do
+    svn rm --force "${path}@"
+done < <(svn stat svn | awk '/^!/ {print $2}')
 svn stat svn
 
 # Commit to SVN
