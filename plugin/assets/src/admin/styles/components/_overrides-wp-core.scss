@@ -1,26 +1,11 @@
 @use "../common/variables";
+@use "./buttons";
 
 .wp-core-ui {
     a.button,
     .button {
         &.tbk-button-danger {
-            background: variables.$tbk-red;
-            border-color: variables.$tbk-red;
-            color: #fff;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-
-            &:hover,
-            &:focus {
-                background: variables.$tbk-red-2;
-                border-color: variables.$tbk-red-2;
-                color: #fff;
-            }
-
-            i {
-                line-height: 1;
-            }
+            @include buttons.tbk-button-danger;
         }
     }
 }

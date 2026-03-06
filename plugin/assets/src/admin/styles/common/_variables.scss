@@ -5,6 +5,11 @@ $tbk-info: #007bff;
 $tbk-warning: #fd7e14;
 $tbk-error: #dc3545;
 $tbk-default: #6c757d;
+$tbk-purple: #6b1a6b;
+$tbk-gray-dark: #333;
+$tbk-gray-medium: #666;
+$tbk-gray-soft: #999;
+$tbk-gray-light: #eee;
 
 :root {
     --tbk-red: #{$tbk-red};
@@ -14,4 +19,5 @@ $tbk-default: #6c757d;
     --tbk-warning: #{$tbk-warning};
     --tbk-error: #{$tbk-error};
     --tbk-default: #{$tbk-default};
+    --tbk-purple: #{$tbk-purple};
 }
