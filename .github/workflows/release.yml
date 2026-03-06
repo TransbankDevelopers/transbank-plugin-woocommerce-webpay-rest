@@ -24,11 +24,19 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y subversion
-      - name: Release
+      - name: Package
+        shell: bash
         run: |
+          set -Eeuo pipefail
           chmod +x package.sh
-          chmod +x scripts/deploy.sh
           ./package.sh
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+      - name: Deploy
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
         env:
           WP_ORG_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
