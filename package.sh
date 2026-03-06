@@ -15,12 +15,14 @@ on_error() {
     local line_no="${1:-unknown}"
     echo "ERROR: packaging failed at line ${line_no} with exit code ${exit_code}" 1>&2
     exit "${exit_code}"
+    return "${exit_code}"
 }
 
 restore_files_on_exit() {
     if [[ "${BACKUPS_CREATED}" -eq 1 ]]; then
         restore_files
     fi
+    return 0
 }
 
 require_command() {
@@ -29,6 +31,7 @@ require_command() {
         echo "Missing required command: ${cmd}" 1>&2
         exit 1
     fi
+    return 0
 }
 
 run_step() {
@@ -36,6 +39,7 @@ run_step() {
     shift
     echo "Running: ${name}"
     "$@"
+    return 0
 }
 
 trap 'on_error $LINENO' ERR
@@ -93,6 +97,7 @@ check_tag() {
     else
         echo "Build pipeline detected. Packaging without version replacement."
     fi
+    return 0
 }
 
 validate_tag() {
@@ -100,6 +105,7 @@ validate_tag() {
         echo "Invalid TAG format: $TAG" 1>&2
         exit 1
     fi
+    return 0
 }
 
 check_requirements() {
@@ -107,6 +113,7 @@ check_requirements() {
     require_command npm
     require_command zip
     require_command sed
+    return 0
 }
 
 set_plugin_tag() {
@@ -115,6 +122,7 @@ set_plugin_tag() {
     sed -i.bkp "s/Version: VERSION_REPLACE_HERE/Version: ${TAG#"v"}/g" $MAIN_FILE
     sed -i.bkp "s/VERSION_REPLACE_HERE/${TAG#"v"}/g" $README_FILE
     BACKUPS_CREATED=1
+    return 0
 }
 
 create_zip() {
@@ -122,6 +130,7 @@ create_zip() {
 
     EXCLUSIONS="webpack.config.js *.lock *.json *.bkp"
     zip -FSr "../$PLUGIN_FILE" . -x $EXCLUSIONS
+    return 0
 }
 
 restore_files() {
@@ -131,6 +140,7 @@ restore_files() {
     rm "$SRC_DIR/$MAIN_FILE.bkp"
     cp "$SRC_DIR/$README_FILE.bkp" "$SRC_DIR/$README_FILE"
     rm "$SRC_DIR/$README_FILE.bkp"
+    return 0
 }
 
 package_plugin

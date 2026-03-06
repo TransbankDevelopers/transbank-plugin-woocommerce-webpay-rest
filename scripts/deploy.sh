@@ -7,6 +7,7 @@ on_error() {
 	local line_no="${1:-unknown}"
 	echo "ERROR: deployment failed at line ${line_no} with exit code ${exit_code}" 1>&2
 	exit "${exit_code}"
+	return "${exit_code}"
 }
 
 require_command() {
@@ -15,6 +16,7 @@ require_command() {
 		echo "Missing required command: ${cmd}" 1>&2
 		exit 1
 	fi
+	return 0
 }
 
 trap 'on_error $LINENO' ERR
