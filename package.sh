@@ -44,7 +44,6 @@ trap restore_files_on_exit EXIT
 package_plugin() {
     echo "Packaging plugin."
     check_tag
-    validate_tag
     check_requirements
 
     cd "$SRC_DIR"
@@ -56,28 +55,44 @@ package_plugin() {
 
     rm -rf node_modules/
 
-    set_plugin_tag
+    if [[ -n "${TAG:-}" ]]; then
+        validate_tag
+        set_plugin_tag
+    fi
 
     create_zip
 
     cd ..
 
-    restore_files
-    BACKUPS_CREATED=0
+    if [[ "${BACKUPS_CREATED}" -eq 1 ]]; then
+        restore_files
+        BACKUPS_CREATED=0
+    fi
 
     echo "\\nPlugin created, the detail is:"
-    echo "- Version: $TAG"
+    if [[ -n "${TAG:-}" ]]; then
+        echo "- Version: $TAG"
+    else
+        echo "- Version: unchanged (non-release build)"
+    fi
     echo "- File name: $PLUGIN_FILE"
 }
 
 check_tag() {
-    if [ "$TAG" = "" ]
-    then
-        echo "No Tag found. Using default Tag 1.0.0"
-        TAG='1.0.0'
+    if [[ "${GITHUB_EVENT_NAME:-}" == "release" ]]; then
+        if [[ -z "${TAG:-}" ]]; then
+            echo "TAG is required for release pipeline" 1>&2
+            exit 1
+        fi
+        echo "Release pipeline detected. Tag: $TAG"
+        return
     fi
 
-    echo "Tag: $TAG"
+    if [[ -n "${TAG:-}" ]]; then
+        echo "Build pipeline with TAG override: $TAG"
+    else
+        echo "Build pipeline detected. Packaging without version replacement."
+    fi
 }
 
 validate_tag() {
