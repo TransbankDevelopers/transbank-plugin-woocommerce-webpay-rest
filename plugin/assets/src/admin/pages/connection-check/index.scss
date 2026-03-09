@@ -5,14 +5,4 @@
 @use "../../styles/components/healthcheck/health-check-rest-tool";
 @use "../../styles/components/healthcheck/health-check-tab";
 @use "../../styles/components/healthcheck/health-check-table";
-
-.info-column {
-    padding-top: 5px;
-    padding-bottom: 5px;
-    text-align: left;
-    word-wrap: break-word;
-}
-
-.info-value {
-    text-align: left;
-}
+@use "../../styles/components/info-element";
