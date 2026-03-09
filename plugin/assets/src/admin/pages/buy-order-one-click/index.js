@@ -6,10 +6,10 @@ import { DEFAULT_BUY_ORDER_FORMATS, SELECTORS } from "../../modules/buy-format-o
 import { DOMUtils } from "../../utils/dom";
 
 DOMUtils.ready(() => {
-    const oneClicInput = document.querySelector(SELECTORS.ONECLICK_BUY_ORDER_INPUT);
+    const oneClickInput = document.querySelector(SELECTORS.ONECLICK_BUY_ORDER_INPUT);
     const oneClickChildInput = document.querySelector(SELECTORS.ONECLICK_CHILD_BUY_ORDER_INPUT);
 
-    if (!oneClicInput || !oneClickChildInput)
+    if (!oneClickInput || !oneClickChildInput)
         return;
 
     const validator = new BuyOrderValidator();
@@ -21,7 +21,7 @@ DOMUtils.ready(() => {
         addHelpText: false,
         isOneClick: true,
         getOtherFormat: () => ({
-            format: oneClickChildInput?.value ?? null,
+            format: oneClickChildInput.value ?? null,
             customMessage: 'El formato de orden de compra principal no puede ser igual al formato de orden de compra hija.'
         })
     });
@@ -33,7 +33,7 @@ DOMUtils.ready(() => {
             addHelpText: true,
             isOneClick: true,
             getOtherFormat: () => ({
-                format: oneClicInput?.value ?? null,
+                format: oneClickInput.value ?? null,
             }),
         },
     );
