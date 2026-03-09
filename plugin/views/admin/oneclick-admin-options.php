@@ -90,6 +90,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
             content.show();
             swal({
                 content: content[0],
+                className: 'tbk-swal-modal',
             });
         }
     })(jQuery);

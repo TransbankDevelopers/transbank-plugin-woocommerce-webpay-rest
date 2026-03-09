@@ -1,0 +1,15 @@
+@use "../../styles/components/page-base";
+@use "../../styles/components/labels";
+@use "../../styles/components/plugin-info";
+@use "../../styles/components/logs/log-viewer";
+
+.info-column {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+.info-value {
+    text-align: left;
+}
