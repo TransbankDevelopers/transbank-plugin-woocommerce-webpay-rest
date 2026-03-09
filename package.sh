@@ -56,8 +56,10 @@ package_plugin() {
 
     run_step "NPM install" npm install --no-audit --no-fund --no-optional
     run_step "NPM build" npm run build
+    run_step "NPM build-admin-assets" npm run build:admin
 
     rm -rf node_modules/
+    rm -rf assets/src/ .webpack-cache-admin/
 
     if [[ -n "${TAG:-}" ]]; then
         validate_tag
@@ -128,7 +130,7 @@ set_plugin_tag() {
 create_zip() {
     echo "Creating zip file."
 
-    EXCLUSIONS="webpack.config.js *.lock *.json *.bkp"
+    EXCLUSIONS="webpack.config.js webpack.admin.js *.lock *.json *.bkp"
     zip -FSr "../$PLUGIN_FILE" . -x $EXCLUSIONS
     return 0
 }

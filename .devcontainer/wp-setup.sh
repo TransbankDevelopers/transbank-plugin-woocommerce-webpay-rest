@@ -38,6 +38,7 @@ if [ -d "$PLUGIN_DIR" ]; then
       echo "Ejecutando npm install y npm run build..."
       npm install --ignore-scripts || echo "npm install falló."
       npm run build || echo "npm run build falló."
+      npm run build:admin:dev || echo "npm run build:admin:dev falló."
   else
     echo "node_modules ya existe, saltando npm run install y npm run build."
   fi
