@@ -69,7 +69,7 @@ add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
 add_action('admin_enqueue_scripts', function () {
-    $slug = tbk_admin_resolve_page_slug();
+    $slug = tbkAdminResolvePageSlug();
 
     if (!$slug) {
         return;
@@ -78,15 +78,15 @@ add_action('admin_enqueue_scripts', function () {
     wp_enqueue_style('tbk-font-awesome', plugins_url('/css/font-awesome/all.css', __FILE__));
 
     $handle  = "tbk-admin-{$slug}";
-    tbk_admin_enqueue_style_bundle("$handle-style", "css/admin-{$slug}-style.css");
-    tbk_admin_enqueue_script_bundle($handle, "js/admin-{$slug}.js");
-    tbk_admin_enqueue_script_bundle('tbk-admin-dismiss-notice', "js/admin-dismiss-notice.js");
+    tbkAdminEnqueueStyleBundle("$handle-style", "css/admin-{$slug}-style.css");
+    tbkAdminEnqueueScriptBundle($handle, "js/admin-{$slug}.js");
+    tbkAdminEnqueueScriptBundle('tbk-admin-dismiss-notice', "js/admin-dismiss-notice.js");
     wp_localize_script($handle, 'ajax_object', [
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('my-ajax-nonce'),
     ]);
 
-    tbk_enqueue_admin_extras_by_screen($slug, [
+    tbkEnqueueAdminExtrasByScreen($slug, [
         'scripts' => [
             [
                 'id' => 'admin-swal',
@@ -96,7 +96,6 @@ add_action('admin_enqueue_scripts', function () {
                     'buy-order-one-click',
                     'inscriptions',
                 ],
-                'in_footer' => true,
             ],
         ],
     ]);
@@ -310,7 +309,7 @@ function transbank_rest_check_cancelled_checkout()
  *
  * @return string Absolute path ending with a trailing slash.
  */
-function tbk_admin_asset_base_dir(): string
+function tbkAdminAssetBaseDir(): string
 {
     return plugin_dir_path(__FILE__) . 'assets/build/admin/';
 }
@@ -320,7 +319,7 @@ function tbk_admin_asset_base_dir(): string
  *
  * @return string Full URL ending with a trailing slash.
  */
-function tbk_admin_asset_base_url(): string
+function tbkAdminAssetBaseUrl(): string
 {
     return plugins_url('assets/build/admin/', __FILE__);
 }
@@ -335,7 +334,7 @@ function tbk_admin_asset_base_url(): string
  * @param  string      $filePath Absolute path to the file.
  * @return string|null Modification time as a string, or null on failure.
  */
-function tbk_safe_filemtime(string $filePath): ?string
+function tbkSafeFilemtime(string $filePath): ?string
 {
     if (!file_exists($filePath)) {
         return null;
@@ -357,10 +356,10 @@ function tbk_safe_filemtime(string $filePath): ?string
  * @param  string $relativeJsPath Path relative to the admin assets build dir.
  * @return void
  */
-function tbk_admin_enqueue_script_bundle(string $handle, string $relativeJsPath): void
+function tbkAdminEnqueueScriptBundle(string $handle, string $relativeJsPath): void
 {
-    $baseDir = tbk_admin_asset_base_dir();
-    $baseUrl = tbk_admin_asset_base_url();
+    $baseDir = tbkAdminAssetBaseDir();
+    $baseUrl = tbkAdminAssetBaseUrl();
 
     $relativeJsPath = ltrim($relativeJsPath, '/');
     $jsFile         = $baseDir . $relativeJsPath;
@@ -369,14 +368,14 @@ function tbk_admin_enqueue_script_bundle(string $handle, string $relativeJsPath)
         return;
     }
 
-    $ver  = tbk_safe_filemtime($jsFile);
+    $ver  = tbkSafeFilemtime($jsFile);
     $deps = [];
 
     $assetPhp = preg_replace('/\.js$/', '.asset.php', $jsFile);
 
     if (is_string($assetPhp) && is_readable($assetPhp)) {
         try {
-            $asset = include $assetPhp;
+            $asset = include_once $assetPhp;
         } catch (\Throwable) {
             $asset = [];
         }
@@ -415,10 +414,10 @@ function tbk_admin_enqueue_script_bundle(string $handle, string $relativeJsPath)
  * @param  string $relativeCssPath Path relative to the admin assets build dir.
  * @return void
  */
-function tbk_admin_enqueue_style_bundle(string $handle, string $relativeCssPath): void
+function tbkAdminEnqueueStyleBundle(string $handle, string $relativeCssPath): void
 {
-    $baseDir = tbk_admin_asset_base_dir();
-    $baseUrl = tbk_admin_asset_base_url();
+    $baseDir = tbkAdminAssetBaseDir();
+    $baseUrl = tbkAdminAssetBaseUrl();
 
     $relativeCssPath = ltrim($relativeCssPath, '/');
     $cssFile         = $baseDir . $relativeCssPath;
@@ -427,7 +426,7 @@ function tbk_admin_enqueue_style_bundle(string $handle, string $relativeCssPath)
         return;
     }
 
-    $ver = tbk_safe_filemtime($cssFile);
+    $ver = tbkSafeFilemtime($cssFile);
 
     wp_enqueue_style(
         $handle,
@@ -445,7 +444,7 @@ function tbk_admin_enqueue_style_bundle(string $handle, string $relativeCssPath)
  *
  * @return string|null The matched slug, or null when the screen is not mapped.
  */
-function tbk_admin_resolve_page_slug(): ?string
+function tbkAdminResolvePageSlug(): ?string
 {
     $screenMap = [
         'shop_order'                 => 'transaction-status',
@@ -468,7 +467,7 @@ function tbk_admin_resolve_page_slug(): ?string
         return $screenMap[$screenId];
     }
 
-    $context = function_exists('tbk_get_context') ? tbk_get_context() : 'none';
+    $context = function_exists('tbkGetContext') ? tbkGetContext() : 'none';
 
     if ($context !== '' && isset($contextMap[$context])) {
         return $contextMap[$context];
@@ -483,25 +482,26 @@ function tbk_admin_resolve_page_slug(): ?string
  * @return string One of: 'webpay', 'oneclick', 'inscriptions', 'healthcheck',
  *                'logs', 'transactions', 'options', or 'none'.
  */
-function tbk_get_context(): string
+function tbkGetContext(): string
 {
     $page    = (string) (filter_input(INPUT_GET, 'page',    FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
     $section = (string) (filter_input(INPUT_GET, 'section', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
     $tbkTab  = (string) (filter_input(INPUT_GET, 'tbk_tab', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
 
-    if ($page === 'wc-settings' && $section === 'transbank_webpay_plus_rest') {
-        return 'webpay';
+    $contextMap = [
+        'wc-settings:transbank_webpay_plus_rest'    => 'webpay',
+        'wc-settings:transbank_oneclick_mall_rest'  => 'oneclick',
+    ];
+
+    $key = "{$page}:{$section}";
+
+    if (isset($contextMap[$key])) {
+        return $contextMap[$key];
     }
 
-    if ($page === 'wc-settings' && $section === 'transbank_oneclick_mall_rest') {
-        return 'oneclick';
-    }
+    $context = $tbkTab !== '' ? $tbkTab : 'options';
 
-    if ($page === 'transbank_webpay_plus_rest') {
-        return $tbkTab !== '' ? $tbkTab : 'options';
-    }
-
-    return 'none';
+    return $page === 'transbank_webpay_plus_rest' ? $context : 'none';
 }
 
 /**
@@ -511,7 +511,7 @@ function tbk_get_context(): string
  * the values listed in each entry's 'screens' field. Already-enqueued handles
  * are skipped to prevent duplicates.
  *
- * @param  string|null $slug   Current resolved page slug (from tbk_admin_resolve_page_slug()).
+ * @param  string|null $slug   Current resolved page slug (from tbkAdminResolvePageSlug()).
  *                             Passing null or an empty string is a no-op.
  * @param  array{
  *             scripts?: array<int, array{id: string, src: string, screens: string|string[], deps?: string[]}>,
@@ -519,7 +519,7 @@ function tbk_get_context(): string
  *         } $extras            Map of scripts and styles to conditionally enqueue.
  * @return void
  */
-function tbk_enqueue_admin_extras_by_screen(?string $slug, array $extras): void
+function tbkEnqueueAdminExtrasByScreen(?string $slug, array $extras): void
 {
     if ($slug === null || $slug === '' || empty($extras)) {
         return;
@@ -529,68 +529,57 @@ function tbk_enqueue_admin_extras_by_screen(?string $slug, array $extras): void
     $baseUrl = plugin_dir_url(__FILE__);
 
     foreach (($extras['scripts'] ?? []) as $script) {
-        if (
-            empty($script['id']) ||
-            empty($script['src']) ||
-            empty($script['screens'])
-        ) {
-            continue;
-        }
-
-        if (!in_array($slug, (array) $script['screens'], true)) {
-            continue;
-        }
-
-        $handle   = 'tbk-' . sanitize_key((string) $script['id']);
-        $relative = ltrim((string) $script['src'], '/');
-        $file     = $baseDir . $relative;
-
-        if (!is_readable($file) || wp_script_is($handle, 'enqueued')) {
-            continue;
-        }
-
-        $deps = isset($script['deps']) && is_array($script['deps']) ? $script['deps'] : [];
-
-        $ver = tbk_safe_filemtime($file);
-
-        wp_enqueue_script(
-            $handle,
-            $baseUrl . $relative,
-            $deps,
-            $ver,
-        );
+        tbkEnqueueExtraScript($slug, $script, $baseDir, $baseUrl);
     }
 
     foreach (($extras['styles'] ?? []) as $style) {
-        if (
-            empty($style['id']) ||
-            empty($style['src']) ||
-            empty($style['screens'])
-        ) {
-            continue;
-        }
-
-        if (!in_array($slug, (array) $style['screens'], true)) {
-            continue;
-        }
-
-        $handle   = 'tbk-' . sanitize_key((string) $style['id']);
-        $relative = ltrim((string) $style['src'], '/');
-        $file     = $baseDir . $relative;
-
-        if (!is_readable($file) || wp_style_is($handle, 'enqueued')) {
-            continue;
-        }
-
-        $deps = isset($style['deps']) && is_array($style['deps']) ? $style['deps'] : [];
-
-        $ver = tbk_safe_filemtime($file);
-
-        wp_enqueue_style(
-            $handle,
-            $baseUrl . $relative,
-            $deps,
-            $ver
-        );
+        tbkEnqueueExtraStyle($slug, $style, $baseDir, $baseUrl);
     }
+}
+
+function tbkEnqueueExtraScript(?string $slug, array $script, string $baseDir, string $baseUrl): void
+{
+    if (empty($script['id']) || empty($script['src']) || empty($script['screens'])) {
+        return;
+    }
+
+    if (!in_array($slug, (array) $script['screens'], true)) {
+        return;
+    }
+
+    $handle   = 'tbk-' . sanitize_key((string) $script['id']);
+    $relative = ltrim((string) $script['src'], '/');
+    $file     = $baseDir . $relative;
+
+    if (!is_readable($file) || wp_script_is($handle, 'enqueued')) {
+        return;
+    }
+
+    $deps = isset($script['deps']) && is_array($script['deps']) ? $script['deps'] : [];
+
+    $inFooter = isset($script['in_footer']) && $script['in_footer'] === true;
+    wp_enqueue_script($handle, $baseUrl . $relative, $deps, tbkSafeFilemtime($file), $inFooter);
+}
+
+function tbkEnqueueExtraStyle(?string $slug, array $style, string $baseDir, string $baseUrl): void
+{
+    if (empty($style['id']) || empty($style['src']) || empty($style['screens'])) {
+        return;
+    }
+
+    if (!in_array($slug, (array) $style['screens'], true)) {
+        return;
+    }
+
+    $handle   = 'tbk-' . sanitize_key((string) $style['id']);
+    $relative = ltrim((string) $style['src'], '/');
+    $file     = $baseDir . $relative;
+
+    if (!is_readable($file) || wp_style_is($handle, 'enqueued')) {
+        return;
+    }
+
+    $deps = isset($style['deps']) && is_array($style['deps']) ? $style['deps'] : [];
+
+    wp_enqueue_style($handle, $baseUrl . $relative, $deps, tbkSafeFilemtime($file));
 }

@@ -1,5 +1,5 @@
 const defaultConfig = require("@wordpress/scripts/config/webpack.config");
-const path = require("path");
+const path = require("node:path");
 const glob = require("glob");
 const RemoveEmptyScriptsPlugin = require("webpack-remove-empty-scripts");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -11,7 +11,7 @@ const PAGES_BASE = path.resolve(__dirname, "assets/src/admin/pages");
 const pageSlugFromFile = (absFile) => {
     const rel = path.relative(PAGES_BASE, absFile);
     const dir = path.dirname(rel);
-    return dir.split(path.sep).join("-").replace(/[^a-zA-Z0-9-_]/g, "-");
+    return dir.split(path.sep).join("-").replaceAll(/[^a-zA-Z0-9-_]/g, "-");
 };
 
 const buildEntries = () => {
