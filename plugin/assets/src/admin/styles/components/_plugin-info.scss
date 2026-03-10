@@ -1,0 +1,21 @@
+.tbk-container {
+    .tbk-plugin-info-container {
+        display: grid;
+        grid-template-columns: 20px 200px 1fr;
+        grid-gap: 5px;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .info-column-plugin {
+        padding: 4px 0;
+        text-align: left;
+        word-wrap: break-word;
+        border-bottom: dashed 1px #ccc;
+
+        &.log {
+            border-bottom: none;
+            border-top: dashed 1px #ccc;
+        }
+    }
+}
