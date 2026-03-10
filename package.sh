@@ -56,10 +56,9 @@ package_plugin() {
 
     run_step "NPM install" npm install --no-audit --no-fund --no-optional
     run_step "NPM build" npm run build
-    run_step "NPM build-admin-assets" npm run build:admin
 
     rm -rf node_modules/
-    rm -rf assets/src/ .webpack-cache-admin/
+    rm -rf assets/src/
 
     if [[ -n "${TAG:-}" ]]; then
         validate_tag

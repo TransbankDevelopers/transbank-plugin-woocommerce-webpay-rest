@@ -59,26 +59,6 @@ Para actualizar la versión del SDK de Transbank se debe editar el archivo [comp
 el valor de la propiedad `"transbank/transbank-sdk"` por la versión que se desea instalar y luego ejecutar el bash `update`
 que esta en la carpeta `docker-woocommerce-php*` lo que actualizara la dependencia del plugin.
 
-### Assets del panel de administración
-
-Si modificas los assets del panel de administración, debes recompilarlos antes de probar o empaquetar el plugin.
-
-```bash
-npm run build:admin
-```
-
-Para desarrollo local, están disponibles los siguientes comandos:
-
-```bash
-npm run build:admin:dev
-npm run watch:admin:dev
-```
-
-- `build:admin:dev`: genera una compilación de desarrollo de los assets del admin.
-- `watch:admin:dev`: observa cambios y recompila automáticamente durante el desarrollo.
-
-> `build:admin` es obligatorio para asegurar que los assets compilados del panel de administración estén actualizados.
-
 ### Crear el instalador del plugin
 
     ./package.sh
