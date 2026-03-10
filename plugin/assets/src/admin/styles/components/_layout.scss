@@ -1,0 +1,32 @@
+.tbk-container {
+    display: flex;
+}
+
+.tbk-nav-container {
+    min-width: 200px;
+}
+
+.tbk-content {
+    margin-left: 20px;
+    flex: 1;
+}
+
+.tbk-wrap {
+    margin-top: 20px;
+}
+
+.tbk-box {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+
+    h4 {
+        margin: 0;
+        margin-top: 10px;
+    }
+
+    .woocommerce-save-button.tbk-custom-save-button {
+        display: inline-block;
+    }
+}
