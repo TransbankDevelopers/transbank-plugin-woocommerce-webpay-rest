@@ -1,0 +1,23 @@
+$tbk-red: #d5006c;
+$tbk-red-2: #c00063;
+$tbk-success: #28a745;
+$tbk-info: #007bff;
+$tbk-warning: #fd7e14;
+$tbk-error: #dc3545;
+$tbk-default: #6c757d;
+$tbk-purple: #6b1a6b;
+$tbk-gray-dark: #333;
+$tbk-gray-medium: #666;
+$tbk-gray-soft: #999;
+$tbk-gray-light: #eee;
+
+:root {
+    --tbk-red: #{$tbk-red};
+    --tbk-red-2: #{$tbk-red-2};
+    --tbk-success: #{$tbk-success};
+    --tbk-info: #{$tbk-info};
+    --tbk-warning: #{$tbk-warning};
+    --tbk-error: #{$tbk-error};
+    --tbk-default: #{$tbk-default};
+    --tbk-purple: #{$tbk-purple};
+}
