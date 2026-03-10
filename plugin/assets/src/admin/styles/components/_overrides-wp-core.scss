@@ -1,0 +1,11 @@
+@use "../common/variables";
+@use "./buttons";
+
+.wp-core-ui {
+    a.button,
+    .button {
+        &.tbk-button-danger {
+            @include buttons.tbk-button-danger;
+        }
+    }
+}
