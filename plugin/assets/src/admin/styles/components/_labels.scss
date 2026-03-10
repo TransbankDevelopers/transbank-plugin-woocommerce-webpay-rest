@@ -1,0 +1,32 @@
+@mixin label-base($bg-color) {
+    background: $bg-color;
+    padding: 5px;
+    color: #fff;
+    font-size: 10px;
+    border-radius: 5px;
+}
+
+.tbk-container .label {
+    &.label-info {
+        @include label-base(#666);
+        float: left;
+        margin-right: 5px;
+        border-radius: 7px;
+        width: 7px;
+        height: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    &-success {
+        @include label-base(#5cb85c);
+        font-weight: bold;
+    }
+
+    &-danger {
+        @include label-base(#ec3206);
+        font-weight: bold;
+    }
+}
