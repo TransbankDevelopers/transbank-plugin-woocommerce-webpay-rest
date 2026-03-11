@@ -47,39 +47,8 @@ if (!defined('ABSPATH')) {
  * WC tested up to: 10.5.2
  */
 
-$prefixedAutoload = plugin_dir_path(__FILE__) . 'vendor-prefixed/autoload.php';
-if (file_exists($prefixedAutoload)) {
-    $prefixedRoot = plugin_dir_path(__FILE__) . 'vendor-prefixed/';
-    $scopeConfigPath = plugin_dir_path(__FILE__) . 'scoper-namespaces.php';
-    $scopeConfig = file_exists($scopeConfigPath) ? require $scopeConfigPath : [];
-    $runtimePrefixes = $scopeConfig['runtime_psr4'] ?? [];
-
-    if (!empty($runtimePrefixes) && is_array($runtimePrefixes)) {
-        spl_autoload_register(static function ($class) use ($prefixedRoot, $runtimePrefixes) {
-            foreach ($runtimePrefixes as $prefix => $relativeBaseDir) {
-                if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
-                    continue;
-                }
-
-                $relativeClass = substr($class, strlen($prefix));
-                $file = $prefixedRoot . $relativeBaseDir . str_replace('\\', '/', $relativeClass) . '.php';
-                if (file_exists($file)) {
-                    require_once $file;
-                }
-                return;
-            }
-        }, true, true);
-    }
-
-    $scoperAutoload = plugin_dir_path(__FILE__) . 'vendor-prefixed/scoper-autoload.php';
-    if (file_exists($scoperAutoload)) {
-        require_once $scoperAutoload;
-    }
-
-    require_once $prefixedAutoload;
-} else {
-    require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
-}
+require_once plugin_dir_path(__FILE__) . 'load-autoloader.php';
+tbkLoadPluginAutoloader(plugin_dir_path(__FILE__));
 $hposHelper = new HposHelper();
 $hposExists = $hposHelper->checkIfHposExists();
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
