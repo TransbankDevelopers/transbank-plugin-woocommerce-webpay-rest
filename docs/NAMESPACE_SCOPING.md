@@ -36,3 +36,14 @@ Como estas etapas operan sobre artefactos distintos, esta duplicación se mantie
 - Si una nueva librería de terceros debe ser prefijada, actualiza `plugin/scoper-namespaces.php`.
 - Si esa librería es referenciada directamente desde el código del plugin, asegúrate de cubrir esas referencias en los patrones de reemplazo.
 - Después de cambiar reglas de scope o dependencias, regenera el paquete y valida el plugin usando el artefacto empaquetado, no solo el árbol fuente.
+
+### Que editar al agregar una nueva dependencia
+
+Si se agrega una nueva dependencia de terceros y debe formar parte del proceso de namespace scoping, se debe revisar al menos lo siguiente:
+
+- `plugin/composer.json`: para declarar la nueva dependencia runtime del plugin.
+- `plugin/scoper-namespaces.php`: para agregar el namespace prefijado en los mapas `runtime_psr4`, `autoload_replacements` y, si aplica, `code_replacement_patterns`.
+- Código del plugin en `plugin/src`, `plugin/shared` o `plugin/views`: si la dependencia es usada directamente mediante imports, referencias estáticas o strings de clase, validar que esas referencias queden cubiertas por el proceso de reemplazo.
+- `plugin/webpay-rest.php`: normalmente no requiere cambios adicionales si `runtime_psr4` fue actualizado correctamente, pero debe verificarse cuando la estructura PSR-4 de la nueva librería no siga el patrón esperado.
+
+Después de eso, se debe generar nuevamente el paquete con `./package.sh` y validar el plugin usando el artefacto empaquetado final.
