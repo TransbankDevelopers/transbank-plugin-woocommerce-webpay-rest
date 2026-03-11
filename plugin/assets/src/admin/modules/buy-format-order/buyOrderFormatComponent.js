@@ -23,9 +23,14 @@ export class BuyOrderFormatComponent {
             valueDisplay: null,
             helpTextNode: null,
             isOneClick: Boolean(options.isOneClick),
-            onChange: typeof options.onChange === "function" ? options.onChange : null,
+            onChange:
+                typeof options.onChange === "function"
+                    ? options.onChange
+                    : null,
             getOtherFormat:
-                typeof options.getOtherFormat === "function" ? options.getOtherFormat : null,
+                typeof options.getOtherFormat === "function"
+                    ? options.getOtherFormat
+                    : null,
             inputHandler: null,
         };
 
@@ -62,7 +67,9 @@ export class BuyOrderFormatComponent {
         }
 
         const format = instance.input.value;
-        const otherFormat = instance.getOtherFormat ? instance.getOtherFormat() : null;
+        const otherFormat = instance.getOtherFormat
+            ? instance.getOtherFormat()
+            : null;
         const result = this.service.validateAndPreview(format, otherFormat);
 
         if (!result.valid) {
@@ -157,9 +164,10 @@ export class BuyOrderFormatComponent {
             <p>•Solo se permiten caracteres alfanuméricos, guiones (<code>-</code>), guiones bajos (<code>_</code>)
                 o dos puntos (<code>:</code>). No se permiten espacios. </p>
             <p>•El valor generado no puede exceder los 26 caracteres.</p>
-            ${isOneClick
-                ? `<p>•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.</p>`
-                : ""
+            ${
+                isOneClick
+                    ? `<p>•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.</p>`
+                    : ""
             }
         `;
         return helpText;
@@ -180,10 +188,14 @@ export class BuyOrderFormatComponent {
 
     renderError(instance, message) {
         instance.errorDisplay.classList.remove("tbk-hide");
-        instance.errorDisplay.classList.add("tbk-buy-order__format-status--is-visible");
+        instance.errorDisplay.classList.add(
+            "tbk-buy-order__format-status--is-visible",
+        );
         instance.errorDisplay.textContent = `❌ ${message}`;
 
-        instance.valueDisplay.classList.remove("tbk-buy-order__format-status--is-visible");
+        instance.valueDisplay.classList.remove(
+            "tbk-buy-order__format-status--is-visible",
+        );
         instance.valueDisplay.textContent = "";
 
         instance.input.classList.remove("tbk-input-valid");
@@ -191,12 +203,16 @@ export class BuyOrderFormatComponent {
     }
 
     renderSuccess(instance, message) {
-        instance.errorDisplay.classList.remove("tbk-buy-order__format-status--is-visible");
+        instance.errorDisplay.classList.remove(
+            "tbk-buy-order__format-status--is-visible",
+        );
         instance.errorDisplay.classList.add("tbk-hide");
         instance.errorDisplay.textContent = "";
 
         instance.valueDisplay.classList.remove("tbk-hide");
-        instance.valueDisplay.classList.add("tbk-buy-order__format-status--is-visible");
+        instance.valueDisplay.classList.add(
+            "tbk-buy-order__format-status--is-visible",
+        );
         instance.valueDisplay.textContent = message;
 
         instance.input.classList.remove("tbk-input-error");
