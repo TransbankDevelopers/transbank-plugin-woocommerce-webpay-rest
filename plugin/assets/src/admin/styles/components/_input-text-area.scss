@@ -1,0 +1,7 @@
+.tbk-container .input-text.wide-input.admin-textarea {
+    width: 400px !important;
+
+    @media only screen and (max-width: 782px) {
+        width: 100% !important;
+    }
+}

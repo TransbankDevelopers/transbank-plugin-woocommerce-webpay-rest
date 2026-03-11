@@ -41,3 +41,5 @@ docker-woocommerce-*/transbank-webpay-plus-rest
 plugin/js/front/
 
 .devcontainer/logs
+plugin/assets/build/
+plugin/.webpack-cache-admin/

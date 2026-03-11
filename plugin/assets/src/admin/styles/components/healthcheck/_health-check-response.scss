@@ -1,0 +1,36 @@
+@use "../../common/variables";
+
+#row_response_token_text {
+    pre {
+        padding: 5px;
+        background: variables.$tbk-gray-light;
+        border-radius: 5px;
+        border: solid 1px variables.$tbk-gray-soft;
+    }
+}
+
+.token {
+    pre {
+        margin-top: 0;
+        padding: 5px;
+        background: variables.$tbk-gray-light;
+        border-radius: 5px;
+        border: solid 1px variables.$tbk-gray-soft;
+        text-wrap: unset;
+        overflow-wrap: anywhere;
+    }
+}
+
+.tbk-response-container {
+    display: grid;
+    grid-template-columns: 20px 80px 1fr;
+    grid-gap: 5px;
+    align-items: flex-start;
+    overflow: hidden;
+}
+
+.tbk_response_status {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}

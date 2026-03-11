@@ -1,0 +1,35 @@
+@use "../common/variables";
+
+.tbk-swal-modal {
+    &.swal-modal {
+        width: 700px;
+        max-width: 80vw;
+    }
+
+    .swal-content {
+        text-align: left;
+        font-family: -apple-system, system-ui, "Segoe UI", Roboto, Oxygen-Sans,
+            Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    }
+
+    .swal-button {
+        &--confirm {
+            background: variables.$tbk-red !important;
+            border-color: variables.$tbk-red !important;
+            box-shadow: none !important;
+
+            &:hover,
+            &:focus {
+                background: variables.$tbk-red-2 !important;
+                border-color: variables.$tbk-red-2 !important;
+            }
+        }
+
+        &--cancel {
+            background: #fff !important;
+            color: variables.$tbk-red !important;
+            border: 1px solid variables.$tbk-red !important;
+            box-shadow: none !important;
+        }
+    }
+}
