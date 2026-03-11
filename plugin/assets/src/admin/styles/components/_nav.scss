@@ -1,0 +1,68 @@
+@use '../common/variables';
+
+.tbk-nav {
+    font-size: 14px;
+    width: 200px;
+    background: #fff;
+    margin-left: 5px;
+    border-radius: 10px;
+
+    .nav-title {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        background: variables.$tbk-purple;
+        padding: 15px 15px 15px 20px;
+        color: #fff;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+
+        li {
+            margin: 0;
+            padding: 0;
+
+            .icon {
+                float: right;
+                opacity: 0;
+                transition: 0.5s;
+                right: 20px;
+                position: relative;
+            }
+
+            &.active {
+                font-weight: bold;
+
+                a {
+                    color: variables.$tbk-purple;
+
+                    &:hover {
+                        color: variables.$tbk-purple;
+                    }
+                }
+            }
+
+            a {
+                display: block;
+                color: #333;
+                text-decoration: none;
+                padding: 15px;
+                transition: 0.5s;
+
+                &:hover {
+                    color: #0a4b78;
+
+                    .icon {
+                        opacity: 1;
+                        right: 0;
+                    }
+                }
+            }
+
+            &:last-child a {
+                border-bottom: none;
+            }
+        }
+    }
+}

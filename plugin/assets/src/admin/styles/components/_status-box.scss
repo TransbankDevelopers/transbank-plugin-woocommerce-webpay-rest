@@ -1,0 +1,103 @@
+@use "../common/variables";
+
+.tbk-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.tbk-field-name {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.tbk-field-value {
+    text-align: right;
+    word-break: break-word;
+
+    &--full-width {
+        width: 100%;
+    }
+}
+
+.tbk-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+
+    &-success {
+        background-color: variables.$tbk-success;
+    }
+    &-info {
+        background-color: variables.$tbk-info;
+    }
+    &-warning {
+        background-color: variables.$tbk-warning;
+    }
+    &-error {
+        background-color: variables.$tbk-error;
+    }
+    &-default {
+        background-color: variables.$tbk-default;
+    }
+}
+
+.tbk-status {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    i {
+        width: 100px;
+        max-width: 24px;
+        text-align: center;
+        font-size: x-large;
+    }
+
+    p {
+        padding-left: 10px;
+        margin: 0;
+    }
+
+    &.tbk-status-info i {
+        color: variables.$tbk-info;
+    }
+
+    &.tbk-status-error {
+        i,
+        p {
+            color: variables.$tbk-error;
+            font-weight: bold;
+        }
+    }
+}
+
+.tbk-status-button {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+
+    .tbk-button-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.tbk-separator {
+    width: 100%;
+    height: 1px;
+    background-color: #ccc;
+    margin: 10px 0;
+}
+
+.transbank_response_note {
+    h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.2em;
+    }
+}

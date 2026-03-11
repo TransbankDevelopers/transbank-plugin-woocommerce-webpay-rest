@@ -185,7 +185,7 @@ create_zip() {
     rm -f "$PROJECT_ROOT/$PLUGIN_FILE"
     (
         cd "$WORK_DIR"
-        zip -r "$PROJECT_ROOT/$PLUGIN_FILE" . -x "webpack.config.js" "*.lock" "*.json" "*.bkp"
+        zip -r "$PROJECT_ROOT/$PLUGIN_FILE" . -x "webpack.config.js" "webpack.admin.js" "*.lock" "*.json" "*.bkp"
     )
 }
 
@@ -205,6 +205,7 @@ package_plugin() {
     run_step "NPM build" npm run build
 
     rm -rf node_modules
+    rm -rf assets/src
 
     if [[ -n "${TAG:-}" ]]; then
         validate_tag

@@ -1,0 +1,44 @@
+@use "../common/variables";
+
+.tbk-buy-order-format {
+    &-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &-value-display {
+        margin-top: 8px;
+        font-size: 14px;
+        color: variables.$tbk-gray-dark;
+    }
+
+    &-error-display {
+        max-width: 600px;
+        margin-top: 4px;
+        font-size: 13px;
+        color: red;
+        display: none;
+    }
+
+    &-help-text {
+        max-width: 600px;
+        margin-top: 4px;
+        font-size: 12px;
+        color: variables.$tbk-gray-medium;
+    }
+}
+
+.tbk-input-error {
+    border: 2px solid red !important;
+    outline: none;
+}
+
+.tbk-input-valid {
+    border: 2px solid green !important;
+    outline: none;
+}
+
+.tbk-buy-order__format-status--is-visible {
+    display: block;
+}
