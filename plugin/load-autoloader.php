@@ -30,7 +30,7 @@ function tbkLoadScopedRuntimePrefixes(string $pluginRoot): array
         return [];
     }
 
-    $scopeConfig = require $scopeConfigPath;
+    $scopeConfig = require_once $scopeConfigPath;
     $runtimePrefixes = $scopeConfig['runtime_psr4'] ?? [];
 
     return is_array($runtimePrefixes) ? $runtimePrefixes : [];

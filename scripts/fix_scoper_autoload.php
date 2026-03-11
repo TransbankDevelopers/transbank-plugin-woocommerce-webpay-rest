@@ -16,7 +16,7 @@ if (!is_file($scopeConfigPath)) {
     exit(1);
 }
 
-$scopeConfig = require $scopeConfigPath;
+$scopeConfig = require_once $scopeConfigPath;
 $replacements = $scopeConfig['autoload_replacements'] ?? [];
 
 if (!is_array($replacements) || $replacements === []) {

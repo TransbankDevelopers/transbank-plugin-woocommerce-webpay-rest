@@ -19,7 +19,7 @@ if (!is_file($scopeConfigPath)) {
     exit(1);
 }
 
-$scopeConfig = require $scopeConfigPath;
+$scopeConfig = require_once $scopeConfigPath;
 $patterns = $scopeConfig['code_replacement_patterns'] ?? [];
 if (!is_array($patterns) || $patterns === []) {
     fwrite(STDERR, "Invalid code replacement patterns in {$scopeConfigPath}\n");
