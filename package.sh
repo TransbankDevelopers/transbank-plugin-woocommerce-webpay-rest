@@ -36,6 +36,8 @@ cleanup() {
             rm -f "$ROOT_COMPOSER_LOCK"
         fi
     fi
+
+    return 0
 }
 
 require_command() {
@@ -60,6 +62,8 @@ track_tooling_state() {
     if [[ -f "$ROOT_COMPOSER_LOCK" ]]; then
         ROOT_LOCK_WAS_PRESENT=1
     fi
+
+    return 0
 }
 
 check_tag() {
@@ -136,6 +140,8 @@ prepare_work_dir() {
     else
         cp -a "$PROJECT_ROOT/$SRC_DIR/." "$WORK_DIR/"
     fi
+
+    return 0
 }
 
 set_plugin_tag() {
@@ -191,6 +197,8 @@ create_zip() {
 
 validate_php_syntax() {
     run_step "Validate bootstrap syntax" php -l webpay-rest.php
+
+    return 0
 }
 
 package_plugin() {
