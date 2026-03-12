@@ -53,7 +53,6 @@ $hposExists = $hposHelper->checkIfHposExists();
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
 add_action('wp_loaded', 'woocommerceTransbankInit');
 register_activation_hook(__FILE__, 'activateTransbankModule');
-register_uninstall_hook(__FILE__, 'transbank_rest_remove_database');
 add_action('add_meta_boxes', function () use ($hposExists) {
     addTransbankStatusMetaBox($hposExists);
 });
@@ -279,13 +278,6 @@ function activateTransbankModule()
         );
     }
 }
-
-function transbank_rest_remove_database()
-{
-    DatabaseTableInstaller::deleteTable();
-}
-
-
 
 function transbank_rest_before_cart()
 {
