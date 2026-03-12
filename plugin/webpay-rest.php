@@ -47,7 +47,8 @@ if (!defined('ABSPATH')) {
  * WC tested up to: 10.5.2
  */
 
-require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
+require_once plugin_dir_path(__FILE__) . 'load-autoloader.php';
+tbkLoadPluginAutoloader(plugin_dir_path(__FILE__));
 $hposHelper = new HposHelper();
 $hposExists = $hposHelper->checkIfHposExists();
 add_action('plugins_loaded', 'registerPaymentGateways', 0);
