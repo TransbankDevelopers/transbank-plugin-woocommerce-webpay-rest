@@ -166,6 +166,8 @@ scope_vendor_dependencies() {
 }
 
 validate_packaging_layout() {
+    local unexpected_prefix_pattern="TransbankVendor\\\\Transbank\\\\WooCommerce\\\\WebpayRest\\\\\|TransbankVendor\\\\Transbank\\\\Plugin\\\\"
+
     if [[ "$ENABLE_SCOPER" != "1" ]]; then
         return 0
     fi
@@ -180,7 +182,7 @@ validate_packaging_layout() {
         exit 1
     fi
 
-    if find src shared views -type f -name '*.php' -print0 2>/dev/null | xargs -0 grep -q "TransbankVendor\\\\Transbank\\\\WooCommerce\\\\WebpayRest\\\\\|TransbankVendor\\\\Transbank\\\\Plugin\\\\"; then
+    if find src shared views -type f -name '*.php' -print0 2>/dev/null | xargs -0 grep -q "$unexpected_prefix_pattern"; then
         echo "ERROR: plugin namespaces were prefixed unexpectedly" 1>&2
         exit 1
     fi
