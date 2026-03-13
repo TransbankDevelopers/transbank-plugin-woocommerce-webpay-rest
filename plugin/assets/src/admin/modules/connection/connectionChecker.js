@@ -25,13 +25,13 @@ export class ProductConnectionChecker {
             spinner,
         ]);
 
-        this.resetUI();
+        this.setLoadingUIState();
 
         try {
             const response = await this.apiService.post(this.config.actionName, {
                 product: this.config.productKey,
             });
-            this.handleResponse(response);
+            this.applyResponseState(response);
         } catch (error) {
             this.handleError(error);
         } finally {
@@ -39,17 +39,17 @@ export class ProductConnectionChecker {
         }
     }
 
-    resetUI() {
-        this.setVisualState("is-loading");
-        this.setLoadingState();
+    setLoadingUIState() {
+        this.setContainerState("is-loading");
+        this.applyLoadingState();
     }
 
-    handleResponse(response) {
-        this.setBaseResponse(response);
-        this.setVisualState("is-ready");
+    applyResponseState(response) {
+        this.applyResultState(response);
+        this.setContainerState("is-ready");
     }
 
-    setLoadingState() {
+    applyLoadingState() {
         if (this.dom.responseBadge) {
             this.dom.responseBadge.textContent = "Verificando";
             this.dom.responseBadge.classList.remove("label-success", "label-danger");
@@ -58,7 +58,7 @@ export class ProductConnectionChecker {
         setText(this.dom.responseEnvironment, "Detectando...");
     }
 
-    setBaseResponse(response) {
+    applyResultState(response) {
         const meta = response?.meta ?? {};
         const isSuccess = response?.status?.string === "OK";
         const statusLabel = isSuccess ? "Conexión OK" : "Conexión con error";
@@ -73,16 +73,16 @@ export class ProductConnectionChecker {
     }
 
     handleError() {
-        this.setBaseResponse({
+        this.applyResultState({
             status: { string: "Error" },
             meta: {
                 environmentLabel: "No disponible",
             },
         });
-        this.setVisualState("is-ready");
+        this.setContainerState("is-ready");
     }
 
-    setVisualState(nextState) {
+    setContainerState(nextState) {
         if (!this.dom.resultContainer) {
             return;
         }
