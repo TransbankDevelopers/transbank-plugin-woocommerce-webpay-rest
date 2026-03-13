@@ -61,7 +61,7 @@ export class ProductConnectionChecker {
     setBaseResponse(response) {
         const meta = response?.meta ?? {};
         const isSuccess = response?.status?.string === "OK";
-        const statusLabel = isSuccess ? "Conexion OK" : "Conexion con error";
+        const statusLabel = isSuccess ? "Conexión OK" : "Conexión con error";
 
         setText(this.dom.responseEnvironment, meta?.environmentLabel ?? "No disponible");
 
