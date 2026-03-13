@@ -7,9 +7,23 @@ use Transbank\Webpay\Options;
 
 class ConnectionCheck
 {
+    private const ALLOWED_PRODUCTS = ['webpay', 'oneclick'];
+
     public static function check()
     {
         $product = sanitize_text_field($_POST['product'] ?? 'webpay');
+
+        if (!in_array($product, self::ALLOWED_PRODUCTS, true)) {
+            TbkFactory::createLogger()->logError('Producto inválido recibido en prueba de conexión.', [
+                'product' => $product,
+            ]);
+
+            header('Content-Type: application/json');
+            ob_clean();
+            echo json_encode(static::buildErrorResponse('No disponible'));
+            wp_die();
+        }
+
         $resp = static::performProductTestTransaction($product);
 
         header('Content-Type: application/json');
@@ -136,5 +150,17 @@ class ConnectionCheck
         }
 
         return 'Integración';
+    }
+
+    private static function buildErrorResponse(string $environmentLabel): array
+    {
+        return [
+            'status'   => [
+                'string' => 'Error',
+            ],
+            'meta' => [
+                'environmentLabel' => $environmentLabel,
+            ],
+        ];
     }
 }
