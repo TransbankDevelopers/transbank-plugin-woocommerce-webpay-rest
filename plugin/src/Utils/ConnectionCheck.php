@@ -1,4 +1,5 @@
 <?php
+
 namespace Transbank\WooCommerce\WebpayRest\Utils;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
@@ -65,8 +66,7 @@ class ConnectionCheck
                     'environmentLabel' => $environmentLabel,
                 ],
             ];
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $logger->logError('Prueba de conexión Webpay Plus fallida.', [
                 'environment' => $environmentLabel,
                 'error' => $e->getMessage(),
@@ -112,7 +112,6 @@ class ConnectionCheck
                     'environmentLabel' => $environmentLabel,
                 ],
             ];
-
         } catch (\Exception $e) {
             $logger->logError('Prueba de conexión Webpay Oneclick fallida.', [
                 'environment' => $environmentLabel,
