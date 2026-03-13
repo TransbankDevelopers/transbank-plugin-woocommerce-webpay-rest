@@ -2,12 +2,14 @@
 namespace Transbank\WooCommerce\WebpayRest\Utils;
 
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\Webpay\Options;
 
 class ConnectionCheck
 {
     public static function check()
     {
-        $resp = ConnectionCheck::performTestTransaction();
+        $product = sanitize_text_field($_POST['product'] ?? 'webpay');
+        $resp = static::performProductTestTransaction($product);
 
         header('Content-Type: application/json');
         ob_clean();
@@ -15,31 +17,74 @@ class ConnectionCheck
         wp_die();
     }
 
-    public static function performTestTransaction()
+    private static function performProductTestTransaction(string $product)
     {
-        $amount = 990;
-        $returnUrl = 'http://test.com/test';
-
-        $status = 'Error';
-        try {
-            $webpayService = TbkFactory::createWebpayService();
-            $result = $webpayService->createTransaction(0, $amount, $returnUrl);
-            $status = 'OK';
-
-        } catch (\Exception $e) {
-            $status = 'Error';
-            $result = [
-                'error'  => 'Error al crear la transacción',
-                'detail' => $e->getMessage()
-            ];
+        if ($product === 'webpay') {
+            return static::performWebpayTestTransaction();
         }
 
         return [
-            'status'   => ['string' => $status],
-            'response' => [
-                'token' => $result->getToken(),
-                'url'   => $result->getUrl()
-            ]
+            'status'   => [
+                'string' => 'Error',
+            ],
+            'meta' => [
+                'environmentLabel' => 'No disponible',
+            ],
         ];
+    }
+
+    public static function performWebpayTestTransaction()
+    {
+        $amount = 990;
+        $returnUrl = 'http://test.com/test';
+        $environment = TbkFactory::getWebpayplusConfig()->getEnvironment();
+        $environmentLabel = static::getEnvironmentLabel($environment);
+        $logger = TbkFactory::createWebpayPlusLogger();
+
+        $logger->logInfo('Iniciando prueba de conexión Webpay Plus.', [
+            'environment' => $environmentLabel,
+        ]);
+
+        try {
+            $webpayService = TbkFactory::createWebpayService();
+            $webpayService->createTransaction(0, $amount, $returnUrl);
+
+            $logger->logInfo('Prueba de conexión Webpay Plus exitosa.', [
+                'environment' => $environmentLabel,
+            ]);
+
+            return [
+                'status'   => [
+                    'string' => 'OK',
+                ],
+                'meta' => [
+                    'environmentLabel' => $environmentLabel,
+                ],
+            ];
+
+        } catch (\Exception $e) {
+            $logger->logError('Prueba de conexión Webpay Plus fallida.', [
+                'environment' => $environmentLabel,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'status'   => [
+                    'string' => 'Error',
+                ],
+                'meta' => [
+                    'environmentLabel' => $environmentLabel,
+                ],
+            ];
+        }
+    }
+
+    private static function getEnvironmentLabel(string $environment): string
+    {
+        if ($environment === Options::ENVIRONMENT_PRODUCTION) {
+            return 'Producción';
+        }
+
+        return 'Integración';
     }
 }
