@@ -16,8 +16,12 @@ $connectionTests = [
         'actionName' => 'check_connection',
         'title' => 'Prueba de conexión Webpay Plus',
         'description' => 'Esta prueba usará el entorno y las credenciales configuradas actualmente para Webpay Plus y enviará una solicitud de transacción de prueba para validar la comunicación con Transbank.',
-        'initialStatusText' => 'No ejecutado',
-        'initialEnvironmentText' => 'No ejecutado',
+    ],
+    [
+        'productKey' => 'oneclick',
+        'actionName' => 'check_connection',
+        'title' => 'Prueba de conexión Webpay Oneclick',
+        'description' => 'Esta prueba usará el entorno y las credenciales configuradas actualmente para Webpay Oneclick y enviará una solicitud de inscripción de prueba para validar la comunicación con Transbank.',
     ],
 ];
 $template = new Template();

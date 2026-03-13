@@ -23,6 +23,10 @@ class ConnectionCheck
             return static::performWebpayTestTransaction();
         }
 
+        if ($product === 'oneclick') {
+            return static::performOneclickTestTransaction();
+        }
+
         return [
             'status'   => [
                 'string' => 'Error',
@@ -64,6 +68,53 @@ class ConnectionCheck
 
         } catch (\Exception $e) {
             $logger->logError('Prueba de conexión Webpay Plus fallida.', [
+                'environment' => $environmentLabel,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'status'   => [
+                    'string' => 'Error',
+                ],
+                'meta' => [
+                    'environmentLabel' => $environmentLabel,
+                ],
+            ];
+        }
+    }
+
+    public static function performOneclickTestTransaction()
+    {
+        $returnUrl = 'http://test.com/test';
+        $testUserName = 'tbk_connection_test_' . wp_generate_password(8, false, false);
+        $testEmail = 'tbk-connection-test@example.com';
+        $environment = TbkFactory::getOneclickConfig()->getEnvironment();
+        $environmentLabel = static::getEnvironmentLabel($environment);
+        $logger = TbkFactory::createOneclickLogger();
+
+        $logger->logInfo('Iniciando prueba de conexión Webpay Oneclick.', [
+            'environment' => $environmentLabel,
+        ]);
+
+        try {
+            $oneclickInscriptionService = TbkFactory::createOneclickInscriptionService();
+            $oneclickInscriptionService->startInscription($testUserName, $testEmail, $returnUrl);
+
+            $logger->logInfo('Prueba de conexión Webpay Oneclick exitosa.', [
+                'environment' => $environmentLabel,
+            ]);
+
+            return [
+                'status'   => [
+                    'string' => 'OK',
+                ],
+                'meta' => [
+                    'environmentLabel' => $environmentLabel,
+                ],
+            ];
+
+        } catch (\Exception $e) {
+            $logger->logError('Prueba de conexión Webpay Oneclick fallida.', [
                 'environment' => $environmentLabel,
                 'error' => $e->getMessage(),
             ]);
