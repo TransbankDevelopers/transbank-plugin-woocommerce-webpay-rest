@@ -1,23 +1,22 @@
-import { setElement } from "../../utils/setElement";
 import { setText } from "../../utils/setText";
 import { elementFactory } from "../../utils/elementFactory";
 
-export class ConnectionChecker {
-    constructor(apiService, buttonBusyManager, visibilityManager, dom) {
+export class ProductConnectionChecker {
+    constructor(apiService, buttonBusyManager, dom, config = {}) {
         this.apiService = apiService;
         this.buttonBusyManager = buttonBusyManager;
-        this.visibilityManager = visibilityManager;
         this.dom = dom;
+        this.config = config;
     }
 
     init() {
         this.dom.checkButton?.addEventListener?.("click", (e) => {
             e.preventDefault();
-            this.check();
+            this.checkConnection();
         });
     }
 
-    async check() {
+    async checkConnection() {
         const spinner = elementFactory("i", { className: "fa fa-spinner fa-spin" });
         const text = document.createTextNode("Verificando... ");
 
@@ -26,11 +25,13 @@ export class ConnectionChecker {
             spinner,
         ]);
 
-        this.resetUI();
+        this.setLoadingUIState();
 
         try {
-            const response = await this.apiService.post("check_connection");
-            this.handleResponse(response);
+            const response = await this.apiService.post(this.config.actionName, {
+                product: this.config.productKey,
+            });
+            this.applyResponseState(response);
         } catch (error) {
             this.handleError(error);
         } finally {
@@ -38,44 +39,55 @@ export class ConnectionChecker {
         }
     }
 
-    resetUI() {
-        this.visibilityManager.show(this.dom.resultContainer);
-        this.visibilityManager.hide(this.dom.errorContainer);
-        this.visibilityManager.hide(this.dom.successContainer);
+    setLoadingUIState() {
+        this.setContainerState("is-loading");
+        this.applyLoadingState();
     }
 
-    handleResponse(response) {
-        if (response?.status?.string === "OK") {
-            this.showSuccess(response.response);
+    applyResponseState(response) {
+        this.applyResultState(response);
+        this.setContainerState("is-ready");
+    }
+
+    applyLoadingState() {
+        if (this.dom.responseBadge) {
+            this.dom.responseBadge.textContent = "Verificando";
+            this.dom.responseBadge.classList.remove("label-success", "label-danger");
+        }
+
+        setText(this.dom.responseEnvironment, "Detectando...");
+    }
+
+    applyResultState(response) {
+        const meta = response?.meta ?? {};
+        const isSuccess = response?.status?.string === "OK";
+        const statusLabel = isSuccess ? "Conexión OK" : "Conexión con error";
+
+        setText(this.dom.responseEnvironment, meta?.environmentLabel ?? "No disponible");
+
+        if (this.dom.responseBadge) {
+            this.dom.responseBadge.textContent = statusLabel;
+            this.dom.responseBadge.classList.remove("label-success", "label-danger");
+            this.dom.responseBadge.classList.add(isSuccess ? "label-success" : "label-danger");
+        }
+    }
+
+    handleError() {
+        this.applyResultState({
+            status: { string: "Error" },
+            meta: {
+                environmentLabel: "No disponible",
+            },
+        });
+        this.setContainerState("is-ready");
+    }
+
+    setContainerState(nextState) {
+        if (!this.dom.resultContainer) {
             return;
         }
 
-        this.showError(response.response);
-    }
-
-    showSuccess(data) {
-        setText(this.dom.responseUrl, data?.url ?? "");
-        setElement(this.dom.responseToken, "pre", null, [data?.token ?? ""]);
-
-        this.visibilityManager.show(this.dom.successContainer);
-    }
-
-    showError(data) {
-        setText(this.dom.errorResponse, data?.error ?? "");
-        setElement(
-            this.dom.errorDetail,
-            "code",
-            null,
-            [data?.detail ?? ""],
-        );
-
-        this.visibilityManager.show(this.dom.errorContainer);
-    }
-
-    handleError(error) {
-        this.showError({
-            error: "Error de conexión",
-            detail: error?.message || "Error al verificar la conexión",
-        });
+        this.dom.resultContainer.classList.remove("is-loading", "is-ready");
+        this.dom.resultContainer.classList.add(nextState);
     }
 }
