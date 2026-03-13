@@ -1,3 +1,5 @@
+@use "../common/variables";
+
 @mixin label-base($bg-color) {
     background: $bg-color;
     padding: 5px;
@@ -21,12 +23,12 @@
     }
 
     &-success {
-        @include label-base(#5cb85c);
+        @include label-base(variables.$tbk-success);
         font-weight: bold;
     }
 
     &-danger {
-        @include label-base(#ec3206);
+        @include label-base(variables.$tbk-error);
         font-weight: bold;
     }
 }
