@@ -4,7 +4,6 @@ use Transbank\WooCommerce\WebpayRest\Admin\Notices\DismissNoticeAjax;
 use Transbank\WooCommerce\WebpayRest\Admin\Notices\NoticeInscriptionDelete;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
-use Transbank\WooCommerce\WebpayRest\Helpers\SessionMessageHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
@@ -64,8 +63,6 @@ add_action('init', function () {
     add_action('wp_ajax_download_log_file', PluginLogger::class . '::downloadLogFile');
     add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 });
-
-add_action('woocommerce_before_cart', 'transbank_rest_before_cart');
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
 add_action('admin_enqueue_scripts', function () {
@@ -132,16 +129,6 @@ if ($hposExists) {
         }
     });
 }
-
-
-//Start sessions if not already done
-add_action('init', function () {
-    if (!headers_sent() && '' == session_id()) {
-        session_start([
-            'read_and_close' => true,
-        ]);
-    }
-});
 
 function woocommerceTransbankInit()
 {
@@ -278,11 +265,6 @@ function activateTransbankModule()
             ['back_link' => true]
         );
     }
-}
-
-function transbank_rest_before_cart()
-{
-    SessionMessageHelper::printMessage();
 }
 
 function transbank_rest_check_cancelled_checkout()
