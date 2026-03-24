@@ -31,7 +31,7 @@ export class BuyOrderFormatComponent {
                 typeof options.getOtherFormat === "function"
                     ? options.getOtherFormat
                     : null,
-            inputHandler: null,
+            inputHandler: null
         };
 
         this.createUI(instance);
@@ -79,7 +79,7 @@ export class BuyOrderFormatComponent {
 
         this.renderSuccess(
             instance,
-            `✅ Vista previa: ${result.preview} (${result.length} caracteres)`,
+            `✅ Vista previa: ${result.preview} (${result.length} caracteres)`
         );
     }
 
@@ -157,36 +157,36 @@ export class BuyOrderFormatComponent {
         helpText.appendChild(document.createElement("br"));
         helpText.appendChild(this.createStrongParagraph("ℹ️ Información: "));
         helpText.appendChild(
-            this.createStrongParagraph("Componentes disponibles:"),
+            this.createStrongParagraph("Componentes disponibles:")
         );
         helpText.appendChild(
             this.createParagraphWithCode(
                 "•",
                 "{orderId}",
-                " Número de orden de compra en Woocommerce (obligatorio).",
-            ),
+                " Número de orden de compra en Woocommerce (obligatorio)."
+            )
         );
         helpText.appendChild(
             this.createParagraphWithCode(
                 "•",
                 "{random}",
-                " Texto aleatorio con longitud de 8 caracteres (opcional).",
-            ),
+                " Texto aleatorio con longitud de 8 caracteres (opcional)."
+            )
         );
         helpText.appendChild(
             this.createParagraphWithCode(
                 "•",
                 "{random, length=12}",
-                " Texto aleatorio con longitud especifica (opcional).",
-            ),
+                " Texto aleatorio con longitud especifica (opcional)."
+            )
         );
         helpText.appendChild(
             this.createParagraphWithCode(
                 "Ejemplo: ",
                 "cualquierTexto-{random, length=12}-{orderId}",
                 "",
-                true,
-            ),
+                true
+            )
         );
         helpText.appendChild(this.createStrongParagraph("Notas:"));
         helpText.appendChild(
@@ -197,20 +197,20 @@ export class BuyOrderFormatComponent {
                 { code: "_" },
                 ") o dos puntos (",
                 { code: ":" },
-                "). No se permiten espacios.",
-            ]),
+                "). No se permiten espacios."
+            ])
         );
         helpText.appendChild(
             this.createParagraph(
-                "•El valor generado no puede exceder los 26 caracteres.",
-            ),
+                "•El valor generado no puede exceder los 26 caracteres."
+            )
         );
 
         if (isOneClick) {
             helpText.appendChild(
                 this.createParagraph(
-                    "•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.",
-                ),
+                    "•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal."
+                )
             );
         }
 
@@ -283,12 +283,12 @@ export class BuyOrderFormatComponent {
     renderError(instance, message) {
         instance.errorDisplay.classList.remove("tbk-hide");
         instance.errorDisplay.classList.add(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.errorDisplay.textContent = `❌ ${message}`;
 
         instance.valueDisplay.classList.remove(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.valueDisplay.textContent = "";
 
@@ -298,14 +298,14 @@ export class BuyOrderFormatComponent {
 
     renderSuccess(instance, message) {
         instance.errorDisplay.classList.remove(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.errorDisplay.classList.add("tbk-hide");
         instance.errorDisplay.textContent = "";
 
         instance.valueDisplay.classList.remove("tbk-hide");
         instance.valueDisplay.classList.add(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.valueDisplay.textContent = message;
 

@@ -51,8 +51,8 @@ export class TransactionRenderer {
                     className: "fa fa-times"
                 }),
                 elementFactory("p", {
-                    textContent: message,
-                }),
+                    textContent: message
+                })
             ])
         );
     }
@@ -67,12 +67,12 @@ export class TransactionRenderer {
         return elementFactory("div", { className: "tbk-field" }, [
             elementFactory("span", {
                 className: "tbk-field-name",
-                textContent: field.label || field.key,
+                textContent: field.label || field.key
             }),
             elementFactory("span", {
                 className: valueClass,
-                textContent: value,
-            }),
+                textContent: value
+            })
         ]);
     }
 

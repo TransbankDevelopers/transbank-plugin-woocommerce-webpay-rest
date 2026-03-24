@@ -16,6 +16,6 @@ DOMUtils.ready(() => {
     const component = new BuyOrderFormatComponent(service);
 
     component.attach(SELECTORS.WEBPAY_BUY_ORDER_INPUT, DEFAULT_BUY_ORDER_FORMATS.WEBPAY, {
-        addHelpText: true,
+        addHelpText: true
     });
 });

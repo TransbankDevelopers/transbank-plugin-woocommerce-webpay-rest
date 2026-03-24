@@ -23,7 +23,7 @@ export class LogDownloader {
             this.noticeManager.renderNotice({
                 type: "error",
                 title: "Error en la descarga",
-                message: "Selecciona un archivo para descargar.",
+                message: "Selecciona un archivo para descargar."
             });
             return;
         }
@@ -37,7 +37,7 @@ export class LogDownloader {
                 this.noticeManager.renderNotice({
                     type: "error",
                     title: "Error en la descarga",
-                    message: permissionResponse?.data?.error,
+                    message: permissionResponse?.data?.error
                 });
                 return;
             }
@@ -48,7 +48,7 @@ export class LogDownloader {
             this.noticeManager.renderNotice({
                 type: "error",
                 title: "Error en la descarga",
-                message: error.message || 'Ocurrió un error al intentar descargar el archivo',
+                message: error.message || 'Ocurrió un error al intentar descargar el archivo'
             });
         }
     }

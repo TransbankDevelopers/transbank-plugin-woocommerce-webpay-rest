@@ -32,8 +32,8 @@ const TransbankWebpayBlocks = {
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {
-        features: settings.supports,
-    },
+        features: settings.supports
+    }
 };
 
 registerPaymentMethod(TransbankWebpayBlocks);

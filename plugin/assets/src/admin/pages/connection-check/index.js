@@ -37,11 +37,11 @@ DOMUtils.ready(() => {
                 checkButton,
                 resultContainer,
                 responseBadge,
-                responseEnvironment,
+                responseEnvironment
             },
             {
                 actionName: card.dataset.action || "check_connection",
-                productKey: card.dataset.productKey || "",
+                productKey: card.dataset.productKey || ""
             }
         );
 
