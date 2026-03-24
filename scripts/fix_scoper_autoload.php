@@ -2,21 +2,35 @@
 
 declare(strict_types=1);
 
+$defaultPluginRoot = realpath(__DIR__ . '/../plugin');
+if ($defaultPluginRoot === false) {
+    fwrite(STDERR, "Cannot resolve default plugin root.\n");
+    exit(1);
+}
+
 if ($argc < 2) {
     fwrite(STDERR, "Usage: php scripts/fix_scoper_autoload.php <plugin-root>\n");
     exit(1);
 }
 
-$pluginRoot = rtrim($argv[1], DIRECTORY_SEPARATOR);
+$pluginRoot = realpath($argv[1]);
+$pluginRoot = $pluginRoot === false ? '' : $pluginRoot;
+
+$scopeConfigPath = __DIR__ . '/../plugin/scoper-namespaces.php';
+
+if ($pluginRoot !== $defaultPluginRoot) {
+    fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
+    exit(1);
+}
+
 $composerDir = $pluginRoot . '/vendor-prefixed/composer';
-$scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
 
 if (!is_file($scopeConfigPath)) {
     fwrite(STDERR, "Missing scope config: {$scopeConfigPath}\n");
     exit(1);
 }
 
-$scopeConfig = require_once $scopeConfigPath;
+$scopeConfig = require_once __DIR__ . '/../plugin/scoper-namespaces.php';
 $replacements = $scopeConfig['autoload_replacements'] ?? [];
 
 if (!is_array($replacements) || $replacements === []) {

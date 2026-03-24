@@ -2,24 +2,30 @@
 
 declare(strict_types=1);
 
+$defaultPluginRoot = realpath(__DIR__ . '/../plugin');
+if ($defaultPluginRoot === false) {
+    fwrite(STDERR, "Cannot resolve default plugin root.\n");
+    exit(1);
+}
+
 if ($argc < 2) {
     fwrite(STDERR, "Usage: php scripts/apply_scope_replacements.php <plugin-root>\n");
     exit(1);
 }
 
-$pluginRoot = rtrim($argv[1], DIRECTORY_SEPARATOR);
-if (!is_dir($pluginRoot)) {
-    fwrite(STDERR, "Invalid plugin root: {$pluginRoot}\n");
+$pluginRoot = realpath($argv[1]);
+if ($pluginRoot === false || $pluginRoot !== $defaultPluginRoot) {
+    fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
     exit(1);
 }
 
-$scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
+$scopeConfigPath = __DIR__ . '/../plugin/scoper-namespaces.php';
 if (!is_file($scopeConfigPath)) {
     fwrite(STDERR, "Missing scope config: {$scopeConfigPath}\n");
     exit(1);
 }
 
-$scopeConfig = require_once $scopeConfigPath;
+$scopeConfig = require_once __DIR__ . '/../plugin/scoper-namespaces.php';
 $patterns = $scopeConfig['code_replacement_patterns'] ?? [];
 if (!is_array($patterns) || $patterns === []) {
     fwrite(STDERR, "Invalid code replacement patterns in {$scopeConfigPath}\n");

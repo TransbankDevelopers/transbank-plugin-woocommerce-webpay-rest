@@ -8,9 +8,18 @@ use Transbank\Webpay\Options;
 class ConnectionCheck
 {
     private const ALLOWED_PRODUCTS = ['webpay', 'oneclick'];
+    private const REQUIRED_CAPABILITY = 'manage_woocommerce';
 
     public static function check()
     {
+        if (!current_user_can(self::REQUIRED_CAPABILITY)) {
+            wp_send_json_error(['error' => 'No tienes permisos para realizar esta acción'], 403);
+        }
+
+        if (!check_ajax_referer('my-ajax-nonce', 'nonce', false)) {
+            wp_send_json_error(['error' => 'Nonce inválido'], 403);
+        }
+
         $product = sanitize_text_field($_POST['product'] ?? 'webpay');
 
         if (!in_array($product, self::ALLOWED_PRODUCTS, true)) {
