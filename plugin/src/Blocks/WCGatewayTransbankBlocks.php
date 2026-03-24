@@ -17,7 +17,7 @@ trait WCGatewayTransbankBlocks
     public function initialize()
     {
         $this->settings = get_option($this->paymentId . '_settings', []);
-        $this->gateway = $this->get_gateway();
+        $this->gateway = $this->getGateway();
         add_action('woocommerce_rest_checkout_process_payment_with_context', [$this, 'processErrorPayment'], 10, 2);
     }
 
@@ -45,7 +45,7 @@ trait WCGatewayTransbankBlocks
         ];
     }
 
-    private function get_gateway()
+    private function getGateway()
     {
         $gateways = WC()->payment_gateways->get_available_payment_gateways();
         if (isset($gateways[$this->paymentId])) {
@@ -66,6 +66,10 @@ trait WCGatewayTransbankBlocks
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)
     {
+        if ($context->payment_method !== $this->paymentId) {
+            return;
+        }
+
         add_action(
             'wc_gateway_transbank_process_payment_error_' . $this->paymentId,
             function ($error, $shouldThrowError = false) use (&$result) {
