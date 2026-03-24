@@ -33,22 +33,9 @@ const Content = (props) => {
 const Label = () => {
     const title = decodeEntities(settings.title);
     const imagePath = settings.icon;
-    const paymentImage = (
-        <img
-            src={imagePath}
-            alt="oneclick logo"
-            style={{ marginLeft: "auto" }}
-        />
-    );
+    const paymentImage = <img src={imagePath} alt="oneclick logo" />;
     return (
-        <div
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-            }}
-        >
+        <div>
             <span>{title}</span>
             {paymentImage}
         </div>
