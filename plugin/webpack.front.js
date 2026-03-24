@@ -1,50 +1,49 @@
-const defaultConfig = require('@wordpress/scripts/config/webpack.config');
-const WooCommerceDependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin');
-const path = require('path');
+const defaultConfig = require("@wordpress/scripts/config/webpack.config");
+const WooCommerceDependencyExtractionWebpackPlugin = require("@woocommerce/dependency-extraction-webpack-plugin");
+const path = require("path");
 
 const wcDepMap = {
-	'@woocommerce/blocks-registry': ['wc', 'wcBlocksRegistry'],
-	'@woocommerce/settings'       : ['wc', 'wcSettings']
+    "@woocommerce/blocks-registry": ["wc", "wcBlocksRegistry"],
+    "@woocommerce/settings": ["wc", "wcSettings"],
 };
 
 const wcHandleMap = {
-	'@woocommerce/blocks-registry': 'wc-blocks-registry',
-	'@woocommerce/settings'       : 'wc-settings'
+    "@woocommerce/blocks-registry": "wc-blocks-registry",
+    "@woocommerce/settings": "wc-settings",
 };
 
 const requestToExternal = (request) => {
-	if (wcDepMap[request]) {
-		return wcDepMap[request];
-	}
+    if (wcDepMap[request]) {
+        return wcDepMap[request];
+    }
 };
 
 const requestToHandle = (request) => {
-	if (wcHandleMap[request]) {
-		return wcHandleMap[request];
-	}
+    if (wcHandleMap[request]) {
+        return wcHandleMap[request];
+    }
 };
 
 // Export configuration.
 module.exports = {
-	...defaultConfig,
-	entry:
-        {'webpay_blocks': '/src/Blocks/js/webpay_checkout.js',
-        'oneclick_blocks': '/src/Blocks/js/oneclick_checkout.js',
-        'notice_handler': '/src/Blocks/js/notice_handler.js'
-        }
-	,
-	output: {
-		path: path.resolve( __dirname, 'js/front' ),
-		filename: '[name].js'
-	},
-	plugins: [
-		...defaultConfig.plugins.filter(
-			(plugin) =>
-				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
-		),
-		new WooCommerceDependencyExtractionWebpackPlugin({
-			requestToExternal,
-			requestToHandle
-		})
-	]
+    ...defaultConfig,
+    entry: {
+        webpay_blocks: "/assets/src/front/block/webpay_checkout.js",
+        oneclick_blocks: "/assets/src/front/block/oneclick_checkout.js",
+        notice_handler: "/assets/src/front/block/notice_handler.js",
+    },
+    output: {
+        path: path.resolve(__dirname, "assets/build/front/"),
+        filename: "[name].js",
+    },
+    plugins: [
+        ...defaultConfig.plugins.filter(
+            (plugin) =>
+                plugin.constructor.name !== "DependencyExtractionWebpackPlugin",
+        ),
+        new WooCommerceDependencyExtractionWebpackPlugin({
+            requestToExternal,
+            requestToHandle,
+        }),
+    ],
 };

@@ -16,11 +16,22 @@ const Label = () => {
 	const title = decodeEntities( settings.title );
 	const imagePath = settings.icon;
 	const paymentImage = (
-		<img src={imagePath} alt="webpay plus logo"/>
+		<img
+			src={imagePath}
+			alt="webpay plus logo"
+			style={{ marginLeft: 'auto' }}
+		/>
 	);
 	return (
-		<div>
-			{title}
+		<div
+			style={{
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'space-between',
+				width: '100%',
+			}}
+		>
+			<span>{title}</span>
 			{paymentImage}
 		</div>
 	);
