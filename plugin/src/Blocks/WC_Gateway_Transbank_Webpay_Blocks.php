@@ -12,8 +12,7 @@ final class WCGatewayTransbankWebpayBlocks extends AbstractPaymentMethodType
 
     public function __construct()
     {
-        $scriptPath = dirname(dirname(plugin_dir_path(__FILE__))) . '/assets/build/front/';
-        $this->scriptInfo = require_once $scriptPath . 'webpay_blocks.asset.php';
+        $this->scriptInfo = require_once $this->getFrontAssetBuildPath() . 'webpay_blocks.asset.php';
         $this->paymentId = $this->name;
         $this->productName = 'webpay';
     }

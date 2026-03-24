@@ -6,6 +6,8 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 
 trait WCGatewayTransbankBlocks
 {
+    private const FRONT_ASSETS_BUILD_DIR = '/assets/build/front/';
+
     private $gateway;
     private $paymentId;
 
@@ -23,7 +25,7 @@ trait WCGatewayTransbankBlocks
     {
         wp_register_script(
             'wc_transbank_' . $this->productName . '_payment',
-            dirname(dirname(plugins_url('/', __FILE__))) . '/assets/build/front/' . $this->productName . '_blocks.js',
+            $this->getFrontAssetUrl($this->productName . '_blocks.js'),
             $this->scriptInfo['dependencies'],
             $this->scriptInfo['version'],
             true
@@ -50,6 +52,16 @@ trait WCGatewayTransbankBlocks
             return $gateways[$this->paymentId];
         }
         return null;
+    }
+
+    protected function getFrontAssetBuildPath(): string
+    {
+        return dirname(dirname(plugin_dir_path(__FILE__))) . self::FRONT_ASSETS_BUILD_DIR;
+    }
+
+    protected function getFrontAssetUrl(string $fileName): string
+    {
+        return dirname(dirname(plugins_url('/', __FILE__))) . self::FRONT_ASSETS_BUILD_DIR . ltrim($fileName, '/');
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)

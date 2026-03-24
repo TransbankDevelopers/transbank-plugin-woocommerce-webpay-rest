@@ -2,6 +2,9 @@ const defaultConfig = require("@wordpress/scripts/config/webpack.config");
 const WooCommerceDependencyExtractionWebpackPlugin = require("@woocommerce/dependency-extraction-webpack-plugin");
 const path = require("path");
 
+const FRONT_SOURCE_DIR = "assets/src/front/block";
+const FRONT_BUILD_DIR = "assets/build/front";
+
 const wcDepMap = {
     "@woocommerce/blocks-registry": ["wc", "wcBlocksRegistry"],
     "@woocommerce/settings": ["wc", "wcSettings"],
@@ -28,12 +31,12 @@ const requestToHandle = (request) => {
 module.exports = {
     ...defaultConfig,
     entry: {
-        webpay_blocks: "/assets/src/front/block/webpay_checkout.js",
-        oneclick_blocks: "/assets/src/front/block/oneclick_checkout.js",
-        notice_handler: "/assets/src/front/block/notice_handler.js",
+        webpay_blocks: `./${FRONT_SOURCE_DIR}/webpay_checkout.js`,
+        oneclick_blocks: `./${FRONT_SOURCE_DIR}/oneclick_checkout.js`,
+        notice_handler: `./${FRONT_SOURCE_DIR}/notice_handler.js`,
     },
     output: {
-        path: path.resolve(__dirname, "assets/build/front/"),
+        path: path.resolve(__dirname, FRONT_BUILD_DIR),
         filename: "[name].js",
     },
     plugins: [
