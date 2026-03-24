@@ -1,6 +1,6 @@
 const defaultConfig = require("@wordpress/scripts/config/webpack.config");
 const WooCommerceDependencyExtractionWebpackPlugin = require("@woocommerce/dependency-extraction-webpack-plugin");
-const path = require("path");
+const path = require("node:path");
 
 const FRONT_SOURCE_DIR = "assets/src/front/block";
 const FRONT_BUILD_DIR = "assets/build/front";
