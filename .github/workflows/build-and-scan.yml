@@ -6,6 +6,11 @@ on:
   push:
     branches:
       - "master"
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   sonarcloud:
     name: SonarCloud
@@ -33,3 +38,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Upload zip artifact
+        if: success()
+        id: upload_zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: transbank-plugin-zip
+          path: transbank-webpay-plus-rest.zip
+      - name: Comment PR with artifact link
+        if: success() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: plugin-zip
+          message: |
+            Plugin ZIP disponible.
+
+            - Descargar artifact: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload_zip.outputs.artifact-id }}
