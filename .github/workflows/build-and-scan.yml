@@ -47,7 +47,7 @@ jobs:
           path: transbank-webpay-plus-rest.zip
       - name: Comment PR with artifact link
         if: success() && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987
         with:
           header: plugin-zip
           message: |
