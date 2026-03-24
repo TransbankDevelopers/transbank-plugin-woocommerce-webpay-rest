@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
+    http_response_code(403);
+    exit('Forbidden');
+}
+
 $defaultPluginRoot = realpath(__DIR__ . '/../plugin');
 if ($defaultPluginRoot === false) {
     fwrite(STDERR, "Cannot resolve default plugin root.\n");

@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
+    http_response_code(403);
+    exit('Forbidden');
+}
+
 $defaultPluginRoot = realpath(__DIR__ . '/../plugin');
 if ($defaultPluginRoot === false) {
     fwrite(STDERR, "Cannot resolve default plugin root.\n");
@@ -42,20 +47,15 @@ $files = [];
 foreach ($paths as $path) {
     if (is_file($path)) {
         $files[] = $path;
-        continue;
-    }
+    } elseif (is_dir($path)) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)
+        );
 
-    if (!is_dir($path)) {
-        continue;
-    }
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)
-    );
-
-    foreach ($iterator as $fileInfo) {
-        if ($fileInfo->isFile() && $fileInfo->getExtension() === 'php') {
-            $files[] = $fileInfo->getPathname();
+        foreach ($iterator as $fileInfo) {
+            if ($fileInfo->isFile() && $fileInfo->getExtension() === 'php') {
+                $files[] = $fileInfo->getPathname();
+            }
         }
     }
 }
