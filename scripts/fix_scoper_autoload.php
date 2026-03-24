@@ -7,12 +7,6 @@ if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
     exit('Forbidden');
 }
 
-$defaultPluginRoot = realpath(__DIR__ . '/../plugin');
-if ($defaultPluginRoot === false) {
-    fwrite(STDERR, "Cannot resolve default plugin root.\n");
-    exit(1);
-}
-
 if ($argc < 2) {
     fwrite(STDERR, "Usage: php scripts/fix_scoper_autoload.php <plugin-root>\n");
     exit(1);
@@ -23,7 +17,11 @@ $pluginRoot = $pluginRoot === false ? '' : $pluginRoot;
 
 $scopeConfigPath = __DIR__ . '/../plugin/scoper-namespaces.php';
 
-if ($pluginRoot !== $defaultPluginRoot) {
+if (
+    $pluginRoot === '' ||
+    !is_file($pluginRoot . '/scoper-namespaces.php') ||
+    !is_dir($pluginRoot . '/vendor-prefixed/composer')
+) {
     fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
     exit(1);
 }

@@ -7,21 +7,27 @@ if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
     exit('Forbidden');
 }
 
-$defaultPluginRoot = realpath(__DIR__ . '/../plugin');
-if ($defaultPluginRoot === false) {
-    fwrite(STDERR, "Cannot resolve default plugin root.\n");
-    exit(1);
-}
-
 if ($argc < 2) {
     fwrite(STDERR, "Usage: php scripts/apply_scope_replacements.php <plugin-root>\n");
     exit(1);
 }
 
 $pluginRoot = realpath($argv[1]);
-if ($pluginRoot === false || $pluginRoot !== $defaultPluginRoot) {
+if ($pluginRoot === false) {
     fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
     exit(1);
+}
+
+$requiredPaths = [
+    $pluginRoot . '/scoper-namespaces.php',
+    $pluginRoot . '/src',
+];
+
+foreach ($requiredPaths as $requiredPath) {
+    if (!file_exists($requiredPath)) {
+        fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
+        exit(1);
+    }
 }
 
 $scopeConfigPath = __DIR__ . '/../plugin/scoper-namespaces.php';
