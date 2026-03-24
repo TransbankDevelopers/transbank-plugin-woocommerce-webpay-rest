@@ -1,21 +1,21 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+if [[ "${1:-}" == "" ]]; then
+    echo "Usage: bash scripts/fix_scoper_autoload.sh <plugin-root>" 1>&2
+    exit 1
+fi
+
+PLUGIN_ROOT="$1"
+
+php <<'PHP' "$PLUGIN_ROOT"
 <?php
 
 declare(strict_types=1);
 
-if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
-    http_response_code(403);
-    exit('Forbidden');
-}
-
-if ($argc < 2) {
-    fwrite(STDERR, "Usage: php scripts/fix_scoper_autoload.php <plugin-root>\n");
-    exit(1);
-}
-
 $pluginRoot = realpath($argv[1]);
 $pluginRoot = $pluginRoot === false ? '' : $pluginRoot;
-
-$scopeConfigPath = __DIR__ . '/../plugin/scoper-namespaces.php';
 
 if (
     $pluginRoot === '' ||
@@ -26,14 +26,8 @@ if (
     exit(1);
 }
 
-$composerDir = $pluginRoot . '/vendor-prefixed/composer';
-
-if (!is_file($scopeConfigPath)) {
-    fwrite(STDERR, "Missing scope config: {$scopeConfigPath}\n");
-    exit(1);
-}
-
-$scopeConfig = require_once __DIR__ . '/../plugin/scoper-namespaces.php';
+$scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
+$scopeConfig = require $scopeConfigPath;
 $replacements = $scopeConfig['autoload_replacements'] ?? [];
 
 if (!is_array($replacements) || $replacements === []) {
@@ -42,8 +36,8 @@ if (!is_array($replacements) || $replacements === []) {
 }
 
 $targets = [
-    $composerDir . '/autoload_psr4.php',
-    $composerDir . '/autoload_static.php',
+    $pluginRoot . '/vendor-prefixed/composer/autoload_psr4.php',
+    $pluginRoot . '/vendor-prefixed/composer/autoload_static.php',
 ];
 
 foreach ($targets as $file) {
@@ -60,11 +54,9 @@ foreach ($targets as $file) {
 
     $updated = str_replace(array_keys($replacements), array_values($replacements), $content);
 
-    if ($updated !== $content) {
-        $ok = file_put_contents($file, $updated);
-        if ($ok === false) {
-            fwrite(STDERR, "Cannot write file: {$file}\n");
-            exit(1);
-        }
+    if ($updated !== $content && file_put_contents($file, $updated) === false) {
+        fwrite(STDERR, "Cannot write file: {$file}\n");
+        exit(1);
     }
 }
+PHP

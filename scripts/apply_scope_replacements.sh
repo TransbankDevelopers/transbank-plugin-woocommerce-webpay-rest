@@ -1,16 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+if [[ "${1:-}" == "" ]]; then
+    echo "Usage: bash scripts/apply_scope_replacements.sh <plugin-root>" 1>&2
+    exit 1
+fi
+
+PLUGIN_ROOT="$1"
+
+php <<'PHP' "$PLUGIN_ROOT"
 <?php
 
 declare(strict_types=1);
-
-if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
-    http_response_code(403);
-    exit('Forbidden');
-}
-
-if ($argc < 2) {
-    fwrite(STDERR, "Usage: php scripts/apply_scope_replacements.php <plugin-root>\n");
-    exit(1);
-}
 
 $pluginRoot = realpath($argv[1]);
 if ($pluginRoot === false) {
@@ -30,14 +32,10 @@ foreach ($requiredPaths as $requiredPath) {
     }
 }
 
-$scopeConfigPath = __DIR__ . '/../plugin/scoper-namespaces.php';
-if (!is_file($scopeConfigPath)) {
-    fwrite(STDERR, "Missing scope config: {$scopeConfigPath}\n");
-    exit(1);
-}
-
-$scopeConfig = require_once __DIR__ . '/../plugin/scoper-namespaces.php';
+$scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
+$scopeConfig = require $scopeConfigPath;
 $patterns = $scopeConfig['code_replacement_patterns'] ?? [];
+
 if (!is_array($patterns) || $patterns === []) {
     fwrite(STDERR, "Invalid code replacement patterns in {$scopeConfigPath}\n");
     exit(1);
@@ -79,11 +77,9 @@ foreach ($files as $file) {
         exit(1);
     }
 
-    if ($updated !== $content) {
-        $ok = file_put_contents($file, $updated);
-        if ($ok === false) {
-            fwrite(STDERR, "Cannot write file: {$file}\n");
-            exit(1);
-        }
+    if ($updated !== $content && file_put_contents($file, $updated) === false) {
+        fwrite(STDERR, "Cannot write file: {$file}\n");
+        exit(1);
     }
 }
+PHP
