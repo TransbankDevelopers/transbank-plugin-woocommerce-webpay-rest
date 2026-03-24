@@ -10,8 +10,8 @@ El artefacto final incluye las dependencias externas prefijadas bajo el namespac
 2. Los assets frontend se generan dentro de ese directorio temporal.
 3. `php-scoper` se ejecuta sobre el directorio `vendor/` del plugin y escribe el resultado en `vendor-prefixed/`.
 4. Luego el build aplica dos pasos de normalización:
-   - `scripts/fix_scoper_autoload.sh` ajusta los mapas de autoload de Composer generados para las dependencias prefijadas.
-   - `scripts/apply_scope_replacements.sh` actualiza las referencias en el código del plugin que deben apuntar a los namespaces prefijados.
+   - `scripts/fix_scoper_autoload.php` ajusta los mapas de autoload de Composer generados para las dependencias prefijadas.
+   - `scripts/apply_scope_replacements.php` actualiza las referencias en el código del plugin que deben apuntar a los namespaces prefijados.
 5. El directorio `vendor/` sin prefijar se elimina del artefacto final.
 6. `plugin/webpay-rest.php` carga el autoloader prefijado cuando existe `vendor-prefixed/` y, en caso contrario, hace fallback al autoloader estándar de `vendor/`.
 

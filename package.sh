@@ -115,13 +115,13 @@ check_requirements() {
         fi
     fi
 
-    if [[ ! -f "$PROJECT_ROOT/scripts/apply_scope_replacements.sh" ]]; then
-        echo "Missing required script: scripts/apply_scope_replacements.sh" 1>&2
+    if [[ ! -f "$PROJECT_ROOT/scripts/apply_scope_replacements.php" ]]; then
+        echo "Missing required script: scripts/apply_scope_replacements.php" 1>&2
         exit 1
     fi
 
-    if [[ ! -f "$PROJECT_ROOT/scripts/fix_scoper_autoload.sh" ]]; then
-        echo "Missing required script: scripts/fix_scoper_autoload.sh" 1>&2
+    if [[ ! -f "$PROJECT_ROOT/scripts/fix_scoper_autoload.php" ]]; then
+        echo "Missing required script: scripts/fix_scoper_autoload.php" 1>&2
         exit 1
     fi
 
@@ -159,8 +159,8 @@ scope_vendor_dependencies() {
 
     run_step "Scope composer dependencies" "$SCOPER_BIN" add-prefix --force --quiet --config=scoper.inc.php
 
-    run_step "Fix scoped composer autoload maps" bash "$PROJECT_ROOT/scripts/fix_scoper_autoload.sh" "$WORK_DIR"
-    run_step "Apply namespace replacement dictionary" bash "$PROJECT_ROOT/scripts/apply_scope_replacements.sh" "$WORK_DIR"
+    run_step "Fix scoped composer autoload maps" php "$PROJECT_ROOT/scripts/fix_scoper_autoload.php" "$WORK_DIR"
+    run_step "Apply namespace replacement dictionary" php "$PROJECT_ROOT/scripts/apply_scope_replacements.php" "$WORK_DIR"
 
     run_step "Remove unscoped vendor directory" rm -rf vendor
 }

@@ -1,23 +1,24 @@
-#!/usr/bin/env bash
-
-set -Eeuo pipefail
-
-if [[ "${1:-}" == "" ]]; then
-    echo "Usage: bash scripts/apply_scope_replacements.sh <plugin-root>" 1>&2
-    exit 1
-fi
-
-PLUGIN_ROOT="$1"
-
-php <<'PHP' "$PLUGIN_ROOT"
 <?php
 
 declare(strict_types=1);
 
+function failScopeReplacementScript(): void
+{
+    exit(1);
+}
+
+if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
+    http_response_code(403);
+    exit('Forbidden');
+}
+
+if ($argc < 2) {
+    failScopeReplacementScript();
+}
+
 $pluginRoot = realpath($argv[1]);
 if ($pluginRoot === false) {
-    fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
-    exit(1);
+    failScopeReplacementScript();
 }
 
 $requiredPaths = [
@@ -27,18 +28,19 @@ $requiredPaths = [
 
 foreach ($requiredPaths as $requiredPath) {
     if (!file_exists($requiredPath)) {
-        fwrite(STDERR, "Invalid plugin root: {$argv[1]}\n");
-        exit(1);
+        failScopeReplacementScript();
     }
 }
 
 $scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
+if (!is_file($scopeConfigPath)) {
+    failScopeReplacementScript();
+}
+
 $scopeConfig = require $scopeConfigPath;
 $patterns = $scopeConfig['code_replacement_patterns'] ?? [];
-
 if (!is_array($patterns) || $patterns === []) {
-    fwrite(STDERR, "Invalid code replacement patterns in {$scopeConfigPath}\n");
-    exit(1);
+    failScopeReplacementScript();
 }
 
 $paths = [
@@ -67,19 +69,18 @@ foreach ($paths as $path) {
 foreach ($files as $file) {
     $content = file_get_contents($file);
     if ($content === false) {
-        fwrite(STDERR, "Cannot read file: {$file}\n");
-        exit(1);
+        failScopeReplacementScript();
     }
 
     $updated = preg_replace(array_keys($patterns), array_values($patterns), $content);
     if ($updated === null) {
-        fwrite(STDERR, "Regex replacement failed in file: {$file}\n");
-        exit(1);
+        failScopeReplacementScript();
     }
 
-    if ($updated !== $content && file_put_contents($file, $updated) === false) {
-        fwrite(STDERR, "Cannot write file: {$file}\n");
-        exit(1);
+    if ($updated !== $content) {
+        $ok = file_put_contents($file, $updated);
+        if ($ok === false) {
+            failScopeReplacementScript();
+        }
     }
 }
-PHP
