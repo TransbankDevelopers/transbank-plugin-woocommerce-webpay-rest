@@ -1,24 +1,22 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+if [[ "${1:-}" == "" ]]; then
+    exit 1
+fi
+
+PLUGIN_ROOT="$1"
+
+PLUGIN_ROOT="$PLUGIN_ROOT" php <<'PHP'
 <?php
 
 declare(strict_types=1);
 
-function failScopeReplacementScript(): void
-{
-    exit(1);
-}
-
-if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
-    http_response_code(403);
-    exit('Forbidden');
-}
-
-if ($argc < 2) {
-    failScopeReplacementScript();
-}
-
-$pluginRoot = realpath($argv[1]);
+$pluginRootInput = getenv('PLUGIN_ROOT') ?: '';
+$pluginRoot = realpath($pluginRootInput);
 if ($pluginRoot === false) {
-    failScopeReplacementScript();
+    exit(1);
 }
 
 $requiredPaths = [
@@ -28,19 +26,16 @@ $requiredPaths = [
 
 foreach ($requiredPaths as $requiredPath) {
     if (!file_exists($requiredPath)) {
-        failScopeReplacementScript();
+        exit(1);
     }
 }
 
 $scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
-if (!is_file($scopeConfigPath)) {
-    failScopeReplacementScript();
-}
-
-$scopeConfig = require $scopeConfigPath;
+$scopeConfig = require_once $scopeConfigPath;
 $patterns = $scopeConfig['code_replacement_patterns'] ?? [];
+
 if (!is_array($patterns) || $patterns === []) {
-    failScopeReplacementScript();
+    exit(1);
 }
 
 $paths = [
@@ -69,18 +64,16 @@ foreach ($paths as $path) {
 foreach ($files as $file) {
     $content = file_get_contents($file);
     if ($content === false) {
-        failScopeReplacementScript();
+        exit(1);
     }
 
     $updated = preg_replace(array_keys($patterns), array_values($patterns), $content);
     if ($updated === null) {
-        failScopeReplacementScript();
+        exit(1);
     }
 
-    if ($updated !== $content) {
-        $ok = file_put_contents($file, $updated);
-        if ($ok === false) {
-            failScopeReplacementScript();
-        }
+    if ($updated !== $content && file_put_contents($file, $updated) === false) {
+        exit(1);
     }
 }
+PHP

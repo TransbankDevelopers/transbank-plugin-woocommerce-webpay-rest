@@ -1,22 +1,20 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+if [[ "${1:-}" == "" ]]; then
+    exit 1
+fi
+
+PLUGIN_ROOT="$1"
+
+PLUGIN_ROOT="$PLUGIN_ROOT" php <<'PHP'
 <?php
 
 declare(strict_types=1);
 
-function failFixScoperAutoloadScript(): void
-{
-    exit(1);
-}
-
-if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
-    http_response_code(403);
-    exit('Forbidden');
-}
-
-if ($argc < 2) {
-    failFixScoperAutoloadScript();
-}
-
-$pluginRoot = realpath($argv[1]);
+$pluginRootInput = getenv('PLUGIN_ROOT') ?: '';
+$pluginRoot = realpath($pluginRootInput);
 $pluginRoot = $pluginRoot === false ? '' : $pluginRoot;
 
 if (
@@ -24,19 +22,15 @@ if (
     !is_file($pluginRoot . '/scoper-namespaces.php') ||
     !is_dir($pluginRoot . '/vendor-prefixed/composer')
 ) {
-    failFixScoperAutoloadScript();
+    exit(1);
 }
 
 $scopeConfigPath = $pluginRoot . '/scoper-namespaces.php';
-if (!is_file($scopeConfigPath)) {
-    failFixScoperAutoloadScript();
-}
-
-$scopeConfig = require $scopeConfigPath;
+$scopeConfig = require_once $scopeConfigPath;
 $replacements = $scopeConfig['autoload_replacements'] ?? [];
 
 if (!is_array($replacements) || $replacements === []) {
-    failFixScoperAutoloadScript();
+    exit(1);
 }
 
 $targets = [
@@ -46,20 +40,18 @@ $targets = [
 
 foreach ($targets as $file) {
     if (!is_file($file)) {
-        failFixScoperAutoloadScript();
+        exit(1);
     }
 
     $content = file_get_contents($file);
     if ($content === false) {
-        failFixScoperAutoloadScript();
+        exit(1);
     }
 
     $updated = str_replace(array_keys($replacements), array_values($replacements), $content);
 
-    if ($updated !== $content) {
-        $ok = file_put_contents($file, $updated);
-        if ($ok === false) {
-            failFixScoperAutoloadScript();
-        }
+    if ($updated !== $content && file_put_contents($file, $updated) === false) {
+        exit(1);
     }
 }
+PHP
