@@ -8,7 +8,7 @@ const label = decodeEntities(settings.title);
 
 noticeHandler(settings.id);
 
-const Content = () => {
+const Content = ({ settings }) => {
     return decodeEntities(settings.description);
 };
 
@@ -27,8 +27,8 @@ const Label = ({ settings }) => {
 const TransbankWebpayBlocks = {
     name: settings.id,
     label: <Label settings={settings} />,
-    content: <Content />,
-    edit: <Content />,
+    content: <Content settings={settings} />,
+    edit: <Content settings={settings} />,
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {
