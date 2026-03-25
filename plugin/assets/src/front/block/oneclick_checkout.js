@@ -14,10 +14,12 @@ const Content = (props) => {
     const { onCheckoutFail } = eventRegistration;
     useEffect(() => {
         const onError = ({ processingResponse }) => {
-            if (processingResponse.paymentDetails.errorMessage) {
+            const errorMessage = processingResponse?.paymentDetails?.errorMessage;
+
+            if (errorMessage) {
                 return {
                     type: emitResponse.responseTypes.ERROR,
-                    message: processingResponse.paymentDetails.errorMessage,
+                    message: errorMessage,
                     messageContext: emitResponse.noticeContexts.PAYMENTS
                 };
             }
@@ -25,7 +27,7 @@ const Content = (props) => {
         };
         const unsubscribe = onCheckoutFail(onError);
         return unsubscribe;
-    }, [onCheckoutFail]);
+    }, [emitResponse, onCheckoutFail]);
 
     return decodeEntities(settings.description);
 };

@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 trait WCGatewayTransbankBlocks
 {
     private const FRONT_ASSETS_BUILD_DIR = '/assets/build/front/';
+    private const PROCESS_ERROR_HOOK_PRIORITY = 10;
+    private const PROCESS_ERROR_HOOK_ACCEPTED_ARGS = 2;
 
     private $gateway;
     private $paymentId;
@@ -18,7 +20,12 @@ trait WCGatewayTransbankBlocks
     {
         $this->settings = get_option($this->paymentId . '_settings', []);
         $this->gateway = $this->getGateway();
-        add_action('woocommerce_rest_checkout_process_payment_with_context', [$this, 'processErrorPayment'], 10, 2);
+        add_action(
+            'woocommerce_rest_checkout_process_payment_with_context',
+            [$this, 'processErrorPayment'],
+            self::PROCESS_ERROR_HOOK_PRIORITY,
+            self::PROCESS_ERROR_HOOK_ACCEPTED_ARGS
+        );
     }
 
     public function get_payment_method_script_handles()
@@ -81,8 +88,8 @@ trait WCGatewayTransbankBlocks
                     throw $error;
                 }
             },
-            10,
-            2
+            self::PROCESS_ERROR_HOOK_PRIORITY,
+            self::PROCESS_ERROR_HOOK_ACCEPTED_ARGS
         );
     }
 
