@@ -31,7 +31,7 @@ export class BuyOrderFormatComponent {
                 typeof options.getOtherFormat === "function"
                     ? options.getOtherFormat
                     : null,
-            inputHandler: null,
+            inputHandler: null
         };
 
         this.createUI(instance);
@@ -79,7 +79,7 @@ export class BuyOrderFormatComponent {
 
         this.renderSuccess(
             instance,
-            `✅ Vista previa: ${result.preview} (${result.length} caracteres)`,
+            `✅ Vista previa: ${result.preview} (${result.length} caracteres)`
         );
     }
 
@@ -152,25 +152,119 @@ export class BuyOrderFormatComponent {
     createHelpText(isOneClick) {
         const helpText = document.createElement("div");
         helpText.className = "tbk-buy-order-format-help-text";
-        helpText.innerHTML = `
-            <br/><br/>
-            <p><strong>ℹ️ Información: </strong></p>
-            <p><strong>Componentes disponibles:</strong></p>
-            <p>•<code>{orderId}</code> Número de orden de compra en Woocommerce (obligatorio).</p>
-            <p>•<code>{random}</code> Texto aleatorio con longitud de 8 caracteres (opcional).</p>
-            <p>•<code>{random, length=12}</code> Texto aleatorio con longitud especifica (opcional).</p>
-            <p><strong>Ejemplo:</strong> <code>cualquierTexto-{random, length=12}-{orderId}</code></p>
-            <p><strong>Notas:</strong></p>
-            <p>•Solo se permiten caracteres alfanuméricos, guiones (<code>-</code>), guiones bajos (<code>_</code>)
-                o dos puntos (<code>:</code>). No se permiten espacios. </p>
-            <p>•El valor generado no puede exceder los 26 caracteres.</p>
-            ${
-                isOneClick
-                    ? `<p>•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal.</p>`
-                    : ""
-            }
-        `;
+
+        helpText.appendChild(document.createElement("br"));
+        helpText.appendChild(document.createElement("br"));
+        helpText.appendChild(this.createStrongParagraph("ℹ️ Información: "));
+        helpText.appendChild(
+            this.createStrongParagraph("Componentes disponibles:")
+        );
+        helpText.appendChild(
+            this.createParagraphWithCode(
+                "•",
+                "{orderId}",
+                " Número de orden de compra en Woocommerce (obligatorio)."
+            )
+        );
+        helpText.appendChild(
+            this.createParagraphWithCode(
+                "•",
+                "{random}",
+                " Texto aleatorio con longitud de 8 caracteres (opcional)."
+            )
+        );
+        helpText.appendChild(
+            this.createParagraphWithCode(
+                "•",
+                "{random, length=12}",
+                " Texto aleatorio con longitud especifica (opcional)."
+            )
+        );
+        helpText.appendChild(
+            this.createParagraphWithCode(
+                "Ejemplo: ",
+                "cualquierTexto-{random, length=12}-{orderId}",
+                "",
+                true
+            )
+        );
+        helpText.appendChild(this.createStrongParagraph("Notas:"));
+        helpText.appendChild(
+            this.createParagraphWithInlineCode([
+                "•Solo se permiten caracteres alfanuméricos, guiones (",
+                { code: "-" },
+                "), guiones bajos (",
+                { code: "_" },
+                ") o dos puntos (",
+                { code: ":" },
+                "). No se permiten espacios."
+            ])
+        );
+        helpText.appendChild(
+            this.createParagraph(
+                "•El valor generado no puede exceder los 26 caracteres."
+            )
+        );
+
+        if (isOneClick) {
+            helpText.appendChild(
+                this.createParagraph(
+                    "•El formato de orden de compra hija debe ser distinto al formato de orden de compra principal."
+                )
+            );
+        }
+
         return helpText;
+    }
+
+    createParagraph(text) {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = text;
+        return paragraph;
+    }
+
+    createStrongParagraph(text) {
+        const paragraph = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = text;
+        paragraph.appendChild(strong);
+        return paragraph;
+    }
+
+    createParagraphWithCode(prefix, codeValue, suffix, strongPrefix = false) {
+        const paragraph = document.createElement("p");
+
+        if (strongPrefix) {
+            const prefixNode = document.createElement("strong");
+            prefixNode.textContent = prefix;
+            paragraph.appendChild(prefixNode);
+        } else {
+            paragraph.appendChild(document.createTextNode(prefix));
+        }
+
+        const code = document.createElement("code");
+        code.textContent = codeValue;
+        paragraph.appendChild(code);
+        paragraph.appendChild(document.createTextNode(suffix));
+
+        return paragraph;
+    }
+
+    createParagraphWithInlineCode(parts) {
+        const paragraph = document.createElement("p");
+
+        parts.forEach((part) => {
+            if (typeof part === "string") {
+                paragraph.appendChild(document.createTextNode(part));
+                return;
+            }
+
+            const code = document.createElement("code");
+            code.textContent = part.code;
+            paragraph.appendChild(code);
+        });
+
+        return paragraph;
     }
 
     bind(instance) {
@@ -189,12 +283,12 @@ export class BuyOrderFormatComponent {
     renderError(instance, message) {
         instance.errorDisplay.classList.remove("tbk-hide");
         instance.errorDisplay.classList.add(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.errorDisplay.textContent = `❌ ${message}`;
 
         instance.valueDisplay.classList.remove(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.valueDisplay.textContent = "";
 
@@ -204,14 +298,14 @@ export class BuyOrderFormatComponent {
 
     renderSuccess(instance, message) {
         instance.errorDisplay.classList.remove(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.errorDisplay.classList.add("tbk-hide");
         instance.errorDisplay.textContent = "";
 
         instance.valueDisplay.classList.remove("tbk-hide");
         instance.valueDisplay.classList.add(
-            "tbk-buy-order__format-status--is-visible",
+            "tbk-buy-order__format-status--is-visible"
         );
         instance.valueDisplay.textContent = message;
 

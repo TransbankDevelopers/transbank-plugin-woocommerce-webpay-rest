@@ -22,14 +22,14 @@ export class ProductConnectionChecker {
 
         const release = this.buttonBusyManager.setBusy(this.dom.checkButton, [
             text,
-            spinner,
+            spinner
         ]);
 
         this.setLoadingUIState();
 
         try {
             const response = await this.apiService.post(this.config.actionName, {
-                product: this.config.productKey,
+                product: this.config.productKey
             });
             this.applyResponseState(response);
         } catch (error) {
@@ -76,8 +76,8 @@ export class ProductConnectionChecker {
         this.applyResultState({
             status: { string: "Error" },
             meta: {
-                environmentLabel: "No disponible",
-            },
+                environmentLabel: "No disponible"
+            }
         });
         this.setContainerState("is-ready");
     }

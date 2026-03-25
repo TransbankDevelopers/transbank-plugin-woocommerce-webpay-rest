@@ -40,15 +40,15 @@ export class InscriptionDeletion {
                 cancel: {
                     text: "Cancelar",
                     visible: true,
-                    closeModal: true,
+                    closeModal: true
                 },
                 confirm: {
                     text: "Eliminar",
                     value: true,
-                    closeModal: true,
-                },
+                    closeModal: true
+                }
             },
-            dangerMode: true,
+            dangerMode: true
         }).then(function (confirmed) {
             if (confirmed) {
                 globalThis.location.href = href;

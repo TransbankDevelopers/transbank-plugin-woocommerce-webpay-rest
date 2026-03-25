@@ -54,13 +54,13 @@ module.exports = {
         filename: "js/[name].js",
         chunkFilename: "js/chunks/[name].js",
         publicPath: "",
-        clean: true,
+        clean: true
     },
 
     optimization: {
         ...defaultConfig.optimization,
         splitChunks: false,
-        runtimeChunk: false,
+        runtimeChunk: false
     },
 
     cache: isProd
@@ -68,24 +68,24 @@ module.exports = {
         : {
             type: "filesystem",
             cacheDirectory: path.resolve(__dirname, ".webpack-cache-admin"),
-            buildDependencies: { config: [__filename] },
+            buildDependencies: { config: [__filename] }
         },
 
     plugins: (() => {
         let plugins = defaultConfig.plugins.filter(
-            (plugin) => plugin.constructor.name !== "RtlCssPlugin",
+            (plugin) => plugin.constructor.name !== "RtlCssPlugin"
         );
 
         plugins = replacePlugin(
             plugins,
             "MiniCssExtractPlugin",
             new MiniCssExtractPlugin({
-                filename: "css/[name].css",
+                filename: "css/[name].css"
             })
         );
 
         plugins.unshift(new RemoveEmptyScriptsPlugin());
 
         return plugins;
-    })(),
+    })()
 };

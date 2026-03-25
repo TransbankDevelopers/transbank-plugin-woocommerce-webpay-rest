@@ -94,6 +94,12 @@
                 "[php]": {
                     "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
                 },
+                "[javascript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[javascriptreact]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
                 "[jsonc]": {
                     "editor.defaultFormatter": "esbenp.prettier-vscode"
                 },

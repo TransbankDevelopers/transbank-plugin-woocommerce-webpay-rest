@@ -21,7 +21,7 @@ export class BuyOrderService {
         if (this.validator.exceedsMaxLength(length)) {
             return {
                 valid: false,
-                error: `El formato genera ${length} caracteres, pero el máximo permitido es ${this.validator.maxLength}`,
+                error: `El formato genera ${length} caracteres, pero el máximo permitido es ${this.validator.maxLength}`
             };
         }
 

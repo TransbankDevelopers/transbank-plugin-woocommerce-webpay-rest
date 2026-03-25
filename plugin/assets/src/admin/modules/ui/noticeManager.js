@@ -16,7 +16,7 @@ export class NoticeManager {
             message = "",
             title = "",
             dismissible = true,
-            timeoutMs = 0,
+            timeoutMs = 0
         } = options;
 
         const container =
@@ -40,7 +40,7 @@ export class NoticeManager {
             dismissBtn = elementFactory("button", {
                 type: "button",
                 className: "notice-dismiss",
-                ariaLabel: "Dismiss",
+                ariaLabel: "Dismiss"
             }, []);
 
             noticeChildren.push(dismissBtn);
@@ -50,7 +50,7 @@ export class NoticeManager {
             "div",
             {
                 className: `notice notice-${type} ${dismissible ? "is-dismissible" : ""} tbk-admin-notice`,
-                role: "alert",
+                role: "alert"
             },
             noticeChildren
         );

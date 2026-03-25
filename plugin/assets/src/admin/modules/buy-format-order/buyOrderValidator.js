@@ -5,7 +5,7 @@ export class BuyOrderValidator {
             allowedCharsRegex = /^[A-Za-z0-9\-_:]*$/,
             orderIdRequiredRegex = /\{orderId\}/i,
             orderIdPlaceholderRegex = /\{orderId\}/gi,
-            randomPlaceholderRegex = /\{random(?:,\s*length=\d+)?\}/gi,
+            randomPlaceholderRegex = /\{random(?:,\s*length=\d+)?\}/gi
         } = options;
 
         this.allowedCharsRegex = allowedCharsRegex;
@@ -30,7 +30,7 @@ export class BuyOrderValidator {
             return {
                 valid: false,
                 error:
-                    "Formato inválido. Asegúrate de que contenga solo caracteres alfanuméricos, guiones (-), guiones bajos (_) o dos puntos (:), sin espacios, y que contenga {orderId}.",
+                    "Formato inválido. Asegúrate de que contenga solo caracteres alfanuméricos, guiones (-), guiones bajos (_) o dos puntos (:), sin espacios, y que contenga {orderId}."
             };
         }
 
@@ -43,7 +43,7 @@ export class BuyOrderValidator {
                 valid: false,
                 error:
                     customMessage ??
-                    "El formato de orden de compra hija no puede ser igual al formato de orden de compra principal",
+                    "El formato de orden de compra hija no puede ser igual al formato de orden de compra principal"
             };
         }
 

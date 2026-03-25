@@ -1,5 +1,5 @@
 const oneClickId = "transbank_oneclick_mall_rest";
-const url = new URL(window.location.href);
+const url = new URL(globalThis.location.href);
 const params = new URLSearchParams(url.search);
 const hasTbkData = params.has("transbank_status");
 

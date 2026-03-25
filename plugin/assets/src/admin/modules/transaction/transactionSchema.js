@@ -5,7 +5,7 @@ const statusColors = {
     Fallida: "tbk-badge-error",
     Anulada: "tbk-badge-info",
     Reversada: "tbk-badge-info",
-    "Parcialmente anulada": "tbk-badge-info",
+    "Parcialmente anulada": "tbk-badge-info"
 };
 
 export function createTransactionSchema() {

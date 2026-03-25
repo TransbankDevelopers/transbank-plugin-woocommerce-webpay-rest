@@ -33,8 +33,8 @@ DOMUtils.ready(() => {
             addHelpText: true,
             isOneClick: true,
             getOtherFormat: () => ({
-                format: oneClickInput.value ?? null,
-            }),
-        },
+                format: oneClickInput.value ?? null
+            })
+        }
     );
 });

@@ -267,6 +267,13 @@ function activateTransbankModule()
     }
 }
 
+function transbank_rest_remove_database()
+{
+    // Backward compatibility for sites that still have this uninstall callback
+    // registered from previous plugin versions. Remove in a future major
+    // version once the legacy uninstall hook is no longer in use.
+}
+
 function transbank_rest_check_cancelled_checkout()
 {
     $cancelledOrder = $_GET['transbank_cancelled_order'] ?? false;
