@@ -20,9 +20,9 @@ const Content = (props) => {
 
             if (errorMessage) {
                 return {
-                    type: emitResponse.responseTypes.ERROR,
+                    type: emitResponse?.responseTypes?.ERROR,
                     message: errorMessage,
-                    messageContext: emitResponse.noticeContexts.PAYMENTS
+                    messageContext: emitResponse?.noticeContexts?.PAYMENTS
                 };
             }
             return null;
