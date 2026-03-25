@@ -20,9 +20,9 @@ const Content = (props) => {
 
             if (errorMessage) {
                 return {
-                    type: emitResponse?.responseTypes?.ERROR,
+                    type: emitResponse.responseTypes.ERROR,
                     message: errorMessage,
-                    messageContext: emitResponse?.noticeContexts?.PAYMENTS,
+                    messageContext: emitResponse.noticeContexts.PAYMENTS
                 };
             }
             return null;
@@ -54,8 +54,8 @@ const TransbankOneclickBlocks = {
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {
-        features: settings.supports,
-    },
+        features: settings.supports
+    }
 };
 
 registerPaymentMethod(TransbankOneclickBlocks);
