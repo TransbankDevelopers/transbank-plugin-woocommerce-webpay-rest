@@ -15,13 +15,14 @@ const Content = (props) => {
     const { onCheckoutFail } = eventRegistration;
     useEffect(() => {
         const onError = ({ processingResponse }) => {
-            const errorMessage = processingResponse?.paymentDetails?.errorMessage;
+            const errorMessage =
+                processingResponse?.paymentDetails?.errorMessage;
 
             if (errorMessage) {
                 return {
-                    type: emitResponse.responseTypes.ERROR,
+                    type: emitResponse?.responseTypes?.ERROR,
                     message: errorMessage,
-                    messageContext: emitResponse.noticeContexts.PAYMENTS
+                    messageContext: emitResponse?.noticeContexts?.PAYMENTS,
                 };
             }
             return null;
@@ -33,7 +34,7 @@ const Content = (props) => {
     return decodeEntities(settings.description);
 };
 
-const Label = () => {
+const Label = ({ settings }) => {
     const title = decodeEntities(settings.title);
     const imagePath = settings.icon;
     const paymentImage = <img src={imagePath} alt="oneclick logo" />;
@@ -47,14 +48,14 @@ const Label = () => {
 
 const TransbankOneclickBlocks = {
     name: settings.id,
-    label: <Label />,
+    label: <Label settings={settings} />,
     content: <Content />,
     edit: <Content />,
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {
-        features: settings.supports
-    }
+        features: settings.supports,
+    },
 };
 
 registerPaymentMethod(TransbankOneclickBlocks);

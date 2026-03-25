@@ -12,7 +12,7 @@ const Content = () => {
     return decodeEntities(settings.description);
 };
 
-const Label = () => {
+const Label = ({ settings }) => {
     const title = decodeEntities(settings.title);
     const imagePath = settings.icon;
     const paymentImage = <img src={imagePath} alt="webpay plus logo" />;
@@ -26,14 +26,14 @@ const Label = () => {
 
 const TransbankWebpayBlocks = {
     name: settings.id,
-    label: <Label />,
+    label: <Label settings={settings} />,
     content: <Content />,
     edit: <Content />,
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {
-        features: settings.supports
-    }
+        features: settings.supports,
+    },
 };
 
 registerPaymentMethod(TransbankWebpayBlocks);
