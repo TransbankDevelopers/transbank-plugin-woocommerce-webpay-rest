@@ -24,7 +24,7 @@
         "build:front": "cross-env NODE_ENV=production wp-scripts build --config webpack.front.js",
         "build:admin": "cross-env NODE_ENV=production wp-scripts build --config webpack.admin.js",
         "build:front:dev": "cross-env NODE_ENV=development wp-scripts build --config webpack.front.js",
-        "watch:front:dev": "cross-env NODE_ENV=development CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true wp-scripts start --watch --config webpack.front.js",
+        "watch:front:dev": "cross-env NODE_ENV=development CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true wp-scripts build --watch --config webpack.front.js",
         "build:admin:dev": "cross-env NODE_ENV=development wp-scripts build --config webpack.admin.js",
         "watch:admin:dev": "cross-env NODE_ENV=development CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true wp-scripts build --watch --config webpack.admin.js"
     }
