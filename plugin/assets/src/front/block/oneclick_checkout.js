@@ -2,6 +2,7 @@ import { registerPaymentMethod } from "@woocommerce/blocks-registry";
 import { decodeEntities } from "@wordpress/html-entities";
 import { getSetting } from "@woocommerce/settings";
 import { noticeHandler } from "./notice_handler";
+
 const { useEffect } = globalThis.wp.element;
 
 const settings = getSetting("transbank_oneclick_mall_rest_data", {});
