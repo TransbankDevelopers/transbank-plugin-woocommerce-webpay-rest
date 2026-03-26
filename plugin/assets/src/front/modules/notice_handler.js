@@ -2,7 +2,6 @@ export const noticeHandler = (paymentMethod) => {
     const oneClickId = "transbank_oneclick_mall_rest";
     const url = new URL(globalThis.location.href);
     const params = new URLSearchParams(url.search);
-    const hasTbkData = params.has("transbank_status");
 
     const noticeTypes = {
         SUCCESS: "success",
@@ -76,29 +75,34 @@ export const noticeHandler = (paymentMethod) => {
         }
     };
 
-    if (window.wc.blocksCheckout && hasTbkData) {
-        const productNoticeData =
-            paymentMethod === oneClickId ? oneClickNoticeData : webPayNoticeData;
-        const statusCode = params.get("transbank_status");
+    if (!window.wc.blocksCheckout || !params.has("transbank_status")) {
+        return;
+    }
 
-        if (!Object.prototype.hasOwnProperty.call(productNoticeData, statusCode)) {
-            return;
-        }
+    const productNoticeData =
+        paymentMethod === oneClickId ? oneClickNoticeData : webPayNoticeData;
+    const statusCode = params.get("transbank_status");
 
-        const noticeMessage = productNoticeData[statusCode].message;
-        const notificationType = productNoticeData[statusCode].type;
+    if (!Object.prototype.hasOwnProperty.call(productNoticeData, statusCode)) {
+        return;
+    }
 
-        switch (notificationType) {
-            case noticeTypes.SUCCESS:
-                window.wp.data
-                    .dispatch("core/notices")
-                    .createSuccessNotice(noticeMessage, { context: "wc/checkout" });
-                break;
-            case noticeTypes.ERROR:
-                window.wp.data
-                    .dispatch("core/notices")
-                    .createErrorNotice(noticeMessage, { context: "wc/checkout" });
-                break;
-        }
+    const noticeMessage = productNoticeData[statusCode].message;
+    const notificationType = productNoticeData[statusCode].type;
+    const noticeDispatcher = window.wp.data.dispatch("core/notices");
+
+    switch (notificationType) {
+        case noticeTypes.SUCCESS:
+            noticeDispatcher.createSuccessNotice(noticeMessage, {
+                context: "wc/checkout"
+            });
+            break;
+        case noticeTypes.ERROR:
+            noticeDispatcher.createErrorNotice(noticeMessage, {
+                context: "wc/checkout"
+            });
+            break;
+        default:
+            break;
     }
 };
