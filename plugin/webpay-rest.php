@@ -65,7 +65,7 @@ add_action('init', function () {
 });
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
-add_action('wp_enqueue_scripts', 'transbank_rest_enqueue_checkout_notice_handler');
+add_action('wp_enqueue_scripts', 'transbankRestEnqueueCheckoutNoticeHandler');
 add_action('admin_enqueue_scripts', function () {
     $slug = tbkAdminResolvePageSlug();
 
@@ -287,7 +287,7 @@ function transbank_rest_check_cancelled_checkout()
     }
 }
 
-function transbank_rest_enqueue_checkout_notice_handler()
+function transbankRestEnqueueCheckoutNoticeHandler()
 {
     if (!function_exists('is_checkout') || !is_checkout()) {
         return;
