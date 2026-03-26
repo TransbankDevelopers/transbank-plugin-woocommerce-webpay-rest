@@ -65,6 +65,7 @@ add_action('init', function () {
 });
 
 add_action('woocommerce_before_checkout_form', 'transbank_rest_check_cancelled_checkout');
+add_action('wp_enqueue_scripts', 'transbank_rest_enqueue_checkout_notice_handler');
 add_action('admin_enqueue_scripts', function () {
     $slug = tbkAdminResolvePageSlug();
 
@@ -286,6 +287,35 @@ function transbank_rest_check_cancelled_checkout()
     }
 }
 
+function transbank_rest_enqueue_checkout_notice_handler()
+{
+    if (!function_exists('is_checkout') || !is_checkout()) {
+        return;
+    }
+
+    tbkFrontEnqueueScriptBundle('tbk-front-notice-handler', 'front-notice-handler.js');
+}
+
+/**
+ * Returns the absolute filesystem path to the front assets build directory.
+ *
+ * @return string Absolute path ending with a trailing slash.
+ */
+function tbkFrontAssetBaseDir(): string
+{
+    return plugin_dir_path(__FILE__) . 'assets/build/front/';
+}
+
+/**
+ * Returns the public URL to the front assets build directory.
+ *
+ * @return string Full URL ending with a trailing slash.
+ */
+function tbkFrontAssetBaseUrl(): string
+{
+    return plugins_url('assets/build/front/', __FILE__);
+}
+
 /**
  * Returns the absolute filesystem path to the admin assets build directory.
  *
@@ -342,6 +372,65 @@ function tbkAdminEnqueueScriptBundle(string $handle, string $relativeJsPath): vo
 {
     $baseDir = tbkAdminAssetBaseDir();
     $baseUrl = tbkAdminAssetBaseUrl();
+
+    $relativeJsPath = ltrim($relativeJsPath, '/');
+    $jsFile         = $baseDir . $relativeJsPath;
+
+    if (!is_readable($jsFile)) {
+        return;
+    }
+
+    $ver  = tbkSafeFilemtime($jsFile);
+    $deps = [];
+
+    $assetPhp = preg_replace('/\.js$/', '.asset.php', $jsFile);
+
+    if (is_string($assetPhp) && is_readable($assetPhp)) {
+        try {
+            $asset = include_once $assetPhp;
+        } catch (\Throwable) {
+            $asset = [];
+        }
+
+        if (is_array($asset)) {
+            $deps = isset($asset['dependencies']) && is_array($asset['dependencies'])
+                ? $asset['dependencies']
+                : [];
+
+            if (
+                isset($asset['version'])
+                && is_string($asset['version'])
+                && $asset['version'] !== ''
+            ) {
+                $ver = $asset['version'];
+            }
+        }
+    }
+
+    wp_enqueue_script(
+        $handle,
+        $baseUrl . $relativeJsPath,
+        $deps,
+        $ver,
+        true
+    );
+}
+
+/**
+ * Enqueues a front JS bundle, loading its .asset.php metadata file when available.
+ *
+ * If the file is not readable this function returns silently without enqueuing
+ * anything. A corrupted or invalid .asset.php will be ignored gracefully and
+ * the fallback version (file mtime) will be used instead.
+ *
+ * @param  string $handle         Unique script handle.
+ * @param  string $relativeJsPath Path relative to the front assets build dir.
+ * @return void
+ */
+function tbkFrontEnqueueScriptBundle(string $handle, string $relativeJsPath): void
+{
+    $baseDir = tbkFrontAssetBaseDir();
+    $baseUrl = tbkFrontAssetBaseUrl();
 
     $relativeJsPath = ltrim($relativeJsPath, '/');
     $jsFile         = $baseDir . $relativeJsPath;

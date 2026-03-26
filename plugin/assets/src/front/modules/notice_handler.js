@@ -1,76 +1,104 @@
 export const noticeHandler = (paymentMethod) => {
-    if (window.wc.blocksCheckout) {
-        let lastNotice = null;
-        const { createNotice, removeNotice } = window.wp.data.dispatch(
-            "core/notices"
-        );
-        const { select } = window.wp.data;
-        const { getSetting } = window.wc.wcSettings;
-        const {
-            validationStore,
-            paymentStore,
-            checkoutStore
-        } = window.wc.wcBlocksData;
+    const oneClickId = "transbank_oneclick_mall_rest";
+    const url = new URL(globalThis.location.href);
+    const params = new URLSearchParams(url.search);
+    const hasTbkData = params.has("transbank_status");
 
-        const onlyErrorForPaymentMethod = (errors) => {
-            return errors.find(
-                (error) => error.hidden || error.message.includes(paymentMethod)
-            );
-        };
+    const noticeTypes = {
+        SUCCESS: "success",
+        ERROR: "error"
+    };
 
-        const { unsubscribe } = window.wp.data.subscribe(() => {
-            const validationErrors =
-                select(validationStore).getValidationErrors();
+    const oneClickNoticeData = {
+        0: {
+            message:
+                "La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.",
+            type: noticeTypes.SUCCESS
+        },
+        1: {
+            message:
+                "La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.",
+            type: noticeTypes.ERROR
+        },
+        2: {
+            message: "No se recibió el token de la inscripción.",
+            type: noticeTypes.ERROR
+        },
+        3: {
+            message: "El usuario canceló la inscripción en el formulario de pago.",
+            type: noticeTypes.ERROR
+        },
+        4: {
+            message: "La inscripción no se encuentra en estado inicializada.",
+            type: noticeTypes.ERROR
+        },
+        5: {
+            message: "Ocurrió un error al ejecutar la inscripción.",
+            type: noticeTypes.ERROR
+        },
+        6: {
+            message: "La inscripción de la tarjeta ha sido rechazada.",
+            type: noticeTypes.ERROR
+        }
+    };
 
-            if (Object.keys(validationErrors).length === 0) {
-                return;
-            }
+    const webPayNoticeData = {
+        7: { message: "Transacción aprobada", type: noticeTypes.SUCCESS },
+        8: {
+            message:
+                "Tu transacción no pudo ser autorizada. Ningún cobro fue realizado.",
+            type: noticeTypes.ERROR
+        },
+        9: {
+            message:
+                "Orden cancelada por el usuario. Por favor, reintente el pago.",
+            type: noticeTypes.ERROR
+        },
+        10: {
+            message:
+                "Orden cancelada por inactividad del usuario en el formulario de pago. Por favor, reintente el pago.",
+            type: noticeTypes.ERROR
+        },
+        11: {
+            message:
+                "Orden cancelada por un error en el formulario de pago. Por favor, reintente el pago.",
+            type: noticeTypes.ERROR
+        },
+        12: {
+            message:
+                "No se pudo procesar el pago. Si el problema persiste, contacte al comercio.",
+            type: noticeTypes.ERROR
+        },
+        13: {
+            message:
+                "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.",
+            type: noticeTypes.ERROR
+        }
+    };
 
-            const currentError = onlyErrorForPaymentMethod(
-                Object.values(validationErrors)
-            );
+    if (window.wc.blocksCheckout && hasTbkData) {
+        const productNoticeData =
+            paymentMethod === oneClickId ? oneClickNoticeData : webPayNoticeData;
+        const statusCode = params.get("transbank_status");
 
-            if (lastNotice) {
-                removeNotice(lastNotice.id, "wc/checkout");
-                lastNotice = null;
-            }
-
-            if (currentError && currentError.message) {
-                lastNotice = createNotice("error", currentError.message, {
-                    id: "transbank-error",
-                    context: "wc/checkout",
-                    speak: false,
-                    isDismissible: true
-                });
-            }
-        });
-
-        const settings = getSetting("transbank_webpay_plus_rest_data");
-
-        if (settings.title === undefined) {
-            const paymentStatus =
-                select(paymentStore).getState().activePaymentMethod;
-            const currentPaymentMethod = select(checkoutStore).getState()
-                .activePaymentMethod;
-
-            if (
-                paymentStatus === "error" &&
-                paymentMethod === currentPaymentMethod
-            ) {
-                const errorMessage =
-                    select(paymentStore).getState().paymentResult
-                        .paymentDetails.errorMessage;
-                if (errorMessage) {
-                    createNotice("error", errorMessage, {
-                        id: "transbank-error",
-                        context: "wc/checkout",
-                        speak: false,
-                        isDismissible: true
-                    });
-                }
-            }
+        if (!Object.prototype.hasOwnProperty.call(productNoticeData, statusCode)) {
+            return;
         }
 
-        return () => unsubscribe();
+        const noticeMessage = productNoticeData[statusCode].message;
+        const notificationType = productNoticeData[statusCode].type;
+
+        switch (notificationType) {
+            case noticeTypes.SUCCESS:
+                window.wp.data
+                    .dispatch("core/notices")
+                    .createSuccessNotice(noticeMessage, { context: "wc/checkout" });
+                break;
+            case noticeTypes.ERROR:
+                window.wp.data
+                    .dispatch("core/notices")
+                    .createErrorNotice(noticeMessage, { context: "wc/checkout" });
+                break;
+        }
     }
 };
