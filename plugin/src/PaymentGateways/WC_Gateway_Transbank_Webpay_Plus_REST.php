@@ -204,8 +204,9 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
 
         $tab = 'options';
-        $environment = $this->gatewaySettings->get(
-            TransbankGatewaySettings::ENVIRONMENT
+        $environment = (string) $this->gatewaySettings->getPersisted(
+            TransbankGatewaySettings::ENVIRONMENT,
+            ''
         );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }

@@ -90,7 +90,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->logger = TbkFactory::createOneclickLogger();
         $this->inscriptionService = TbkFactory::createOneclickInscriptionService();
 
-        $this->max_amount = $this->get_option('max_amount') ?? 100000;
+        $this->max_amount = (int) $this->gatewaySettings->getPersisted(
+            TransbankGatewaySettings::MAX_AMOUNT,
+            0
+        );
 
         add_action(
             'woocommerce_scheduled_subscription_payment_' . $this->id,
@@ -167,8 +170,9 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             }
 
             $tab = 'options_oneclick';
-            $environment = $this->gatewaySettings->get(
-                TransbankGatewaySettings::ENVIRONMENT
+            $environment = (string) $this->gatewaySettings->getPersisted(
+                TransbankGatewaySettings::ENVIRONMENT,
+                ''
             );
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
@@ -239,7 +243,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function get_saved_payment_methods_list($saved_methods)
     {
-        $pluginEnvironment = $this->get_option('environment');
+        $pluginEnvironment = (string) $this->gatewaySettings->getPersisted(
+            TransbankGatewaySettings::ENVIRONMENT,
+            ''
+        );
         $oneclickCards = $saved_methods['oneclick'] ?? [];
         $filteredCards = [];
 
