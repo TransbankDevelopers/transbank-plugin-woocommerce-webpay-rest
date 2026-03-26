@@ -12,8 +12,8 @@ final class WCGatewayTransbankOneclickBlocks extends AbstractPaymentMethodType
 
     public function __construct()
     {
-        $this->scriptInfo = require_once $this->getFrontAssetBuildPath() . 'oneclick_blocks.asset.php';
-        $this->paymentId = $this->name;
         $this->productName = 'oneclick';
+        $this->paymentId = $this->name;
+        $this->scriptInfo = require_once $this->getFrontAssetBuildPath() . $this->getFrontEntryBaseName() . '.asset.php';
     }
 }

@@ -16,6 +16,7 @@ trait WCGatewayTransbankBlocks
     private $productName;
 
     private $scriptInfo;
+
     public function initialize()
     {
         $this->settings = get_option($this->paymentId . '_settings', []);
@@ -30,9 +31,11 @@ trait WCGatewayTransbankBlocks
 
     public function get_payment_method_script_handles()
     {
+        $entryBaseName = $this->getFrontEntryBaseName();
+
         wp_register_script(
             'wc_transbank_' . $this->productName . '_payment',
-            $this->getFrontAssetUrl($this->productName . '_blocks.js'),
+            $this->getFrontAssetUrl($entryBaseName . '.js'),
             $this->scriptInfo['dependencies'],
             $this->scriptInfo['version'],
             true
@@ -69,6 +72,11 @@ trait WCGatewayTransbankBlocks
     protected function getFrontAssetUrl(string $fileName): string
     {
         return dirname(dirname(plugins_url('/', __FILE__))) . self::FRONT_ASSETS_BUILD_DIR . ltrim($fileName, '/');
+    }
+
+    protected function getFrontEntryBaseName(): string
+    {
+        return 'front-checkout-' . $this->productName;
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)
