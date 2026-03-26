@@ -1,6 +1,6 @@
 import { noticeHandler } from "../../modules/notice_handler";
 
-const settings = window.wc.wcSettings.getSetting(
+const settings = globalThis.wc.wcSettings.getSetting(
     "transbank_webpay_plus_rest_data",
     {}
 );

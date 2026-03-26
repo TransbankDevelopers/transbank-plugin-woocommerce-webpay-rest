@@ -75,21 +75,22 @@ export const noticeHandler = (paymentMethod) => {
         }
     };
 
-    if (!window.wc.blocksCheckout || !params.has("transbank_status")) {
+    if (!globalThis.wc.blocksCheckout || !params.has("transbank_status")) {
         return;
     }
 
     const productNoticeData =
         paymentMethod === oneClickId ? oneClickNoticeData : webPayNoticeData;
     const statusCode = params.get("transbank_status");
+    const currentNoticeData = productNoticeData?.[statusCode];
 
-    if (!Object.prototype.hasOwnProperty.call(productNoticeData, statusCode)) {
+    if (!currentNoticeData) {
         return;
     }
 
-    const noticeMessage = productNoticeData[statusCode].message;
-    const notificationType = productNoticeData[statusCode].type;
-    const noticeDispatcher = window.wp.data.dispatch("core/notices");
+    const noticeMessage = currentNoticeData.message;
+    const notificationType = currentNoticeData.type;
+    const noticeDispatcher = globalThis.wp.data.dispatch("core/notices");
 
     switch (notificationType) {
         case noticeTypes.SUCCESS:
