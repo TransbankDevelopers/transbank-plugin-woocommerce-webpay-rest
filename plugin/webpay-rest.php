@@ -303,7 +303,7 @@ function transbank_rest_enqueue_checkout_notice_handler()
  */
 function tbkFrontAssetBaseDir(): string
 {
-    return plugin_dir_path(__FILE__) . 'assets/build/front/';
+    return tbkAssetBaseDir('front');
 }
 
 /**
@@ -313,7 +313,7 @@ function tbkFrontAssetBaseDir(): string
  */
 function tbkFrontAssetBaseUrl(): string
 {
-    return plugins_url('assets/build/front/', __FILE__);
+    return tbkAssetBaseUrl('front');
 }
 
 /**
@@ -323,7 +323,7 @@ function tbkFrontAssetBaseUrl(): string
  */
 function tbkAdminAssetBaseDir(): string
 {
-    return plugin_dir_path(__FILE__) . 'assets/build/admin/';
+    return tbkAssetBaseDir('admin');
 }
 
 /**
@@ -333,7 +333,29 @@ function tbkAdminAssetBaseDir(): string
  */
 function tbkAdminAssetBaseUrl(): string
 {
-    return plugins_url('assets/build/admin/', __FILE__);
+    return tbkAssetBaseUrl('admin');
+}
+
+/**
+ * Returns the absolute filesystem path to a built asset scope directory.
+ *
+ * @param  string $scope Asset scope, for example 'admin' or 'front'.
+ * @return string Absolute path ending with a trailing slash.
+ */
+function tbkAssetBaseDir(string $scope): string
+{
+    return plugin_dir_path(__FILE__) . 'assets/build/' . trim($scope, '/') . '/';
+}
+
+/**
+ * Returns the public URL to a built asset scope directory.
+ *
+ * @param  string $scope Asset scope, for example 'admin' or 'front'.
+ * @return string Full URL ending with a trailing slash.
+ */
+function tbkAssetBaseUrl(string $scope): string
+{
+    return plugins_url('assets/build/' . trim($scope, '/') . '/', __FILE__);
 }
 
 /**
@@ -370,49 +392,11 @@ function tbkSafeFilemtime(string $filePath): ?string
  */
 function tbkAdminEnqueueScriptBundle(string $handle, string $relativeJsPath): void
 {
-    $baseDir = tbkAdminAssetBaseDir();
-    $baseUrl = tbkAdminAssetBaseUrl();
-
-    $relativeJsPath = ltrim($relativeJsPath, '/');
-    $jsFile         = $baseDir . $relativeJsPath;
-
-    if (!is_readable($jsFile)) {
-        return;
-    }
-
-    $ver  = tbkSafeFilemtime($jsFile);
-    $deps = [];
-
-    $assetPhp = preg_replace('/\.js$/', '.asset.php', $jsFile);
-
-    if (is_string($assetPhp) && is_readable($assetPhp)) {
-        try {
-            $asset = include_once $assetPhp;
-        } catch (\Throwable) {
-            $asset = [];
-        }
-
-        if (is_array($asset)) {
-            $deps = isset($asset['dependencies']) && is_array($asset['dependencies'])
-                ? $asset['dependencies']
-                : [];
-
-            if (
-                isset($asset['version'])
-                && is_string($asset['version'])
-                && $asset['version'] !== ''
-            ) {
-                $ver = $asset['version'];
-            }
-        }
-    }
-
-    wp_enqueue_script(
+    tbkEnqueueScriptBundle(
         $handle,
-        $baseUrl . $relativeJsPath,
-        $deps,
-        $ver,
-        true
+        $relativeJsPath,
+        tbkAdminAssetBaseDir(),
+        tbkAdminAssetBaseUrl()
     );
 }
 
@@ -429,9 +413,33 @@ function tbkAdminEnqueueScriptBundle(string $handle, string $relativeJsPath): vo
  */
 function tbkFrontEnqueueScriptBundle(string $handle, string $relativeJsPath): void
 {
-    $baseDir = tbkFrontAssetBaseDir();
-    $baseUrl = tbkFrontAssetBaseUrl();
+    tbkEnqueueScriptBundle(
+        $handle,
+        $relativeJsPath,
+        tbkFrontAssetBaseDir(),
+        tbkFrontAssetBaseUrl()
+    );
+}
 
+/**
+ * Enqueues a JS bundle using a base path and URL, loading its .asset.php metadata file when available.
+ *
+ * If the file is not readable this function returns silently without enqueuing
+ * anything. A corrupted or invalid .asset.php will be ignored gracefully and
+ * the fallback version (file mtime) will be used instead.
+ *
+ * @param  string $handle         Unique script handle.
+ * @param  string $relativeJsPath Path relative to the given base dir.
+ * @param  string $baseDir        Absolute base directory ending with a trailing slash.
+ * @param  string $baseUrl        Public base URL ending with a trailing slash.
+ * @return void
+ */
+function tbkEnqueueScriptBundle(
+    string $handle,
+    string $relativeJsPath,
+    string $baseDir,
+    string $baseUrl
+): void {
     $relativeJsPath = ltrim($relativeJsPath, '/');
     $jsFile         = $baseDir . $relativeJsPath;
 
@@ -439,32 +447,9 @@ function tbkFrontEnqueueScriptBundle(string $handle, string $relativeJsPath): vo
         return;
     }
 
-    $ver  = tbkSafeFilemtime($jsFile);
-    $deps = [];
-
-    $assetPhp = preg_replace('/\.js$/', '.asset.php', $jsFile);
-
-    if (is_string($assetPhp) && is_readable($assetPhp)) {
-        try {
-            $asset = include_once $assetPhp;
-        } catch (\Throwable) {
-            $asset = [];
-        }
-
-        if (is_array($asset)) {
-            $deps = isset($asset['dependencies']) && is_array($asset['dependencies'])
-                ? $asset['dependencies']
-                : [];
-
-            if (
-                isset($asset['version'])
-                && is_string($asset['version'])
-                && $asset['version'] !== ''
-            ) {
-                $ver = $asset['version'];
-            }
-        }
-    }
+    $assetMeta = tbkReadScriptAssetMeta($jsFile);
+    $ver       = $assetMeta['version'] ?? tbkSafeFilemtime($jsFile);
+    $deps      = $assetMeta['dependencies'] ?? [];
 
     wp_enqueue_script(
         $handle,
@@ -487,9 +472,70 @@ function tbkFrontEnqueueScriptBundle(string $handle, string $relativeJsPath): vo
  */
 function tbkAdminEnqueueStyleBundle(string $handle, string $relativeCssPath): void
 {
-    $baseDir = tbkAdminAssetBaseDir();
-    $baseUrl = tbkAdminAssetBaseUrl();
+    tbkEnqueueStyleBundle(
+        $handle,
+        $relativeCssPath,
+        tbkAdminAssetBaseDir(),
+        tbkAdminAssetBaseUrl()
+    );
+}
 
+/**
+ * Reads the generated .asset.php metadata associated with a JS bundle.
+ *
+ * @param  string $jsFile Absolute path to the generated JS bundle.
+ * @return array{dependencies: string[], version?: string}
+ */
+function tbkReadScriptAssetMeta(string $jsFile): array
+{
+    $assetPhp = preg_replace('/\.js$/', '.asset.php', $jsFile);
+
+    if (!is_string($assetPhp) || !is_readable($assetPhp)) {
+        return ['dependencies' => []];
+    }
+
+    try {
+        $asset = include_once $assetPhp;
+    } catch (\Throwable) {
+        return ['dependencies' => []];
+    }
+
+    if (!is_array($asset)) {
+        return ['dependencies' => []];
+    }
+
+    $dependencies = isset($asset['dependencies']) && is_array($asset['dependencies'])
+        ? $asset['dependencies']
+        : [];
+
+    $metadata = ['dependencies' => $dependencies];
+
+    if (
+        isset($asset['version'])
+        && is_string($asset['version'])
+        && $asset['version'] !== ''
+    ) {
+        $metadata['version'] = $asset['version'];
+    }
+
+    return $metadata;
+}
+
+/**
+ * Enqueues a CSS bundle from a given asset base path and URL.
+ *
+ * @param  string $handle          Unique style handle.
+ * @param  string $relativeCssPath Path relative to the given base dir.
+ * @param  string $baseDir         Absolute base directory ending with a trailing slash.
+ * @param  string $baseUrl         Public base URL ending with a trailing slash.
+ * @return void
+ */
+function tbkEnqueueStyleBundle(
+    string $handle,
+    string $relativeCssPath,
+    string $baseDir,
+    string $baseUrl
+): void {
     $relativeCssPath = ltrim($relativeCssPath, '/');
     $cssFile         = $baseDir . $relativeCssPath;
 
@@ -497,13 +543,11 @@ function tbkAdminEnqueueStyleBundle(string $handle, string $relativeCssPath): vo
         return;
     }
 
-    $ver = tbkSafeFilemtime($cssFile);
-
     wp_enqueue_style(
         $handle,
         $baseUrl . $relativeCssPath,
         [],
-        $ver
+        tbkSafeFilemtime($cssFile)
     );
 }
 
