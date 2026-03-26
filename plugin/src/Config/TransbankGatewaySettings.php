@@ -13,12 +13,15 @@ namespace Transbank\WooCommerce\WebpayRest\Config;
  * - Legacy keys are supported for read compatibility and mapped into canonical keys.
  * - Two-level caching:
  *   - rawCache: normalized + defaults, without filters (used for persistence).
- *   - cache: rawCache after WordPress filters are applied (used for runtime reads).
+ *   - cache: rawCache after WordPress filters are applied (legacy runtime reads).
  * - Dirty tracking: `save()` only writes when changes were made through `set()`/`setMany()`.
  *
  * Important:
  * - If both canonical and legacy keys exist, canonical values take precedence.
  * - `save()` persists only canonical keys (legacy keys are not written back).
+ * - `getPersisted()` / `getPersistedAll()` are the preferred read APIs for
+ *   gateway settings because they preserve the distinction between missing,
+ *   empty and configured values.
  */
 final class TransbankGatewaySettings
 {
@@ -57,7 +60,9 @@ final class TransbankGatewaySettings
     /**
      * Convenience helper for the most common flag.
      *
-     * @return bool True if the gateway is enabled (`yes`), false otherwise.
+     * Reads the persisted value only.
+     *
+     * @return bool True if the persisted gateway flag is enabled (`yes`), false otherwise.
      */
     public function isEnabled(): bool
     {
@@ -65,10 +70,12 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * Returns the filtered (runtime) settings array.
+     * Returns the filtered settings array using canonical defaults.
      *
      * Applies `transbank_gateway_settings_all` to allow external customization without persisting
      * the filtered result back to the database.
+     *
+     * Prefer getPersistedAll() for gateway configuration reads.
      *
      * @return array<string, mixed>
      */
@@ -91,7 +98,9 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * Gets a single setting value using canonical keys.
+     * Gets a single setting value using canonical keys and canonical defaults.
+     *
+     * Legacy compatibility read API. Prefer getPersisted() for gateway reads.
      *
      * @param string $key Canonical key (prefer using class constants).
      * @param mixed $default Value returned when the key does not exist.

@@ -11,7 +11,7 @@ namespace Transbank\WooCommerce\WebpayRest\Config;
  * Usage examples:
  * - `TransbankConfig::plugin()->isLoggingEnabled()`
  * - `TransbankConfig::webpayPlus()->isEnabled()`
- * - `TransbankConfig::oneclickMall()->get(TransbankGatewaySettings::ENVIRONMENT)`
+ * - `TransbankConfig::oneclickMall()->getPersisted(TransbankGatewaySettings::ENVIRONMENT)`
  *
  * This class should be the preferred entry point for configuration access
  * in application and domain code.
