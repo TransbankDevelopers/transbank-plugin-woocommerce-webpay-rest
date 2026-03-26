@@ -31,18 +31,16 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function __construct()
     {
         $this->gatewaySettings = TransbankConfig::webpayPlus();
+        $persistedDescription = (string) $this->gatewaySettings->getPersisted(
+            $this->gatewaySettings::DESCRIPTION,
+            ''
+        );
         $this->id = self::ID;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay-logo.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Webpay Plus';
-        $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
-        $this->method_description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
+        $this->description = $persistedDescription;
+        $this->method_description = $persistedDescription;
 
         $this->plugin_url = plugins_url('/', __FILE__);
         $this->log = TbkFactory::createWebpayPlusLogger();
