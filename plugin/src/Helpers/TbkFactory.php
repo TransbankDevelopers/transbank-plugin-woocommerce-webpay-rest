@@ -54,11 +54,11 @@ class TbkFactory
         $webpaySettings = TransbankConfig::webpayPlus();
 
         return new WebpayplusConfig([
-            'environment' => $webpaySettings->get($webpaySettings::ENVIRONMENT),
-            'commerceCode' => $webpaySettings->get($webpaySettings::COMMERCE_CODE),
-            'apikey' => $webpaySettings->get($webpaySettings::API_KEY),
-            'buyOrderFormat' => $webpaySettings->get($webpaySettings::BUY_ORDER_FORMAT) ?? WebpayService::BUY_ORDER_FORMAT,
-            'statusAfterPayment' => $webpaySettings->get($webpaySettings::AFTER_PAYMENT_ORDER_STATUS) ?? ''
+            'environment' => (string) $webpaySettings->getPersisted($webpaySettings::ENVIRONMENT, ''),
+            'commerceCode' => (string) $webpaySettings->getPersisted($webpaySettings::COMMERCE_CODE, ''),
+            'apikey' => (string) $webpaySettings->getPersisted($webpaySettings::API_KEY, ''),
+            'buyOrderFormat' => (string) $webpaySettings->getPersisted($webpaySettings::BUY_ORDER_FORMAT, ''),
+            'statusAfterPayment' => (string) $webpaySettings->getPersisted($webpaySettings::AFTER_PAYMENT_ORDER_STATUS, '')
         ]);
     }
 
@@ -67,13 +67,13 @@ class TbkFactory
         $oneclickSettings = TransbankConfig::oneclickMall();
 
         return new OneclickConfig([
-            'environment' => $oneclickSettings->get($oneclickSettings::ENVIRONMENT),
-            'commerceCode' => $oneclickSettings->get($oneclickSettings::COMMERCE_CODE),
-            'apikey' => $oneclickSettings->get($oneclickSettings::API_KEY),
-            'childCommerceCode' => $oneclickSettings->get($oneclickSettings::CHILD_COMMERCE_CODE),
-            'buyOrderFormat' => $oneclickSettings->get($oneclickSettings::BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
-            'childBuyOrderFormat' => $oneclickSettings->get($oneclickSettings::CHILD_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
-            'statusAfterPayment' => $oneclickSettings->get($oneclickSettings::AFTER_PAYMENT_ORDER_STATUS) ?? ''
+            'environment' => (string) $oneclickSettings->getPersisted($oneclickSettings::ENVIRONMENT, ''),
+            'commerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::COMMERCE_CODE, ''),
+            'apikey' => (string) $oneclickSettings->getPersisted($oneclickSettings::API_KEY, ''),
+            'childCommerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_COMMERCE_CODE, ''),
+            'buyOrderFormat' => (string) $oneclickSettings->getPersisted($oneclickSettings::BUY_ORDER_FORMAT, ''),
+            'childBuyOrderFormat' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_BUY_ORDER_FORMAT, ''),
+            'statusAfterPayment' => (string) $oneclickSettings->getPersisted($oneclickSettings::AFTER_PAYMENT_ORDER_STATUS, '')
         ]);
     }
 
