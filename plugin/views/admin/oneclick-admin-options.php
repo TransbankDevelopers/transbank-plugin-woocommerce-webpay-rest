@@ -47,7 +47,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 <?php } ?>
 
 
-<div id="my-content-id" class="tbk-welcome-message-content">
+<div id="my-content-id" class="tbk-welcome-message-content" hidden>
     <h2>¡Bienvenido a Webpay Oneclick!</h2>
     <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/oneclick-logo.png', dirname(__DIR__)); ?>" alt="">
     <div>
@@ -87,6 +87,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
         //window.tb_show('TbkRestModalWelcome', "#TB_inline?&width=600&height=550&inlineId=my-content-id", null);
         function openWelcomeMessageTransbankWebpayRest() {
             let content = $('#my-content-id').clone();
+            content.prop('hidden', false);
             content.show();
             swal({
                 content: content[0],

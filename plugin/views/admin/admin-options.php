@@ -31,7 +31,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
 
-<div id="my-content-id" class="tbk-welcome-message-content">
+<div id="my-content-id" class="tbk-welcome-message-content" hidden>
     <h2>¡Excelente!</h2>
     <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/webpay-logo.png', dirname(__DIR__)); ?>" alt="">
     <div>
@@ -68,6 +68,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
         //window.tb_show('TbkRestModalWelcome', "#TB_inline?&width=600&height=550&inlineId=my-content-id", null);
         function openWelcomeMessageTransbankWebpayRest() {
             let content = $('#my-content-id').clone();
+            content.prop('hidden', false);
             content.show();
             swal({
                 content: content[0],
