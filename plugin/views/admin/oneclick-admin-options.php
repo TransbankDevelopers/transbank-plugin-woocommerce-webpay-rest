@@ -49,7 +49,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 
 <div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh;">
     <h2>¡Bienvenido a Webpay Oneclick!</h2>
-    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/images/oneclick-logo.png', dirname(__DIR__)); ?>" alt="">
+    <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/oneclick-logo.png', dirname(__DIR__)); ?>" alt="">
     <div>
         <p>Este plugin también incluye integración con Webpay Oneclick Mall REST, para que tus clientes puedan
             inscribir su tarjeta de crédito, débito o prepago, y así puedan realizar sus siguientes compras con un solo
