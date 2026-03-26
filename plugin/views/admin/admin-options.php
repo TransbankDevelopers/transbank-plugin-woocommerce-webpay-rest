@@ -31,7 +31,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
 
-<div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh;">
+<div id="my-content-id" class="tbk-welcome-message-content">
     <h2>¡Excelente!</h2>
     <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/webpay-logo.png', dirname(__DIR__)); ?>" alt="">
     <div>

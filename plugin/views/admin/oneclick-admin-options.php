@@ -47,7 +47,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 <?php } ?>
 
 
-<div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh;">
+<div id="my-content-id" class="tbk-welcome-message-content">
     <h2>¡Bienvenido a Webpay Oneclick!</h2>
     <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/oneclick-logo.png', dirname(__DIR__)); ?>" alt="">
     <div>

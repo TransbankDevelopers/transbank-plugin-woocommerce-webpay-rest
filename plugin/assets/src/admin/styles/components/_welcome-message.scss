@@ -2,6 +2,12 @@
     float: right;
 }
 
+.tbk-welcome-message-content {
+    display: none;
+    overflow-y: scroll;
+    max-height: 50vh;
+}
+
 .tbk-welcome-message-logo {
     float: right;
     width: 180px;
