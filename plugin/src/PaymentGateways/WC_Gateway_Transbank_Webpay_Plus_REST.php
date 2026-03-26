@@ -212,6 +212,18 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }
 
+    public function getPersistedFormSettings(): array
+    {
+        $persistedSettings = $this->gatewaySettings->getPersistedAll();
+        $settings = [];
+
+        foreach (array_keys($this->get_form_fields()) as $key) {
+            $settings[$key] = $persistedSettings[$key] ?? '';
+        }
+
+        return $settings;
+    }
+
     public function process_admin_options()
     {
         $buyOrderFormat = isset($_POST[$this->get_field_key('buy_order_format')])
