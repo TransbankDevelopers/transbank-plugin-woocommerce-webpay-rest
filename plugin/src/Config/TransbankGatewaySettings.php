@@ -78,6 +78,19 @@ final class TransbankGatewaySettings
     }
 
     /**
+     * Returns only the persisted settings after legacy-key normalization.
+     *
+     * Unlike getAll(), this method does not merge canonical defaults and
+     * preserves the distinction between "missing", "empty", and "configured".
+     *
+     * @return array<string, mixed>
+     */
+    public function getPersistedAll(): array
+    {
+        return $this->loadPersisted();
+    }
+
+    /**
      * Gets a single setting value using canonical keys.
      *
      * @param string $key Canonical key (prefer using class constants).
@@ -87,6 +100,27 @@ final class TransbankGatewaySettings
     public function get(string $key, mixed $default = null): mixed
     {
         $settings = $this->load();
+
+        if (!array_key_exists($key, $settings)) {
+            return $default;
+        }
+
+        return $settings[$key];
+    }
+
+    /**
+     * Gets a single persisted setting value using canonical keys.
+     *
+     * This method only reads values that actually exist in persisted settings
+     * after legacy-key normalization. No canonical defaults are applied.
+     *
+     * @param string $key Canonical key (prefer using class constants).
+     * @param mixed $default Value returned when the key does not exist.
+     * @return mixed
+     */
+    public function getPersisted(string $key, mixed $default = null): mixed
+    {
+        $settings = $this->loadPersisted();
 
         if (!array_key_exists($key, $settings)) {
             return $default;
@@ -206,6 +240,28 @@ final class TransbankGatewaySettings
         $this->rawCache = wp_parse_args($normalized, $this->getDefaults());
 
         return $this->rawCache;
+    }
+
+    /**
+     * Loads persisted settings without applying canonical defaults.
+     *
+     * Persisted settings are:
+     * - read from the option
+     * - normalized (legacy -> canonical fallback)
+     * - not merged with defaults
+     * - not filtered
+     *
+     * @return array<string, mixed>
+     */
+    private function loadPersisted(): array
+    {
+        $raw = get_option($this->getOptionName(), []);
+
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        return $this->normalizeKeys($raw);
     }
 
     /**
