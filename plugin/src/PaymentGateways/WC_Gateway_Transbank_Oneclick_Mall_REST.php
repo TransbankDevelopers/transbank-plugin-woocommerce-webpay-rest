@@ -55,6 +55,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function __construct()
     {
         $this->gatewaySettings = TransbankConfig::oneclickMall();
+        $persistedDescription = (string) $this->gatewaySettings->getPersisted(
+            $this->gatewaySettings::DESCRIPTION,
+            ''
+        );
         $this->supports = [
             'refunds',
             'tokenization',
@@ -74,14 +78,8 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->id = self::ID;
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
-        $this->description = $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
-        $this->method_description = $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
+        $this->description = $persistedDescription;
+        $this->method_description = $persistedDescription;
 
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick-logo.png';
         $this->shouldThrowException = false;
