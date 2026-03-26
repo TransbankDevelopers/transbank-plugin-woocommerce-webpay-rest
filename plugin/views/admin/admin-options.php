@@ -33,7 +33,7 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 
 <div id="my-content-id" class="tbk-welcome-message-content" hidden>
     <h2>¡Excelente!</h2>
-    <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/webpay-logo.png', dirname(__DIR__)); ?>" alt="">
+    <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/webpay-logo.png', dirname(__DIR__)); ?>" alt="Webpay logo">
     <div>
         <p>Ahora que ya tienes el plugin instalado, tu sitio ya está habilitado para que tus clientes puedan pagar usando Webpay Plus.
             Asegúrate de que tu tienda esté
