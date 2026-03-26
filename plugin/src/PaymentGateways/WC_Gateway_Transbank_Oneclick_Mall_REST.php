@@ -191,6 +191,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         }
     }
 
+    public function getPersistedFormSettings(): array
+    {
+        $persistedSettings = $this->gatewaySettings->getPersistedAll();
+        $settings = [];
+
+        foreach (array_keys($this->get_form_fields()) as $key) {
+            $settings[$key] = $persistedSettings[$key] ?? '';
+        }
+
+        return $settings;
+    }
+
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InscriptionStartException

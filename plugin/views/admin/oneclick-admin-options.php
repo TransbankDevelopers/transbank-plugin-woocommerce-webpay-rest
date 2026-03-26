@@ -29,7 +29,12 @@ if (!defined('ABSPATH')) {
 
 <div class="tbk-box">
     <table class="form-table" role="presentation">
-        <?php $this->generate_settings_html(); ?>
+        <?php
+        $originalSettings = $this->settings;
+        $this->settings = $this->getPersistedFormSettings();
+        $this->generate_settings_html();
+        $this->settings = $originalSettings;
+        ?>
     </table>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
