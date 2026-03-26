@@ -489,33 +489,28 @@ function tbkAdminEnqueueStyleBundle(string $handle, string $relativeCssPath): vo
 function tbkReadScriptAssetMeta(string $jsFile): array
 {
     $assetPhp = preg_replace('/\.js$/', '.asset.php', $jsFile);
+    $metadata = ['dependencies' => []];
 
-    if (!is_string($assetPhp) || !is_readable($assetPhp)) {
-        return ['dependencies' => []];
-    }
+    if (is_string($assetPhp) && is_readable($assetPhp)) {
+        try {
+            $asset = include_once $assetPhp;
+        } catch (\Throwable) {
+            $asset = null;
+        }
 
-    try {
-        $asset = include_once $assetPhp;
-    } catch (\Throwable) {
-        return ['dependencies' => []];
-    }
+        if (is_array($asset)) {
+            $metadata['dependencies'] = isset($asset['dependencies']) && is_array($asset['dependencies'])
+                ? $asset['dependencies']
+                : [];
 
-    if (!is_array($asset)) {
-        return ['dependencies' => []];
-    }
-
-    $dependencies = isset($asset['dependencies']) && is_array($asset['dependencies'])
-        ? $asset['dependencies']
-        : [];
-
-    $metadata = ['dependencies' => $dependencies];
-
-    if (
-        isset($asset['version'])
-        && is_string($asset['version'])
-        && $asset['version'] !== ''
-    ) {
-        $metadata['version'] = $asset['version'];
+            if (
+                isset($asset['version'])
+                && is_string($asset['version'])
+                && $asset['version'] !== ''
+            ) {
+                $metadata['version'] = $asset['version'];
+            }
+        }
     }
 
     return $metadata;
