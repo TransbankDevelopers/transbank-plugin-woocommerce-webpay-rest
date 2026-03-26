@@ -1,0 +1,109 @@
+export const noticeHandler = (paymentMethod) => {
+    const oneClickId = "transbank_oneclick_mall_rest";
+    const url = new URL(globalThis.location.href);
+    const params = new URLSearchParams(url.search);
+
+    const noticeTypes = {
+        SUCCESS: "success",
+        ERROR: "error"
+    };
+
+    const oneClickNoticeData = {
+        0: {
+            message:
+                "La tarjeta ha sido inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.",
+            type: noticeTypes.SUCCESS
+        },
+        1: {
+            message:
+                "La inscripción fue cancelada automáticamente por estar inactiva mucho tiempo.",
+            type: noticeTypes.ERROR
+        },
+        2: {
+            message: "No se recibió el token de la inscripción.",
+            type: noticeTypes.ERROR
+        },
+        3: {
+            message: "El usuario canceló la inscripción en el formulario de pago.",
+            type: noticeTypes.ERROR
+        },
+        4: {
+            message: "La inscripción no se encuentra en estado inicializada.",
+            type: noticeTypes.ERROR
+        },
+        5: {
+            message: "Ocurrió un error al ejecutar la inscripción.",
+            type: noticeTypes.ERROR
+        },
+        6: {
+            message: "La inscripción de la tarjeta ha sido rechazada.",
+            type: noticeTypes.ERROR
+        }
+    };
+
+    const webPayNoticeData = {
+        7: { message: "Transacción aprobada", type: noticeTypes.SUCCESS },
+        8: {
+            message:
+                "Tu transacción no pudo ser autorizada. Ningún cobro fue realizado.",
+            type: noticeTypes.ERROR
+        },
+        9: {
+            message:
+                "Orden cancelada por el usuario. Por favor, reintente el pago.",
+            type: noticeTypes.ERROR
+        },
+        10: {
+            message:
+                "Orden cancelada por inactividad del usuario en el formulario de pago. Por favor, reintente el pago.",
+            type: noticeTypes.ERROR
+        },
+        11: {
+            message:
+                "Orden cancelada por un error en el formulario de pago. Por favor, reintente el pago.",
+            type: noticeTypes.ERROR
+        },
+        12: {
+            message:
+                "No se pudo procesar el pago. Si el problema persiste, contacte al comercio.",
+            type: noticeTypes.ERROR
+        },
+        13: {
+            message:
+                "El monto del carro ha cambiado mientras se procesaba el pago, la transacción fue cancelada. Ningún cobro fue realizado.",
+            type: noticeTypes.ERROR
+        }
+    };
+
+    if (!globalThis.wc.blocksCheckout || !params.has("transbank_status")) {
+        return;
+    }
+
+    const productNoticeData =
+        paymentMethod === oneClickId ? oneClickNoticeData : webPayNoticeData;
+    const statusCode = params.get("transbank_status");
+    const currentNoticeData = productNoticeData?.[statusCode];
+
+    if (!currentNoticeData) {
+        return;
+    }
+
+    const noticeMessage = currentNoticeData.message;
+    const notificationType = currentNoticeData.type;
+    const noticeDispatcher = globalThis.wp.data.dispatch("core/notices");
+
+    switch (notificationType) {
+        case noticeTypes.SUCCESS:
+            noticeDispatcher.createSuccessNotice(noticeMessage, {
+                context: "wc/checkout"
+            });
+            break;
+        case noticeTypes.ERROR:
+            noticeDispatcher.createErrorNotice(noticeMessage, {
+                context: "wc/checkout"
+            });
+            break;
+        default:
+            break;
+    }
+};

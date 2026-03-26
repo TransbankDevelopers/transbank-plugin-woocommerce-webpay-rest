@@ -1,8 +1,13 @@
 const defaultConfig = require("@wordpress/scripts/config/webpack.config");
 const WooCommerceDependencyExtractionWebpackPlugin = require("@woocommerce/dependency-extraction-webpack-plugin");
+const RemoveEmptyScriptsPlugin = require("webpack-remove-empty-scripts");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("node:path");
+const glob = require("glob");
 
-const FRONT_SOURCE_DIR = "assets/src/front/block";
+const isProd = process.env.NODE_ENV === "production";
+
+const PAGES_BASE = path.resolve(__dirname, "assets/src/front/pages");
 const FRONT_BUILD_DIR = "assets/build/front";
 
 const wcDepMap = {
@@ -27,23 +32,61 @@ const requestToHandle = (request) => {
     }
 };
 
+const slugFromFile = (absFile) => {
+    const rel = path.relative(PAGES_BASE, absFile);
+    const relDir = path.dirname(rel);
+
+    return relDir.split(path.sep).join("-").replaceAll(/[^a-zA-Z0-9-_]/g, "-");
+};
+
+const entryNameFromFile = (absFile, isStyle = false) => {
+    const slug = slugFromFile(absFile);
+    const baseName = `front-${slug}`;
+
+    return isStyle ? `${baseName}-style` : baseName;
+};
+
+const buildEntries = () => {
+    const entries = {};
+
+    glob.sync(path.join(PAGES_BASE, "**/*.js")).forEach((file) => {
+        entries[entryNameFromFile(file)] = file;
+    });
+
+    glob.sync(path.join(PAGES_BASE, "**/!(_)*.scss")).forEach((file) => {
+        entries[entryNameFromFile(file, true)] = file;
+    });
+
+    return entries;
+};
+
 // Export configuration.
 module.exports = {
     ...defaultConfig,
-    entry: {
-        webpay_blocks: `./${FRONT_SOURCE_DIR}/webpay_checkout.js`,
-        oneclick_blocks: `./${FRONT_SOURCE_DIR}/oneclick_checkout.js`,
-        notice_handler: `./${FRONT_SOURCE_DIR}/notice_handler.js`
-    },
+    entry: buildEntries(),
+    devtool: isProd ? false : "source-map",
     output: {
         path: path.resolve(__dirname, FRONT_BUILD_DIR),
         filename: "[name].js"
     },
+    cache: isProd
+        ? false
+        : {
+            type: "filesystem",
+            cacheDirectory: path.resolve(__dirname, ".webpack-cache-front"),
+            buildDependencies: { config: [__filename] }
+        },
     plugins: [
-        ...defaultConfig.plugins.filter(
-            (plugin) =>
-                plugin.constructor.name !== "DependencyExtractionWebpackPlugin"
-        ),
+        new RemoveEmptyScriptsPlugin(),
+        ...defaultConfig.plugins.filter((plugin) => {
+            return ![
+                "DependencyExtractionWebpackPlugin",
+                "MiniCssExtractPlugin"
+            ].includes(plugin.constructor.name);
+        }),
+        new MiniCssExtractPlugin({
+            filename: "[name].css"
+        }),
         new WooCommerceDependencyExtractionWebpackPlugin({
             requestToExternal,
             requestToHandle

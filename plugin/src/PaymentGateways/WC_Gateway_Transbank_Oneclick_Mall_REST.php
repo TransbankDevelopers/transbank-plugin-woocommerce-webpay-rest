@@ -83,7 +83,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             self::PAYMENT_GW_DESCRIPTION
         );
 
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick-logo.png';
         $this->shouldThrowException = false;
 
         $this->init_form_fields();

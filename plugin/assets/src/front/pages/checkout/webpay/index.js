@@ -1,7 +1,7 @@
 import { registerPaymentMethod } from "@woocommerce/blocks-registry";
 import { decodeEntities } from "@wordpress/html-entities";
 import { getSetting } from "@woocommerce/settings";
-import { noticeHandler } from "./notice_handler";
+import { noticeHandler } from "../../../modules/notice_handler";
 
 const settings = getSetting("transbank_webpay_plus_rest_data", {});
 const label = decodeEntities(settings.title);
@@ -15,10 +15,17 @@ const Content = ({ settings }) => {
 const Label = ({ settings }) => {
     const title = decodeEntities(settings.title);
     const imagePath = settings.icon;
-    const paymentImage = <img src={imagePath} alt="webpay plus logo" />;
+    const paymentImage = (
+        <img
+            className="tbk-checkout-block-label__logo"
+            src={imagePath}
+            alt="webpay plus logo"
+        />
+    );
+
     return (
-        <div>
-            <span>{title}</span>
+        <div className="tbk-checkout-block-label">
+            <span className="tbk-checkout-block-label__title">{title}</span>
             {paymentImage}
         </div>
     );

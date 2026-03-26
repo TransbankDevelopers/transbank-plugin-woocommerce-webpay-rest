@@ -16,10 +16,13 @@ trait WCGatewayTransbankBlocks
     private $productName;
 
     private $scriptInfo;
+    private $frontStyleHandle;
+
     public function initialize()
     {
         $this->settings = get_option($this->paymentId . '_settings', []);
         $this->gateway = $this->getGateway();
+        $this->frontStyleHandle = $this->registerFrontStyleHandle();
         add_action(
             'woocommerce_rest_checkout_process_payment_with_context',
             [$this, 'processErrorPayment'],
@@ -30,13 +33,19 @@ trait WCGatewayTransbankBlocks
 
     public function get_payment_method_script_handles()
     {
+        $entryBaseName = $this->getFrontEntryBaseName();
+
         wp_register_script(
             'wc_transbank_' . $this->productName . '_payment',
-            $this->getFrontAssetUrl($this->productName . '_blocks.js'),
+            $this->getFrontAssetUrl($entryBaseName . '.js'),
             $this->scriptInfo['dependencies'],
             $this->scriptInfo['version'],
             true
         );
+
+        if ($this->frontStyleHandle !== null) {
+            wp_enqueue_style($this->frontStyleHandle);
+        }
 
         return ['wc_transbank_' . $this->productName . '_payment'];
     }
@@ -69,6 +78,42 @@ trait WCGatewayTransbankBlocks
     protected function getFrontAssetUrl(string $fileName): string
     {
         return dirname(dirname(plugins_url('/', __FILE__))) . self::FRONT_ASSETS_BUILD_DIR . ltrim($fileName, '/');
+    }
+
+    protected function getFrontEntryBaseName(): string
+    {
+        return 'front-checkout-' . $this->productName;
+    }
+
+    protected function getFrontStyleEntryBaseName(): string
+    {
+        return $this->getFrontEntryBaseName() . '-style';
+    }
+
+    protected function getFrontStyleHandle(): string
+    {
+        return 'wc_transbank_' . $this->productName . '_payment_style';
+    }
+
+    protected function registerFrontStyleHandle(): ?string
+    {
+        $entryBaseName = $this->getFrontStyleEntryBaseName();
+        $cssFilePath = $this->getFrontAssetBuildPath() . $entryBaseName . '.css';
+
+        if (!is_readable($cssFilePath)) {
+            return null;
+        }
+
+        $styleHandle = $this->getFrontStyleHandle();
+
+        wp_register_style(
+            $styleHandle,
+            $this->getFrontAssetUrl($entryBaseName . '.css'),
+            [],
+            tbkSafeFilemtime($cssFilePath)
+        );
+
+        return $styleHandle;
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)

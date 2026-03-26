@@ -32,7 +32,7 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     {
         $this->gatewaySettings = TransbankConfig::webpayPlus();
         $this->id = self::ID;
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay-logo.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Webpay Plus';
         $this->description = $this->gatewaySettings->get(
@@ -117,13 +117,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
 
         $this->form_fields = [
-                $gatewaySettings::ENABLED => [
+            $gatewaySettings::ENABLED => [
                 'title' => __('Activo', 'transbank_webpay_plus_rest'),
                 'type' => 'checkbox',
                 'label' => " ",
                 'default' => 'no',
             ],
-                $gatewaySettings::ENVIRONMENT => [
+            $gatewaySettings::ENVIRONMENT => [
                 'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => $environmentDescription,
@@ -133,21 +133,21 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => 'TEST',
             ],
-                $gatewaySettings::COMMERCE_CODE => [
+            $gatewaySettings::COMMERCE_CODE => [
                 'title' => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $commerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-                $gatewaySettings::API_KEY => [
+            $gatewaySettings::API_KEY => [
                 'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
                 'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip' => $apiKeyDescription,
                 'default' => '',
             ],
-                $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
+            $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
                 'title' => __('Order Status', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
@@ -158,14 +158,14 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => '',
             ],
-                $gatewaySettings::DESCRIPTION => [
+            $gatewaySettings::DESCRIPTION => [
                 'title' => __('Descripción', 'transbank_webpay_plus_rest'),
                 'type' => 'textarea',
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
-                $gatewaySettings::BUY_ORDER_FORMAT => [
+            $gatewaySettings::BUY_ORDER_FORMAT => [
                 'title' => __('Formato de orden de compra', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . WebpayService::BUY_ORDER_FORMAT,
                 'desc_tip' => $buyOrderDescription,

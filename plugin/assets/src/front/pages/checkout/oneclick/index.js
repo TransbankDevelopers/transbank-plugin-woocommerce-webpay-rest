@@ -1,10 +1,9 @@
 import { registerPaymentMethod } from "@woocommerce/blocks-registry";
 import { decodeEntities } from "@wordpress/html-entities";
 import { getSetting } from "@woocommerce/settings";
-import { noticeHandler } from "./notice_handler";
+import { noticeHandler } from "../../../modules/notice_handler";
 
 const { useEffect } = globalThis.wp.element;
-
 const settings = getSetting("transbank_oneclick_mall_rest_data", {});
 const label = decodeEntities(settings.title);
 
@@ -13,6 +12,7 @@ noticeHandler(settings.id);
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
     const { onCheckoutFail } = eventRegistration;
+
     useEffect(() => {
         const onError = ({ processingResponse }) => {
             const errorMessage =
@@ -20,14 +20,17 @@ const Content = (props) => {
 
             if (errorMessage) {
                 return {
-                    type: emitResponse?.responseTypes?.ERROR,
+                    type: emitResponse.responseTypes.ERROR,
                     message: errorMessage,
-                    messageContext: emitResponse?.noticeContexts?.PAYMENTS
+                    messageContext: emitResponse.noticeContexts.PAYMENTS
                 };
             }
+
             return null;
         };
+
         const unsubscribe = onCheckoutFail(onError);
+
         return unsubscribe;
     }, [emitResponse, onCheckoutFail]);
 
@@ -37,10 +40,17 @@ const Content = (props) => {
 const Label = ({ settings }) => {
     const title = decodeEntities(settings.title);
     const imagePath = settings.icon;
-    const paymentImage = <img src={imagePath} alt="oneclick logo" />;
+    const paymentImage = (
+        <img
+            className="tbk-checkout-block-label__logo"
+            src={imagePath}
+            alt="oneclick logo"
+        />
+    );
+
     return (
-        <div>
-            <span>{title}</span>
+        <div className="tbk-checkout-block-label">
+            <span className="tbk-checkout-block-label__title">{title}</span>
             {paymentImage}
         </div>
     );
