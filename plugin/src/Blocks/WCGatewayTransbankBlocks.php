@@ -16,11 +16,13 @@ trait WCGatewayTransbankBlocks
     private $productName;
 
     private $scriptInfo;
+    private $frontStyleHandle;
 
     public function initialize()
     {
         $this->settings = get_option($this->paymentId . '_settings', []);
         $this->gateway = $this->getGateway();
+        $this->frontStyleHandle = $this->registerFrontStyleHandle();
         add_action(
             'woocommerce_rest_checkout_process_payment_with_context',
             [$this, 'processErrorPayment'],
@@ -40,6 +42,10 @@ trait WCGatewayTransbankBlocks
             $this->scriptInfo['version'],
             true
         );
+
+        if ($this->frontStyleHandle !== null) {
+            wp_enqueue_style($this->frontStyleHandle);
+        }
 
         return ['wc_transbank_' . $this->productName . '_payment'];
     }
@@ -77,6 +83,37 @@ trait WCGatewayTransbankBlocks
     protected function getFrontEntryBaseName(): string
     {
         return 'front-checkout-' . $this->productName;
+    }
+
+    protected function getFrontStyleEntryBaseName(): string
+    {
+        return $this->getFrontEntryBaseName() . '-style';
+    }
+
+    protected function getFrontStyleHandle(): string
+    {
+        return 'wc_transbank_' . $this->productName . '_payment_style';
+    }
+
+    protected function registerFrontStyleHandle(): ?string
+    {
+        $entryBaseName = $this->getFrontStyleEntryBaseName();
+        $cssFilePath = $this->getFrontAssetBuildPath() . $entryBaseName . '.css';
+
+        if (!is_readable($cssFilePath)) {
+            return null;
+        }
+
+        $styleHandle = $this->getFrontStyleHandle();
+
+        wp_register_style(
+            $styleHandle,
+            $this->getFrontAssetUrl($entryBaseName . '.css'),
+            [],
+            tbkSafeFilemtime($cssFilePath)
+        );
+
+        return $styleHandle;
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)

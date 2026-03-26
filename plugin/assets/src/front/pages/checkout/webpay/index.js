@@ -15,11 +15,17 @@ const Content = ({ settings }) => {
 const Label = ({ settings }) => {
     const title = decodeEntities(settings.title);
     const imagePath = settings.icon;
-    const paymentImage = <img src={imagePath} alt="webpay plus logo" />;
+    const paymentImage = (
+        <img
+            className="tbk-checkout-block-label__logo"
+            src={imagePath}
+            alt="webpay plus logo"
+        />
+    );
 
     return (
-        <div>
-            <span>{title}</span>
+        <div className="tbk-checkout-block-label">
+            <span className="tbk-checkout-block-label__title">{title}</span>
             {paymentImage}
         </div>
     );
