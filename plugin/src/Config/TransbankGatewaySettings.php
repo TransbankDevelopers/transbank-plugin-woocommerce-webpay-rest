@@ -66,7 +66,7 @@ final class TransbankGatewaySettings
      */
     public function isEnabled(): bool
     {
-        return $this->get(self::ENABLED, 'no') === 'yes';
+        return $this->getPersisted(self::ENABLED, 'no') === 'yes';
     }
 
     /**
