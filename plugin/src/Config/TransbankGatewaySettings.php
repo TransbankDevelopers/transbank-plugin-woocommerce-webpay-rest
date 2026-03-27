@@ -48,14 +48,6 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * @return string WooCommerce gateway id associated with this settings instance.
-     */
-    public function getGatewayId(): string
-    {
-        return $this->gatewayId;
-    }
-
-    /**
      * Convenience helper for the most common flag.
      *
      * Reads the persisted value only.
