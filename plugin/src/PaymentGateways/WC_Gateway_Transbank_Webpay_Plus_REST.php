@@ -13,6 +13,7 @@ use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewayIds;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
+use Transbank\Webpay\Options;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
@@ -206,9 +207,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
 
         $tab = 'options';
-        $environment = (string) $this->gatewaySettings->getPersisted(
+        $environment = $this->gatewaySettings->getPersistedAllowedValue(
             TransbankGatewaySettings::ENVIRONMENT,
-            ''
+            [
+                Options::ENVIRONMENT_INTEGRATION,
+                Options::ENVIRONMENT_PRODUCTION,
+            ],
+            Options::ENVIRONMENT_INTEGRATION
         );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
     }
