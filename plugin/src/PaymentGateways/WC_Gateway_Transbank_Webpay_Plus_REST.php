@@ -13,10 +13,13 @@ use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewayIds;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
+use Transbank\Webpay\Options;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
+    use BuildsSanitizedGatewaySettings;
+
     const ID = TransbankGatewayIds::WEBPAY_PLUS_REST;
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 
@@ -31,18 +34,16 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function __construct()
     {
         $this->gatewaySettings = TransbankConfig::webpayPlus();
+        $persistedDescription = (string) $this->gatewaySettings->getPersisted(
+            $this->gatewaySettings::DESCRIPTION,
+            ''
+        );
         $this->id = self::ID;
         $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay-logo.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Webpay Plus';
-        $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
-        $this->method_description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
+        $this->description = $persistedDescription;
+        $this->method_description = $persistedDescription;
 
         $this->plugin_url = plugins_url('/', __FILE__);
         $this->log = TbkFactory::createWebpayPlusLogger();
@@ -206,10 +207,27 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
 
         $tab = 'options';
-        $environment = $this->gatewaySettings->get(
-            TransbankGatewaySettings::ENVIRONMENT
+        $environment = $this->gatewaySettings->getPersistedAllowedValue(
+            TransbankGatewaySettings::ENVIRONMENT,
+            [
+                Options::ENVIRONMENT_INTEGRATION,
+                Options::ENVIRONMENT_PRODUCTION,
+            ],
+            Options::ENVIRONMENT_INTEGRATION
         );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
+    }
+
+    public function getPersistedFormSettings(): array
+    {
+        $persistedSettings = $this->gatewaySettings->getPersistedAll();
+        $settings = [];
+
+        foreach (array_keys($this->get_form_fields()) as $key) {
+            $settings[$key] = $persistedSettings[$key] ?? '';
+        }
+
+        return $settings;
     }
 
     public function process_admin_options()
@@ -222,8 +240,20 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 "El formato personalizado de orden de compra no es válido.",
                 'woocommerce'
             ));
-        } else {
-            parent::process_admin_options();
+            return false;
         }
+
+        $settings = apply_filters(
+            'woocommerce_settings_api_sanitized_fields_' . $this->id,
+            $this->buildSanitizedGatewaySettings($_POST)
+        );
+
+        $this->gatewaySettings->refresh();
+        $this->gatewaySettings->setMany($settings);
+        $this->gatewaySettings->save();
+
+        do_action('woocommerce_update_option', ['id' => $this->get_option_key()]);
+
+        return true;
     }
 }

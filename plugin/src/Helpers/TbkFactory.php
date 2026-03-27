@@ -6,7 +6,9 @@ use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Model\LogConfig;
 use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
+use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\PaymentTokenRepository;
@@ -54,11 +56,22 @@ class TbkFactory
         $webpaySettings = TransbankConfig::webpayPlus();
 
         return new WebpayplusConfig([
-            'environment' => $webpaySettings->get($webpaySettings::ENVIRONMENT),
-            'commerceCode' => $webpaySettings->get($webpaySettings::COMMERCE_CODE),
-            'apikey' => $webpaySettings->get($webpaySettings::API_KEY),
-            'buyOrderFormat' => $webpaySettings->get($webpaySettings::BUY_ORDER_FORMAT) ?? WebpayService::BUY_ORDER_FORMAT,
-            'statusAfterPayment' => $webpaySettings->get($webpaySettings::AFTER_PAYMENT_ORDER_STATUS) ?? ''
+            'environment' => $webpaySettings->getPersistedAllowedValue(
+                $webpaySettings::ENVIRONMENT,
+                [
+                    Options::ENVIRONMENT_INTEGRATION,
+                    Options::ENVIRONMENT_PRODUCTION,
+                ],
+                ''
+            ),
+            'commerceCode' => (string) $webpaySettings->getPersisted($webpaySettings::COMMERCE_CODE, ''),
+            'apikey' => (string) $webpaySettings->getPersisted($webpaySettings::API_KEY, ''),
+            'buyOrderFormat' => (string) $webpaySettings->getPersisted($webpaySettings::BUY_ORDER_FORMAT, ''),
+            'statusAfterPayment' => $webpaySettings->getPersistedAllowedValue(
+                $webpaySettings::AFTER_PAYMENT_ORDER_STATUS,
+                TransbankGatewaySettings::ALLOWED_AFTER_PAYMENT_ORDER_STATUSES,
+                ''
+            )
         ]);
     }
 
@@ -67,13 +80,24 @@ class TbkFactory
         $oneclickSettings = TransbankConfig::oneclickMall();
 
         return new OneclickConfig([
-            'environment' => $oneclickSettings->get($oneclickSettings::ENVIRONMENT),
-            'commerceCode' => $oneclickSettings->get($oneclickSettings::COMMERCE_CODE),
-            'apikey' => $oneclickSettings->get($oneclickSettings::API_KEY),
-            'childCommerceCode' => $oneclickSettings->get($oneclickSettings::CHILD_COMMERCE_CODE),
-            'buyOrderFormat' => $oneclickSettings->get($oneclickSettings::BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::BUY_ORDER_FORMAT,
-            'childBuyOrderFormat' => $oneclickSettings->get($oneclickSettings::CHILD_BUY_ORDER_FORMAT) ?? OneclickAuthorizationService::CHILD_BUY_ORDER_FORMAT,
-            'statusAfterPayment' => $oneclickSettings->get($oneclickSettings::AFTER_PAYMENT_ORDER_STATUS) ?? ''
+            'environment' => $oneclickSettings->getPersistedAllowedValue(
+                $oneclickSettings::ENVIRONMENT,
+                [
+                    Options::ENVIRONMENT_INTEGRATION,
+                    Options::ENVIRONMENT_PRODUCTION,
+                ],
+                ''
+            ),
+            'commerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::COMMERCE_CODE, ''),
+            'apikey' => (string) $oneclickSettings->getPersisted($oneclickSettings::API_KEY, ''),
+            'childCommerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_COMMERCE_CODE, ''),
+            'buyOrderFormat' => (string) $oneclickSettings->getPersisted($oneclickSettings::BUY_ORDER_FORMAT, ''),
+            'childBuyOrderFormat' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_BUY_ORDER_FORMAT, ''),
+            'statusAfterPayment' => $oneclickSettings->getPersistedAllowedValue(
+                $oneclickSettings::AFTER_PAYMENT_ORDER_STATUS,
+                TransbankGatewaySettings::ALLOWED_AFTER_PAYMENT_ORDER_STATUSES,
+                ''
+            )
         ]);
     }
 
