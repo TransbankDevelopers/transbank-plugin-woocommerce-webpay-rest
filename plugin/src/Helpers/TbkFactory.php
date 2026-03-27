@@ -8,6 +8,7 @@ use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
 use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
+use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\PaymentTokenRepository;
@@ -66,7 +67,11 @@ class TbkFactory
             'commerceCode' => (string) $webpaySettings->getPersisted($webpaySettings::COMMERCE_CODE, ''),
             'apikey' => (string) $webpaySettings->getPersisted($webpaySettings::API_KEY, ''),
             'buyOrderFormat' => (string) $webpaySettings->getPersisted($webpaySettings::BUY_ORDER_FORMAT, ''),
-            'statusAfterPayment' => (string) $webpaySettings->getPersisted($webpaySettings::AFTER_PAYMENT_ORDER_STATUS, '')
+            'statusAfterPayment' => $webpaySettings->getPersistedAllowedValue(
+                $webpaySettings::AFTER_PAYMENT_ORDER_STATUS,
+                TransbankGatewaySettings::ALLOWED_AFTER_PAYMENT_ORDER_STATUSES,
+                ''
+            )
         ]);
     }
 
@@ -88,7 +93,11 @@ class TbkFactory
             'childCommerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_COMMERCE_CODE, ''),
             'buyOrderFormat' => (string) $oneclickSettings->getPersisted($oneclickSettings::BUY_ORDER_FORMAT, ''),
             'childBuyOrderFormat' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_BUY_ORDER_FORMAT, ''),
-            'statusAfterPayment' => (string) $oneclickSettings->getPersisted($oneclickSettings::AFTER_PAYMENT_ORDER_STATUS, '')
+            'statusAfterPayment' => $oneclickSettings->getPersistedAllowedValue(
+                $oneclickSettings::AFTER_PAYMENT_ORDER_STATUS,
+                TransbankGatewaySettings::ALLOWED_AFTER_PAYMENT_ORDER_STATUSES,
+                ''
+            )
         ]);
     }
 

@@ -34,6 +34,11 @@ final class TransbankGatewaySettings
     public const DESCRIPTION = 'payment_gateway_description';
     public const BUY_ORDER_FORMAT = 'buy_order_format';
     public const CHILD_BUY_ORDER_FORMAT = 'child_buy_order_format';
+    public const ALLOWED_AFTER_PAYMENT_ORDER_STATUSES = [
+        '',
+        'processing',
+        'completed',
+    ];
 
     private string $gatewayId;
     private ?array $persistedCache = null;
