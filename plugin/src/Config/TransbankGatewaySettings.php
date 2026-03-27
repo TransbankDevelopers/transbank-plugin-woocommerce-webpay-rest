@@ -36,6 +36,7 @@ final class TransbankGatewaySettings
     public const CHILD_BUY_ORDER_FORMAT = 'child_buy_order_format';
 
     private string $gatewayId;
+    private ?array $persistedCache = null;
     private ?array $rawCache = null;
     private bool $dirty = false;
 
@@ -107,6 +108,7 @@ final class TransbankGatewaySettings
 
         $raw[$key] = $this->sanitize($key, $value);
 
+        $this->persistedCache = null;
         $this->rawCache = $raw;
         $this->dirty = true;
     }
@@ -140,6 +142,7 @@ final class TransbankGatewaySettings
 
         update_option($this->getOptionName(), $stored);
 
+        $this->persistedCache = null;
         $this->rawCache = null;
         $this->dirty = false;
     }
@@ -151,6 +154,7 @@ final class TransbankGatewaySettings
      */
     public function refresh(): void
     {
+        $this->persistedCache = null;
         $this->rawCache = null;
         $this->dirty = false;
     }
@@ -198,13 +202,19 @@ final class TransbankGatewaySettings
      */
     private function loadPersisted(): array
     {
+        if ($this->persistedCache !== null) {
+            return $this->persistedCache;
+        }
+
         $raw = get_option($this->getOptionName(), []);
 
         if (!is_array($raw)) {
             return [];
         }
 
-        return $this->normalizeKeys($raw);
+        $this->persistedCache = $this->normalizeKeys($raw);
+
+        return $this->persistedCache;
     }
 
     /**
