@@ -11,9 +11,8 @@ namespace Transbank\WooCommerce\WebpayRest\Config;
  * Key features:
  * - Canonical (normalized) keys are used internally and for persistence.
  * - Legacy keys are supported for read compatibility and mapped into canonical keys.
- * - Two-level caching:
+ * - One-level caching:
  *   - rawCache: normalized + defaults, without filters (used for persistence).
- *   - cache: rawCache after WordPress filters are applied (legacy runtime reads).
  * - Dirty tracking: `save()` only writes when changes were made through `set()`/`setMany()`.
  *
  * Important:
@@ -37,7 +36,6 @@ final class TransbankGatewaySettings
     public const CHILD_BUY_ORDER_FORMAT = 'child_buy_order_format';
 
     private string $gatewayId;
-    private ?array $cache = null;
     private ?array $rawCache = null;
     private bool $dirty = false;
 
@@ -70,21 +68,6 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * Returns the filtered settings array using canonical defaults.
-     *
-     * Applies `transbank_gateway_settings_all` to allow external customization without persisting
-     * the filtered result back to the database.
-     *
-     * Prefer getPersistedAll() for gateway configuration reads.
-     *
-     * @return array<string, mixed>
-     */
-    public function getAll(): array
-    {
-        return $this->load();
-    }
-
-    /**
      * Returns only the persisted settings after legacy-key normalization.
      *
      * Unlike getAll(), this method does not merge canonical defaults and
@@ -95,26 +78,6 @@ final class TransbankGatewaySettings
     public function getPersistedAll(): array
     {
         return $this->loadPersisted();
-    }
-
-    /**
-     * Gets a single setting value using canonical keys and canonical defaults.
-     *
-     * Legacy compatibility read API. Prefer getPersisted() for gateway reads.
-     *
-     * @param string $key Canonical key (prefer using class constants).
-     * @param mixed $default Value returned when the key does not exist.
-     * @return mixed
-     */
-    public function get(string $key, mixed $default = null): mixed
-    {
-        $settings = $this->load();
-
-        if (!array_key_exists($key, $settings)) {
-            return $default;
-        }
-
-        return $settings[$key];
     }
 
     /**
@@ -153,7 +116,6 @@ final class TransbankGatewaySettings
         $raw[$key] = $this->sanitize($key, $value);
 
         $this->rawCache = $raw;
-        $this->cache = null;
         $this->dirty = true;
     }
 
@@ -187,7 +149,6 @@ final class TransbankGatewaySettings
         update_option($this->getOptionName(), $stored);
 
         $this->rawCache = null;
-        $this->cache = null;
         $this->dirty = false;
     }
 
@@ -199,26 +160,7 @@ final class TransbankGatewaySettings
     public function refresh(): void
     {
         $this->rawCache = null;
-        $this->cache = null;
         $this->dirty = false;
-    }
-
-    /**
-     * Loads filtered settings (runtime view).
-     *
-     * @return array<string, mixed>
-     */
-    private function load(): array
-    {
-        if ($this->cache !== null) {
-            return $this->cache;
-        }
-
-        $settings = $this->loadRaw();
-
-        $this->cache = apply_filters('transbank_gateway_settings_all', $settings, $this->gatewayId);
-
-        return $this->cache;
     }
 
     /**
