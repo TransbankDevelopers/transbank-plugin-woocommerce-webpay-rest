@@ -17,6 +17,8 @@ use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
+    use BuildsSanitizedGatewaySettings;
+
     const ID = TransbankGatewayIds::WEBPAY_PLUS_REST;
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 

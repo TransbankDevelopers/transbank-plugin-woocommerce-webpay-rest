@@ -28,6 +28,7 @@ use WC_Payment_Gateway_CC;
  */
 class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
+    use BuildsSanitizedGatewaySettings;
     use TransbankRESTPaymentGateway;
 
     const ID = TransbankGatewayIds::ONECLICK_MALL_REST;
