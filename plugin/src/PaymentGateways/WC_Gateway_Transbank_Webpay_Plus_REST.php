@@ -235,8 +235,20 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 "El formato personalizado de orden de compra no es válido.",
                 'woocommerce'
             ));
-        } else {
-            parent::process_admin_options();
+            return false;
         }
+
+        $settings = apply_filters(
+            'woocommerce_settings_api_sanitized_fields_' . $this->id,
+            $this->buildSanitizedGatewaySettings($_POST)
+        );
+
+        $this->gatewaySettings->refresh();
+        $this->gatewaySettings->setMany($settings);
+        $this->gatewaySettings->save();
+
+        do_action('woocommerce_update_option', ['id' => $this->get_option_key()]);
+
+        return true;
     }
 }
