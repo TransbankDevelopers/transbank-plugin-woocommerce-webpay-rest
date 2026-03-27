@@ -51,8 +51,8 @@ final class TransbankGatewaySettings
     /**
      * Returns only the persisted settings after legacy-key normalization.
      *
-     * Unlike getAll(), this method does not merge canonical defaults and
-     * preserves the distinction between "missing", "empty", and "configured".
+     * This method does not merge canonical defaults and preserves the
+     * distinction between "missing", "empty", and "configured".
      *
      * @return array<string, mixed>
      */
