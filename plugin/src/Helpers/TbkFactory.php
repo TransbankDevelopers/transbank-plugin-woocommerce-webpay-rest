@@ -6,6 +6,7 @@ use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Model\LogConfig;
 use Transbank\Plugin\Model\WebpayplusConfig;
 use Transbank\Plugin\Model\OneclickConfig;
+use Transbank\Webpay\Options;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Repositories\TransactionRepository;
 use Transbank\WooCommerce\WebpayRest\Repositories\InscriptionRepository;
@@ -54,7 +55,14 @@ class TbkFactory
         $webpaySettings = TransbankConfig::webpayPlus();
 
         return new WebpayplusConfig([
-            'environment' => (string) $webpaySettings->getPersisted($webpaySettings::ENVIRONMENT, ''),
+            'environment' => $webpaySettings->getPersistedAllowedValue(
+                $webpaySettings::ENVIRONMENT,
+                [
+                    Options::ENVIRONMENT_INTEGRATION,
+                    Options::ENVIRONMENT_PRODUCTION,
+                ],
+                ''
+            ),
             'commerceCode' => (string) $webpaySettings->getPersisted($webpaySettings::COMMERCE_CODE, ''),
             'apikey' => (string) $webpaySettings->getPersisted($webpaySettings::API_KEY, ''),
             'buyOrderFormat' => (string) $webpaySettings->getPersisted($webpaySettings::BUY_ORDER_FORMAT, ''),
@@ -67,7 +75,14 @@ class TbkFactory
         $oneclickSettings = TransbankConfig::oneclickMall();
 
         return new OneclickConfig([
-            'environment' => (string) $oneclickSettings->getPersisted($oneclickSettings::ENVIRONMENT, ''),
+            'environment' => $oneclickSettings->getPersistedAllowedValue(
+                $oneclickSettings::ENVIRONMENT,
+                [
+                    Options::ENVIRONMENT_INTEGRATION,
+                    Options::ENVIRONMENT_PRODUCTION,
+                ],
+                ''
+            ),
             'commerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::COMMERCE_CODE, ''),
             'apikey' => (string) $oneclickSettings->getPersisted($oneclickSettings::API_KEY, ''),
             'childCommerceCode' => (string) $oneclickSettings->getPersisted($oneclickSettings::CHILD_COMMERCE_CODE, ''),
