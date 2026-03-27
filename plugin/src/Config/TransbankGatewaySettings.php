@@ -49,18 +49,6 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * Convenience helper for the most common flag.
-     *
-     * Reads the persisted value only.
-     *
-     * @return bool True if the persisted gateway flag is enabled (`yes`), false otherwise.
-     */
-    public function isEnabled(): bool
-    {
-        return $this->getPersisted(self::ENABLED, 'no') === 'yes';
-    }
-
-    /**
      * Returns only the persisted settings after legacy-key normalization.
      *
      * Unlike getAll(), this method does not merge canonical defaults and
