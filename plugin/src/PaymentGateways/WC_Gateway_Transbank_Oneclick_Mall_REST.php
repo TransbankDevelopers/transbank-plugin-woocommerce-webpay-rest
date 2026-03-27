@@ -171,9 +171,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             }
 
             $tab = 'options_oneclick';
-            $environment = (string) $this->gatewaySettings->getPersisted(
+            $environment = $this->gatewaySettings->getPersistedAllowedValue(
                 TransbankGatewaySettings::ENVIRONMENT,
-                ''
+                [
+                    Options::ENVIRONMENT_INTEGRATION,
+                    Options::ENVIRONMENT_PRODUCTION,
+                ],
+                Options::ENVIRONMENT_INTEGRATION
             );
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
@@ -244,9 +248,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function get_saved_payment_methods_list($saved_methods)
     {
-        $pluginEnvironment = (string) $this->gatewaySettings->getPersisted(
+        $pluginEnvironment = $this->gatewaySettings->getPersistedAllowedValue(
             TransbankGatewaySettings::ENVIRONMENT,
-            ''
+            [
+                Options::ENVIRONMENT_INTEGRATION,
+                Options::ENVIRONMENT_PRODUCTION,
+            ],
+            Options::ENVIRONMENT_INTEGRATION
         );
         $oneclickCards = $saved_methods['oneclick'] ?? [];
         $filteredCards = [];
