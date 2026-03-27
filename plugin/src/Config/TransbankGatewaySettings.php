@@ -83,6 +83,31 @@ final class TransbankGatewaySettings
     }
 
     /**
+     * Gets a persisted string value constrained to an allowed domain.
+     *
+     * Returns the persisted value only when it is a string that matches one of
+     * the allowed values exactly. Otherwise, returns the runtime fallback.
+     *
+     * @param string $key Canonical key (prefer using class constants).
+     * @param string[] $allowedValues Valid domain values for this setting.
+     * @param string $fallback Value returned when the persisted value is missing or invalid.
+     */
+    public function getPersistedAllowedValue(string $key, array $allowedValues, string $fallback): string
+    {
+        $value = $this->getPersisted($key);
+
+        if (!is_string($value)) {
+            return $fallback;
+        }
+
+        if (!in_array($value, $allowedValues, true)) {
+            return $fallback;
+        }
+
+        return $value;
+    }
+
+    /**
      * Sets a single setting value (canonical key) into the raw cache.
      *
      * The value is sanitized and marked as dirty for persistence.
