@@ -6,10 +6,6 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 
 trait WCGatewayTransbankBlocks
 {
-    private const FRONT_ASSETS_BUILD_DIR = '/assets/build/front/';
-    private const PROCESS_ERROR_HOOK_PRIORITY = 10;
-    private const PROCESS_ERROR_HOOK_ACCEPTED_ARGS = 2;
-
     private $gateway;
     private $paymentId;
 
@@ -26,8 +22,8 @@ trait WCGatewayTransbankBlocks
         add_action(
             'woocommerce_rest_checkout_process_payment_with_context',
             [$this, 'processErrorPayment'],
-            self::PROCESS_ERROR_HOOK_PRIORITY,
-            self::PROCESS_ERROR_HOOK_ACCEPTED_ARGS
+            $this->getProcessErrorHookPriority(),
+            $this->getProcessErrorHookAcceptedArgs()
         );
     }
 
@@ -72,12 +68,12 @@ trait WCGatewayTransbankBlocks
 
     protected function getFrontAssetBuildPath(): string
     {
-        return dirname(dirname(plugin_dir_path(__FILE__))) . self::FRONT_ASSETS_BUILD_DIR;
+        return dirname(dirname(plugin_dir_path(__FILE__))) . $this->getFrontAssetsBuildDir();
     }
 
     protected function getFrontAssetUrl(string $fileName): string
     {
-        return dirname(dirname(plugins_url('/', __FILE__))) . self::FRONT_ASSETS_BUILD_DIR . ltrim($fileName, '/');
+        return dirname(dirname(plugins_url('/', __FILE__))) . $this->getFrontAssetsBuildDir() . ltrim($fileName, '/');
     }
 
     protected function getFrontEntryBaseName(): string
@@ -116,6 +112,21 @@ trait WCGatewayTransbankBlocks
         return $styleHandle;
     }
 
+    protected function getFrontAssetsBuildDir(): string
+    {
+        return '/assets/build/front/';
+    }
+
+    protected function getProcessErrorHookPriority(): int
+    {
+        return 10;
+    }
+
+    protected function getProcessErrorHookAcceptedArgs(): int
+    {
+        return 2;
+    }
+
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)
     {
         if ($context->payment_method !== $this->paymentId) {
@@ -133,8 +144,8 @@ trait WCGatewayTransbankBlocks
                     throw $error;
                 }
             },
-            self::PROCESS_ERROR_HOOK_PRIORITY,
-            self::PROCESS_ERROR_HOOK_ACCEPTED_ARGS
+            $this->getProcessErrorHookPriority(),
+            $this->getProcessErrorHookAcceptedArgs()
         );
     }
 
