@@ -1,8 +1,8 @@
 === Transbank Webpay ===
 Contributors: TransbankDevelopers
 Tags: transbank, webpay_plus, webpay_oneclick
-Requires at least: 5.3
-Tested up to: 6.9.1
+Requires at least: 6.3
+Tested up to: 6.9.4
 Requires PHP: 8.2
 Stable tag: VERSION_REPLACE_HERE
 License: 3-Clause BSD License
