@@ -1,0 +1,98 @@
+.transbank_rest_tool {
+    max-width: 80%;
+    width: 600px;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tbk-diagnostic-tool {
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.tbk-diagnostic-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.tbk-diagnostic-hero-copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.tbk-diagnostic-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tbk-diagnostic-title {
+    margin: 0 0 6px;
+    font-size: 1.3em;
+    line-height: 1.3;
+}
+
+.tbk-diagnostic-description,
+.tbk-diagnostic-card-description,
+.tbk-diagnostic-note {
+    color: #4f5b66;
+}
+
+.tbk-diagnostic-description,
+.tbk-diagnostic-card-description {
+    margin: 0;
+    max-width: 760px;
+}
+
+.tbk-diagnostic-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.tbk-diagnostic-card-top-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+}
+
+.tbk-diagnostic-card-title {
+    margin: 0;
+    font-size: 16px;
+}
+
+.tbk-diagnostic-actions {
+    display: flex;
+    align-items: center;
+}
+
+.tbk-diagnostic-note {
+    margin-top: 4px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid #eceff3;
+    border-left: 3px solid var(--tbk-red);
+}
+
+@media (max-width: 782px) {
+    .tbk-diagnostic-hero,
+    .tbk-diagnostic-card-top-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

@@ -26,14 +26,19 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 
 <div class="tbk-box">
     <table class="form-table" role="presentation">
-        <?php $this->generate_settings_html(); ?>
+        <?php
+        $originalSettings = $this->settings;
+        $this->settings = $this->getPersistedFormSettings();
+        $this->generate_settings_html();
+        $this->settings = $originalSettings;
+        ?>
     </table>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
 
-<div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh;">
+<div id="my-content-id" class="tbk-welcome-message-content" hidden>
     <h2>¡Excelente!</h2>
-    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/images/webpay-new.png', dirname(__DIR__)); ?>" alt="">
+    <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/webpay-logo.png', dirname(__DIR__)); ?>" alt="Webpay logo">
     <div>
         <p>Ahora que ya tienes el plugin instalado, tu sitio ya está habilitado para que tus clientes puedan pagar usando Webpay Plus.
             Asegúrate de que tu tienda esté
@@ -68,9 +73,11 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
         //window.tb_show('TbkRestModalWelcome', "#TB_inline?&width=600&height=550&inlineId=my-content-id", null);
         function openWelcomeMessageTransbankWebpayRest() {
             let content = $('#my-content-id').clone();
+            content.prop('hidden', false);
             content.show();
             swal({
                 content: content[0],
+                className: 'tbk-swal-modal',
             });
         }
     })(jQuery);

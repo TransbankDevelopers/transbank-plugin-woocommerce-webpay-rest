@@ -79,9 +79,17 @@ fi
 # --- Install WooCommerce
 if ! wp plugin is-installed woocommerce --allow-root; then
   echo "Instalando WooCommerce..."
-  wp plugin install woocommerce --version=10.5.2 --activate --allow-root || true
+  wp plugin install woocommerce --version=10.6.1 --activate --allow-root || true
 else
-  echo "WooCommerce ya instalado y activo."
+  echo "WooCommerce ya instalado. Actualizando..."
+  wp plugin update woocommerce --version=10.6.1 --allow-root || true
+
+  if ! wp plugin is-active woocommerce --allow-root; then
+    echo "Activando WooCommerce..."
+    wp plugin activate woocommerce --allow-root || true
+  else
+    echo "WooCommerce ya instalado y activo."
+  fi
 fi
 
 # --- Install Spectra One theme

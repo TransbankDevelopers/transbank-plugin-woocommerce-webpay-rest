@@ -13,10 +13,13 @@ use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewayIds;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankConfig;
 use Transbank\WooCommerce\WebpayRest\Config\TransbankGatewaySettings;
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
+use Transbank\Webpay\Options;
 use WC_Payment_Gateway;
 
 class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
 {
+    use BuildsSanitizedGatewaySettings;
+
     const ID = TransbankGatewayIds::WEBPAY_PLUS_REST;
     const WOOCOMMERCE_API_SLUG = 'wc_gateway_transbank_webpay_plus_rest';
 
@@ -31,18 +34,16 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
     public function __construct()
     {
         $this->gatewaySettings = TransbankConfig::webpayPlus();
+        $persistedDescription = (string) $this->gatewaySettings->getPersisted(
+            $this->gatewaySettings::DESCRIPTION,
+            ''
+        );
         $this->id = self::ID;
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay.png';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/webpay-logo.png';
         $this->method_title = __('Transbank Webpay Plus', 'transbank_webpay_plus_rest');
         $this->title = 'Webpay Plus';
-        $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
-        $this->method_description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
+        $this->description = $persistedDescription;
+        $this->method_description = $persistedDescription;
 
         $this->plugin_url = plugins_url('/', __FILE__);
         $this->log = TbkFactory::createWebpayPlusLogger();
@@ -117,13 +118,13 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
             Transbank, lo que permite identificarla fácilmente dentro del sistema de Transbank.';
 
         $this->form_fields = [
-                $gatewaySettings::ENABLED => [
+            $gatewaySettings::ENABLED => [
                 'title' => __('Activo', 'transbank_webpay_plus_rest'),
                 'type' => 'checkbox',
                 'label' => " ",
                 'default' => 'no',
             ],
-                $gatewaySettings::ENVIRONMENT => [
+            $gatewaySettings::ENVIRONMENT => [
                 'title' => __('Ambiente', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => $environmentDescription,
@@ -133,21 +134,21 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => 'TEST',
             ],
-                $gatewaySettings::COMMERCE_CODE => [
+            $gatewaySettings::COMMERCE_CODE => [
                 'title' => __('Código de Comercio Producción', 'transbank_webpay_plus_rest'),
                 'placeholder' => 'Ej: 597012345678',
                 'desc_tip' => $commerceCodeDescription,
                 'type' => 'text',
                 'default' => '',
             ],
-                $gatewaySettings::API_KEY => [
+            $gatewaySettings::API_KEY => [
                 'title' => __('API Key (llave secreta) producción', 'transbank_webpay_plus_rest'),
                 'type' => 'password',
                 'placeholder' => 'Ej: XXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'desc_tip' => $apiKeyDescription,
                 'default' => '',
             ],
-                $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
+            $gatewaySettings::AFTER_PAYMENT_ORDER_STATUS => [
                 'title' => __('Order Status', 'transbank_webpay_plus_rest'),
                 'type' => 'select',
                 'desc_tip' => 'Define el estado de la orden luego del pago exitoso.',
@@ -158,14 +159,14 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 ],
                 'default' => '',
             ],
-                $gatewaySettings::DESCRIPTION => [
+            $gatewaySettings::DESCRIPTION => [
                 'title' => __('Descripción', 'transbank_webpay_plus_rest'),
                 'type' => 'textarea',
                 'desc_tip' => 'Define la descripción del medio de pago.',
                 'default' => self::PAYMENT_GW_DESCRIPTION,
                 'class' => 'admin-textarea'
             ],
-                $gatewaySettings::BUY_ORDER_FORMAT => [
+            $gatewaySettings::BUY_ORDER_FORMAT => [
                 'title' => __('Formato de orden de compra', 'transbank_wc_plugin'),
                 'placeholder' => 'Ej: ' . WebpayService::BUY_ORDER_FORMAT,
                 'desc_tip' => $buyOrderDescription,
@@ -206,10 +207,27 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
         }
 
         $tab = 'options';
-        $environment = $this->gatewaySettings->get(
-            TransbankGatewaySettings::ENVIRONMENT
+        $environment = $this->gatewaySettings->getPersistedAllowedValue(
+            TransbankGatewaySettings::ENVIRONMENT,
+            [
+                Options::ENVIRONMENT_INTEGRATION,
+                Options::ENVIRONMENT_PRODUCTION,
+            ],
+            Options::ENVIRONMENT_INTEGRATION
         );
         include_once __DIR__ . '/../../views/admin/options-tabs.php';
+    }
+
+    public function getPersistedFormSettings(): array
+    {
+        $persistedSettings = $this->gatewaySettings->getPersistedAll();
+        $settings = [];
+
+        foreach (array_keys($this->get_form_fields()) as $key) {
+            $settings[$key] = $persistedSettings[$key] ?? '';
+        }
+
+        return $settings;
     }
 
     public function process_admin_options()
@@ -222,8 +240,20 @@ class WC_Gateway_Transbank_Webpay_Plus_REST extends WC_Payment_Gateway
                 "El formato personalizado de orden de compra no es válido.",
                 'woocommerce'
             ));
-        } else {
-            parent::process_admin_options();
+            return false;
         }
+
+        $settings = apply_filters(
+            'woocommerce_settings_api_sanitized_fields_' . $this->id,
+            $this->buildSanitizedGatewaySettings($_POST)
+        );
+
+        $this->gatewaySettings->refresh();
+        $this->gatewaySettings->setMany($settings);
+        $this->gatewaySettings->save();
+
+        do_action('woocommerce_update_option', ['id' => $this->get_option_key()]);
+
+        return true;
     }
 }

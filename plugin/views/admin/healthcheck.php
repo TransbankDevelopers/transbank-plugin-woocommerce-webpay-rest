@@ -2,6 +2,7 @@
 
 use Transbank\Plugin\Helpers\InfoUtil;
 use Transbank\Plugin\Helpers\WoocommerceInfoUtil;
+use Transbank\WooCommerce\WebpayRest\Utils\Template;
 
 if (!defined('ABSPATH')) {
     return;
@@ -9,99 +10,42 @@ if (!defined('ABSPATH')) {
 
 $summary = InfoUtil::getSummary();
 $eSummary = WoocommerceInfoUtil::getSummary();
+$connectionTests = [
+    [
+        'productKey' => 'webpay',
+        'actionName' => 'check_connection',
+        'title' => 'Prueba de conexión Webpay Plus',
+        'description' => 'Esta prueba usará el entorno y las credenciales configuradas actualmente para Webpay Plus y enviará una solicitud de transacción de prueba para validar la comunicación con Transbank.',
+    ],
+    [
+        'productKey' => 'oneclick',
+        'actionName' => 'check_connection',
+        'title' => 'Prueba de conexión Webpay Oneclick',
+        'description' => 'Esta prueba usará el entorno y las credenciales configuradas actualmente para Webpay Oneclick y enviará una solicitud de inscripción de prueba para validar la comunicación con Transbank.',
+    ],
+];
+$template = new Template();
 ?>
 
 <div id="transbank_rest_info" class="">
-    <div class="transbank_rest_tool">
-        <h3 style="margin-bottom: 0">Verificar configuración Webpay Plus </h3>
-        <p>Esta herramienta permite probar tu configuración (ambiente, código de comercio y llave secreta (Api Key
-            Secret). Al verificar conexión se envía una solicitud para crear una transacción de prueba.
-            Si ocurre algún problema, puedes obtener más información en el tab de "registros (logs)"</p>
-        <div>
-            <button class="check_conn button">Verificar Conexión</button>
-        </div>
-        <hr>
-        <div class="tbk-response-status tbk-hide" id="tbk_response_status">
-            <h4 id="response_title">Respuesta de Transbank</h4>
-            <div class="tbk-status-ok tbk-hide" id="div_status_ok">
-                <div class="tbk-response-container" id="div_status">
-                    <div class="info-column">
-                        <div title="Informa el estado de la comunicación con Transbank mediante método create_transaction"
-                            class="label label-info">?
-                        </div>
-                    </div>
-                    <div class="info-column">
-                        <span class="highlight-text"> Estado: </span>
-                    </div>
-                    <div class="info-column">
-                        <span class="label label-success" id="response_status_text">OK</span>
-                    </div>
-                </div>
-                <div class="tbk-response-container" id="div_response_url">
-                    <div class="info-column">
-                        <div title="URL entregada por Transbank para realizar la transacción"
-                            class="label label-info">?
-                        </div>
-                    </div>
-                    <div class="info-column">
-                        <span class="highlight-text"> URL: </span>
-                    </div>
-                    <div class="info-column" id="response_url_text">
-                    </div>
-                </div>
-                <div class="tbk-response-container" id="div_response_token">
-                    <div class="info-column">
-                        <div title="Token entregada por Transbank para realizar la transacción"
-                            class="label label-info">?
-                        </div>
-                    </div>
-                    <div class="info-column">
-                        <span class="highlight-text"> Token: </span>
-                    </div>
-                    <div class="info-column token" id="response_token_text">
-                    </div>
-                </div>
+    <div class="transbank_rest_tool tbk-diagnostic-tool">
+        <div class="tbk-diagnostic-hero">
+            <div class="tbk-diagnostic-hero-copy">
+                <h3 class="tbk-diagnostic-title">Pruebas de conexión</h3>
+                <p class="tbk-diagnostic-description">
+                    Esta sección agrupará las pruebas de conexión de Webpay Plus y Webpay Oneclick.
+                </p>
             </div>
-            <div class="tbk-status-error tbk-hide" id="div_status_error">
-                <div class="tbk-response-container" id="div_error_status">
-                    <div class="info-column">
-                        <div title="Status devuelto por Transbank al fallar create_transaction"
-                            class="label label-info">?
-                        </div>
-                    </div>
-                    <div class="info-column">
-                        <span class="highlight-text"> Estado: </span>
-                    </div>
-                    <div class="info-column" id="error_response_status">
-                        <span class="label label-danger" id="error_response_status_text">ERROR</span>
-                    </div>
-                </div>
-                <div class="tbk-response-container" id="div_error_message">
-                    <div class="info-column">
-                        <div title="Mensaje de error devuelto por Transbank al fallar create_transaction"
-                            class="label label-info">?
-                        </div>
-                    </div>
-                    <div class="info-column">
-                        <span class="highlight-text"> Error: </span>
-                    </div>
-                    <div class="info-column" id="error_response_text">
-                    </div>
-                </div>
-                <div class="tbk-response-container" id="div_error_detail">
-                    <div class="info-column">
-                        <div title="Detalle del error devuelto por Transbank al fallar create_transaction"
-                            class="label label-info">?
-                        </div>
-                    </div>
-                    <div class="info-column">
-                        <span class="highlight-text"> Detalle: </span>
-                    </div>
-                    <div class="info-column" id="error_detail_response_text">
-                    </div>
-                </div>
+            <div class="tbk-diagnostic-note">
+                Si la prueba presenta problemas, revisa también la pestaña de registros (logs) para obtener más detalle.
             </div>
         </div>
+
+        <?php foreach ($connectionTests as $connectionTest) : ?>
+            <?php $template->render('admin/components/connection-test-card.php', [
+                'connectionTest' => $connectionTest,
+            ]); ?>
+        <?php endforeach; ?>
     </div>
 
     <div class="transbank_rest_tool">

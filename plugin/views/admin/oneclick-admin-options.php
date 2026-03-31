@@ -29,7 +29,12 @@ if (!defined('ABSPATH')) {
 
 <div class="tbk-box">
     <table class="form-table" role="presentation">
-        <?php $this->generate_settings_html(); ?>
+        <?php
+        $originalSettings = $this->settings;
+        $this->settings = $this->getPersistedFormSettings();
+        $this->generate_settings_html();
+        $this->settings = $originalSettings;
+        ?>
     </table>
     <button name="save" class="button-primary woocommerce-save-button tbk-custom-save-button" type="submit" value="<?php _e('Guardar cambios', 'transbank_wc_plugin'); ?>"><?php _e('Guardar cambios', 'transbank_wc_plugin'); ?></button>
 </div>
@@ -47,9 +52,9 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
 <?php } ?>
 
 
-<div id="my-content-id" style="display:none;overflow-y: scroll; max-height: 50vh;">
+<div id="my-content-id" class="tbk-welcome-message-content" hidden>
     <h2>¡Bienvenido a Webpay Oneclick!</h2>
-    <img style="float: right; width: 180px; padding: 20px; display: block" src="<?php echo plugins_url('/images/oneclick.svg', dirname(__DIR__)); ?>" alt="">
+    <img class="tbk-welcome-message-logo" src="<?php echo plugins_url('/images/oneclick-logo.png', dirname(__DIR__)); ?>" alt="Oneclick logo">
     <div>
         <p>Este plugin también incluye integración con Webpay Oneclick Mall REST, para que tus clientes puedan
             inscribir su tarjeta de crédito, débito o prepago, y así puedan realizar sus siguientes compras con un solo
@@ -87,9 +92,11 @@ if ($environment === \Transbank\Webpay\Options::ENVIRONMENT_INTEGRATION) { ?>
         //window.tb_show('TbkRestModalWelcome', "#TB_inline?&width=600&height=550&inlineId=my-content-id", null);
         function openWelcomeMessageTransbankWebpayRest() {
             let content = $('#my-content-id').clone();
+            content.prop('hidden', false);
             content.show();
             swal({
                 content: content[0],
+                className: 'tbk-swal-modal',
             });
         }
     })(jQuery);

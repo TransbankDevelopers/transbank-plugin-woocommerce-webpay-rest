@@ -1,0 +1,24 @@
+.tbk_table_info {
+    width: 600px;
+    max-width: 50%;
+
+    th {
+        text-align: left;
+    }
+
+    td {
+        width: 300px;
+        border-bottom: dashed 1px #ccc;
+        padding: 4px;
+    }
+}
+
+.tbk_table_td {
+    width: 200px;
+}
+
+.tbk_table_trans {
+    pre {
+        font-size: 12px;
+    }
+}

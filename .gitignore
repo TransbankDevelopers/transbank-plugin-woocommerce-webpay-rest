@@ -37,7 +37,14 @@ docker-woocommerce-*/wp_data
 docker-woocommerce-*/db_data
 docker-woocommerce-*/transbank-webpay-plus-rest
 
-# Woocoomerce blocks genereted files
-plugin/js/front/
+# Woocoomerce blocks generated files
+plugin/assets/build/
+plugin/.webpack-cache-admin/
+plugin/.webpack-cache-front/
 
+# Generated files for package
+build
+
+# Devcontainer logs
 .devcontainer/logs
+

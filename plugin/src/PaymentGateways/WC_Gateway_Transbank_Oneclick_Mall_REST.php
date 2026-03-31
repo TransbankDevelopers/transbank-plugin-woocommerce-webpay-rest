@@ -28,6 +28,7 @@ use WC_Payment_Gateway_CC;
  */
 class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 {
+    use BuildsSanitizedGatewaySettings;
     use TransbankRESTPaymentGateway;
 
     const ID = TransbankGatewayIds::ONECLICK_MALL_REST;
@@ -55,6 +56,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
     public function __construct()
     {
         $this->gatewaySettings = TransbankConfig::oneclickMall();
+        $persistedDescription = (string) $this->gatewaySettings->getPersisted(
+            $this->gatewaySettings::DESCRIPTION,
+            ''
+        );
         $this->supports = [
             'refunds',
             'tokenization',
@@ -74,16 +79,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->id = self::ID;
         $this->title = 'Webpay Oneclick';
         $this->method_title = 'Webpay Oneclick';
-        $this->description = $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
-        $this->method_description = $this->description = $this->gatewaySettings->get(
-            $this->gatewaySettings::DESCRIPTION,
-            self::PAYMENT_GW_DESCRIPTION
-        );
+        $this->description = $persistedDescription;
+        $this->method_description = $persistedDescription;
 
-        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick.png';
+        $this->icon = plugin_dir_url(dirname(dirname(__FILE__))) . 'images/oneclick-logo.png';
         $this->shouldThrowException = false;
 
         $this->init_form_fields();
@@ -92,7 +91,10 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $this->logger = TbkFactory::createOneclickLogger();
         $this->inscriptionService = TbkFactory::createOneclickInscriptionService();
 
-        $this->max_amount = $this->get_option('max_amount') ?? 100000;
+        $this->max_amount = (int) $this->gatewaySettings->getPersisted(
+            TransbankGatewaySettings::MAX_AMOUNT,
+            0
+        );
 
         add_action(
             'woocommerce_scheduled_subscription_payment_' . $this->id,
@@ -169,8 +171,13 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             }
 
             $tab = 'options_oneclick';
-            $environment = $this->gatewaySettings->get(
-                TransbankGatewaySettings::ENVIRONMENT
+            $environment = $this->gatewaySettings->getPersistedAllowedValue(
+                TransbankGatewaySettings::ENVIRONMENT,
+                [
+                    Options::ENVIRONMENT_INTEGRATION,
+                    Options::ENVIRONMENT_PRODUCTION,
+                ],
+                Options::ENVIRONMENT_INTEGRATION
             );
             include_once __DIR__ . '/../../views/admin/options-tabs.php';
         } else {
@@ -189,6 +196,18 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
             </div>
 <?php
         }
+    }
+
+    public function getPersistedFormSettings(): array
+    {
+        $persistedSettings = $this->gatewaySettings->getPersistedAll();
+        $settings = [];
+
+        foreach (array_keys($this->get_form_fields()) as $key) {
+            $settings[$key] = $persistedSettings[$key] ?? '';
+        }
+
+        return $settings;
     }
 
     /**
@@ -229,7 +248,14 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function get_saved_payment_methods_list($saved_methods)
     {
-        $pluginEnvironment = $this->get_option('environment');
+        $pluginEnvironment = $this->gatewaySettings->getPersistedAllowedValue(
+            TransbankGatewaySettings::ENVIRONMENT,
+            [
+                Options::ENVIRONMENT_INTEGRATION,
+                Options::ENVIRONMENT_PRODUCTION,
+            ],
+            Options::ENVIRONMENT_INTEGRATION
+        );
         $oneclickCards = $saved_methods['oneclick'] ?? [];
         $filteredCards = [];
 
@@ -436,14 +462,12 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
         $childBuyOrderFormat = isset($_POST[$this->get_field_key('child_buy_order_format')])
             ? wc_clean(wp_unslash($_POST[$this->get_field_key('child_buy_order_format')])) : '';
 
-        $isValid = true;
-
         if (!BuyOrderHelper::isValidFormat($buyOrderFormat)) {
             \WC_Admin_Settings::add_error(__(
                 "El formato personalizado de orden de compra principal no es válido.",
                 'woocommerce'
             ));
-            $isValid = false;
+            return false;
         }
 
         if (!BuyOrderHelper::isValidFormat($childBuyOrderFormat)) {
@@ -451,10 +475,20 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
                 "El formato personalizado de orden de compra hija no es válido.",
                 'woocommerce'
             ));
-            $isValid = false;
+            return false;
         }
-        if ($isValid) {
-            parent::process_admin_options();
-        }
+
+        $settings = apply_filters(
+            'woocommerce_settings_api_sanitized_fields_' . $this->id,
+            $this->buildSanitizedGatewaySettings($_POST)
+        );
+
+        $this->gatewaySettings->refresh();
+        $this->gatewaySettings->setMany($settings);
+        $this->gatewaySettings->save();
+
+        do_action('woocommerce_update_option', ['id' => $this->get_option_key()]);
+
+        return true;
     }
 }

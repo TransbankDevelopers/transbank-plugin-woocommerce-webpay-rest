@@ -11,14 +11,16 @@ namespace Transbank\WooCommerce\WebpayRest\Config;
  * Key features:
  * - Canonical (normalized) keys are used internally and for persistence.
  * - Legacy keys are supported for read compatibility and mapped into canonical keys.
- * - Two-level caching:
+ * - One-level caching:
  *   - rawCache: normalized + defaults, without filters (used for persistence).
- *   - cache: rawCache after WordPress filters are applied (used for runtime reads).
  * - Dirty tracking: `save()` only writes when changes were made through `set()`/`setMany()`.
  *
  * Important:
  * - If both canonical and legacy keys exist, canonical values take precedence.
  * - `save()` persists only canonical keys (legacy keys are not written back).
+ * - `getPersisted()` / `getPersistedAll()` are the preferred read APIs for
+ *   gateway settings because they preserve the distinction between missing,
+ *   empty and configured values.
  */
 final class TransbankGatewaySettings
 {
@@ -32,9 +34,14 @@ final class TransbankGatewaySettings
     public const DESCRIPTION = 'payment_gateway_description';
     public const BUY_ORDER_FORMAT = 'buy_order_format';
     public const CHILD_BUY_ORDER_FORMAT = 'child_buy_order_format';
+    public const ALLOWED_AFTER_PAYMENT_ORDER_STATUSES = [
+        '',
+        'processing',
+        'completed',
+    ];
 
     private string $gatewayId;
-    private ?array $cache = null;
+    private ?array $persistedCache = null;
     private ?array $rawCache = null;
     private bool $dirty = false;
 
@@ -47,52 +54,62 @@ final class TransbankGatewaySettings
     }
 
     /**
-     * @return string WooCommerce gateway id associated with this settings instance.
-     */
-    public function getGatewayId(): string
-    {
-        return $this->gatewayId;
-    }
-
-    /**
-     * Convenience helper for the most common flag.
+     * Returns only the persisted settings after legacy-key normalization.
      *
-     * @return bool True if the gateway is enabled (`yes`), false otherwise.
-     */
-    public function isEnabled(): bool
-    {
-        return $this->get(self::ENABLED, 'no') === 'yes';
-    }
-
-    /**
-     * Returns the filtered (runtime) settings array.
-     *
-     * Applies `transbank_gateway_settings_all` to allow external customization without persisting
-     * the filtered result back to the database.
+     * This method does not merge canonical defaults and preserves the
+     * distinction between "missing", "empty", and "configured".
      *
      * @return array<string, mixed>
      */
-    public function getAll(): array
+    public function getPersistedAll(): array
     {
-        return $this->load();
+        return $this->loadPersisted();
     }
 
     /**
-     * Gets a single setting value using canonical keys.
+     * Gets a single persisted setting value using canonical keys.
+     *
+     * This method only reads values that actually exist in persisted settings
+     * after legacy-key normalization. No canonical defaults are applied.
      *
      * @param string $key Canonical key (prefer using class constants).
      * @param mixed $default Value returned when the key does not exist.
      * @return mixed
      */
-    public function get(string $key, mixed $default = null): mixed
+    public function getPersisted(string $key, mixed $default = null): mixed
     {
-        $settings = $this->load();
+        $settings = $this->loadPersisted();
 
         if (!array_key_exists($key, $settings)) {
             return $default;
         }
 
         return $settings[$key];
+    }
+
+    /**
+     * Gets a persisted string value constrained to an allowed domain.
+     *
+     * Returns the persisted value only when it is a string that matches one of
+     * the allowed values exactly. Otherwise, returns the runtime fallback.
+     *
+     * @param string $key Canonical key (prefer using class constants).
+     * @param string[] $allowedValues Valid domain values for this setting.
+     * @param string $fallback Value returned when the persisted value is missing or invalid.
+     */
+    public function getPersistedAllowedValue(string $key, array $allowedValues, string $fallback): string
+    {
+        $value = $this->getPersisted($key);
+
+        if (!is_string($value)) {
+            return $fallback;
+        }
+
+        if (!in_array($value, $allowedValues, true)) {
+            return $fallback;
+        }
+
+        return $value;
     }
 
     /**
@@ -109,8 +126,8 @@ final class TransbankGatewaySettings
 
         $raw[$key] = $this->sanitize($key, $value);
 
+        $this->persistedCache = null;
         $this->rawCache = $raw;
-        $this->cache = null;
         $this->dirty = true;
     }
 
@@ -143,8 +160,8 @@ final class TransbankGatewaySettings
 
         update_option($this->getOptionName(), $stored);
 
+        $this->persistedCache = null;
         $this->rawCache = null;
-        $this->cache = null;
         $this->dirty = false;
     }
 
@@ -155,27 +172,9 @@ final class TransbankGatewaySettings
      */
     public function refresh(): void
     {
+        $this->persistedCache = null;
         $this->rawCache = null;
-        $this->cache = null;
         $this->dirty = false;
-    }
-
-    /**
-     * Loads filtered settings (runtime view).
-     *
-     * @return array<string, mixed>
-     */
-    private function load(): array
-    {
-        if ($this->cache !== null) {
-            return $this->cache;
-        }
-
-        $settings = $this->loadRaw();
-
-        $this->cache = apply_filters('transbank_gateway_settings_all', $settings, $this->gatewayId);
-
-        return $this->cache;
     }
 
     /**
@@ -206,6 +205,34 @@ final class TransbankGatewaySettings
         $this->rawCache = wp_parse_args($normalized, $this->getDefaults());
 
         return $this->rawCache;
+    }
+
+    /**
+     * Loads persisted settings without applying canonical defaults.
+     *
+     * Persisted settings are:
+     * - read from the option
+     * - normalized (legacy -> canonical fallback)
+     * - not merged with defaults
+     * - not filtered
+     *
+     * @return array<string, mixed>
+     */
+    private function loadPersisted(): array
+    {
+        if ($this->persistedCache !== null) {
+            return $this->persistedCache;
+        }
+
+        $raw = get_option($this->getOptionName(), []);
+
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $this->persistedCache = $this->normalizeKeys($raw);
+
+        return $this->persistedCache;
     }
 
     /**

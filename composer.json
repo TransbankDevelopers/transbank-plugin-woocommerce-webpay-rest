@@ -1,0 +1,14 @@
+{
+  "name": "transbank/woocommerce-webpay-rest-tooling",
+  "description": "Repository tooling dependencies",
+  "type": "project",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {},
+  "require-dev": {
+    "humbug/php-scoper": "0.18.19"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

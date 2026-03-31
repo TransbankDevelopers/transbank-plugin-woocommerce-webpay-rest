@@ -3,16 +3,17 @@
 namespace Transbank\WooCommerce\WebpayRest\Blocks;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
-final class WCGatewayTransbankOneclickBlocks extends AbstractPaymentMethodType {
+final class WCGatewayTransbankOneclickBlocks extends AbstractPaymentMethodType
+{
 
     use WCGatewayTransbankBlocks;
 
     protected $name = 'transbank_oneclick_mall_rest';
 
-    public function __construct() {
-        $scriptPath = dirname(dirname(plugin_dir_path(__FILE__))) . '/js/front/';
-        $this->scriptInfo = require_once $scriptPath . 'oneclick_blocks.asset.php';
-        $this->paymentId = $this->name;
+    public function __construct()
+    {
         $this->productName = 'oneclick';
+        $this->paymentId = $this->name;
+        $this->scriptInfo = require_once $this->getFrontAssetBuildPath() . $this->getFrontEntryBaseName() . '.asset.php';
     }
 }
