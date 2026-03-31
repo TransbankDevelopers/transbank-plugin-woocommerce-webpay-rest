@@ -11,10 +11,10 @@
     },
     "devDependencies": {
         "@woocommerce/dependency-extraction-webpack-plugin": "^3.1.0",
-        "@wordpress/scripts": "^30.14.0",
-        "cross-env": "7.0.3",
+        "@wordpress/scripts": "31.7.0",
+        "cross-env": "10.1.0",
         "glob": "^13.0.1",
-        "sass": "^1.97.3",
+        "sass": "^1.98.0",
         "webpack-remove-empty-scripts": "^1.1.1"
     },
     "scripts": {
