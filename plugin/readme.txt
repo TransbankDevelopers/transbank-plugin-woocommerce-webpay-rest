@@ -59,6 +59,28 @@ Transforma tu eCommerce con el plugin oficial de Transbank y dale a tus clientes
 4. Página de logs
 
 == Changelog ==
+= 1.13.0 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
+__Agrega:__
+
+* Se agrega la opción de poder testear la conexión del producto Webpay Oneclick desde el menú de diagnóstico.
+
+__Actualiza:__
+
+* Se refina el proceso de empaquetado del plugin para evitar conflictos con plugins de terceros.
+* Se refina la carga de la descripción del medio de pago en la pantalla de checkout.
+* Se actualiza el proceso de desinstalación del plugin para permitir conservar el historial de inscripciones y transacciones
+* Se actualiza la pantalla de diagnóstico para diferenciar la prueba de conexión de Webpay Plus y Webpay Oneclick.
+* Se actualizan los logs de Webpay y Oneclick.
+* Se actualiza la posición de los logos de Webpay Oneclick en la pantalla de checkout.
+* Se actualiza las dependencias necesarias para construir el plugin.
+
+__Elimina:__
+
+* Se elimina función en desuso para el manejo de sesiones interno del plugin.
+
 = 1.12.2 =
 
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
@@ -163,6 +185,28 @@ Esta versión no tiene cambios en el comportamiento de las funcionalidades de la
 
 
 == Upgrade Notice ==
+= 1.13.0 =
+
+Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
+
+__Agrega:__
+
+* Se agrega la opción de poder testear la conexión del producto Webpay Oneclick desde el menú de diagnóstico.
+
+__Actualiza:__
+
+* Se refina el proceso de empaquetado del plugin para evitar conflictos con plugins de terceros.
+* Se refina la carga de la descripción del medio de pago en la pantalla de checkout.
+* Se actualiza el proceso de desinstalación del plugin para permitir conservar el historial de inscripciones y transacciones
+* Se actualiza la pantalla de diagnóstico para diferenciar la prueba de conexión de Webpay Plus y Webpay Oneclick.
+* Se actualizan los logs de Webpay y Oneclick.
+* Se actualiza la posición de los logos de Webpay Oneclick en la pantalla de checkout.
+* Se actualiza las dependencias necesarias para construir el plugin.
+
+__Elimina:__
+
+* Se elimina función en desuso para el manejo de sesiones interno del plugin.
+
 = 1.12.2 =
 
 Esta versión no tiene cambios en el comportamiento de las funcionalidades de la API.
