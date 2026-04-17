@@ -208,6 +208,8 @@ validate_scoped_autoload_maps() {
             fi
         done
     done
+
+    return 0
 }
 
 validate_packaging_layout() {
