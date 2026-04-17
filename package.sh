@@ -9,6 +9,7 @@ PLUGIN_FILE="transbank-webpay-plus-rest.zip"
 MAIN_FILE="webpay-rest.php"
 README_FILE="readme.txt"
 ENABLE_SCOPER="${ENABLE_SCOPER:-1}"
+KEEP_BUILD_ARTIFACTS="${KEEP_BUILD_ARTIFACTS:-0}"
 SCOPER_BIN="$PROJECT_ROOT/vendor/bin/php-scoper"
 ROOT_COMPOSER_JSON="$PROJECT_ROOT/composer.json"
 ROOT_COMPOSER_LOCK="$PROJECT_ROOT/composer.lock"
@@ -25,14 +26,18 @@ on_error() {
 }
 
 cleanup() {
-    rm -rf "$PROJECT_ROOT/build"
+    if [[ "$KEEP_BUILD_ARTIFACTS" != "1" ]]; then
+        rm -rf "$PROJECT_ROOT/build"
+    else
+        echo "Keeping build directory for debugging: $PROJECT_ROOT/build"
+    fi
 
     if [[ "$TOOLING_INSTALLED_BY_SCRIPT" == "1" ]]; then
         echo "Cleaning temporary tooling artifacts."
-        if [[ "$ROOT_VENDOR_WAS_PRESENT" == "0" ]]; then
+        if [[ "$KEEP_BUILD_ARTIFACTS" != "1" && "$ROOT_VENDOR_WAS_PRESENT" == "0" ]]; then
             rm -rf "$ROOT_VENDOR_DIR"
         fi
-        if [[ "$ROOT_LOCK_WAS_PRESENT" == "0" ]]; then
+        if [[ "$KEEP_BUILD_ARTIFACTS" != "1" && "$ROOT_LOCK_WAS_PRESENT" == "0" ]]; then
             rm -f "$ROOT_COMPOSER_LOCK"
         fi
     fi
@@ -165,6 +170,48 @@ scope_vendor_dependencies() {
     run_step "Remove unscoped vendor directory" rm -rf vendor
 }
 
+validate_scoped_autoload_maps() {
+    local autoload_psr4="vendor-prefixed/composer/autoload_psr4.php"
+    local autoload_static="vendor-prefixed/composer/autoload_static.php"
+    local required_prefixed_prefix_keys=(
+        "'TransbankVendor\\Psr\\Log\\\\' =>"
+        "'TransbankVendor\\Psr\\Http\\Message\\\\' =>"
+        "'TransbankVendor\\Psr\\Http\\Client\\\\' =>"
+        "'TransbankVendor\\GuzzleHttp\\Psr7\\\\' =>"
+        "'TransbankVendor\\GuzzleHttp\\Promise\\\\' =>"
+    )
+    local forbidden_unprefixed_keys=(
+        "'Psr\\\\Log\\\\' =>"
+        "'Psr\\\\Http\\\\Message\\\\' =>"
+        "'Psr\\\\Http\\\\Client\\\\' =>"
+        "'GuzzleHttp\\\\Psr7\\\\' =>"
+        "'GuzzleHttp\\\\Promise\\\\' =>"
+    )
+
+    for file in "$autoload_psr4" "$autoload_static"; do
+        if [[ ! -f "$file" ]]; then
+            echo "ERROR: missing scoped autoload map: $file" 1>&2
+            exit 1
+        fi
+
+        for prefix_key in "${required_prefixed_prefix_keys[@]}"; do
+            if ! grep -Fq "$prefix_key" "$file"; then
+                echo "ERROR: missing required prefixed namespace key $prefix_key in $file" 1>&2
+                exit 1
+            fi
+        done
+
+        for prefix_key in "${forbidden_unprefixed_keys[@]}"; do
+            if grep -Fq "$prefix_key" "$file"; then
+                echo "ERROR: found unprefixed scoped namespace key $prefix_key in $file" 1>&2
+                exit 1
+            fi
+        done
+    done
+
+    return 0
+}
+
 validate_packaging_layout() {
     local unexpected_prefix_pattern="TransbankVendor\\\\Transbank\\\\WooCommerce\\\\WebpayRest\\\\\|TransbankVendor\\\\Transbank\\\\Plugin\\\\"
 
@@ -181,6 +228,8 @@ validate_packaging_layout() {
         echo "ERROR: vendor directory must not exist when php-scoper is enabled" 1>&2
         exit 1
     fi
+
+    validate_scoped_autoload_maps
 
     if find src shared views -type f -name '*.php' -print0 2>/dev/null | xargs -0 grep -q "$unexpected_prefix_pattern"; then
         echo "ERROR: plugin namespaces were prefixed unexpectedly" 1>&2
@@ -229,13 +278,17 @@ package_plugin() {
 
     cd "$PROJECT_ROOT"
 
-    echo "\nPlugin created, the detail is:"
+    echo
+    echo "Plugin created, the detail is:"
     if [[ -n "${TAG:-}" ]]; then
         echo "- Version: $TAG"
     else
         echo "- Version: unchanged (non-release build)"
     fi
     echo "- File name: $PLUGIN_FILE"
+    if [[ "$KEEP_BUILD_ARTIFACTS" == "1" ]]; then
+        echo "- Build dir kept for debugging: $PROJECT_ROOT/build/package-plugin"
+    fi
 }
 
 trap 'on_error $LINENO' ERR
