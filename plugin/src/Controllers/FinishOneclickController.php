@@ -5,6 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use \Exception;
 use Throwable;
 use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\WooCommerce\WebpayRest\Helpers\RequestInputHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
@@ -43,13 +44,13 @@ class FinishOneclickController
     {
         try {
             $this->log->logInfo('Procesando retorno desde formulario Oneclick');
-            $method = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? '');
-            if ($method === '') {
-                $method = 'GET';
-            }
-
+            $method = RequestInputHelper::resolveRequestMethod($_SERVER);
             $rawData = $method === 'GET' ? $_GET : $_POST;
-            $data = $this->sanitizeOneclickRequest($rawData);
+            $data = RequestInputHelper::sanitizeExpectedFields($rawData, [
+                'TBK_TOKEN',
+                'TBK_ID_SESION',
+                'TBK_ORDEN_COMPRA',
+            ]);
             $oneclickFlow = $this->getOneclickFlow($data);
             $this->log->logInfo('Resumen de retorno de Oneclick', PluginLogger::sanitizeContextForLogs([
                 'method' => $method,
@@ -63,11 +64,11 @@ class FinishOneclickController
             ]);
 
             if ($oneclickFlow === self::ONECLICK_ABORTED_FLOW) {
-                $this->assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
+                RequestInputHelper::assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
                 $this->handleAbortedFlow($data['TBK_TOKEN']);
             }
             if ($oneclickFlow === self::ONECLICK_NORMAL_FLOW) {
-                $this->assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
+                RequestInputHelper::assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
                 $this->handleNormalFlow($data['TBK_TOKEN']);
             }
             if ($oneclickFlow === self::ONECLICK_ERROR_FLOW) {
@@ -89,9 +90,9 @@ class FinishOneclickController
      */
     protected function getOneclickFlow(array $requestData): string
     {
-        $token = $this->hasValue($requestData["TBK_TOKEN"] ?? null);
-        $tbkSessionId = $this->hasValue($requestData['TBK_ID_SESION'] ?? null);
-        $tbkOrdenCompra = $this->hasValue($requestData['TBK_ORDEN_COMPRA'] ?? null);
+        $token = RequestInputHelper::hasValue($requestData["TBK_TOKEN"] ?? null);
+        $tbkSessionId = RequestInputHelper::hasValue($requestData['TBK_ID_SESION'] ?? null);
+        $tbkOrdenCompra = RequestInputHelper::hasValue($requestData['TBK_ORDEN_COMPRA'] ?? null);
 
         if ($token && !$tbkSessionId && !$tbkOrdenCompra) {
             return self::ONECLICK_NORMAL_FLOW;
@@ -200,31 +201,6 @@ class FinishOneclickController
                 $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
             }
             $this->redirectUser($ins ? $ins->from : null, BlocksHelper::ONECLICK_FINISH_ERROR);
-        }
-    }
-
-    private function sanitizeOneclickRequest(array $request): array
-    {
-        return [
-            'TBK_TOKEN' => sanitize_text_field((string) ($request['TBK_TOKEN'] ?? '')),
-            'TBK_ID_SESION' => sanitize_text_field((string) ($request['TBK_ID_SESION'] ?? '')),
-            'TBK_ORDEN_COMPRA' => sanitize_text_field((string) ($request['TBK_ORDEN_COMPRA'] ?? '')),
-        ];
-    }
-
-    private function hasValue(?string $value): bool
-    {
-        return is_string($value) && trim($value) !== '';
-    }
-
-    private function assertValidIdentifier(?string $value, string $fieldName): void
-    {
-        if (!$this->hasValue($value)) {
-            throw new EcommerceException("Parámetro inválido recibido: {$fieldName}");
-        }
-
-        if (strlen($value) > 255 || !preg_match('/^[A-Za-z0-9:_-]+$/', $value)) {
-            throw new EcommerceException("Formato inválido recibido para: {$fieldName}");
         }
     }
 

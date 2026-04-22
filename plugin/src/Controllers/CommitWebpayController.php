@@ -4,6 +4,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 
 use Transbank\WooCommerce\WebpayRest\Services\WebpayService;
 use Transbank\Plugin\Helpers\PluginLogger;
+use Transbank\WooCommerce\WebpayRest\Helpers\RequestInputHelper;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
@@ -55,13 +56,14 @@ class CommitWebpayController
     public function process(): void
     {
         try {
-            $requestMethod = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? '');
-            if ($requestMethod === '') {
-                $requestMethod = 'GET';
-            }
-
+            $requestMethod = RequestInputHelper::resolveRequestMethod($_SERVER);
             $rawRequest = $requestMethod === 'POST' ? $_POST : $_GET;
-            $request = $this->sanitizeWebpayRequest($rawRequest);
+            $request = RequestInputHelper::sanitizeExpectedFields($rawRequest, [
+                'token_ws',
+                'TBK_TOKEN',
+                'TBK_ID_SESION',
+                'TBK_ORDEN_COMPRA',
+            ]);
             $webpayFlow = $this->getWebpayFlow($request);
             $this->log->logInfo('Procesando retorno desde formulario de Webpay.');
             $this->log->logInfo('Resumen de retorno de Webpay', PluginLogger::sanitizeContextForLogs([
@@ -92,22 +94,22 @@ class CommitWebpayController
         $webpayFlow = $webpayFlow ?? $this->getWebpayFlow($request);
 
         if ($webpayFlow == self::WEBPAY_NORMAL_FLOW) {
-            $this->assertValidIdentifier($request['token_ws'], 'token_ws');
+            RequestInputHelper::assertValidIdentifier($request['token_ws'], 'token_ws');
             $this->handleNormalFlow($request['token_ws']);
         }
 
         if ($webpayFlow == self::WEBPAY_TIMEOUT_FLOW) {
-            $this->assertValidIdentifier($request['TBK_ORDEN_COMPRA'], 'TBK_ORDEN_COMPRA');
+            RequestInputHelper::assertValidIdentifier($request['TBK_ORDEN_COMPRA'], 'TBK_ORDEN_COMPRA');
             $this->handleFlowTimeout($request['TBK_ORDEN_COMPRA']);
         }
 
         if ($webpayFlow == self::WEBPAY_ABORTED_FLOW) {
-            $this->assertValidIdentifier($request['TBK_TOKEN'], 'TBK_TOKEN');
+            RequestInputHelper::assertValidIdentifier($request['TBK_TOKEN'], 'TBK_TOKEN');
             $this->handleFlowAborted($request['TBK_TOKEN']);
         }
 
         if ($webpayFlow == self::WEBPAY_ERROR_FLOW) {
-            $this->assertValidIdentifier($request['token_ws'], 'token_ws');
+            RequestInputHelper::assertValidIdentifier($request['token_ws'], 'token_ws');
             $this->handleFlowError($request['token_ws']);
         }
 
@@ -129,19 +131,31 @@ class CommitWebpayController
         $tbkIdSession = $request['TBK_ID_SESION'] ?? null;
         $webpayFlow = self::WEBPAY_INVALID_FLOW;
 
-        if ($this->hasValue($tokenWs) && $this->hasValue($tbkToken)) {
+        if (RequestInputHelper::hasValue($tokenWs) && RequestInputHelper::hasValue($tbkToken)) {
             return self::WEBPAY_ERROR_FLOW;
         }
 
-        if ($this->hasValue($tbkIdSession) && $this->hasValue($tbkToken) && !$this->hasValue($tokenWs)) {
+        if (
+            RequestInputHelper::hasValue($tbkIdSession)
+            && RequestInputHelper::hasValue($tbkToken)
+            && !RequestInputHelper::hasValue($tokenWs)
+        ) {
             $webpayFlow = self::WEBPAY_ABORTED_FLOW;
         }
 
-        if ($this->hasValue($tbkIdSession) && !$this->hasValue($tbkToken) && !$this->hasValue($tokenWs)) {
+        if (
+            RequestInputHelper::hasValue($tbkIdSession)
+            && !RequestInputHelper::hasValue($tbkToken)
+            && !RequestInputHelper::hasValue($tokenWs)
+        ) {
             $webpayFlow = self::WEBPAY_TIMEOUT_FLOW;
         }
 
-        if ($this->hasValue($tokenWs) && !$this->hasValue($tbkToken) && !$this->hasValue($tbkIdSession)) {
+        if (
+            RequestInputHelper::hasValue($tokenWs)
+            && !RequestInputHelper::hasValue($tbkToken)
+            && !RequestInputHelper::hasValue($tbkIdSession)
+        ) {
             $webpayFlow = self::WEBPAY_NORMAL_FLOW;
         }
 
@@ -477,31 +491,5 @@ class CommitWebpayController
     protected function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
     {
         return $status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
-    }
-
-    private function sanitizeWebpayRequest(array $request): array
-    {
-        return [
-            'token_ws' => sanitize_text_field((string) ($request['token_ws'] ?? '')),
-            'TBK_TOKEN' => sanitize_text_field((string) ($request['TBK_TOKEN'] ?? '')),
-            'TBK_ID_SESION' => sanitize_text_field((string) ($request['TBK_ID_SESION'] ?? '')),
-            'TBK_ORDEN_COMPRA' => sanitize_text_field((string) ($request['TBK_ORDEN_COMPRA'] ?? '')),
-        ];
-    }
-
-    private function hasValue(?string $value): bool
-    {
-        return is_string($value) && trim($value) !== '';
-    }
-
-    private function assertValidIdentifier(?string $value, string $fieldName): void
-    {
-        if (!$this->hasValue($value)) {
-            throw new EcommerceException("Parámetro inválido recibido: {$fieldName}");
-        }
-
-        if (strlen($value) > 255 || !preg_match('/^[A-Za-z0-9:_-]+$/', $value)) {
-            throw new EcommerceException("Formato inválido recibido para: {$fieldName}");
-        }
     }
 }
