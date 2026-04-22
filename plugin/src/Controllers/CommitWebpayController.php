@@ -55,8 +55,13 @@ class CommitWebpayController
     public function process(): void
     {
         try {
-            $requestMethod = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? 'GET');
-            $request = $requestMethod === 'POST' ? $_POST : $_GET;
+            $requestMethod = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? '');
+            if ($requestMethod === '') {
+                $requestMethod = 'GET';
+            }
+
+            $rawRequest = $requestMethod === 'POST' ? $_POST : $_GET;
+            $request = $this->sanitizeWebpayRequest($rawRequest);
             $webpayFlow = $this->getWebpayFlow($request);
             $this->log->logInfo('Procesando retorno desde formulario de Webpay.');
             $this->log->logInfo('Resumen de retorno de Webpay', PluginLogger::sanitizeContextForLogs([
@@ -87,18 +92,22 @@ class CommitWebpayController
         $webpayFlow = $webpayFlow ?? $this->getWebpayFlow($request);
 
         if ($webpayFlow == self::WEBPAY_NORMAL_FLOW) {
+            $this->assertValidIdentifier($request['token_ws'], 'token_ws');
             $this->handleNormalFlow($request['token_ws']);
         }
 
         if ($webpayFlow == self::WEBPAY_TIMEOUT_FLOW) {
+            $this->assertValidIdentifier($request['TBK_ORDEN_COMPRA'], 'TBK_ORDEN_COMPRA');
             $this->handleFlowTimeout($request['TBK_ORDEN_COMPRA']);
         }
 
         if ($webpayFlow == self::WEBPAY_ABORTED_FLOW) {
+            $this->assertValidIdentifier($request['TBK_TOKEN'], 'TBK_TOKEN');
             $this->handleFlowAborted($request['TBK_TOKEN']);
         }
 
         if ($webpayFlow == self::WEBPAY_ERROR_FLOW) {
+            $this->assertValidIdentifier($request['token_ws'], 'token_ws');
             $this->handleFlowError($request['token_ws']);
         }
 
@@ -120,19 +129,19 @@ class CommitWebpayController
         $tbkIdSession = $request['TBK_ID_SESION'] ?? null;
         $webpayFlow = self::WEBPAY_INVALID_FLOW;
 
-        if (isset($tokenWs) && isset($tbkToken)) {
+        if ($this->hasValue($tokenWs) && $this->hasValue($tbkToken)) {
             return self::WEBPAY_ERROR_FLOW;
         }
 
-        if (isset($tbkIdSession) && isset($tbkToken) && !isset($tokenWs)) {
+        if ($this->hasValue($tbkIdSession) && $this->hasValue($tbkToken) && !$this->hasValue($tokenWs)) {
             $webpayFlow = self::WEBPAY_ABORTED_FLOW;
         }
 
-        if (isset($tbkIdSession) && !isset($tbkToken) && !isset($tokenWs)) {
+        if ($this->hasValue($tbkIdSession) && !$this->hasValue($tbkToken) && !$this->hasValue($tokenWs)) {
             $webpayFlow = self::WEBPAY_TIMEOUT_FLOW;
         }
 
-        if (isset($tokenWs) && !isset($tbkToken) && !isset($tbkIdSession)) {
+        if ($this->hasValue($tokenWs) && !$this->hasValue($tbkToken) && !$this->hasValue($tbkIdSession)) {
             $webpayFlow = self::WEBPAY_NORMAL_FLOW;
         }
 
@@ -227,6 +236,11 @@ class CommitWebpayController
         );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
+        if (!$webpayTransaction) {
+            $message = 'No se encontró la transacción abortada para el token proporcionado.';
+            $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
+            throw new EcommerceException($message);
+        }
 
         if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -255,6 +269,11 @@ class CommitWebpayController
         );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
+        if (!$webpayTransaction) {
+            $message = 'No se encontró la transacción con error para el token proporcionado.';
+            $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
+            throw new EcommerceException($message);
+        }
 
         if ($this->transactionService->checkIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -320,10 +339,10 @@ class CommitWebpayController
         $webpayTransaction,
         TransactionCommitResponse $commitResponse
     ): void {
-        $this->log->logInfo("Transacción rechazada por Transbank", [
+        $this->log->logInfo("Transacción rechazada por Transbank", PluginLogger::sanitizeContextForLogs([
             'status' => $commitResponse->getStatus(),
-            'token' => PluginLogger::sanitizeContextForLogs(['token' => $webpayTransaction->token])['token'],
-        ]);
+            'token' => $webpayTransaction->token,
+        ]));
         $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
         $this->ecommerceService->setWebpayOrderAsFailed($wooCommerceOrder, $webpayTransaction, $commitResponse);
 
@@ -352,6 +371,9 @@ class CommitWebpayController
         );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
+        if (!$webpayTransaction) {
+            throw new EcommerceException('No se encontró la transacción previamente procesada para el token proporcionado.');
+        }
         $status = $webpayTransaction->status;
         $errorCode = self::WEBPAY_EXCEPTION_FLOW_MESSAGE;
 
@@ -398,7 +420,7 @@ class CommitWebpayController
     ): void {
         $this->log->logInfo(
             "Error al procesar transacción por Transbank",
-            ['Token' => $webpayTransaction->token]
+            PluginLogger::sanitizeContextForLogs(['token' => $webpayTransaction->token])
         );
 
         $data = [
@@ -455,5 +477,31 @@ class CommitWebpayController
     protected function checkTransactionIsAlreadyProcessedByStatus(string $status): bool
     {
         return $status != TbkConstants::TRANSACTION_STATUS_INITIALIZED;
+    }
+
+    private function sanitizeWebpayRequest(array $request): array
+    {
+        return [
+            'token_ws' => sanitize_text_field((string) ($request['token_ws'] ?? '')),
+            'TBK_TOKEN' => sanitize_text_field((string) ($request['TBK_TOKEN'] ?? '')),
+            'TBK_ID_SESION' => sanitize_text_field((string) ($request['TBK_ID_SESION'] ?? '')),
+            'TBK_ORDEN_COMPRA' => sanitize_text_field((string) ($request['TBK_ORDEN_COMPRA'] ?? '')),
+        ];
+    }
+
+    private function hasValue(?string $value): bool
+    {
+        return is_string($value) && trim($value) !== '';
+    }
+
+    private function assertValidIdentifier(?string $value, string $fieldName): void
+    {
+        if (!$this->hasValue($value)) {
+            throw new EcommerceException("Parámetro inválido recibido: {$fieldName}");
+        }
+
+        if (strlen($value) > 255 || !preg_match('/^[A-Za-z0-9:_-]+$/', $value)) {
+            throw new EcommerceException("Formato inválido recibido para: {$fieldName}");
+        }
     }
 }
