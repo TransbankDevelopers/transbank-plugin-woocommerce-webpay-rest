@@ -95,7 +95,9 @@ $selectedFilename = isset($lastLog['filename']) ? basename((string) $lastLog['fi
 
     <?php
     if (isset($lastLog['content'])) {
-        echo '<div class="log-container">';
+        ?>
+        <div class="log-container">
+        <?php
         $logLines = explode("\n", $lastLog['content']);
 
         foreach ($logLines as $line) {
@@ -111,7 +113,9 @@ $selectedFilename = isset($lastLog['filename']) ? basename((string) $lastLog['fi
                 <?php
             }
         }
-        echo '</div>';
+        ?>
+        </div>
+        <?php
     }
     ?>
 </div>
