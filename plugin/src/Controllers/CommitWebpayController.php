@@ -55,12 +55,19 @@ class CommitWebpayController
     public function process(): void
     {
         try {
-            $requestMethod = $_SERVER['REQUEST_METHOD'];
+            $requestMethod = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? 'GET');
             $request = $requestMethod === 'POST' ? $_POST : $_GET;
+            $webpayFlow = $this->getWebpayFlow($request);
             $this->log->logInfo('Procesando retorno desde formulario de Webpay.');
-            $this->log->logInfo("Request method: {$requestMethod}");
-            $this->log->logInfo("Request payload", $request);
-            $this->handleFormReturn($request);
+            $this->log->logInfo('Resumen de retorno de Webpay', PluginLogger::sanitizeContextForLogs([
+                'method' => $requestMethod,
+                'flow' => $webpayFlow,
+                'token_ws' => $request['token_ws'] ?? null,
+                'TBK_TOKEN' => $request['TBK_TOKEN'] ?? null,
+                'TBK_ID_SESION' => $request['TBK_ID_SESION'] ?? null,
+                'TBK_ORDEN_COMPRA' => $request['TBK_ORDEN_COMPRA'] ?? null,
+            ], ['token_ws', 'TBK_TOKEN', 'TBK_ID_SESION', 'TBK_ORDEN_COMPRA']));
+            $this->handleFormReturn($request, $webpayFlow);
         } catch (\Exception | \Error $e) {
             $this->log->logError('Error en el proceso de validación de pago', ['error' => $e->getMessage()]);
             $this->setPaymentErrorPage(self::WEBPAY_EXCEPTION_FLOW_MESSAGE);
@@ -75,9 +82,9 @@ class CommitWebpayController
      * @throws EcommerceException If the payment flow is not recognized.
      * @return void
      */
-    protected function handleFormReturn(array $request): void
+    protected function handleFormReturn(array $request, ?string $webpayFlow = null): void
     {
-        $webpayFlow = $this->getWebpayFlow($request);
+        $webpayFlow = $webpayFlow ?? $this->getWebpayFlow($request);
 
         if ($webpayFlow == self::WEBPAY_NORMAL_FLOW) {
             $this->handleNormalFlow($request['token_ws']);
@@ -140,7 +147,10 @@ class CommitWebpayController
      */
     protected function handleNormalFlow(string $token): void
     {
-        $this->log->logInfo("Procesando transacción por flujo Normal", ['token' => $token]);
+        $this->log->logInfo(
+            "Procesando transacción por flujo Normal",
+            PluginLogger::sanitizeContextForLogs(['token' => $token], ['token'])
+        );
 
         if ($this->transactionService->checkIsAlreadyProcessed($token)) {
             $this->handleTransactionAlreadyProcessed($token);
@@ -170,7 +180,7 @@ class CommitWebpayController
      */
     protected function handleFlowTimeout(string $buyOrder): void
     {
-        $this->log->logInfo("Procesando transacción por flujo timeout", ['buyOrder' => $buyOrder]);
+        $this->log->logInfo("Procesando transacción por flujo timeout");
 
         $webpayTransaction = $this->transactionService->getByBuyOrder($buyOrder);
 
@@ -195,7 +205,10 @@ class CommitWebpayController
      */
     protected function handleFlowAborted(string $token): void
     {
-        $this->log->logInfo("Procesando transacción por flujo de pago abortado", ['token' => $token]);
+        $this->log->logInfo(
+            "Procesando transacción por flujo de pago abortado",
+            PluginLogger::sanitizeContextForLogs(['token' => $token], ['token'])
+        );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
 
@@ -222,7 +235,7 @@ class CommitWebpayController
     {
         $this->log->logInfo(
             "Procesando transacción por flujo de error en formulario de pago",
-            ['token' => $token]
+            PluginLogger::sanitizeContextForLogs(['token' => $token], ['token'])
         );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
@@ -257,8 +270,8 @@ class CommitWebpayController
     ): void {
         $token = $webpayTransaction->token;
         $this->log->logInfo("Transacción autorizada por Transbank", [
-            'token' => $token,
-            'buyOrder' => $commitResponse->getBuyOrder()
+            'buyOrder' => $commitResponse->getBuyOrder(),
+            'token' => PluginLogger::sanitizeContextForLogs(['token' => $token], ['token'])['token'],
         ]);
 
         $this->transactionService->update(
@@ -291,8 +304,10 @@ class CommitWebpayController
         $webpayTransaction,
         TransactionCommitResponse $commitResponse
     ): void {
-        $token = $webpayTransaction->token;
-        $this->log->logInfo("Transacción rechazada por Transbank", ['token' => $token, 'status' => $commitResponse->getStatus()]);
+        $this->log->logInfo("Transacción rechazada por Transbank", [
+            'status' => $commitResponse->getStatus(),
+            'token' => PluginLogger::sanitizeContextForLogs(['token' => $webpayTransaction->token], ['token'])['token'],
+        ]);
         $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
         $this->ecommerceService->setWebpayOrderAsFailed($wooCommerceOrder, $webpayTransaction, $commitResponse);
 
@@ -315,7 +330,10 @@ class CommitWebpayController
      */
     protected function handleTransactionAlreadyProcessed(string $token): void
     {
-        $this->log->logInfo("Transacción ya se encontraba procesada", ['token' => $token]);
+        $this->log->logInfo(
+            "Transacción ya se encontraba procesada",
+            PluginLogger::sanitizeContextForLogs(['token' => $token], ['token'])
+        );
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
         $status = $webpayTransaction->status;
