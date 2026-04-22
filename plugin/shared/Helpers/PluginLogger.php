@@ -103,23 +103,25 @@ final class PluginLogger
         return $sanitizedContext;
     }
 
-    private static function sanitizeLogValue($value, int $depth = 0)
+    private static function sanitizeLogValue(mixed $value, int $depth = 0): mixed
     {
         if ($depth > self::MAX_LOG_DEPTH) {
             return '[array too deep]';
         }
 
+        $sanitizedValue = null;
+
         if (is_array($value)) {
-            return array_map(function ($nestedValue) use ($depth) {
+            $sanitizedValue = array_map(function ($nestedValue) use ($depth) {
                 return self::sanitizeLogValue($nestedValue, $depth + 1);
             }, $value);
+        } elseif (is_null($value) || is_bool($value) || is_int($value) || is_float($value)) {
+            $sanitizedValue = $value;
+        } else {
+            $sanitizedValue = sanitize_text_field(wp_strip_all_tags((string) $value));
         }
 
-        if (is_null($value) || is_bool($value) || is_int($value) || is_float($value)) {
-            return $value;
-        }
-
-        return sanitize_text_field(wp_strip_all_tags((string) $value));
+        return $sanitizedValue;
     }
 
     public function getInfo()
