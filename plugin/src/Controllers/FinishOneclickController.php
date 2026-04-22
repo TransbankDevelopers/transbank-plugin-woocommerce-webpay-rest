@@ -43,8 +43,13 @@ class FinishOneclickController
     {
         try {
             $this->log->logInfo('Procesando retorno desde formulario Oneclick');
-            $method = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? 'GET');
-            $data = $method === 'GET' ? $_GET : $_POST;
+            $method = sanitize_text_field($_SERVER['REQUEST_METHOD'] ?? '');
+            if ($method === '') {
+                $method = 'GET';
+            }
+
+            $rawData = $method === 'GET' ? $_GET : $_POST;
+            $data = $this->sanitizeOneclickRequest($rawData);
             $oneclickFlow = $this->getOneclickFlow($data);
             $this->log->logInfo('Resumen de retorno de Oneclick', PluginLogger::sanitizeContextForLogs([
                 'method' => $method,
@@ -58,9 +63,11 @@ class FinishOneclickController
             ]);
 
             if ($oneclickFlow === self::ONECLICK_ABORTED_FLOW) {
+                $this->assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
                 $this->handleAbortedFlow($data['TBK_TOKEN']);
             }
             if ($oneclickFlow === self::ONECLICK_NORMAL_FLOW) {
+                $this->assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
                 $this->handleNormalFlow($data['TBK_TOKEN']);
             }
             if ($oneclickFlow === self::ONECLICK_ERROR_FLOW) {
@@ -82,9 +89,9 @@ class FinishOneclickController
      */
     protected function getOneclickFlow(array $requestData): string
     {
-        $token = isset($requestData["TBK_TOKEN"]);
-        $tbkSessionId = isset($requestData['TBK_ID_SESION']);
-        $tbkOrdenCompra = isset($requestData['TBK_ORDEN_COMPRA']);
+        $token = $this->hasValue($requestData["TBK_TOKEN"] ?? null);
+        $tbkSessionId = $this->hasValue($requestData['TBK_ID_SESION'] ?? null);
+        $tbkOrdenCompra = $this->hasValue($requestData['TBK_ORDEN_COMPRA'] ?? null);
 
         if ($token && !$tbkSessionId && !$tbkOrdenCompra) {
             return self::ONECLICK_NORMAL_FLOW;
@@ -109,6 +116,9 @@ class FinishOneclickController
             PluginLogger::sanitizeContextForLogs(['token' => $token])
         );
         $ins = $this->inscriptionService->findByToken($token);
+        if (!$ins) {
+            throw new EcommerceException('No se encontró la inscripción para el token proporcionado.');
+        }
         BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'warning');
         $this->inscriptionService->update($ins->id, [
             'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED
@@ -127,8 +137,13 @@ class FinishOneclickController
      */
     private function handleNormalFlow(string $token)
     {
+        $ins = null;
+
         try {
             $ins = $this->inscriptionService->getByToken($token);
+            if (!$ins) {
+                throw new EcommerceException('No se encontró la inscripción para el token proporcionado.');
+            }
             $this->log->logInfo('Finalizando inscripción', PluginLogger::sanitizeContextForLogs([
                 'userName' => $ins->username,
                 'email' => $ins->email,
@@ -169,15 +184,47 @@ class FinishOneclickController
             $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
             $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
         } catch (Exception $e) {
-            $this->log->logError('Error al confirmar la inscripción', PluginLogger::sanitizeContextForLogs([
-                'userName' => $ins->username,
-                'email' => $ins->email,
+            $errorContext = [
                 'token' => $token,
                 'error' => $e->getMessage(),
-            ]));
+            ];
+
+            if ($ins) {
+                $errorContext['userName'] = $ins->username;
+                $errorContext['email'] = $ins->email;
+            }
+
+            $this->log->logError('Error al confirmar la inscripción', PluginLogger::sanitizeContextForLogs($errorContext));
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
-            $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
-            $this->redirectUser($ins->from, BlocksHelper::ONECLICK_FINISH_ERROR);
+            if ($ins) {
+                $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
+            }
+            $this->redirectUser($ins ? $ins->from : null, BlocksHelper::ONECLICK_FINISH_ERROR);
+        }
+    }
+
+    private function sanitizeOneclickRequest(array $request): array
+    {
+        return [
+            'TBK_TOKEN' => sanitize_text_field((string) ($request['TBK_TOKEN'] ?? '')),
+            'TBK_ID_SESION' => sanitize_text_field((string) ($request['TBK_ID_SESION'] ?? '')),
+            'TBK_ORDEN_COMPRA' => sanitize_text_field((string) ($request['TBK_ORDEN_COMPRA'] ?? '')),
+        ];
+    }
+
+    private function hasValue(?string $value): bool
+    {
+        return is_string($value) && trim($value) !== '';
+    }
+
+    private function assertValidIdentifier(?string $value, string $fieldName): void
+    {
+        if (!$this->hasValue($value)) {
+            throw new EcommerceException("Parámetro inválido recibido: {$fieldName}");
+        }
+
+        if (strlen($value) > 255 || !preg_match('/^[A-Za-z0-9:_-]+$/', $value)) {
+            throw new EcommerceException("Formato inválido recibido para: {$fieldName}");
         }
     }
 
