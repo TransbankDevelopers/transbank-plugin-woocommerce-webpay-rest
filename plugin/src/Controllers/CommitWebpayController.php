@@ -158,8 +158,24 @@ class CommitWebpayController
         }
 
         $webpayTransaction = $this->transactionService->findFirstByToken($token);
+
+        if (!$webpayTransaction) {
+            $message = "No se encontró la transacción para el token proporcionado.";
+            $this->log->logError(
+                $message,
+                PluginLogger::sanitizeContextForLogs(['token' => $token])
+            );
+            throw new EcommerceException($message);
+        }
+
         $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
         $commitResponse = $this->webpayService->commitTransaction($token);
+
+        if ($commitResponse->getStatus() === null || $commitResponse->getResponseCode() === null) {
+            $message = "La respuesta de confirmación de Transbank es inválida.";
+            $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
+            throw new EcommerceException($message);
+        }
 
         if ($commitResponse->isApproved()) {
             $this->handleAuthorizedTransaction(
