@@ -92,26 +92,19 @@ final class PluginLogger
         $this->logger->error($msg, $context);
     }
 
-    public static function sanitizeContextForLogs(array $context, array $redactedKeys = []): array
+    public static function sanitizeContextForLogs(array $context): array
     {
         $sanitizedContext = [];
 
         foreach ($context as $key => $value) {
-            $sanitizedContext[$key] = self::sanitizeLogValue(
-                $value,
-                in_array((string) $key, $redactedKeys, true)
-            );
+            $sanitizedContext[$key] = self::sanitizeLogValue($value);
         }
 
         return $sanitizedContext;
     }
 
-    private static function sanitizeLogValue($value, bool $redact = false)
+    private static function sanitizeLogValue($value)
     {
-        if ($redact) {
-            return self::maskIdentifier($value);
-        }
-
         if (is_array($value)) {
             return array_map(function ($nestedValue) {
                 return self::sanitizeLogValue($nestedValue);
@@ -123,39 +116,6 @@ final class PluginLogger
         }
 
         return sanitize_text_field(wp_strip_all_tags((string) $value));
-    }
-
-    private static function describePresence($value): string
-    {
-        if (is_array($value)) {
-            return empty($value) ? '[missing]' : '[present]';
-        }
-
-        if (is_null($value) || $value === '') {
-            return '[missing]';
-        }
-
-        return '[present]';
-    }
-
-    private static function maskIdentifier($value): string
-    {
-        if (is_array($value)) {
-            return self::describePresence($value);
-        }
-
-        if (is_null($value) || $value === '') {
-            return '[missing]';
-        }
-
-        $sanitizedValue = sanitize_text_field(wp_strip_all_tags((string) $value));
-        $length = strlen($sanitizedValue);
-
-        if ($length <= 8) {
-            return substr($sanitizedValue, 0, 2) . str_repeat('*', max($length - 4, 1)) . substr($sanitizedValue, -2);
-        }
-
-        return substr($sanitizedValue, 0, 4) . str_repeat('*', $length - 8) . substr($sanitizedValue, -4);
     }
 
     public function getInfo()
