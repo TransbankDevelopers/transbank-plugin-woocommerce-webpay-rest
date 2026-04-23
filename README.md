@@ -48,17 +48,7 @@ Para cumplir estas dependencias, debes instalar [Composer](https://getcomposer.o
 
 ## Desarrollo
 
-Para apoyar el levantamiento rápido de un ambiente de desarrollo, hemos creado la especificación de contenedores a través de Docker Compose.
-
-Para probar el plugin, ponemos a disposición el siguiente contenedor:
-
-- [WooCommerce 9.4 con php 8.2](./docker-woocommerce-php8.2-wp6.7.1-wc2.11.0-woo9.4.2)
-
-Si necesitas subir el plugin a Woocommerce y obtienes un error por que no se puede mover el archivo a `wp-content` entonces ejecuta
-
-```bash
-docker-compose run webserver chmod -Rv 767 wp-content/
-```
+Para apoyar el levantamiento rápido de un ambiente de desarrollo, se ha agregado un devcontainer, el cual levanta un entorno listo para probar el plugin.
 
 ### Actualizar versión del SDK de Transbank
 

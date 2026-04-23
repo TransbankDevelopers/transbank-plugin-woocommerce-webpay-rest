@@ -10,8 +10,8 @@ use Transbank\Plugin\Model\LogConfig;
 
 final class PluginLogger
 {
-
     const CACHE_LOG_NAME = 'transbank_log_file_name';
+    private const MAX_LOG_DEPTH = 10;
 
     private $logger;
     private $config;
@@ -90,6 +90,38 @@ final class PluginLogger
     public function logError(string $msg, array $context = [])
     {
         $this->logger->error($msg, $context);
+    }
+
+    public static function sanitizeContextForLogs(array $context): array
+    {
+        $sanitizedContext = [];
+
+        foreach ($context as $key => $value) {
+            $sanitizedContext[$key] = self::sanitizeLogValue($value);
+        }
+
+        return $sanitizedContext;
+    }
+
+    private static function sanitizeLogValue(mixed $value, int $depth = 0): mixed
+    {
+        if ($depth > self::MAX_LOG_DEPTH) {
+            return '[array too deep]';
+        }
+
+        $sanitizedValue = null;
+
+        if (is_array($value)) {
+            $sanitizedValue = array_map(function ($nestedValue) use ($depth) {
+                return self::sanitizeLogValue($nestedValue, $depth + 1);
+            }, $value);
+        } elseif (is_null($value) || is_bool($value) || is_int($value) || is_float($value)) {
+            $sanitizedValue = $value;
+        } else {
+            $sanitizedValue = sanitize_text_field(wp_strip_all_tags((string) $value));
+        }
+
+        return $sanitizedValue;
     }
 
     public function getInfo()
