@@ -5,6 +5,7 @@ namespace Transbank\WooCommerce\WebpayRest\Controllers;
 use \Exception;
 use Throwable;
 use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\WooCommerce\WebpayRest\Helpers\RequestInputHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
@@ -43,17 +44,31 @@ class FinishOneclickController
     {
         try {
             $this->log->logInfo('Procesando retorno desde formulario Oneclick');
-            $method = $_SERVER['REQUEST_METHOD'];
-            $data = $method === 'GET' ? $_GET : $_POST;
+            $method = RequestInputHelper::resolveRequestMethod($_SERVER);
+            $rawData = $method === 'GET' ? $_GET : $_POST;
+            $data = RequestInputHelper::sanitizeExpectedFields($rawData, [
+                'TBK_TOKEN',
+                'TBK_ID_SESION',
+                'TBK_ORDEN_COMPRA',
+            ]);
             $oneclickFlow = $this->getOneclickFlow($data);
+            $this->log->logInfo('Resumen de retorno de Oneclick', PluginLogger::sanitizeContextForLogs([
+                'method' => $method,
+                'flow' => $oneclickFlow,
+                'TBK_TOKEN' => $data['TBK_TOKEN'] ?? null,
+                'TBK_ID_SESION' => $data['TBK_ID_SESION'] ?? null,
+                'TBK_ORDEN_COMPRA' => $data['TBK_ORDEN_COMPRA'] ?? null,
+            ]));
             $this->log->logInfo('Flujo de inscripción Oneclick:', [
                 'flow' => $oneclickFlow
             ]);
 
             if ($oneclickFlow === self::ONECLICK_ABORTED_FLOW) {
+                RequestInputHelper::assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
                 $this->handleAbortedFlow($data['TBK_TOKEN']);
             }
             if ($oneclickFlow === self::ONECLICK_NORMAL_FLOW) {
+                RequestInputHelper::assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
                 $this->handleNormalFlow($data['TBK_TOKEN']);
             }
             if ($oneclickFlow === self::ONECLICK_ERROR_FLOW) {
@@ -75,15 +90,9 @@ class FinishOneclickController
      */
     protected function getOneclickFlow(array $requestData): string
     {
-        $token = isset($requestData["TBK_TOKEN"]);
-        $tbkSessionId = isset($requestData['TBK_ID_SESION']);
-        $tbkOrdenCompra = isset($requestData['TBK_ORDEN_COMPRA']);
-
-        $this->log->logInfo('Datos recibidos desde formulario Oneclick', [
-            'token' => $token ? $requestData["TBK_TOKEN"] : null,
-            'tbkSessionId' => $tbkSessionId ? $requestData['TBK_ID_SESION'] : null,
-            'tbkOrdenCompra' => $tbkOrdenCompra ? $requestData['TBK_ORDEN_COMPRA'] : null,
-        ]);
+        $token = RequestInputHelper::hasValue($requestData["TBK_TOKEN"] ?? null);
+        $tbkSessionId = RequestInputHelper::hasValue($requestData['TBK_ID_SESION'] ?? null);
+        $tbkOrdenCompra = RequestInputHelper::hasValue($requestData['TBK_ORDEN_COMPRA'] ?? null);
 
         if ($token && !$tbkSessionId && !$tbkOrdenCompra) {
             return self::ONECLICK_NORMAL_FLOW;
@@ -103,10 +112,14 @@ class FinishOneclickController
      */
     protected function handleAbortedFlow(string $token): void
     {
-        $this->log->logInfo('Inscripcion abortada por el usuario desde el formulario Oneclick', [
-            'token' => $token
-        ]);
+        $this->log->logInfo(
+            'Inscripcion abortada por el usuario desde el formulario Oneclick',
+            PluginLogger::sanitizeContextForLogs(['token' => $token])
+        );
         $ins = $this->inscriptionService->findByToken($token);
+        if (!$ins) {
+            throw new EcommerceException('No se encontró la inscripción para el token proporcionado.');
+        }
         BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'warning');
         $this->inscriptionService->update($ins->id, [
             'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED
@@ -125,13 +138,18 @@ class FinishOneclickController
      */
     private function handleNormalFlow(string $token)
     {
+        $ins = null;
+
         try {
             $ins = $this->inscriptionService->getByToken($token);
-            $this->log->logInfo('Finalizando inscripción', [
-                'token' => $token,
+            if (!$ins) {
+                throw new EcommerceException('No se encontró la inscripción para el token proporcionado.');
+            }
+            $this->log->logInfo('Finalizando inscripción', PluginLogger::sanitizeContextForLogs([
                 'userName' => $ins->username,
-                'email' => $ins->email
-            ]);
+                'email' => $ins->email,
+                'token' => $token,
+            ]));
             $resp = $this->oneclickInscriptionService->finishInscription(
                 $token
             );
@@ -167,15 +185,22 @@ class FinishOneclickController
             $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
             $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
         } catch (Exception $e) {
-            $this->log->logError('Error al confirmar la inscripción', [
+            $errorContext = [
                 'token' => $token,
-                'userName' => $ins->username,
-                'email' => $ins->email,
                 'error' => $e->getMessage(),
-            ]);
+            ];
+
+            if ($ins) {
+                $errorContext['userName'] = $ins->username;
+                $errorContext['email'] = $ins->email;
+            }
+
+            $this->log->logError('Error al confirmar la inscripción', PluginLogger::sanitizeContextForLogs($errorContext));
             BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
-            $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
-            $this->redirectUser($ins->from, BlocksHelper::ONECLICK_FINISH_ERROR);
+            if ($ins) {
+                $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
+            }
+            $this->redirectUser($ins ? $ins->from : null, BlocksHelper::ONECLICK_FINISH_ERROR);
         }
     }
 
