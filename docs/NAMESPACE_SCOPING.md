@@ -6,14 +6,28 @@ El artefacto final incluye las dependencias externas prefijadas bajo el namespac
 
 ### Como funciona el proceso
 
-1. `./package.sh` crea un directorio temporal de build e instala las dependencias runtime del plugin.
-2. Los assets frontend se generan dentro de ese directorio temporal.
-3. `php-scoper` se ejecuta sobre el directorio `vendor/` del plugin y escribe el resultado en `vendor-prefixed/`.
-4. Luego el build aplica dos pasos de normalización:
+1. `./package.sh` copia el contenido de `plugin/` a un directorio temporal de trabajo en `build/package-plugin/`.
+2. Dentro de ese directorio temporal ejecuta `composer install --no-dev --prefer-dist`, `npm install --no-audit --no-fund --no-optional` y `npm run build`.
+3. Después del build elimina `node_modules/` y `assets/src/` del artefacto temporal para no incluir archivos de desarrollo.
+4. Si `ENABLE_SCOPER=1`, `php-scoper` se ejecuta con `plugin/scoper.inc.php`, toma `vendor/` como entrada y escribe el resultado en `vendor-prefixed/`.
+5. Luego el build aplica dos pasos de normalización:
    - `scripts/fix_scoper_autoload.sh` ajusta los mapas de autoload de Composer generados para las dependencias prefijadas.
    - `scripts/apply_scope_replacements.sh` actualiza las referencias en el código del plugin que deben apuntar a los namespaces prefijados.
-5. El directorio `vendor/` sin prefijar se elimina del artefacto final.
-6. `plugin/webpay-rest.php` carga el autoloader prefijado cuando existe `vendor-prefixed/` y, en caso contrario, hace fallback al autoloader estándar de `vendor/`.
+6. El directorio `vendor/` sin prefijar se elimina del artefacto final.
+7. Antes de generar el zip, `./package.sh` valida que:
+   - exista `vendor-prefixed/autoload.php`
+   - no exista `vendor/`
+   - los mapas `vendor-prefixed/composer/autoload_psr4.php` y `vendor-prefixed/composer/autoload_static.php` contengan los prefijos esperados
+   - los namespaces propios del plugin no hayan sido prefijados por error
+   - `webpay-rest.php` siga teniendo sintaxis PHP valida
+8. El zip final se genera desde el contenido ya procesado de `build/package-plugin/`.
+
+### Carga en runtime
+
+`plugin/webpay-rest.php` delega la carga de dependencias en `plugin/load-autoloader.php`.
+
+- Si existe `vendor-prefixed/autoload.php`, el plugin carga opcionalmente `vendor-prefixed/scoper-autoload.php` y luego el autoloader prefijado.
+- Si no existe `vendor-prefixed/autoload.php`, hace fallback a `vendor/autoload.php`.
 
 ### Por que existe duplicacion intencional
 
@@ -23,18 +37,19 @@ El artefacto final incluye las dependencias externas prefijadas bajo el namespac
 - `autoload_replacements`
 - `code_replacement_patterns`
 
-Esto es intencional. Aunque algunos mapeos se ven similares, cada uno resuelve una necesidad distinta dentro del flujo de build/runtime:
+No todos cumplen el mismo rol:
 
-- `runtime_psr4` se usa en el bootstrap del plugin para resolver clases prefijadas en runtime.
 - `autoload_replacements` se usa para corregir los archivos de autoload generados por Composer dentro de `vendor-prefixed/composer/`.
 - `code_replacement_patterns` se usa para reescribir referencias PHP dentro del código del plugin que deben apuntar a los namespaces prefijados.
+- `runtime_psr4` existe como mapa declarativo de namespaces prefijados y rutas PSR-4, pero actualmente no es consumido directamente por `./package.sh`, `plugin/load-autoloader.php` ni los scripts de normalización.
 
-Como estas etapas operan sobre artefactos distintos, esta duplicación se mantiene de forma explícita por diseño. La prioridad es favorecer un flujo de empaquetado predecible y fácil de depurar antes que una abstracción más implícita.
+La parte operativa del empaquetado depende hoy de `autoload_replacements` y `code_replacement_patterns`. Si `runtime_psr4` se mantiene, conviene tratarlo como documentación viva de los namespaces prefijados esperados y revisar periódicamente si sigue aportando valor.
 
 ### Consideraciones al cambiar dependencias
 
 - Si una nueva librería de terceros debe ser prefijada, actualiza `plugin/scoper-namespaces.php`.
 - Si esa librería es referenciada directamente desde el código del plugin, asegúrate de cubrir esas referencias en los patrones de reemplazo.
+- Revisa también si `package.sh` necesita nuevas validaciones explícitas para esa librería en los mapas de autoload.
 - Después de cambiar reglas de scope o dependencias, regenera el paquete y valida el plugin usando el artefacto empaquetado, no solo el árbol fuente.
 
 ### Que editar al agregar una nueva dependencia
@@ -42,8 +57,9 @@ Como estas etapas operan sobre artefactos distintos, esta duplicación se mantie
 Si se agrega una nueva dependencia de terceros y debe formar parte del proceso de namespace scoping, se debe revisar al menos lo siguiente:
 
 - `plugin/composer.json`: para declarar la nueva dependencia runtime del plugin.
-- `plugin/scoper-namespaces.php`: para agregar el namespace prefijado en los mapas `runtime_psr4`, `autoload_replacements` y, si aplica, `code_replacement_patterns`.
+- `plugin/scoper-namespaces.php`: para agregar el namespace prefijado en `autoload_replacements` y, si aplica, en `code_replacement_patterns`. Si se mantiene `runtime_psr4`, actualizarlo tambien para que no quede desalineado.
 - Código del plugin en `plugin/src`, `plugin/shared` o `plugin/views`: si la dependencia es usada directamente mediante imports, referencias estáticas o strings de clase, validar que esas referencias queden cubiertas por el proceso de reemplazo.
-- `plugin/webpay-rest.php`: normalmente no requiere cambios adicionales si `runtime_psr4` fue actualizado correctamente, pero debe verificarse cuando la estructura PSR-4 de la nueva librería no siga el patrón esperado.
+- `package.sh`: si corresponde, para agregar o ajustar validaciones sobre prefijos obligatorios o namespaces no permitidos.
+- `plugin/load-autoloader.php`: normalmente no requiere cambios mientras el autoload generado por Composer siga resolviendo correctamente `vendor-prefixed/`.
 
 Después de eso, se debe generar nuevamente el paquete con `./package.sh` y validar el plugin usando el artefacto empaquetado final.

@@ -5,20 +5,21 @@ if (!defined('ABSPATH')) {
 $logDirectoryTitle = "Carpeta en el servidor en donde se guardan los archivos" .
     " con la información de cada compra mediante Webpay";
 $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro creado";
+$selectedFilename = isset($lastLog['filename']) ? basename((string) $lastLog['filename']) : '';
 ?>
 
 <div class="tbk-box" id="logs-container">
     <h3 class="tbk_title_h3">Información de Registros</h3>
     <div class="tbk-plugin-info-container">
         <div class="info-column">
-            <div title="<?= $logDirectoryTitle ?>" class="label label-info">?</div>
+            <div title="<?= esc_attr($logDirectoryTitle) ?>" class="label label-info">?</div>
         </div>
         <div class="info-column">
             <span class="highlight-text"> Directorio de registros: </span>
         </div>
         <div class="info-column">
             <span class="label">
-                <?= $resume['dir'] ?>
+                <?= esc_html((string) ($resume['dir'] ?? '-')) ?>
             </span>
         </div>
     </div>
@@ -35,24 +36,22 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
                 <input type="hidden" name="page" value="transbank_webpay_plus_rest">
                 <input type="hidden" name="tbk_tab" value="logs">
 
-                <select class="select label" name="log_file" id="log_file" <?= !$folderHasLogs ? "disabled" : '' ?>>
+                <select class="select label" name="log_file" id="log_file" <?= !$folderHasLogs ? 'disabled' : '' ?>>
                     <?php
-                    $options = '';
-
                     if (!$folderHasLogs) {
-                        $options = "<option value='' selected>No hay archivos log</option>";
+                        ?>
+                        <option value="" selected>No hay archivos log</option>
+                        <?php
                     }
-                    
+
                     foreach ($resume['logs'] as $index) {
-                        if($index['filename'] == basename($lastLog['filename'])) {
-                            $options .= "<option value='{$index['filename']}' selected>{$index['filename']}</option>";
-                            continue;
-                        }
-
-                        $options .= "<option value='{$index['filename']}'>{$index['filename']}</option>";
+                        $filename = (string) ($index['filename'] ?? '');
+                        ?>
+                        <option value="<?= esc_attr($filename) ?>" <?= selected($filename, $selectedFilename, false) ?>>
+                            <?= esc_html($filename) ?>
+                        </option>
+                        <?php
                     }
-
-                    echo $options;
                     ?>
                 </select>
                 <input type="submit" class="button button-primary tbk-button-primary"
@@ -75,20 +74,20 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
             </div>
             <div class="info-column-plugin">
                 <span class="label">
-                    <?= $lastLog['size'] ?? '-'; ?>
+                    <?= esc_html((string) ($lastLog['size'] ?? '-')) ?>
                 </span>
             </div>
         </div>
         <div class="tbk-plugin-info-container">
             <div class="info-column">
-                <div title="<?= $lineCountTitle ?>" class="label label-info">?</div>
+                <div title="<?= esc_attr($lineCountTitle) ?>" class="label label-info">?</div>
             </div>
             <div class="info-column-plugin">
                 <span class="highlight-text"> Cantidad de Líneas: </span>
             </div>
             <div class="info-column-plugin">
                 <span class="label">
-                    <?= $lastLog['lines'] ?? '-'; ?>
+                    <?= esc_html((string) ($lastLog['lines'] ?? '-')) ?>
                 </span>
             </div>
         </div>
@@ -96,25 +95,27 @@ $lineCountTitle = "Cantidad de líneas que posee el último archivo de registro 
 
     <?php
     if (isset($lastLog['content'])) {
-        $logContent = '<div class="log-container">';
-
+        ?>
+        <div class="log-container">
+        <?php
         $logLines = explode("\n", $lastLog['content']);
 
         foreach ($logLines as $line) {
             $chunks = explode(' > ', $line);
 
-            $date = $chunks[0];
+            $date = $chunks[0] ?? null;
             $level = $chunks[1] ?? null;
             $message = $chunks[2] ?? null;
 
             if (!is_null($date) && !is_null($level) && !is_null($message)) {
-                $logContent .= '<pre class="log-line">' . $date . ' > ' .
-                    '<span class="log-' . strtolower($level) . '">' . $level . '</span> > ' . $message .
-                    '</pre>';
+                ?>
+                <pre class="log-line"><?= esc_html($date) ?> &gt; <span class="<?= esc_attr('log-' . strtolower($level)) ?>"><?= esc_html($level) ?></span> &gt; <?= esc_html($message) ?></pre>
+                <?php
             }
         }
-        $logContent .= '</div>';
-        echo $logContent;
+        ?>
+        </div>
+        <?php
     }
     ?>
 </div>
