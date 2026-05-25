@@ -1,11 +1,10 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Helpers;
+namespace Transbank\WooCommerce\WebpayRest\Admin\ListTable;
 
-use DateTime;
-use DateTimeZone;
 use Transbank\Webpay\Options;
 use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WP_List_Table;
 
