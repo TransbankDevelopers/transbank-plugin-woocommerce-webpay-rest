@@ -58,12 +58,12 @@ class WebpayTransactionsTable extends WP_List_Table
         $tableName = TbkFactory::createTransactionRepository()->getTableName();
         global $wpdb;
         $orderByColumns = $this->get_sortable_columns();
-        $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
-            ? esc_sql($_GET['orderby'])
+        $orderby = isset($_GET['orderby']) && array_key_exists(wp_unslash($_GET['orderby']), $orderByColumns)
+            ? sanitize_key(wp_unslash($_GET['orderby']))
             : 'order_id';
 
-        $queryOrder = isset($_GET['order']) ? strtoupper($_GET['order']) : null;
-        $order = in_array($queryOrder, ['ASC', 'DESC'], true) ? $queryOrder : 'DESC';
+        $queryOrder = isset($_GET['order']) ? strtoupper(wp_unslash($_GET['order'])) : null;
+        $order = $this->getOrderDirectionSql($queryOrder);
 
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
         $paged = $paged > 0 ? $paged : 1;
@@ -104,6 +104,11 @@ class WebpayTransactionsTable extends WP_List_Table
             'product', 'status', 'environment' => $orderby,
             default => 'CAST(order_id AS UNSIGNED)',
         };
+    }
+
+    private function getOrderDirectionSql(?string $queryOrder): string
+    {
+        return in_array($queryOrder, ['ASC', 'DESC'], true) ? $queryOrder : 'DESC';
     }
 
     public function column_amount($item)
