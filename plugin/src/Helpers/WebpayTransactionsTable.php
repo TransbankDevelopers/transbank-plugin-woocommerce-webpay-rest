@@ -79,12 +79,12 @@ class WebpayTransactionsTable extends WP_List_Table
         $totalPages = ceil($totalItems / $perPage);
 
         $itemsQuery = "SELECT * FROM " . esc_sql($tableName) . "
-                   ORDER BY %i {$order}
+                   ORDER BY {$this->getOrderBySql($orderby)} {$order}
                    LIMIT %d, %d";
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $itemsQuery,
-            [$orderby, (int) $offset, (int) $perPage]
+            [(int) $offset, (int) $perPage]
         ));
 
         $this->set_pagination_args([
@@ -95,6 +95,17 @@ class WebpayTransactionsTable extends WP_List_Table
 
         $columns = $this->get_columns();
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
+    }
+
+    private function getOrderBySql(string $orderby): string
+    {
+        return match ($orderby) {
+            'order_id' => 'CAST(order_id AS UNSIGNED)',
+            'amount' => 'CAST(amount AS UNSIGNED)',
+            'id' => 'id',
+            'product', 'status', 'environment' => $orderby,
+            default => 'CAST(order_id AS UNSIGNED)',
+        };
     }
 
     public function column_amount($item)
