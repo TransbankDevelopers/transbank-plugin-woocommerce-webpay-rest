@@ -62,9 +62,8 @@ class WebpayTransactionsTable extends WP_List_Table
             ? esc_sql($_GET['orderby'])
             : 'order_id';
 
-        $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC'])
-            ? esc_sql(strtoupper($_GET['order']))
-            : 'DESC';
+        $queryOrder = isset($_GET['order']) ? strtoupper($_GET['order']) : null;
+        $order = in_array($queryOrder, ['ASC', 'DESC'], true) ? $queryOrder : 'DESC';
 
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
         $paged = $paged > 0 ? $paged : 1;
