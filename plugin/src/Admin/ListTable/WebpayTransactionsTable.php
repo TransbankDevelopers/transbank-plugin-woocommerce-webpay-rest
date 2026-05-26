@@ -1,11 +1,10 @@
 <?php
 
-namespace Transbank\WooCommerce\WebpayRest\Helpers;
+namespace Transbank\WooCommerce\WebpayRest\Admin\ListTable;
 
-use DateTime;
-use DateTimeZone;
 use Transbank\Webpay\Options;
 use Transbank\Plugin\Helpers\TbkConstants;
+use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkResponseUtil;
 use WP_List_Table;
 
@@ -59,13 +58,12 @@ class WebpayTransactionsTable extends WP_List_Table
         $tableName = TbkFactory::createTransactionRepository()->getTableName();
         global $wpdb;
         $orderByColumns = $this->get_sortable_columns();
-        $orderby = isset($_GET['orderby']) && array_key_exists($_GET['orderby'], $orderByColumns)
-            ? esc_sql($_GET['orderby'])
+        $orderby = isset($_GET['orderby']) && array_key_exists(wp_unslash($_GET['orderby']), $orderByColumns)
+            ? sanitize_key(wp_unslash($_GET['orderby']))
             : 'order_id';
 
-        $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC'])
-            ? esc_sql(strtoupper($_GET['order']))
-            : 'DESC';
+        $queryOrder = isset($_GET['order']) ? strtoupper(wp_unslash($_GET['order'])) : null;
+        $order = $this->getOrderDirectionSql($queryOrder);
 
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
         $paged = $paged > 0 ? $paged : 1;
@@ -79,12 +77,12 @@ class WebpayTransactionsTable extends WP_List_Table
         $totalPages = ceil($totalItems / $perPage);
 
         $itemsQuery = "SELECT * FROM " . esc_sql($tableName) . "
-                   ORDER BY %i {$order}
+                   ORDER BY {$this->getOrderBySql($orderby)} {$order}
                    LIMIT %d, %d";
 
         $this->items = $wpdb->get_results($wpdb->prepare(
             $itemsQuery,
-            [$orderby, (int) $offset, (int) $perPage]
+            [(int) $offset, (int) $perPage]
         ));
 
         $this->set_pagination_args([
@@ -95,6 +93,22 @@ class WebpayTransactionsTable extends WP_List_Table
 
         $columns = $this->get_columns();
         $this->_column_headers = [$columns, [], $this->get_sortable_columns(), 'id'];
+    }
+
+    private function getOrderBySql(string $orderby): string
+    {
+        return match ($orderby) {
+            'order_id' => 'CAST(order_id AS UNSIGNED)',
+            'amount' => 'CAST(amount AS UNSIGNED)',
+            'id' => 'id',
+            'product', 'status', 'environment' => $orderby,
+            default => 'CAST(order_id AS UNSIGNED)',
+        };
+    }
+
+    private function getOrderDirectionSql(?string $queryOrder): string
+    {
+        return in_array($queryOrder, ['ASC', 'DESC'], true) ? $queryOrder : 'DESC';
     }
 
     public function column_amount($item)
