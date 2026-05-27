@@ -39,7 +39,7 @@ trait WCGatewayTransbankBlocks
             true
         );
 
-        if ($this->frontStyleHandle !== null) {
+        if ($this->frontStyleHandle !== null && $this->shouldEnqueueFrontStyle()) {
             wp_enqueue_style($this->frontStyleHandle);
         }
 
@@ -125,6 +125,20 @@ trait WCGatewayTransbankBlocks
     protected function getProcessErrorHookAcceptedArgs(): int
     {
         return 2;
+    }
+
+    protected function shouldEnqueueFrontStyle(): bool
+    {
+        if (!function_exists('has_block') || !function_exists('get_queried_object_id')) {
+            return false;
+        }
+
+        $postId = get_queried_object_id();
+        if (!$postId) {
+            return false;
+        }
+
+        return has_block('woocommerce/checkout', $postId);
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)
