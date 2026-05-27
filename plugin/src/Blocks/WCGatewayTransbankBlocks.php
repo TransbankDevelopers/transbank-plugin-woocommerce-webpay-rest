@@ -13,6 +13,7 @@ trait WCGatewayTransbankBlocks
 
     private $scriptInfo;
     private $frontStyleHandle;
+    private ?bool $shouldEnqueueFrontStyle = null;
 
     public function initialize()
     {
@@ -129,16 +130,26 @@ trait WCGatewayTransbankBlocks
 
     protected function shouldEnqueueFrontStyle(): bool
     {
-        if (!function_exists('has_block') || !function_exists('get_queried_object_id')) {
-            return false;
+        if ($this->shouldEnqueueFrontStyle !== null) {
+            return $this->shouldEnqueueFrontStyle;
         }
 
-        $postId = get_queried_object_id();
-        if (!$postId) {
-            return false;
+        $shouldEnqueue = false;
+
+        if (function_exists('is_checkout') && is_checkout()) {
+            $shouldEnqueue = true;
+
+            if (function_exists('get_queried_object_id') && function_exists('has_block')) {
+                $postId = get_queried_object_id();
+                if ($postId > 0) {
+                    $shouldEnqueue = has_block('woocommerce/checkout', $postId);
+                }
+            }
         }
 
-        return has_block('woocommerce/checkout', $postId);
+        $this->shouldEnqueueFrontStyle = $shouldEnqueue;
+
+        return $this->shouldEnqueueFrontStyle;
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)
