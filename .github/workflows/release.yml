@@ -19,7 +19,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@11.5.1 --activate
       - name: Install SVN
         run: |
           sudo apt-get update

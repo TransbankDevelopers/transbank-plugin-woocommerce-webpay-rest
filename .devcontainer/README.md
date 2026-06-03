@@ -13,7 +13,7 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 
 - **Wordpress 6.9.1** con PHP 8.2.
 - **Woocommerce 10.6.1** con PHP 8.2.
-- **Node 20.X**
+- **Node 22.X**
 - **Wordpress CLI**
 - **Woocommerce CLI**
 - **Mysql 8** como base de datos.

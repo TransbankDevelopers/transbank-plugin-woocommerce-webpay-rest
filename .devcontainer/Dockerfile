@@ -2,7 +2,7 @@
 # image with
 # WordPress 6.9.1
 # Woocomerce 10.5.2
-# Node 20.x
+# Node 22.x
 # Wordpress Cli lasted
 # Composer 2.9.2
 ############################
@@ -50,10 +50,12 @@ RUN printf '%s\n' \
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
  && a2enconf servername
 
-# Install node 20.x
-RUN curl --proto "=https" -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+# Install node 22.x
+RUN curl --proto "=https" -fsSL https://deb.nodesource.com/setup_22.x | bash - \
  && apt-get update \
  && apt-get install -y --no-install-recommends nodejs \
+ && corepack enable \
+ && corepack prepare pnpm@11.5.1 --activate \
  && npm install --ignore-scripts -g npm@latest \
  && rm -rf /var/lib/apt/lists/*
 
