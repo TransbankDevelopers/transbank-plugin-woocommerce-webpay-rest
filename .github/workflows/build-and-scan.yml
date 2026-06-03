@@ -12,7 +12,7 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Setup PHP
@@ -20,9 +20,11 @@ jobs:
         with:
           php-version: "8.2"
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "22"
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@11.5.1 --activate
       - name: Package Plugin
         shell: bash
         run: |
