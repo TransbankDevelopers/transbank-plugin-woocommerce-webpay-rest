@@ -161,11 +161,13 @@ class FinishOneclickController
                 'from' => $from
             ]);
 
+            $userInfo = wp_get_current_user();
+
+            if (!$userInfo) {
+                throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
+            }
+
             if ($resp->isApproved()) {
-                $userInfo = wp_get_current_user();
-                if (!$userInfo) {
-                    throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
-                }
                 $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
                 BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
                 $token = $this->savePaymentToken($ins, $resp);
