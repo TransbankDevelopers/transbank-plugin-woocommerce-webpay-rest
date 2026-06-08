@@ -190,6 +190,7 @@ class FinishOneclickController
                     'responseCode' => $resp->getResponseCode(),
                     'user'         => $ins->user_id,
                 ]);
+                $order->add_order_note('Inscripción de tarjeta rechazada por Transbank. Código de respuesta: ' . $resp->getResponseCode());
                 BlocksHelper::addLegacyNotices(
                     __('La inscripción fue rechazada. Por favor, intenta nuevamente con otra tarjeta.', 'transbank_wc_plugin'),
                     'error'
