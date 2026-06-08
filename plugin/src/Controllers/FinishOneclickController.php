@@ -161,29 +161,41 @@ class FinishOneclickController
                 'from' => $from
             ]);
 
-            $userInfo = wp_get_current_user();
-            if (!$userInfo) {
-                throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
-            }
-            $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
-            BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
-            $token = $this->savePaymentToken($ins, $resp);
-            if ($order) {
-                $order->add_order_note('Tarjeta inscrita satisfactoriamente');
-            }
-            $this->inscriptionService->update($ins->id, [
-                'token_id' => $token->get_id(),
-            ]);
+            if ($resp->isApproved()) {
+                $userInfo = wp_get_current_user();
+                if (!$userInfo) {
+                    throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
+                }
+                $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
+                BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
+                $token = $this->savePaymentToken($ins, $resp);
+                if ($order) {
+                    $order->add_order_note('Tarjeta inscrita satisfactoriamente');
+                }
+                $this->inscriptionService->update($ins->id, [
+                    'token_id' => $token->get_id(),
+                ]);
 
-            WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
+                WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
 
-            do_action('wc_transbank_oneclick_inscription_approved', [
-                'transbankInscriptionResponse' => $resp,
-                'transbankToken' => $token,
-                'from' => $from
-            ]);
-            $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
-            $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
+                do_action('wc_transbank_oneclick_inscription_approved', [
+                    'transbankInscriptionResponse' => $resp,
+                    'transbankToken' => $token,
+                    'from' => $from
+                ]);
+                $this->log->logInfo('Inscripción finalizada correctamente', ['user' => $ins->user_id]);
+                $this->redirectUser($from, BlocksHelper::ONECLICK_SUCCESSFULL_INSCRIPTION);
+            } else {
+                $this->log->logInfo('Inscripción rechazada', [
+                    'responseCode' => $resp->getResponseCode(),
+                    'user'         => $ins->user_id,
+                ]);
+                BlocksHelper::addLegacyNotices(
+                    __('La inscripción fue rechazada. Por favor, intenta nuevamente con otra tarjeta.', 'transbank_wc_plugin'),
+                    'error'
+                );
+                $this->redirectUser($from, BlocksHelper::ONECLICK_REJECTED_INSCRIPTION);
+            }
         } catch (Exception $e) {
             $errorContext = [
                 'token' => $token,
