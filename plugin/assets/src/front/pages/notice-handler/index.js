@@ -1,8 +1,8 @@
+import { getSetting } from "@woocommerce/settings";
 import { noticeHandler } from "../../modules/notice_handler";
 
-const settings = globalThis.wc.wcSettings.getSetting(
-    "transbank_webpay_plus_rest_data",
-    {}
-);
+const settings = getSetting("transbank_webpay_plus_rest_data", {});
 
-noticeHandler(settings.id);
+if (settings?.id) {
+    noticeHandler(settings.id);
+}

@@ -29,6 +29,7 @@ ehthumbs_vista.db
 # Dependencies
 vendor
 node_modules
+.pnpm-store
 
 transbank-webpay-plus-rest.zip
 transbank-webpay-plus-rest-guzzle7.zip
