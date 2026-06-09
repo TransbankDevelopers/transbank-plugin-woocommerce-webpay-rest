@@ -8,6 +8,7 @@ use Transbank\WooCommerce\WebpayRest\Helpers\RequestInputHelper;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Lock\MySqlNamedLock;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
@@ -41,15 +42,18 @@ class CommitWebpayController
     protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
+    protected MySqlNamedLock $webpayReturnLock;
 
     /**
      * Constructor initializes the logger.
      */
     public function __construct()
     {
+        global $wpdb;
         $this->transactionService = TbkFactory::createTransactionService();
         $this->webpayService = TbkFactory::createWebpayService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
+        $this->webpayReturnLock = new MySqlNamedLock($wpdb);
         $this->log = TbkFactory::createWebpayPlusLogger();
     }
 
@@ -175,39 +179,51 @@ class CommitWebpayController
             PluginLogger::sanitizeContextForLogs(['token' => $token])
         );
 
-        if ($this->transactionService->checkIsAlreadyProcessed($token)) {
-            $this->handleTransactionAlreadyProcessed($token);
+        if (!$this->webpayReturnLock->acquire($token)) {
+            $this->log->logInfo(
+                'Retorno de Webpay ya se encuentra en procesamiento',
+                PluginLogger::sanitizeContextForLogs(['token' => $token])
+            );
             return;
         }
 
-        $webpayTransaction = $this->transactionService->findFirstByToken($token);
+        try {
+            if ($this->transactionService->checkIsAlreadyProcessed($token)) {
+                $this->handleTransactionAlreadyProcessed($token);
+                return;
+            }
 
-        if (!$webpayTransaction) {
-            $message = "No se encontró la transacción para el token proporcionado.";
-            $this->log->logError(
-                $message,
-                PluginLogger::sanitizeContextForLogs(['token' => $token])
-            );
-            throw new EcommerceException($message);
-        }
+            $webpayTransaction = $this->transactionService->findFirstByToken($token);
 
-        $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
-        $commitResponse = $this->webpayService->commitTransaction($token);
+            if (!$webpayTransaction) {
+                $message = "No se encontró la transacción para el token proporcionado.";
+                $this->log->logError(
+                    $message,
+                    PluginLogger::sanitizeContextForLogs(['token' => $token])
+                );
+                throw new EcommerceException($message);
+            }
 
-        if ($commitResponse->getStatus() === null || $commitResponse->getResponseCode() === null) {
-            $message = "La respuesta de confirmación de Transbank es inválida.";
-            $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
-            throw new EcommerceException($message);
-        }
+            $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
+            $commitResponse = $this->webpayService->commitTransaction($token);
 
-        if ($commitResponse->isApproved()) {
-            $this->handleAuthorizedTransaction(
-                $wooCommerceOrder,
-                $webpayTransaction,
-                $commitResponse
-            );
-        } else {
-            $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
+            if ($commitResponse->getStatus() === null || $commitResponse->getResponseCode() === null) {
+                $message = "La respuesta de confirmación de Transbank es inválida.";
+                $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
+                throw new EcommerceException($message);
+            }
+
+            if ($commitResponse->isApproved()) {
+                $this->handleAuthorizedTransaction(
+                    $wooCommerceOrder,
+                    $webpayTransaction,
+                    $commitResponse
+                );
+            } else {
+                $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
+            }
+        } finally {
+            $this->webpayReturnLock->release($token);
         }
     }
 
