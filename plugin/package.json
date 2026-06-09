@@ -5,10 +5,9 @@
     "author": "Transbank Developers",
     "license": "BSD-3-Clause",
     "keywords": [],
-    "packageManager": "pnpm@11.5.1",
     "engines": {
         "node": "^22.13.0",
-        "pnpm": ">=11.5.1"
+        "pnpm": ">=11.5.2"
     },
     "devDependencies": {
         "@woocommerce/dependency-extraction-webpack-plugin": "4.0.0",

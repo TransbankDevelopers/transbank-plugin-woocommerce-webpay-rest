@@ -59,7 +59,7 @@ RUN mkdir -p /etc/apt/keyrings \
  && apt-get update \
  && apt-get install -y --no-install-recommends nodejs \
  && corepack enable \
- && corepack prepare pnpm@11.5.1 --activate \
+ && corepack prepare pnpm@11.5.2 --activate \
  && npm install --ignore-scripts -g npm@latest \
  && rm -rf /var/lib/apt/lists/*
 

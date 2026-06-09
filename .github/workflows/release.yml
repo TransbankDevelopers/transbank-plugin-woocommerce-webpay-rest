@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: "22"
       - name: Prepare pnpm
-        run: corepack prepare pnpm@11.5.1 --activate
+        run: corepack prepare pnpm@11.5.2 --activate
       - name: Install SVN
         run: |
           sudo apt-get update
