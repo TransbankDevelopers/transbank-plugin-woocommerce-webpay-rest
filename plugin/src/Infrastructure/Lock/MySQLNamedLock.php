@@ -37,6 +37,6 @@ class MySqlNamedLock
 
     private function buildLockName(string $key): string
     {
-        return self::LOCK_PREFIX . sha1($key);
+        return self::LOCK_PREFIX . substr(hash('sha256', $key), 0, 40);
     }
 }
