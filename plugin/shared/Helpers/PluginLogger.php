@@ -92,6 +92,11 @@ final class PluginLogger
         $this->logger->error($msg, $context);
     }
 
+    public function logWarning(string $msg, array $context = [])
+    {
+        $this->logger->warning($msg, $context);
+    }
+
     public static function sanitizeContextForLogs(array $context): array
     {
         $sanitizedContext = [];
