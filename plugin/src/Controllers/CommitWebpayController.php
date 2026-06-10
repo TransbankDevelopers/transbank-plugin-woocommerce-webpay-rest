@@ -9,6 +9,7 @@ use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Infrastructure\Lock\MySqlNamedLock;
+use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
@@ -174,20 +175,19 @@ class CommitWebpayController
      */
     protected function handleNormalFlow(string $token): void
     {
+        $lockAcquired = false;
         $this->log->logInfo(
             "Procesando transacción por flujo Normal",
             PluginLogger::sanitizeContextForLogs(['token' => $token])
         );
 
-        if (!$this->webpayReturnLock->acquire($token)) {
-            $this->log->logInfo(
-                'Retorno de Webpay ya se encuentra en procesamiento',
-                PluginLogger::sanitizeContextForLogs(['token' => $token])
-            );
-            return;
-        }
-
         try {
+            $lockAcquired = $this->acquireWebpayReturnLock($token);
+
+            if (!$lockAcquired) {
+                return;
+            }
+
             if ($this->transactionService->checkIsAlreadyProcessed($token)) {
                 $this->handleTransactionAlreadyProcessed($token);
                 return;
@@ -223,7 +223,59 @@ class CommitWebpayController
                 $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
             }
         } finally {
-            $this->webpayReturnLock->release($token);
+            $this->releaseWebpayReturnLock($token, $lockAcquired);
+        }
+    }
+
+    /**
+     * Tries to acquire the return lock for a token.
+     *
+     * @param string $token
+     * @return bool True when the lock is acquired, false when another request is already processing.
+     */
+    private function acquireWebpayReturnLock(string $token): bool
+    {
+        $lockAcquired = $this->webpayReturnLock->acquire($token);
+
+        if (!$lockAcquired) {
+            $this->log->logInfo(
+                'Retorno de Webpay ya se encuentra en procesamiento',
+                PluginLogger::sanitizeContextForLogs(['token' => $token])
+            );
+        }
+
+        return $lockAcquired;
+    }
+
+    /**
+     * Releases the return lock only when it was actually acquired.
+     *
+     * @param string $token
+     * @param bool $lockAcquired
+     * @return void
+     */
+    private function releaseWebpayReturnLock(string $token, bool $lockAcquired): void
+    {
+        if (!$lockAcquired) {
+            return;
+        }
+
+        try {
+            $released = $this->webpayReturnLock->release($token);
+            if (!$released) {
+                $this->log->logWarning(
+                    'No se pudo liberar el lock de retorno de Webpay',
+                    PluginLogger::sanitizeContextForLogs(['token' => $token])
+                );
+            }
+        } catch (MySqlNamedLockException $e) {
+            $this->log->logWarning(
+                'Error al liberar el lock de retorno de Webpay',
+                PluginLogger::sanitizeContextForLogs([
+                    'token' => $token,
+                    'error' => $e->getMessage(),
+                ])
+            );
         }
     }
 

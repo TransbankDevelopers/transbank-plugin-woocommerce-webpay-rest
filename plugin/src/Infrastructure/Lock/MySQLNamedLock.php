@@ -3,6 +3,7 @@
 namespace Transbank\WooCommerce\WebpayRest\Infrastructure\Lock;
 
 use wpdb;
+use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
 
 /**
  * Thin MySQL named lock adapter.
@@ -24,15 +25,30 @@ class MySqlNamedLock
     {
         $lockName = $this->buildLockName($key);
         $query = $this->db->prepare('SELECT GET_LOCK(%s, 0)', $lockName);
+        $result = $this->db->get_var($query);
 
-        return (string) $this->db->get_var($query) === '1';
+        if ($result === null) {
+            throw new MySqlNamedLockException(
+                'No se pudo adquirir el lock de retorno de Webpay: error al consultar MySQL.'
+            );
+        }
+
+        return $result === '1';
     }
 
-    public function release(string $key): void
+    public function release(string $key): bool
     {
         $lockName = $this->buildLockName($key);
         $query = $this->db->prepare('SELECT RELEASE_LOCK(%s)', $lockName);
-        $this->db->get_var($query);
+        $result = $this->db->get_var($query);
+
+        if ($result === null) {
+            throw new MySqlNamedLockException(
+                'No se pudo liberar el lock de retorno de Webpay: error al consultar MySQL.'
+            );
+        }
+
+        return $result === '1';
     }
 
     private function buildLockName(string $key): string
