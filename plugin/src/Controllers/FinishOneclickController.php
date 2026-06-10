@@ -97,7 +97,7 @@ class FinishOneclickController
         if ($token && !$tbkSessionId && !$tbkOrdenCompra) {
             return self::ONECLICK_NORMAL_FLOW;
         }
-        if ($token && $tbkSessionId && $tbkOrdenCompra) {
+        if ($token && $tbkOrdenCompra) {
             return self::ONECLICK_ABORTED_FLOW;
         }
 
