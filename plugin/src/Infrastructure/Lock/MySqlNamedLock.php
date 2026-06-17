@@ -13,6 +13,7 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
 class MySqlNamedLock
 {
     private const LOCK_PREFIX = 'transbank_webpay_lock_';
+    private const GET_LOCK_TIMEOUT_SECONDS = 10;
 
     private wpdb $db;
 
@@ -24,7 +25,7 @@ class MySqlNamedLock
     public function acquire(string $key): bool
     {
         $lockName = $this->buildLockName($key);
-        $query = $this->db->prepare('SELECT GET_LOCK(%s, 0)', $lockName);
+        $query = $this->db->prepare('SELECT GET_LOCK(%s, %d)', $lockName, self::GET_LOCK_TIMEOUT_SECONDS);
         $result = $this->db->get_var($query);
 
         if ($result === null) {
