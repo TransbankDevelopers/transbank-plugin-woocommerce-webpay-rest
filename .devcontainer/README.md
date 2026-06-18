@@ -11,8 +11,8 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 
 ## 📋 Servicios incluidos
 
-- **Wordpress 6.9.1** con PHP 8.2.
-- **Woocommerce 10.6.1** con PHP 8.2.
+- **Wordpress 7.0.0** con PHP 8.2.
+- **Woocommerce 10.8.1** con PHP 8.2.
 - **Node 22.X**
 - **Wordpress CLI**
 - **Woocommerce CLI**
