@@ -13,6 +13,7 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
 class MySqlNamedLock
 {
     private const GET_LOCK_TIMEOUT_SECONDS = 10;
+    private const MAX_LOCK_NAME_LENGTH = 64;
 
     private wpdb $db;
 
@@ -23,6 +24,7 @@ class MySqlNamedLock
 
     public function acquire(string $key): bool
     {
+        $this->validateKeyLength($key);
         $query = $this->db->prepare('SELECT GET_LOCK(%s, %d)', $key, self::GET_LOCK_TIMEOUT_SECONDS);
         $result = $this->db->get_var($query);
 
@@ -37,6 +39,7 @@ class MySqlNamedLock
 
     public function release(string $key): bool
     {
+        $this->validateKeyLength($key);
         $query = $this->db->prepare('SELECT RELEASE_LOCK(%s)', $key);
         $result = $this->db->get_var($query);
 
@@ -47,5 +50,14 @@ class MySqlNamedLock
         }
 
         return $result === '1';
+    }
+
+    private function validateKeyLength(string $key): void
+    {
+        if (strlen($key) > self::MAX_LOCK_NAME_LENGTH) {
+            throw new MySqlNamedLockException(
+                'El nombre del lock excede el límite de ' . self::MAX_LOCK_NAME_LENGTH . ' caracteres de MySQL.'
+            );
+        }
     }
 }
