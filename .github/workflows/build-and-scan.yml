@@ -1,26 +1,27 @@
 name: Build and Scan
 on:
-  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - "master"
+
+permissions:
+  contents: read
 
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  build:
+    name: Build and Scan
     runs-on: ubuntu-latest
+    outputs:
+      artifact_url: ${{ steps.artifact_upload.outputs.artifact-url }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Setup PHP
-        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240
         with:
           php-version: "8.2"
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: "22"
       - name: Prepare pnpm
@@ -32,7 +33,30 @@ jobs:
           chmod +x package.sh
           ./package.sh
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Upload build artifact
+        id: artifact_upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: transbank-webpay-plus-rest.zip
+          path: ./transbank-webpay-plus-rest.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  comment:
+    name: Comment artifact link on PR
+    needs: build
+    permissions:
+      contents: read
+      issues: write
+    uses: transbankdevelopers/transbank-github-actions-templates/.github/workflows/plugin-pr-artifact.yml@f104ee093bb1edab2594a19a51bc8be5c201bc2e
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      source_repo_full_name: ${{ github.event.pull_request.head.repo.full_name }}
+      artifact_url: ${{ needs.build.outputs.artifact_url }}
+      artifact_name: transbank-webpay-plus-rest.zip
+      comment_marker: "<!-- transbank-webpay-plus-rest-artifact -->"
+      comment_prefix: Plugin Zip
