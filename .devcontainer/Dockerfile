@@ -57,7 +57,7 @@ RUN mkdir -p /etc/apt/keyrings \
  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
     > /etc/apt/sources.list.d/nodesource.list \
  && apt-get update \
- && apt-get install -y --no-install-recommends nodejs \
+ && apt-get install -y --no-install-recommends nodejs ripgrep \
  && corepack enable \
  && corepack prepare pnpm@11.5.2 --activate \
  && npm install --ignore-scripts -g npm@latest \
