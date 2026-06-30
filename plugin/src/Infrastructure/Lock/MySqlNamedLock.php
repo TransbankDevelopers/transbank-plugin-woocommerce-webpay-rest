@@ -12,7 +12,7 @@ use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
  */
 class MySqlNamedLock
 {
-    private const GET_LOCK_TIMEOUT_SECONDS = 10;
+    private const GET_LOCK_TIMEOUT_SECONDS = 5;
     private const MAX_LOCK_NAME_LENGTH = 64;
 
     private wpdb $db;
