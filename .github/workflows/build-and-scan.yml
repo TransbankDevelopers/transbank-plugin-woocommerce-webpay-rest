@@ -7,10 +7,16 @@ on:
     branches:
       - "master"
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
+    outputs:
+      artifact_url: ${{ steps.artifact_upload.outputs.artifact-url }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -36,3 +42,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Upload build artifact
+        id: artifact_upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: transbank-webpay-plus-rest.zip
+          path: ./transbank-webpay-plus-rest.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  comment:
+    name: Comment artifact link on PR
+    needs: sonarcloud
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      issues: write
+    uses: transbankdevelopers/transbank-github-actions-templates/.github/workflows/plugin-pr-artifact.yml@a756d10868c2b150c77a11fb4fd6d724cbc4feb0
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      source_repo_full_name: ${{ github.event.pull_request.head.repo.full_name }}
+      artifact_url: ${{ needs.sonarcloud.outputs.artifact_url }}
+      artifact_name: transbank-webpay-plus-rest.zip
+      comment_prefix: Plugin Zip
