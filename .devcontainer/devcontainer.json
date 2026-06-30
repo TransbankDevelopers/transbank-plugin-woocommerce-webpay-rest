@@ -42,6 +42,7 @@
                 "extensions.ignoreRecommendations": true,
                 "remote.containers.installRecommendedExtensions": false,
                 "settingsSync.enabled": false,
+                "todo-tree.ripgrep.ripgrep": "/usr/bin/rg",
                 "remote.extensionKind": {
                     "github.copilot": ["ui"],
                     "github.copilot-chat": ["ui"]
