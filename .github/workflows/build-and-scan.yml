@@ -53,7 +53,7 @@ jobs:
   comment:
     name: Comment artifact link on PR
     needs: sonarcloud
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       issues: write
@@ -63,4 +63,5 @@ jobs:
       source_repo_full_name: ${{ github.event.pull_request.head.repo.full_name }}
       artifact_url: ${{ needs.sonarcloud.outputs.artifact_url }}
       artifact_name: transbank-webpay-plus-rest.zip
+      comment_marker: "<!-- transbank-webpay-plus-rest-artifact -->"
       comment_prefix: Plugin Zip
