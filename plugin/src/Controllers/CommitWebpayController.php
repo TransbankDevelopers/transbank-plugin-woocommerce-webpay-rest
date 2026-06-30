@@ -185,9 +185,7 @@ class CommitWebpayController
             $lockAcquired = $this->acquireWebpayReturnLockWithRetries($token);
 
             if (!$lockAcquired) {
-                throw new EcommerceException(
-                    "No se pudo adquirir el lock de retorno para token: {$token}"
-                );
+                throw new EcommerceException('No se pudo adquirir el lock de retorno de Webpay.');
             }
 
             if ($this->transactionService->checkIsAlreadyProcessed($token)) {
