@@ -182,10 +182,12 @@ class CommitWebpayController
         );
 
         try {
-            $lockAcquired = $this->acquireWebpayReturnLock($token);
+            $lockAcquired = $this->acquireWebpayReturnLockWithRetries($token);
 
             if (!$lockAcquired) {
-                return;
+                throw new EcommerceException(
+                    "No se pudo adquirir el lock de retorno para token: {$token}"
+                );
             }
 
             if ($this->transactionService->checkIsAlreadyProcessed($token)) {
@@ -228,23 +230,37 @@ class CommitWebpayController
     }
 
     /**
-     * Tries to acquire the return lock for a token.
+     * Tries to acquire the return lock with internal retries.
      *
-     * @param string $token
-     * @return bool True when the lock is acquired, false when another request is already processing.
+     * @param string $token The transaction token.
+     * @return bool True when the lock is acquired, false when all retries are exhausted.
      */
-    private function acquireWebpayReturnLock(string $token): bool
+    private function acquireWebpayReturnLockWithRetries(string $token): bool
     {
-        $lockAcquired = $this->webpayReturnLock->acquire($token);
+        $maxAttempts = 4;
 
-        if (!$lockAcquired) {
-            $this->log->logInfo(
-                'Retorno de Webpay ya se encuentra en procesamiento',
-                PluginLogger::sanitizeContextForLogs(['token' => $token])
-            );
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                if ($this->webpayReturnLock->acquire($token)) {
+                    return true;
+                }
+
+                $this->log->logInfo(
+                    "Lock de retorno ocupado, intento {$attempt}/{$maxAttempts}",
+                    PluginLogger::sanitizeContextForLogs(['token' => $token])
+                );
+            } catch (\Throwable $e) {
+                $this->log->logError(
+                    "Error al adquirir lock de retorno, intento {$attempt}/{$maxAttempts}",
+                    PluginLogger::sanitizeContextForLogs([
+                        'token' => $token,
+                        'error' => $e->getMessage(),
+                    ])
+                );
+            }
         }
 
-        return $lockAcquired;
+        return false;
     }
 
     /**
