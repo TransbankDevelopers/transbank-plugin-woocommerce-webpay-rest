@@ -11,6 +11,7 @@ use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
 use Transbank\WooCommerce\WebpayRest\Infrastructure\Lock\MySqlNamedLock;
 use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
@@ -549,6 +550,7 @@ class CommitWebpayController
             'transbankResponse' => null
         ]);
         $this->log->logError(self::ERROR_MESSAGES[$errorCode]);
+        BlocksHelper::addLegacyNotices(self::ERROR_MESSAGES[$errorCode], 'error');
         $this->redirect($this->getCheckoutUrlWithError($errorCode));
     }
 
