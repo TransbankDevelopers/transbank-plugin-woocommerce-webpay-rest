@@ -1,14 +1,14 @@
 name: Scan
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Scan Main
+    name: Scan Main Branch
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
