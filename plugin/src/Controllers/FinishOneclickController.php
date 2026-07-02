@@ -78,6 +78,10 @@ class FinishOneclickController
             $this->log->logError('Error procesando el retorno de inscripción Oneclick', [
                 'error' => $e->getMessage(),
             ]);
+            BlocksHelper::addLegacyNotices(
+                __('Ocurrió un error al ejecutar la inscripción.', 'transbank_wc_plugin'),
+                'error'
+            );
             $this->redirectUser('checkout', BlocksHelper::ONECLICK_FINISH_ERROR);
         }
     }
@@ -120,7 +124,7 @@ class FinishOneclickController
         if (!$ins) {
             throw new EcommerceException('No se encontró la inscripción para el token proporcionado.');
         }
-        BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'warning');
+        BlocksHelper::addLegacyNotices('Inscripción abortada desde el formulario. Puedes reintentar la inscripción. ', 'error');
         $this->inscriptionService->update($ins->id, [
             'status' => TbkConstants::INSCRIPTIONS_STATUS_FAILED
         ]);
