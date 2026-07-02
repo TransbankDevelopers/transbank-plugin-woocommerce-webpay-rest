@@ -78,7 +78,10 @@ class FinishOneclickController
             $this->log->logError('Error procesando el retorno de inscripción Oneclick', [
                 'error' => $e->getMessage(),
             ]);
-            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
+            BlocksHelper::addLegacyNotices(
+                __('Ocurrió un error al ejecutar la inscripción.', 'transbank_wc_plugin'),
+                'error'
+            );
             $this->redirectUser('checkout', BlocksHelper::ONECLICK_FINISH_ERROR);
         }
     }
