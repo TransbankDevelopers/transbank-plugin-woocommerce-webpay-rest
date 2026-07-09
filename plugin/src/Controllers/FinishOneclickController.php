@@ -92,7 +92,7 @@ class FinishOneclickController
      * @throws EcommerceException If the inscription flow is not recognized.
      * @return void
      */
-    protected function handleFormReturn(string $oneclickFlow, array $data): void
+    private function handleFormReturn(string $oneclickFlow, array $data): void
     {
         if ($oneclickFlow === self::ONECLICK_ABORTED_FLOW) {
             RequestInputHelper::assertValidIdentifier($data['TBK_TOKEN'], 'TBK_TOKEN');
@@ -115,7 +115,7 @@ class FinishOneclickController
      * @param array $requestData The request data from the payment gateway.
      * @return string The type of payment flow.
      */
-    protected function getOneclickFlow(array $requestData): string
+    private function getOneclickFlow(array $requestData): string
     {
         $token = RequestInputHelper::hasValue($requestData["TBK_TOKEN"] ?? null);
         $tbkSessionId = RequestInputHelper::hasValue($requestData['TBK_ID_SESION'] ?? null);
@@ -138,7 +138,7 @@ class FinishOneclickController
      * @param string $token The inscription token.
      * @return void
      */
-    protected function handleAbortedFlow(string $token): void
+    private function handleAbortedFlow(string $token): void
     {
         $this->log->logInfo(
             'Inscripcion abortada por el usuario desde el formulario Oneclick',
@@ -165,7 +165,7 @@ class FinishOneclickController
      * @param string $token The inscription token.
      * @return void
      */
-    protected function handleNormalFlow(string $token): void
+    private function handleNormalFlow(string $token): void
     {
         $ins = null;
 
@@ -235,7 +235,7 @@ class FinishOneclickController
      * @param string $from The context from which the inscription was started.
      * @return void
      */
-    protected function handleApprovedInscription($ins, $resp, $order, string $from): void
+    private function handleApprovedInscription($ins, $resp, $order, string $from): void
     {
         $message = 'Tarjeta inscrita satisfactoriamente. Aún no se realiza ningún cobro. Ahora puedes realizar el pago.';
         BlocksHelper::addLegacyNotices(__($message, 'transbank_wc_plugin'), 'success');
@@ -270,7 +270,7 @@ class FinishOneclickController
      * @param string $from The context from which the inscription was started.
      * @return void
      */
-    protected function handleRejectedInscription($ins, $resp, $order, string $from): void
+    private function handleRejectedInscription($ins, $resp, $order, string $from): void
     {
         $this->log->logInfo('Inscripción rechazada', [
             'responseCode' => $resp->getResponseCode(),
@@ -295,7 +295,7 @@ class FinishOneclickController
      * @param string|null $errorCode Optional error code to include in the redirect.
      * @return void
      */
-    protected function redirectUser($from = null, $errorCode = null): void
+    private function redirectUser($from = null, $errorCode = null): void
     {
         $redirectUrl = wc_get_checkout_url();
 
