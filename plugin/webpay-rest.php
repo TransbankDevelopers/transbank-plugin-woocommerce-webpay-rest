@@ -1,12 +1,12 @@
 <?php
 
+use Transbank\Plugin\Helpers\LogFileDownloadHandler;
 use Transbank\WooCommerce\WebpayRest\Admin\Notices\DismissNoticeAjax;
 use Transbank\WooCommerce\WebpayRest\Admin\Notices\NoticeInscriptionDelete;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
 use Transbank\WooCommerce\WebpayRest\Helpers\DatabaseTableInstaller;
 use Transbank\WooCommerce\WebpayRest\Helpers\HposHelper;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
-use Transbank\Plugin\Helpers\LogFileDownloadHandler;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Oneclick_Mall_REST;
 use Transbank\WooCommerce\WebpayRest\PaymentGateways\WC_Gateway_Transbank_Webpay_Plus_REST;
 use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankWebpayBlocks;
