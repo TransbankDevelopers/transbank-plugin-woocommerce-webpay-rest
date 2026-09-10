@@ -10,23 +10,24 @@ Este devcontainer proporciona un entorno completo de desarrollo para el módulo 
 4. Una vez listo, Woocommerce estará disponible en http://localhost:8000
 
 ## 📋 Servicios incluidos
--   **Wordpress 6.8.3** con PHP 8.2.
--   **Woocommerce 10.3.6** con PHP 8.2.
--   **Node 20.X**
--   **Wordpress CLI**
--   **Woocommerce CLI**
--   **Mysql 8** como base de datos.
--   **Apache** para servir el contenido.
--   **Extensiones de VS Code** para trabajar con PHP y Woocommerce
--   **Composer** para gestión de dependencias PHP.
+
+- **Wordpress 7.0.0** con PHP 8.2.
+- **Woocommerce 10.8.1** con PHP 8.2.
+- **Node 22.X**
+- **Wordpress CLI**
+- **Woocommerce CLI**
+- **Mysql 8** como base de datos.
+- **Apache** para servir el contenido.
+- **Extensiones de VS Code** para trabajar con PHP y Woocommerce
+- **Composer** para gestión de dependencias PHP.
 
 ## 🔗 URLs de acceso
 
-| Servicio      | Acceso                          | Credenciales                         |
-| ------------- | ------------------------------- | ------------------------------------ |
-| Woocommerce   | http://localhost:8000           | -                                    |
-| Admin Panel   | http://localhost:8000/wp-admin  | admin / admin                        |
-| Base de datos | VS Code SQLTools/MySQL Client   | wordpress / wordpress                |
+| Servicio      | Acceso                         | Credenciales          |
+| ------------- | ------------------------------ | --------------------- |
+| Woocommerce   | http://localhost:8000          | -                     |
+| Admin Panel   | http://localhost:8000/wp-admin | admin / admin         |
+| Base de datos | VS Code SQLTools/MySQL Client  | wordpress / wordpress |
 
 ## 🛠️ Herramientas de desarrollo
 
@@ -36,11 +37,11 @@ El devcontainer incluye una extensión para trabajar con la base de datos:
 
 #### SQLTools
 
--   **Acceso**: Ctrl/Cmd + Shift + P → "SQLTools: Connect"
--   **Conexiones preconfiguradas**:
-    -   `WooCommerce Mysql` - Base de datos principal
-    -   `Mysql Root` - Acceso administrativo completo
--   **Funcionalidades**: Explorar tablas, ejecutar queries, exportar datos
+- **Acceso**: Ctrl/Cmd + Shift + P → "SQLTools: Connect"
+- **Conexiones preconfiguradas**:
+    - `WooCommerce Mysql` - Base de datos principal
+    - `Mysql Root` - Acceso administrativo completo
+- **Funcionalidades**: Explorar tablas, ejecutar queries, exportar datos
 
 ### Estructura del proyecto en el contenedor
 
@@ -73,11 +74,11 @@ composer require nueva-dependencia
 
 ### Configuración por defecto
 
--   Host: `db`
--   Puerto: `3306`
--   Base de datos: `wordpress`
--   Usuario: `wordpress`
--   Contraseña: `wordpress`
+- Host: `db`
+- Puerto: `3306`
+- Base de datos: `wordpress`
+- Usuario: `wordpress`
+- Contraseña: `wordpress`
 
 ## 📝 Notas de desarrollo
 
@@ -93,7 +94,7 @@ En algunas ocasiones detecta los cambios y el editor sugiere reconstruir el cont
 
 ### Reconstruir el devcontainer
 
--   Desde VS Code: abre la paleta de comandos (Ctrl/Cmd + Shift + P) → ejecuta **Dev Containers: Rebuild Container**. Selecciona **Rebuild Container** para iniciar el proceso.
--   Alternativa rápida: haz clic en el icono de la esquina inferior izquierda (Remote) → "Reopen in Container" y acepta la opción de reconstruir si se muestra.
--   Si no se aplica algún cambio (Docker no disponible o caché): reconstruye manualmente desde tu entorno Docker según tu flujo de trabajo local (ej. build sin caché), o elimina la imagen del devcontainer antes de reconstruir.
--   Nota importante: la reconstrucción vuelve a crear la imagen y el contenedor; cualquier dato no persistente en el contenedor (ej. instalación temporal de PrestaShop) se perderá. Asegúrate de respaldar lo necesario antes de reconstruir.
+- Desde VS Code: abre la paleta de comandos (Ctrl/Cmd + Shift + P) → ejecuta **Dev Containers: Rebuild Container**. Selecciona **Rebuild Container** para iniciar el proceso.
+- Alternativa rápida: haz clic en el icono de la esquina inferior izquierda (Remote) → "Reopen in Container" y acepta la opción de reconstruir si se muestra.
+- Si no se aplica algún cambio (Docker no disponible o caché): reconstruye manualmente desde tu entorno Docker según tu flujo de trabajo local (ej. build sin caché), o elimina la imagen del devcontainer antes de reconstruir.
+- Nota importante: la reconstrucción vuelve a crear la imagen y el contenedor; cualquier dato no persistente en el contenedor (ej. instalación temporal de PrestaShop) se perderá. Asegúrate de respaldar lo necesario antes de reconstruir.

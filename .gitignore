@@ -29,6 +29,7 @@ ehthumbs_vista.db
 # Dependencies
 vendor
 node_modules
+.pnpm-store
 
 transbank-webpay-plus-rest.zip
 transbank-webpay-plus-rest-guzzle7.zip
@@ -48,3 +49,9 @@ build
 # Devcontainer logs
 .devcontainer/logs
 
+# E2E tests (Playwright)
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/e2e/blob-report/
+tests/e2e/.env

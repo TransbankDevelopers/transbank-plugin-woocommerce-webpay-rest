@@ -8,7 +8,10 @@ use Transbank\WooCommerce\WebpayRest\Helpers\RequestInputHelper;
 use Transbank\Plugin\Helpers\TbkConstants;
 use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\Webpay\WebpayPlus\Responses\TransactionCommitResponse;
+use Transbank\WooCommerce\WebpayRest\Infrastructure\Lock\MySqlNamedLock;
+use Transbank\WooCommerce\WebpayRest\Exceptions\MySqlNamedLockException;
 use Transbank\WooCommerce\WebpayRest\Helpers\TbkFactory;
+use Transbank\WooCommerce\WebpayRest\Helpers\BlocksHelper;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 
@@ -41,15 +44,18 @@ class CommitWebpayController
     protected TransactionService $transactionService;
     protected WebpayService $webpayService;
     protected EcommerceService $ecommerceService;
+    protected MySqlNamedLock $webpayReturnLock;
 
     /**
      * Constructor initializes the logger.
      */
     public function __construct()
     {
+        global $wpdb;
         $this->transactionService = TbkFactory::createTransactionService();
         $this->webpayService = TbkFactory::createWebpayService();
         $this->ecommerceService = TbkFactory::createEcommerceService();
+        $this->webpayReturnLock = new MySqlNamedLock($wpdb);
         $this->log = TbkFactory::createWebpayPlusLogger();
     }
 
@@ -170,44 +176,121 @@ class CommitWebpayController
      */
     protected function handleNormalFlow(string $token): void
     {
+        $lockAcquired = false;
         $this->log->logInfo(
             "Procesando transacción por flujo Normal",
             PluginLogger::sanitizeContextForLogs(['token' => $token])
         );
 
-        if ($this->transactionService->checkIsAlreadyProcessed($token)) {
-            $this->handleTransactionAlreadyProcessed($token);
+        try {
+            $lockAcquired = $this->acquireWebpayReturnLockWithRetries($token);
+
+            if (!$lockAcquired) {
+                throw new EcommerceException('No se pudo adquirir el lock de retorno de Webpay.');
+            }
+
+            if ($this->transactionService->checkIsAlreadyProcessed($token)) {
+                $this->handleTransactionAlreadyProcessed($token);
+                return;
+            }
+
+            $webpayTransaction = $this->transactionService->findFirstByToken($token);
+
+            if (!$webpayTransaction) {
+                $message = "No se encontró la transacción para el token proporcionado.";
+                $this->log->logError(
+                    $message,
+                    PluginLogger::sanitizeContextForLogs(['token' => $token])
+                );
+                throw new EcommerceException($message);
+            }
+
+            $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
+            $commitResponse = $this->webpayService->commitTransaction($token);
+
+            if ($commitResponse->getStatus() === null || $commitResponse->getResponseCode() === null) {
+                $message = "La respuesta de confirmación de Transbank es inválida.";
+                $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
+                throw new EcommerceException($message);
+            }
+
+            if ($commitResponse->isApproved()) {
+                $this->handleAuthorizedTransaction(
+                    $wooCommerceOrder,
+                    $webpayTransaction,
+                    $commitResponse
+                );
+            } else {
+                $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
+            }
+        } finally {
+            $this->releaseWebpayReturnLock($token, $lockAcquired);
+        }
+    }
+
+    /**
+     * Tries to acquire the return lock with internal retries.
+     *
+     * @param string $token The transaction token.
+     * @return bool True when the lock is acquired, false when all retries are exhausted.
+     */
+    private function acquireWebpayReturnLockWithRetries(string $token): bool
+    {
+        $maxAttempts = 4;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                if ($this->webpayReturnLock->acquire($token)) {
+                    return true;
+                }
+
+                $this->log->logInfo(
+                    "Lock de retorno ocupado, intento {$attempt}/{$maxAttempts}",
+                    PluginLogger::sanitizeContextForLogs(['token' => $token])
+                );
+            } catch (\Throwable $e) {
+                $this->log->logError(
+                    "Error al adquirir lock de retorno, intento {$attempt}/{$maxAttempts}",
+                    PluginLogger::sanitizeContextForLogs([
+                        'token' => $token,
+                        'error' => $e->getMessage(),
+                    ])
+                );
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Releases the return lock only when it was actually acquired.
+     *
+     * @param string $token
+     * @param bool $lockAcquired
+     * @return void
+     */
+    private function releaseWebpayReturnLock(string $token, bool $lockAcquired): void
+    {
+        if (!$lockAcquired) {
             return;
         }
 
-        $webpayTransaction = $this->transactionService->findFirstByToken($token);
-
-        if (!$webpayTransaction) {
-            $message = "No se encontró la transacción para el token proporcionado.";
-            $this->log->logError(
-                $message,
-                PluginLogger::sanitizeContextForLogs(['token' => $token])
+        try {
+            $released = $this->webpayReturnLock->release($token);
+            if (!$released) {
+                $this->log->logWarning(
+                    'No se pudo liberar el lock de retorno de Webpay',
+                    PluginLogger::sanitizeContextForLogs(['token' => $token])
+                );
+            }
+        } catch (MySqlNamedLockException $e) {
+            $this->log->logWarning(
+                'Error al liberar el lock de retorno de Webpay',
+                PluginLogger::sanitizeContextForLogs([
+                    'token' => $token,
+                    'error' => $e->getMessage(),
+                ])
             );
-            throw new EcommerceException($message);
-        }
-
-        $wooCommerceOrder = $this->ecommerceService->getOrderById($webpayTransaction->order_id);
-        $commitResponse = $this->webpayService->commitTransaction($token);
-
-        if ($commitResponse->getStatus() === null || $commitResponse->getResponseCode() === null) {
-            $message = "La respuesta de confirmación de Transbank es inválida.";
-            $this->log->logError($message, PluginLogger::sanitizeContextForLogs(['token' => $token]));
-            throw new EcommerceException($message);
-        }
-
-        if ($commitResponse->isApproved()) {
-            $this->handleAuthorizedTransaction(
-                $wooCommerceOrder,
-                $webpayTransaction,
-                $commitResponse
-            );
-        } else {
-            $this->handleUnauthorizedTransaction($webpayTransaction, $commitResponse);
         }
     }
 
@@ -467,6 +550,7 @@ class CommitWebpayController
             'transbankResponse' => null
         ]);
         $this->log->logError(self::ERROR_MESSAGES[$errorCode]);
+        BlocksHelper::addLegacyNotices(self::ERROR_MESSAGES[$errorCode], 'error');
         $this->redirect($this->getCheckoutUrlWithError($errorCode));
     }
 
