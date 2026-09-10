@@ -52,11 +52,6 @@ const captureAndDuplicateReturn = async (context, page, returnHolder) => {
         duplicateNavigation?.catch(() => {})
     ]);
 
-    await Promise.all([
-        page.waitForLoadState("networkidle").catch(() => {}),
-        duplicatePage.waitForLoadState("networkidle").catch(() => {})
-    ]);
-
     return duplicatePage;
 };
 
