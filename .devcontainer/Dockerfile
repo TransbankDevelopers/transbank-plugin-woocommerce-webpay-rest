@@ -60,7 +60,6 @@ RUN mkdir -p /etc/apt/keyrings \
  && apt-get install -y --no-install-recommends nodejs ripgrep \
  && corepack enable \
  && corepack prepare pnpm@11.5.2 --activate \
- && npm install --ignore-scripts -g npm@latest \
  && rm -rf /var/lib/apt/lists/*
 
 # Install composer 2.9.2
