@@ -20,7 +20,7 @@ final class LogFileDownloadHandler
 
         $baseUploadDir = wp_upload_dir();
         $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
-        $logName = sanitize_text_field($_POST['file']);
+        $logName = isset($_POST['file']) ? sanitize_text_field($_POST['file']) : '';
         $nonce = sanitize_text_field($_POST['nonce'] ?? '');
         $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
         $allowedFiles = self::getAllowedLogFilePaths($folderPath);
@@ -56,7 +56,8 @@ final class LogFileDownloadHandler
         $baseUploadDir = wp_upload_dir();
         $tbkLogsFolder = '/transbank_webpay_plus_rest/logs/';
         $logName = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
-        $safeFilename = rawurlencode(basename($logName));
+        $basename = basename($logName);
+        $safeFilename = rawurlencode($basename);
 
         if ($logName === '') {
             wp_die('Archivo no especificado', 400);
@@ -64,7 +65,7 @@ final class LogFileDownloadHandler
 
         $folderPath = $baseUploadDir['basedir'] . $tbkLogsFolder;
         $allowedFiles = self::getAllowedLogFilePaths($folderPath);
-        $filePath = $allowedFiles[$safeFilename] ?? '';
+        $filePath = $allowedFiles[$basename] ?? '';
 
         if ($filePath === '' || !is_readable($filePath)) {
             wp_die('No existe el archivo solicitado', 404);
