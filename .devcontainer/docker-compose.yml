@@ -7,8 +7,6 @@ services:
     container_name: woocommerce-plugin-mysql
     restart: on-failure:2
     command: >
-      --mysql-native-password=ON
-      --authentication-policy=mysql_native_password
       --default-time-zone='America/Santiago'
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pwordpress"]
