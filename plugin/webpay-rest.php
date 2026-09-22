@@ -1,5 +1,6 @@
 <?php
 
+use Transbank\Plugin\Helpers\LogFileDownloadHandler;
 use Transbank\WooCommerce\WebpayRest\Admin\Notices\DismissNoticeAjax;
 use Transbank\WooCommerce\WebpayRest\Admin\Notices\NoticeInscriptionDelete;
 use Transbank\WooCommerce\WebpayRest\Controllers\TransactionStatusController;
@@ -13,7 +14,6 @@ use Transbank\WooCommerce\WebpayRest\Blocks\WCGatewayTransbankOneclickBlocks;
 use Transbank\WooCommerce\WebpayRest\Setup\ConfigMigrator;
 use Transbank\WooCommerce\WebpayRest\Utils\ConnectionCheck;
 use Transbank\WooCommerce\WebpayRest\Utils\TableCheck;
-use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\WooCommerce\WebpayRest\Utils\Template;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Transbank\WooCommerce\WebpayRest\Admin\Notices\AdminNoticeManager;
@@ -59,8 +59,8 @@ add_action('add_meta_boxes', function () use ($hposExists) {
 
 add_action('init', function () {
     add_action('wp_ajax_check_connection', ConnectionCheck::class . '::check');
-    add_action('wp_ajax_check_can_download_file', PluginLogger::class . '::checkCanDownloadLogFile');
-    add_action('wp_ajax_download_log_file', PluginLogger::class . '::downloadLogFile');
+    add_action('wp_ajax_check_can_download_file', LogFileDownloadHandler::class . '::checkCanDownloadLogFile');
+    add_action('wp_ajax_download_log_file', LogFileDownloadHandler::class . '::downloadLogFile');
     add_action('wp_ajax_get_transaction_status', [new TransactionStatusController(), 'getStatus']);
 });
 

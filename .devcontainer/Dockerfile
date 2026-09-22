@@ -1,12 +1,12 @@
 ############################
 # image with
-# WordPress 6.9.1
-# Woocomerce 10.5.2
-# Node 20.x
+# WordPress 7.0.0
+# Woocomerce 10.8.1
+# Node 22.x
 # Wordpress Cli lasted
 # Composer 2.9.2
 ############################
-FROM wordpress:6.9.1-php8.2-apache
+FROM wordpress:7.0.0-php8.2-apache
 
 ENV WORDPRESS_ROOT=/var/www/html
 ENV COMPOSER_VERSION=2.9.2
@@ -50,11 +50,16 @@ RUN printf '%s\n' \
 RUN echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
  && a2enconf servername
 
-# Install node 20.x
-RUN curl --proto "=https" -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+# Install node 22.x without executing remote setup scripts
+RUN mkdir -p /etc/apt/keyrings \
+ && curl --proto "=https" -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+    | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+ && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
+    > /etc/apt/sources.list.d/nodesource.list \
  && apt-get update \
- && apt-get install -y --no-install-recommends nodejs \
- && npm install --ignore-scripts -g npm@latest \
+ && apt-get install -y --no-install-recommends nodejs ripgrep \
+ && corepack enable \
+ && corepack prepare pnpm@11.5.2 --activate \
  && rm -rf /var/lib/apt/lists/*
 
 # Install composer 2.9.2

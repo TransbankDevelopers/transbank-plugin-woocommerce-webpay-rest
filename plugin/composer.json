@@ -2,10 +2,10 @@
     "description": "Transbank WooCommerce Plugin",
     "name": "transbank/woocommerce-plugin",
     "require": {
-        "transbank/transbank-sdk": "^5.0",
+        "transbank/transbank-sdk": "5.1.0",
         "ext-json": "*",
         "php": ">=8.2",
-        "monolog/monolog": "3.10"
+        "monolog/monolog": "3.10.0"
     },
     "config": {
         "platform": {
@@ -19,7 +19,7 @@
         }
     },
     "require-dev": {
-        "php-stubs/wordpress-stubs": "^6.9",
-        "php-stubs/woocommerce-stubs": "^10.4"
+        "php-stubs/wordpress-stubs": "6.9.4",
+        "php-stubs/woocommerce-stubs": "10.8.0"
     }
 }

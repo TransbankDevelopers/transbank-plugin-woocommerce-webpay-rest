@@ -7,7 +7,7 @@ El artefacto final incluye las dependencias externas prefijadas bajo el namespac
 ### Como funciona el proceso
 
 1. `./package.sh` copia el contenido de `plugin/` a un directorio temporal de trabajo en `build/package-plugin/`.
-2. Dentro de ese directorio temporal ejecuta `composer install --no-dev --prefer-dist`, `npm install --no-audit --no-fund --no-optional` y `npm run build`.
+2. Dentro de ese directorio temporal ejecuta `composer install --no-dev --prefer-dist`, `corepack pnpm install --frozen-lockfile` y `corepack pnpm run build`.
 3. Después del build elimina `node_modules/` y `assets/src/` del artefacto temporal para no incluir archivos de desarrollo.
 4. Si `ENABLE_SCOPER=1`, `php-scoper` se ejecuta con `plugin/scoper.inc.php`, toma `vendor/` como entrada y escribe el resultado en `vendor-prefixed/`.
 5. Luego el build aplica dos pasos de normalización:

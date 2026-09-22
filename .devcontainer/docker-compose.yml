@@ -3,7 +3,7 @@ version: "3.8"
 services:
   db:
     platform: linux/x86_64
-    image: mysql:8.0
+    image: mysql:8.4
     container_name: woocommerce-plugin-mysql
     restart: on-failure:2
     command: >
@@ -18,6 +18,8 @@ services:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
+    ports:
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
 

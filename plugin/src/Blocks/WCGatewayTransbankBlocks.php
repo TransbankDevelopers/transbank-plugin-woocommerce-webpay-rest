@@ -13,6 +13,7 @@ trait WCGatewayTransbankBlocks
 
     private $scriptInfo;
     private $frontStyleHandle;
+    private ?bool $shouldEnqueueFrontStyle = null;
 
     public function initialize()
     {
@@ -39,7 +40,7 @@ trait WCGatewayTransbankBlocks
             true
         );
 
-        if ($this->frontStyleHandle !== null) {
+        if ($this->frontStyleHandle !== null && $this->shouldEnqueueFrontStyle()) {
             wp_enqueue_style($this->frontStyleHandle);
         }
 
@@ -125,6 +126,30 @@ trait WCGatewayTransbankBlocks
     protected function getProcessErrorHookAcceptedArgs(): int
     {
         return 2;
+    }
+
+    protected function shouldEnqueueFrontStyle(): bool
+    {
+        if ($this->shouldEnqueueFrontStyle !== null) {
+            return $this->shouldEnqueueFrontStyle;
+        }
+
+        $shouldEnqueue = false;
+
+        if (function_exists('is_checkout') && is_checkout()) {
+            $shouldEnqueue = true;
+
+            if (function_exists('get_queried_object_id') && function_exists('has_block')) {
+                $postId = get_queried_object_id();
+                if ($postId > 0) {
+                    $shouldEnqueue = has_block('woocommerce/checkout', $postId);
+                }
+            }
+        }
+
+        $this->shouldEnqueueFrontStyle = $shouldEnqueue;
+
+        return $this->shouldEnqueueFrontStyle;
     }
 
     public function processErrorPayment(PaymentContext $context, PaymentResult &$result)

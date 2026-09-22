@@ -98,7 +98,7 @@ validate_tag() {
 
 check_requirements() {
     require_command composer
-    require_command npm
+    require_command corepack
     require_command zip
     require_command sed
     require_command php
@@ -242,7 +242,7 @@ create_zip() {
     rm -f "$PROJECT_ROOT/$PLUGIN_FILE"
     (
         cd "$WORK_DIR"
-        zip -r "$PROJECT_ROOT/$PLUGIN_FILE" . -x "webpack.config.js" "webpack.admin.js" "*.lock" "*.json" "*.bkp"
+        zip -r "$PROJECT_ROOT/$PLUGIN_FILE" . -x "webpack.config.js" "webpack.admin.js" "*.lock" "*.json" "pnpm-lock.yaml" "*.bkp"
     )
 }
 
@@ -260,8 +260,8 @@ package_plugin() {
     cd "$WORK_DIR"
 
     run_step "Composer install" composer install --no-dev --prefer-dist
-    run_step "NPM install" npm install --no-audit --no-fund --no-optional
-    run_step "NPM build" npm run build
+    run_step "PNPM install" corepack pnpm install --frozen-lockfile
+    run_step "PNPM build" corepack pnpm run build
 
     rm -rf node_modules
     rm -rf assets/src
