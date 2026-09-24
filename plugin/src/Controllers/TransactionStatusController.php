@@ -43,8 +43,6 @@ class TransactionStatusController
         ];
 
         $this->logger->logInfo('Obteniendo estado de la transacción.');
-
-        // Check for nonce security
         $nonce = sanitize_text_field($_POST['nonce']);
 
         if (!wp_verify_nonce($nonce, 'my-ajax-nonce')) {
