@@ -234,7 +234,7 @@ class WC_Gateway_Transbank_Oneclick_Mall_REST extends WC_Payment_Gateway_CC
 
     public function is_available()
     {
-        if (!$this->is_valid_for_use()) {
+        if (!is_user_logged_in() || !$this->is_valid_for_use()) {
             return false;
         }
 
