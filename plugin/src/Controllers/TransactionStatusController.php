@@ -11,10 +11,12 @@ use Transbank\WooCommerce\WebpayRest\Services\TransactionService;
 class TransactionStatusController
 {
     const HTTP_OK = 200;
+    const HTTP_FORBIDDEN = 403;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
     const NO_TRANSACTION_ERROR_MESSAGE = 'No hay transacciones webpay para esta orden.';
     const BUY_ORDER_MISMATCH_ERROR_MESSAGE = 'El buy_order enviado y el buy_order de la transacción no coinciden.';
     const TOKEN_MISMATCH_ERROR_MESSAGE = 'El token enviado y el token de la transacción no coinciden.';
+    const UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE = 'No tienes permiso para consultar esta orden.';
 
     /**
      * Log instance.
@@ -52,6 +54,15 @@ class TransactionStatusController
         }
 
         $orderId = $this->getSecureInputValue('order_id');
+
+        if (!current_user_can('edit_shop_order', (int) $orderId)) {
+            $this->logger->logError(self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE);
+            $response['body']['message'] = self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE;
+            wp_send_json($response['body'], self::HTTP_FORBIDDEN);
+
+            return;
+        }
+
         $buyOrder = $this->getSecureInputValue('buy_order');
         $token = $this->getSecureInputValue('token');
 
