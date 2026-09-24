@@ -54,9 +54,21 @@ class TransactionStatusController
         }
 
         $orderId = $this->getSecureInputValue('order_id');
+        $orderIdInt = (int) $orderId;
 
-        if (!current_user_can('edit_shop_order', (int) $orderId)) {
-            $this->logger->logError(self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE);
+        if ($orderIdInt <= 0) {
+            $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
+            $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
+            wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
+
+            return;
+        }
+
+        if (!current_user_can('edit_shop_order', $orderIdInt)) {
+            $this->logger->logError(self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE, [
+                'orderId' => $orderIdInt,
+                'userId' => get_current_user_id(),
+            ]);
             $response['body']['message'] = self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE;
             wp_send_json($response['body'], self::HTTP_FORBIDDEN);
 
