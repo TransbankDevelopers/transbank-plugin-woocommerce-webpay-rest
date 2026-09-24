@@ -55,9 +55,7 @@ class TransactionStatusController
         $orderIdInt = (int) $orderId;
 
         if ($orderIdInt <= 0) {
-            $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
-            $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
-            wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
+            $this->handleNoTransactionResponse();
 
             return;
         }
@@ -86,9 +84,8 @@ class TransactionStatusController
             $transaction = $this->transactionService->findFirstByOrderId($orderId);
 
             if (!$transaction) {
-                $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
-                $response['body']['message'] = self::NO_TRANSACTION_ERROR_MESSAGE;
-                wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
+                $this->handleNoTransactionResponse();
+
                 return;
             }
 
@@ -102,6 +99,12 @@ class TransactionStatusController
             $response['body']['message'] = $errorMessage;
             wp_send_json($response['body'], self::HTTP_UNPROCESSABLE_ENTITY);
         }
+    }
+
+    private function handleNoTransactionResponse(): void
+    {
+        $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
+        wp_send_json(['message' => self::NO_TRANSACTION_ERROR_MESSAGE], self::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     private function handleGetStatus(object $transaction, string $buyOrder, string $token): array
