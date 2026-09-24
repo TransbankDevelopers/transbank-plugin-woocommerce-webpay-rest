@@ -52,22 +52,9 @@ class TransactionStatusController
         }
 
         $orderId = $this->getSecureInputValue('order_id');
-        $orderIdInt = (int) $orderId;
+        $orderIdInt = $this->authorizeOrderAccess($orderId);
 
-        if ($orderIdInt <= 0) {
-            $this->handleNoTransactionResponse();
-
-            return;
-        }
-
-        if (!current_user_can('edit_shop_order', $orderIdInt)) {
-            $this->logger->logError(self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE, [
-                'orderId' => $orderIdInt,
-                'userId' => get_current_user_id(),
-            ]);
-            $response['body']['message'] = self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE;
-            wp_send_json($response['body'], self::HTTP_FORBIDDEN);
-
+        if ($orderIdInt === null) {
             return;
         }
 
@@ -105,6 +92,29 @@ class TransactionStatusController
     {
         $this->logger->logError(self::NO_TRANSACTION_ERROR_MESSAGE);
         wp_send_json(['message' => self::NO_TRANSACTION_ERROR_MESSAGE], self::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    private function authorizeOrderAccess(string $orderId): ?int
+    {
+        $orderIdInt = (int) $orderId;
+
+        if ($orderIdInt <= 0) {
+            $this->handleNoTransactionResponse();
+
+            return null;
+        }
+
+        if (!current_user_can('edit_shop_order', $orderIdInt)) {
+            $this->logger->logError(self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE, [
+                'orderId' => $orderIdInt,
+                'userId' => get_current_user_id(),
+            ]);
+            wp_send_json(['message' => self::UNAUTHORIZED_ORDER_ACCESS_ERROR_MESSAGE], self::HTTP_FORBIDDEN);
+
+            return null;
+        }
+
+        return $orderIdInt;
     }
 
     private function handleGetStatus(object $transaction, string $buyOrder, string $token): array
