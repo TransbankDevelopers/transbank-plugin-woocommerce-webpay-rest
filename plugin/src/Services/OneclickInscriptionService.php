@@ -72,19 +72,25 @@ class OneclickInscriptionService extends ProductBaseService
         return $this->mallInscription->finish($token);
     }
 
-    private function generateUsername($userId)
+    /**
+     * Generate a unique Oneclick inscription username for an authenticated user.
+     *
+     * The username is the identifier Transbank uses to recognize the cardholder
+     * within the commerce; it must be unique per inscription, not per person.
+     *
+     * @param int $customerId The authenticated WordPress user id (must be > 0)
+     *
+     * @throws \InvalidArgumentException When $customerId is not a valid authenticated user id
+     *
+     * @return string
+     */
+    public function generateInscriptionUsername(int $customerId): string
     {
-        return 'wc:' . $this->generateRandomId() . ':' . $userId;
-    }
-
-    private function generateRandomId($length = 10)
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[random_int(0, strlen($characters) - 1)];
+        if ($customerId <= 0) {
+            throw new \InvalidArgumentException('El id de usuario es inválido.');
         }
-        return $randomString;
+
+        return sprintf('wc:%d:%s', $customerId, bin2hex(random_bytes(8)));
     }
 
     public function prepareInscription(
@@ -94,7 +100,7 @@ class OneclickInscriptionService extends ProductBaseService
         $from = 'checkout',
 
     ): TbkInscription {
-        $username = $this->generateUsername($userId);
+        $username = $this->generateInscriptionUsername((int) $userId);
         $data = new TbkInscription();
         $data->username = $username;
         $data->email = $userEmail;

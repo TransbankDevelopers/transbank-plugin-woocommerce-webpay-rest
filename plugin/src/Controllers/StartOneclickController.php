@@ -9,6 +9,7 @@ use Transbank\Webpay\Oneclick\Responses\InscriptionStartResponse;
 use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\Plugin\Helpers\PluginLogger;
+use Transbank\Plugin\Exceptions\EcommerceException;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 
 class StartOneclickController
@@ -47,6 +48,7 @@ class StartOneclickController
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws InscriptionStartException
+     * @throws EcommerceException When there is no authenticated user session
      *
      * @return InscriptionStartResponse
      */
@@ -54,6 +56,11 @@ class StartOneclickController
         int $orderId,
         string $from = 'checkout'
     ) {
+        if (!is_user_logged_in()) {
+            $this->log->logInfo('Intento de inscripción Oneclick sin sesión activa.');
+            throw new EcommerceException('Debes iniciar sesión para inscribir una tarjeta.');
+        }
+
         // The user selected Oneclick, Pay with new card and choosed to save it in their account.
         $userInfo = wp_get_current_user();
         $returnUrl = add_query_arg('wc-api', static::WOOCOMMERCE_API_RETURN_ADD_PAYMENT, home_url('/'));
