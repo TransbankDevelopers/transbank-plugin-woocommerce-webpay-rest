@@ -202,7 +202,13 @@ class FinishOneclickController
                 $this->handleRejectedInscription($ins, $resp, $order, $from);
             }
         } catch (OwnerMismatchInscriptionOneclickException $e) {
-            $this->handleNormalFlowError($token, $e, $ins, false);
+            $this->handleNormalFlowError(
+                $token,
+                $e,
+                $ins,
+                false,
+                __('Ocurrió un error al ejecutar la inscripción.', 'transbank_wc_plugin')
+            );
         } catch (Exception $e) {
             $this->handleNormalFlowError($token, $e, $ins);
         }
@@ -215,13 +221,15 @@ class FinishOneclickController
      * @param Exception $e The exception that interrupted the flow.
      * @param object|null $ins The inscription record, if it was found.
      * @param bool $markInscriptionAsError Whether to store the error on the inscription.
+     * @param string|null $userMessage Message shown to the user, defaults to the exception message.
      * @return void
      */
     private function handleNormalFlowError(
         string $token,
         Exception $e,
         ?object $ins,
-        bool $markInscriptionAsError = true
+        bool $markInscriptionAsError = true,
+        ?string $userMessage = null
     ): void {
         $errorContext = [
             'token' => $token,
@@ -234,7 +242,7 @@ class FinishOneclickController
         }
 
         $this->log->logError('Error al confirmar la inscripción', PluginLogger::sanitizeContextForLogs($errorContext));
-        BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
+        BlocksHelper::addLegacyNotices($userMessage ?? $e->getMessage(), 'error');
 
         if ($ins && $markInscriptionAsError) {
             $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
