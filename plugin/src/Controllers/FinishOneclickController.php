@@ -234,6 +234,7 @@ class FinishOneclickController
         $errorContext = [
             'token' => $token,
             'error' => $e->getMessage(),
+            'sessionUserId' => get_current_user_id(),
         ];
 
         if ($ins) {
