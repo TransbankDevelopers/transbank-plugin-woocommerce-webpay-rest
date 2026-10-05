@@ -12,6 +12,7 @@ use Transbank\WooCommerce\WebpayRest\Services\InscriptionService;
 use Transbank\WooCommerce\WebpayRest\Services\OneclickInscriptionService;
 use Transbank\Plugin\Helpers\PluginLogger;
 use Transbank\Plugin\Exceptions\EcommerceException;
+use Transbank\Plugin\Exceptions\Oneclick\OwnerMismatchInscriptionOneclickException;
 use Transbank\WooCommerce\WebpayRest\Services\EcommerceService;
 use Transbank\WooCommerce\WebpayRest\Tokenization\WC_Payment_Token_Oneclick;
 use WC_Payment_Tokens;
@@ -176,6 +177,8 @@ class FinishOneclickController
                 throw new EcommerceException('No se encontró la inscripción para el token proporcionado.');
             }
 
+            $this->assertSessionOwnsInscription($ins);
+
             $this->log->logInfo('Finalizando inscripción', PluginLogger::sanitizeContextForLogs([
                 'userName' => $ins->username,
                 'email' => $ins->email,
@@ -193,36 +196,65 @@ class FinishOneclickController
                 'from' => $from
             ]);
 
-            $userInfo = wp_get_current_user();
-
-            if (!$userInfo) {
-                throw new EcommerceException('No se encontró el usuario asociado a la inscripción');
-            }
-
             if ($resp->isApproved()) {
                 $this->handleApprovedInscription($ins, $resp, $order, $from);
             } else {
                 $this->handleRejectedInscription($ins, $resp, $order, $from);
             }
+        } catch (OwnerMismatchInscriptionOneclickException $e) {
+            $this->handleNormalFlowError($token, $e, $ins, false);
         } catch (Exception $e) {
-            $errorContext = [
-                'token' => $token,
-                'error' => $e->getMessage(),
-            ];
+            $this->handleNormalFlowError($token, $e, $ins);
+        }
+    }
 
-            if ($ins) {
-                $errorContext['userName'] = $ins->username;
-                $errorContext['email'] = $ins->email;
-            }
+    /**
+     * Logs the error, notifies the user and redirects when the normal inscription flow fails.
+     *
+     * @param string $token The inscription token.
+     * @param Exception $e The exception that interrupted the flow.
+     * @param object|null $ins The inscription record, if it was found.
+     * @param bool $markInscriptionAsError Whether to store the error on the inscription.
+     * @return void
+     */
+    private function handleNormalFlowError(
+        string $token,
+        Exception $e,
+        ?object $ins,
+        bool $markInscriptionAsError = true
+    ): void {
+        $errorContext = [
+            'token' => $token,
+            'error' => $e->getMessage(),
+        ];
 
-            $this->log->logError('Error al confirmar la inscripción', PluginLogger::sanitizeContextForLogs($errorContext));
-            BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
+        if ($ins) {
+            $errorContext['userName'] = $ins->username;
+            $errorContext['email'] = $ins->email;
+        }
 
-            if ($ins) {
-                $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
-            }
+        $this->log->logError('Error al confirmar la inscripción', PluginLogger::sanitizeContextForLogs($errorContext));
+        BlocksHelper::addLegacyNotices($e->getMessage(), 'error');
 
-            $this->redirectUser($ins ? $ins->from : null, BlocksHelper::ONECLICK_FINISH_ERROR);
+        if ($ins && $markInscriptionAsError) {
+            $this->inscriptionService->updateWithFinishResponseError($ins->id, 'error', $e->getMessage());
+        }
+
+        $this->redirectUser($ins ? $ins->from : null, BlocksHelper::ONECLICK_FINISH_ERROR);
+    }
+
+    /**
+     * Ensures the current session belongs to the inscription owner.
+     *
+     * @param object $ins The inscription record.
+     *
+     * @throws OwnerMismatchInscriptionOneclickException If the session is not the inscription owner.
+     * @return void
+     */
+    private function assertSessionOwnsInscription(object $ins): void
+    {
+        if (!$this->inscriptionService->isOwnedByCustomer($ins->user_id, get_current_user_id())) {
+            throw new OwnerMismatchInscriptionOneclickException();
         }
     }
 
@@ -249,7 +281,7 @@ class FinishOneclickController
             'token_id' => $token->get_id(),
         ]);
 
-        WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
+        WC_Payment_Tokens::set_users_default((int) $ins->user_id, $token->get_id());
 
         do_action('wc_transbank_oneclick_inscription_approved', [
             'transbankInscriptionResponse' => $resp,
