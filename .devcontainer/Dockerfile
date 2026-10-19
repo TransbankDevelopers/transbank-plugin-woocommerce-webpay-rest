@@ -46,11 +46,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxfixes3 \
     libxkbcommon0 \
+    libxml2-dev \
     libxrandr2 \
     libxshmfence1 \
     libxss1 \
     libxtst6 \
-    libxml2-dev \
     libzip-dev \
     mariadb-client \
     netcat-openbsd \
