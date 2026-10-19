@@ -339,6 +339,9 @@ class CommitWebpayController
                 throw new EcommerceException('No se pudo registrar el timeout de la transacción.');
             }
 
+            $webpayTransaction->status = TbkConstants::TRANSACTION_STATUS_TIMEOUT;
+            $webpayTransaction->detail_error = self::ERROR_MESSAGES[self::WEBPAY_TIMEOUT_FLOW_MESSAGE];
+
             $this->dispatchTransactionErrorAndShowPage(
                 'transbank_webpay_plus_timeout_on_form',
                 self::WEBPAY_TIMEOUT_FLOW_MESSAGE,
