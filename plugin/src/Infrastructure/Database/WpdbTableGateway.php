@@ -155,6 +155,20 @@ final class WpdbTableGateway
      */
     public function update(array $where, array $data, ?string $error = null): void
     {
+        $this->updateAndGetAffectedRows($where, $data, $error);
+    }
+
+    /**
+     * Updates rows and returns the affected-row count.
+     *
+     * @param array<string,mixed> $where Where clause (Column => value).
+     * @param array<string,mixed> $data Column => value.
+     * @param string|null $error Custom error prefix.
+     * @return int Number of affected rows, including zero.
+     * @throws DatabaseUpdateException If update fails.
+     */
+    public function updateAndGetAffectedRows(array $where, array $data, ?string $error = null): int
+    {
         $result = $this->db->update(
             $this->table,
             $this->sanitizeData($data),
@@ -167,6 +181,8 @@ final class WpdbTableGateway
 
             throw new DatabaseUpdateException($errorMessage);
         }
+
+        return (int) $result;
     }
 
     /**
