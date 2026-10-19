@@ -65,6 +65,19 @@ class TransactionService
     }
 
     /**
+     * Update a transaction only while it has the expected status.
+     *
+     * @param string $transactionId Transaction ID.
+     * @param string $expectedStatus Required current status.
+     * @param array<string,mixed> $data New data.
+     * @return int Number of affected rows.
+     */
+    public function updateIfStatus(string $transactionId, string $expectedStatus, array $data): int
+    {
+        return $this->repository->updateIfStatus($transactionId, $expectedStatus, $data);
+    }
+
+    /**
      * Retrieve the first transaction by token.
      *
      * @param mixed $token

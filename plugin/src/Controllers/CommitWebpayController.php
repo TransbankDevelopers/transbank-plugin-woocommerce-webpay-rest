@@ -106,7 +106,8 @@ class CommitWebpayController
 
         if ($webpayFlow == self::WEBPAY_TIMEOUT_FLOW) {
             RequestInputHelper::assertValidIdentifier($request['TBK_ORDEN_COMPRA'], 'TBK_ORDEN_COMPRA');
-            $this->handleFlowTimeout($request['TBK_ORDEN_COMPRA']);
+            RequestInputHelper::assertValidIdentifier($request['TBK_ID_SESION'], 'TBK_ID_SESION');
+            $this->handleFlowTimeout($request['TBK_ORDEN_COMPRA'], $request['TBK_ID_SESION']);
         }
 
         if ($webpayFlow == self::WEBPAY_ABORTED_FLOW) {
@@ -298,25 +299,55 @@ class CommitWebpayController
      * Processes the payment flow when the transaction times out.
      *
      * @param string $buyOrder The buy order identifier.
+     * @param string $sessionId The callback session identifier.
      * @return void
      */
-    protected function handleFlowTimeout(string $buyOrder): void
+    protected function handleFlowTimeout(string $buyOrder, string $sessionId): void
     {
         $this->log->logInfo("Procesando transacción por flujo timeout");
 
         $webpayTransaction = $this->transactionService->getByBuyOrder($buyOrder);
+        $token = $webpayTransaction->token;
+        $lockAcquired = false;
 
-        if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
-            $this->handleTransactionAlreadyProcessed($webpayTransaction->token);
-            return;
+        try {
+            $lockAcquired = $this->acquireWebpayReturnLockWithRetries($token);
+            if (!$lockAcquired) {
+                throw new EcommerceException('No se pudo adquirir el lock de retorno de Webpay.');
+            }
+
+            $webpayTransaction = $this->transactionService->getByBuyOrder($buyOrder);
+            if ($sessionId !== $webpayTransaction->session_id) {
+                throw new EcommerceException('La sesión recibida no coincide con la transacción.');
+            }
+
+            if ($this->checkTransactionIsAlreadyProcessedByStatus($webpayTransaction->status)) {
+                $this->handleTransactionAlreadyProcessed($token);
+                return;
+            }
+
+            $updatedRows = $this->transactionService->updateIfStatus(
+                (string) $webpayTransaction->id,
+                TbkConstants::TRANSACTION_STATUS_INITIALIZED,
+                [
+                    'status' => TbkConstants::TRANSACTION_STATUS_TIMEOUT,
+                    'detail_error' => self::ERROR_MESSAGES[self::WEBPAY_TIMEOUT_FLOW_MESSAGE],
+                ]
+            );
+
+            if ($updatedRows !== 1) {
+                throw new EcommerceException('No se pudo registrar el timeout de la transacción.');
+            }
+
+            do_action('transbank_webpay_plus_timeout_on_form', [
+                'order' => null,
+                'transbankTransaction' => $webpayTransaction,
+                'transbankResponse' => null,
+            ]);
+            $this->setPaymentErrorPage(self::WEBPAY_TIMEOUT_FLOW_MESSAGE);
+        } finally {
+            $this->releaseWebpayReturnLock($token, $lockAcquired);
         }
-
-        $this->handleAbortedTransaction(
-            'transbank_webpay_plus_timeout_on_form',
-            TbkConstants::TRANSACTION_STATUS_TIMEOUT,
-            self::WEBPAY_TIMEOUT_FLOW_MESSAGE,
-            $webpayTransaction
-        );
     }
 
     /**

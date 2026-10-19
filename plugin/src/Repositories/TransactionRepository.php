@@ -86,6 +86,22 @@ class TransactionRepository
     }
 
     /**
+     * Update a transaction only while it has the expected status.
+     *
+     * @param string $transactionId Transaction ID.
+     * @param string $expectedStatus Required current status.
+     * @param array<string,mixed> $data New data.
+     * @return int Number of affected rows.
+     */
+    public function updateIfStatus(string $transactionId, string $expectedStatus, array $data): int
+    {
+        return $this->db->updateAndGetAffectedRows(
+            ['id' => $transactionId, 'status' => $expectedStatus],
+            $data
+        );
+    }
+
+    /**
      * Retrieve a transaction by token. Throws an exception if not found.
      *
      * @param string $token The transaction token.
