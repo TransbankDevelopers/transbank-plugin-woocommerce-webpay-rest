@@ -339,12 +339,11 @@ class CommitWebpayController
                 throw new EcommerceException('No se pudo registrar el timeout de la transacción.');
             }
 
-            do_action('transbank_webpay_plus_timeout_on_form', [
-                'order' => null,
-                'transbankTransaction' => $webpayTransaction,
-                'transbankResponse' => null,
-            ]);
-            $this->setPaymentErrorPage(self::WEBPAY_TIMEOUT_FLOW_MESSAGE);
+            $this->dispatchTransactionErrorAndShowPage(
+                'transbank_webpay_plus_timeout_on_form',
+                self::WEBPAY_TIMEOUT_FLOW_MESSAGE,
+                $webpayTransaction
+            );
         } finally {
             $this->releaseWebpayReturnLock($token, $lockAcquired);
         }
@@ -563,6 +562,32 @@ class CommitWebpayController
 
         $this->transactionService->update($webpayTransaction->id, $data);
 
+        $this->dispatchTransactionErrorAndShowPage(
+            $action,
+            $errorCode,
+            $webpayTransaction,
+            $wooCommerceOrder,
+            $response
+        );
+    }
+
+    /**
+     * Dispatches a transaction error action and displays its checkout error page.
+     *
+     * @param string $action Action to dispatch.
+     * @param int $errorCode Checkout error message code.
+     * @param object $webpayTransaction Transaction associated with the error.
+     * @param object|null $wooCommerceOrder Optional WooCommerce order.
+     * @param mixed $response Optional Transbank response.
+     * @return void
+     */
+    private function dispatchTransactionErrorAndShowPage(
+        string $action,
+        int $errorCode,
+        object $webpayTransaction,
+        $wooCommerceOrder = null,
+        $response = null
+    ): void {
         do_action($action, [
             'order' => $wooCommerceOrder ? $wooCommerceOrder->get_data() : null,
             'transbankTransaction' => $webpayTransaction,
