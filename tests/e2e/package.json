@@ -6,9 +6,9 @@
     "description": "E2E tests for Transbank WooCommerce plugin",
     "scripts": {
         "setup": "pnpm playwright install chromium",
-        "test": "pnpm playwright test --headed",
-        "test:webpay-plus": "pnpm playwright test webpay-plus --headed",
-        "test:debug": "pnpm playwright test --debug",
+        "test": "xvfb-run -a pnpm playwright test --headed",
+        "test:webpay-plus": "xvfb-run -a pnpm playwright test webpay-plus --headed",
+        "test:debug": "xvfb-run -a pnpm playwright test --debug",
         "report": "pnpm playwright show-report"
     },
     "devDependencies": {

@@ -16,12 +16,40 @@ ENV TZ=America/Santiago
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    fonts-liberation \
     git \
     gnupg \
     less \
+    libasound2t64 \
+    libatk-bridge2.0-0t64 \
+    libatk1.0-0t64 \
+    libatspi2.0-0t64 \
+    libcairo2 \
+    libcups2t64 \
+    libdbus-1-3 \
+    libdrm2 \
+    libfontconfig1 \
+    libgbm1 \
+    libglib2.0-0t64 \
+    libgtk-3-0t64 \
     libjpeg-dev \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
     libpng-dev \
     libwebp-dev \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxrandr2 \
+    libxshmfence1 \
+    libxss1 \
+    libxtst6 \
     libxml2-dev \
     libzip-dev \
     mariadb-client \
@@ -29,6 +57,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ssh \
     unzip \
     wget \
+    xauth \
+    xdg-utils \
+    xvfb \
     zip \
  && docker-php-ext-install soap \
  && rm -rf /var/lib/apt/lists/*
