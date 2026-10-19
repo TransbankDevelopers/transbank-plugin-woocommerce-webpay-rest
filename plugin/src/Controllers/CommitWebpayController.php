@@ -307,6 +307,7 @@ class CommitWebpayController
         $this->log->logInfo("Procesando transacción por flujo timeout");
 
         $webpayTransaction = $this->transactionService->getByBuyOrder($buyOrder);
+        $transactionId = (string) $webpayTransaction->id;
         $token = $webpayTransaction->token;
         $lockAcquired = false;
 
@@ -317,6 +318,13 @@ class CommitWebpayController
             }
 
             $webpayTransaction = $this->transactionService->getByBuyOrder($buyOrder);
+            if (
+                (string) $webpayTransaction->id !== $transactionId
+                || $webpayTransaction->token !== $token
+            ) {
+                throw new EcommerceException('La transacción cambió durante la adquisición del lock.');
+            }
+
             if ($sessionId !== $webpayTransaction->session_id) {
                 throw new EcommerceException('La sesión recibida no coincide con la transacción.');
             }
