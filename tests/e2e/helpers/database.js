@@ -79,3 +79,21 @@ export async function getTransactionStatus(token) {
 
     return result;
 }
+
+export async function getTransactionByOrderId(orderId) {
+    const [rows] = await getPool().execute(
+        "SELECT id, buy_order, session_id, status FROM wp_webpay_rest_transactions WHERE order_id = ? ORDER BY id DESC LIMIT 1",
+        [orderId]
+    );
+
+    return rows[0] ?? null;
+}
+
+export async function getTransactionStatusById(id) {
+    const result = await queryScalar(
+        "SELECT status FROM wp_webpay_rest_transactions WHERE id = ?",
+        [id]
+    );
+
+    return result;
+}
