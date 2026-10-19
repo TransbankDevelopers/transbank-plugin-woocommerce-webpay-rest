@@ -8,7 +8,7 @@ import {
 
 const WEBPAY_API = "wc_gateway_transbank_webpay_plus_rest";
 
-async function startCheckoutAndGetTransaction(page) {
+const startCheckoutAndGetTransaction = async (page) => {
     await login(page);
     await addProductToCart(page);
 
@@ -31,7 +31,7 @@ async function startCheckoutAndGetTransaction(page) {
     expect(transaction.session_id).toBeTruthy();
 
     return transaction;
-}
+};
 
 function timeoutCallbackUrl(baseURL, transaction, sessionId) {
     const url = new URL("/", baseURL);
