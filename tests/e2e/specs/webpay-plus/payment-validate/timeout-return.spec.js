@@ -42,29 +42,27 @@ function timeoutCallbackUrl(baseURL, transaction, sessionId) {
     return url.toString();
 }
 
-test.describe("Webpay Plus — Timeout return", () => {
-    test.afterEach(async () => {
-        await closePool();
-    });
+test.afterEach(async () => {
+    await closePool();
+});
 
-    test("Matching session marks the initialized transaction as timeout", async ({ page, baseURL }) => {
-        const transaction = await startCheckoutAndGetTransaction(page);
+test("Matching session marks the initialized transaction as timeout", async ({ page, baseURL }) => {
+    const transaction = await startCheckoutAndGetTransaction(page);
 
-        await page.goto(timeoutCallbackUrl(baseURL, transaction, transaction.session_id));
+    await page.goto(timeoutCallbackUrl(baseURL, transaction, transaction.session_id));
 
-        await expect(page).toHaveURL(/transbank_status=10/);
-        await expect.poll(() => getTransactionStatusById(transaction.id)).toBe("timeout");
-        expect((await page.content()).includes("Fatal error")).toBe(false);
-    });
+    await expect(page).toHaveURL(/transbank_status=10/);
+    expect(await getTransactionStatusById(transaction.id)).toBe("timeout");
+    expect((await page.content()).includes("Fatal error")).toBe(false);
+});
 
-    test("Mismatched session leaves the transaction initialized and shows generic error", async ({ page, baseURL }) => {
-        const transaction = await startCheckoutAndGetTransaction(page);
-        const mismatchedSessionId = `${transaction.session_id}-mismatch`;
+test("Mismatched session leaves the transaction initialized and shows generic error", async ({ page, baseURL }) => {
+    const transaction = await startCheckoutAndGetTransaction(page);
+    const mismatchedSessionId = `${transaction.session_id}-mismatch`;
 
-        await page.goto(timeoutCallbackUrl(baseURL, transaction, mismatchedSessionId));
+    await page.goto(timeoutCallbackUrl(baseURL, transaction, mismatchedSessionId));
 
-        await expect(page).toHaveURL(/transbank_status=12/);
-        expect(await getTransactionStatusById(transaction.id)).toBe("initialized");
-        expect((await page.content()).includes("Fatal error")).toBe(false);
-    });
+    await expect(page).toHaveURL(/transbank_status=12/);
+    expect(await getTransactionStatusById(transaction.id)).toBe("initialized");
+    expect((await page.content()).includes("Fatal error")).toBe(false);
 });
